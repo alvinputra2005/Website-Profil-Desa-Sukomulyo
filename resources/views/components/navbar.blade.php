@@ -4,12 +4,16 @@
     <div class="header-top">
         <div class="container topbar-content">
             <div class="news-ticker" aria-label="Berita terbaru">
-                <span class="news-label">Berita</span>
+                <span class="news-label"><span>Berita</span></span>
                 <div class="ticker-window">
                     <div class="ticker-track">
-                        @foreach ($articles as $article)
-                            <a href="{{ route('news.show', $article['slug']) }}">{{ $article['title'] }}</a>
-                        @endforeach
+                        @for ($copy = 0; $copy < 2; $copy++)
+                            <div class="ticker-group" @if($copy === 1) aria-hidden="true" @endif>
+                                @foreach ($articles as $article)
+                                    <a href="{{ route('berita-desa.show', $article['slug']) }}">{{ $article['title'] }}</a>
+                                @endforeach
+                            </div>
+                        @endfor
                     </div>
                 </div>
             </div>
@@ -23,12 +27,11 @@
 
     <div class="container brand-row">
         <div class="logo">
-            <a class="brand-mark" href="{{ route('home') }}" aria-label="{{ $site['name'] }}">
-                <i class="fas fa-landmark" aria-hidden="true"></i>
+            <a class="brand-mark" href="{{ route('beranda') }}" aria-label="{{ $site['name'] }}">
+                <img src="{{ asset('assets/logo-brighter-sukomulyo.svg') }}" alt="Logo Brighter Sukomulyo">
             </a>
             <div>
-                <p class="eyebrow">Website Resmi</p>
-                <h1><a href="{{ route('home') }}">{{ $site['name'] }}</a></h1>
+                <h1><a href="{{ route('beranda') }}">{{ $site['name'] }}</a></h1>
                 <p>{{ $site['tagline'] }}</p>
             </div>
         </div>
@@ -42,7 +45,7 @@
                 <i class="fas fa-phone" aria-hidden="true"></i>
                 <span><span class="statictext">Telepon</span>{{ $site['phone'] }}</span>
             </div>
-            <a class="donatenow service-button" href="{{ route('contact.index') }}">Layanan Desa</a>
+            <a class="donatenow service-button" href="{{ route('informasi-publik-desa') }}">Layanan Desa</a>
         </div>
     </div>
 </header>

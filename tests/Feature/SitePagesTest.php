@@ -12,17 +12,17 @@ class SitePagesTest extends TestCase
     public function test_all_public_pages_can_be_opened(): void
     {
         $pages = [
-            route('home') => 'Desa Sukomulyo',
-            route('profile') => 'Profil Desa',
-            route('government') => 'Pemerintahan Desa',
-            route('potentials') => 'Potensi Desa',
-            route('news.index') => 'Berita Desa',
-            route('news.category', 'pemerintahan') => 'Kategori: Pemerintahan',
-            route('news.archive', '2026') => 'Arsip Berita 2026',
-            route('news.show', 'musyawarah-desa-penyusunan-program-kerja') => 'Musyawarah Desa Penyusunan Program Kerja',
-            route('search', ['q' => 'UMKM']) => 'Pelatihan Pemasaran Digital untuk UMKM',
-            route('gallery') => 'Galeri Desa',
-            route('contact.index') => 'Hubungi Pemerintah Desa',
+            route('beranda') => 'Desa Sukomulyo',
+            route('profile-desa') => 'Profil Desa',
+            route('data-desa-statistik') => 'Data Desa/Statistik',
+            route('informasi-publik-desa') => 'Informasi Publik Desa',
+            route('peta-desa') => 'Peta Desa',
+            route('berita-desa.index') => 'Berita Desa',
+            route('berita-desa.category', 'pemerintahan') => 'Kategori: Pemerintahan',
+            route('berita-desa.archive', '2026') => 'Arsip Berita 2026',
+            route('berita-desa.show', 'musyawarah-desa-penyusunan-program-kerja') => 'Musyawarah Desa Penyusunan Program Kerja',
+            route('berita-desa.search', ['q' => 'UMKM']) => 'Pelatihan Pemasaran Digital untuk UMKM',
+            route('kontak.index') => 'Hubungi Pemerintah Desa',
         ];
 
         foreach ($pages as $url => $content) {
@@ -36,14 +36,14 @@ class SitePagesTest extends TestCase
             ->assertNotFound()
             ->assertSee('Halaman Tidak Ditemukan');
 
-        $this->get('/berita/artikel-tidak-ada')
+        $this->get('/berita-desa/artikel-tidak-ada')
             ->assertNotFound()
             ->assertSee('Halaman Tidak Ditemukan');
     }
 
     public function test_contact_form_validates_and_accepts_a_message(): void
     {
-        $this->post(route('contact.store'), [
+        $this->post(route('kontak.store'), [
             'name' => 'Warga Sukomulyo',
             'email' => 'warga@example.com',
             'phone' => '08123456789',
@@ -55,8 +55,8 @@ class SitePagesTest extends TestCase
             'message' => 'Saya ingin meminta informasi layanan desa.',
         ]);
 
-        $this->from(route('contact.index'))->post(route('contact.store'), [])
-            ->assertRedirect(route('contact.index'))
+        $this->from(route('kontak.index'))->post(route('kontak.store'), [])
+            ->assertRedirect(route('kontak.index'))
             ->assertSessionHasErrors(['name', 'email', 'message']);
     }
 }

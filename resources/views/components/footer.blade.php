@@ -20,7 +20,7 @@
             <h5>Kategori Berita</h5>
             <ul>
                 @foreach ($categories as $category)
-                    <li><a href="{{ route('news.category', $category['category_slug']) }}">{{ $category['category'] }}</a></li>
+                    <li><a href="{{ route('berita-desa.category', $category['category_slug']) }}">{{ $category['category'] }}</a></li>
                 @endforeach
             </ul>
         </section>

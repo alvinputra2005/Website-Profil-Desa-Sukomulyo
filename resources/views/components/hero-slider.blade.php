@@ -8,7 +8,7 @@
                     <span class="hero-kicker">{{ $article['category'] }}</span>
                     <h2>{{ $article['title'] }}</h2>
                     <p>{{ $article['excerpt'] }}</p>
-                    <a class="slide_more" href="{{ route('news.show', $article['slug']) }}">Baca Selengkapnya</a>
+                    <a class="slide_more" href="{{ route('berita-desa.show', $article['slug']) }}">Baca Selengkapnya</a>
                 </div>
             </article>
         @endforeach
