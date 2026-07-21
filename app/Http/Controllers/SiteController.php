@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ContactMessage;
+use App\Models\{ContactMessage, Gallery, News, Official, Setting, VillageProfileSection};
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Schema;
 
 class SiteController extends Controller
 {
@@ -26,13 +27,13 @@ class SiteController extends Controller
 
     public function profile(): View
     {
-        return $this->render('pages.profile');
+        return $this->render('pages.profile', ['profileSections' => Schema::hasTable('village_profile_sections') ? VillageProfileSection::where('status','published')->orderBy('display_order')->get() : collect()]);
     }
 
     public function government(): View
     {
         return $this->render('pages.government', [
-            'officials' => [
+            'officials' => Schema::hasTable('officials') && Official::where('is_active',true)->exists() ? Official::where('is_active',true)->orderBy('display_order')->get()->map(fn($o)=>['role'=>$o->position,'name'=>$o->name])->all() : [
                 ['role' => 'Kepala Desa', 'name' => 'Nama Kepala Desa'],
                 ['role' => 'Sekretaris Desa', 'name' => 'Nama Sekretaris Desa'],
                 ['role' => 'Kaur Tata Usaha dan Umum', 'name' => 'Nama Perangkat Desa'],
@@ -117,6 +118,14 @@ class SiteController extends Controller
     {
         $image = asset('assets/social-care-lite/images/slides/slider-default.jpg');
 
+        if (Schema::hasTable('galleries')) {
+            $photos = Gallery::where('status','published')->with(['items.media','cover'])->latest('event_date')->get()->flatMap(function ($gallery) use ($image) {
+                if ($gallery->items->isEmpty()) return [['src'=>$gallery->cover?->url ?? $image,'title'=>$gallery->title,'caption'=>$gallery->description]];
+                return $gallery->items->map(fn($item)=>['src'=>$item->media->url,'title'=>$gallery->title,'caption'=>$item->caption ?? $gallery->description]);
+            })->all();
+            if ($photos !== []) return $this->render('pages.gallery', compact('photos'));
+        }
+
         return $this->render('pages.gallery', [
             'photos' => [
                 ['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa.'],
@@ -165,14 +174,15 @@ class SiteController extends Controller
     private function shared(): array
     {
         $articles = $this->articles();
+        $setting = fn(string $key,string $fallback) => Schema::hasTable('settings') ? (Setting::where('key',$key)->value('value') ?? $fallback) : $fallback;
 
         return [
             'site' => [
-                'name' => 'Desa Sukomulyo',
-                'tagline' => 'Website Resmi Pemerintah Desa Sukomulyo',
-                'email' => 'pemdes@sukomulyo.desa.id',
-                'phone' => '(0000) 123 456',
-                'address' => 'Kantor Desa Sukomulyo, Indonesia',
+                'name' => $setting('site.name','Desa Sukomulyo'),
+                'tagline' => $setting('site.tagline','Website Resmi Pemerintah Desa Sukomulyo'),
+                'email' => $setting('site.email','pemdes@sukomulyo.desa.id'),
+                'phone' => $setting('site.phone','(0000) 123 456'),
+                'address' => $setting('site.address','Kantor Desa Sukomulyo, Indonesia'),
             ],
             'navigation' => [
                 ['label' => 'Beranda', 'route' => 'home', 'active' => 'home'],
@@ -192,6 +202,12 @@ class SiteController extends Controller
     private function articles(): array
     {
         $image = asset('assets/social-care-lite/images/slides/slider-default.jpg');
+
+        if (Schema::hasTable('news') && News::published()->exists()) {
+            return News::published()->with(['category','featuredImage'])->latest('published_at')->get()->map(function (News $article) use ($image) {
+                return ['slug'=>$article->slug,'title'=>$article->title,'date'=>($article->published_at??$article->created_at)->translatedFormat('d F Y'),'year'=>(string)($article->published_at??$article->created_at)->year,'category'=>$article->category->name,'category_slug'=>$article->category->slug,'image'=>$article->featuredImage?->url??$image,'excerpt'=>$article->excerpt??strip_tags($article->content),'content'=>[strip_tags($article->content)],'html_content'=>$article->content,'tags'=>[]];
+            })->all();
+        }
 
         return [
             [

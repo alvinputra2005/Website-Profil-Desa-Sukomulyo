@@ -4,6 +4,11 @@
     <div class="container">
         <div id="sc_innerpage_wrap">
             <article class="sc_innerpage_contentbx profile-content">
+                @if($profileSections->isNotEmpty())
+                    @foreach($profileSections as $section)
+                        <section><h2>{{ $section->title }}</h2><div>{!! $section->content !!}</div></section>
+                    @endforeach
+                @else
                 <section>
                     <h2>Sejarah Singkat</h2>
                     <p>Desa Sukomulyo berkembang dari kehidupan masyarakat yang menjunjung kebersamaan, kerja keras, dan gotong royong. Nilai tersebut menjadi dasar dalam setiap kegiatan sosial maupun pembangunan desa.</p>
@@ -39,6 +44,7 @@
                         </table>
                     </div>
                 </section>
+                @endif
             </article>
 
             <x-sidebar :categories="$categories" :archive-years="$archiveYears" />
