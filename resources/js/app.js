@@ -17,6 +17,7 @@ if (slider) {
     let current = 0;
     let timer;
     let animating = false;
+    let transition;
 
     const waveClip = (progress, direction) => {
         const offsets = [-4, 3, -2, 4, -3, 2, -1, 1];
@@ -59,6 +60,7 @@ if (slider) {
         animating = true;
         const outgoing = slides[current];
         const incoming = slides[next];
+        dots.forEach((dot, position) => dot.classList.toggle('is-active', position === next));
 
         if (!pixelLayer || !Element.prototype.animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             activate(outgoing, incoming, next);
@@ -83,11 +85,26 @@ if (slider) {
             easing: 'linear',
             fill: 'forwards',
         });
+        transition = animation;
 
         animation.addEventListener('finish', () => {
+            if (transition !== animation) return;
+
+            transition = undefined;
             activate(outgoing, incoming, next);
             pixelLayer.replaceChildren();
         }, { once: true });
+    };
+
+    const jumpTo = (index) => {
+        const next = (index + slides.length) % slides.length;
+
+        transition?.cancel();
+        transition = undefined;
+        pixelLayer?.replaceChildren();
+        animating = false;
+
+        if (next !== current) activate(slides[current], slides[next], next);
     };
 
     const play = () => { timer = window.setInterval(() => show(current + 1, 'next'), 6000); };
@@ -96,13 +113,44 @@ if (slider) {
     slider.querySelector('[data-slider-prev]')?.addEventListener('click', () => { show(current - 1, 'prev'); restart(); });
     slider.querySelector('[data-slider-next]')?.addEventListener('click', () => { show(current + 1, 'next'); restart(); });
     dots.forEach((dot) => dot.addEventListener('click', () => {
-        const next = Number(dot.dataset.sliderDot);
-        show(next, next < current ? 'prev' : 'next');
+        jumpTo(Number(dot.dataset.sliderDot));
         restart();
     }));
     slider.addEventListener('mouseenter', () => window.clearInterval(timer));
     slider.addEventListener('mouseleave', play);
     play();
+}
+
+const villageStats = document.querySelector('[data-village-stats]');
+
+if (villageStats && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const counters = [...villageStats.querySelectorAll('[data-stat-count]')];
+    const formatter = new Intl.NumberFormat('id-ID');
+
+    counters.forEach((counter) => { counter.textContent = '0'; });
+
+    const observer = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting) return;
+
+        counters.forEach((counter) => {
+            const target = Number(counter.dataset.statCount);
+            const startedAt = performance.now();
+
+            const count = (now) => {
+                const progress = Math.min((now - startedAt) / 800, 1);
+                const eased = 1 - ((1 - progress) ** 3);
+                counter.textContent = formatter.format(Math.round(target * eased));
+
+                if (progress < 1) requestAnimationFrame(count);
+            };
+
+            requestAnimationFrame(count);
+        });
+
+        observer.disconnect();
+    }, { threshold: 0.35 });
+
+    observer.observe(villageStats);
 }
 
 const galleryDialog = document.querySelector('[data-gallery-dialog]');
@@ -131,7 +179,15 @@ if (galleryDialog) {
 const backToTop = document.querySelector('.back-to-top');
 
 if (backToTop) {
-    const updateButton = () => { backToTop.hidden = window.scrollY < 500; };
+    const hero = document.querySelector('.hero-slider');
+    const updateButton = () => {
+        const heroPassed = hero ? hero.getBoundingClientRect().bottom <= 0 : window.scrollY >= 500;
+        backToTop.classList.toggle('is-visible', heroPassed);
+        backToTop.setAttribute('aria-hidden', String(!heroPassed));
+        backToTop.tabIndex = heroPassed ? 0 : -1;
+    };
+
+    backToTop.hidden = false;
     window.addEventListener('scroll', updateButton, { passive: true });
     backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
     updateButton();
