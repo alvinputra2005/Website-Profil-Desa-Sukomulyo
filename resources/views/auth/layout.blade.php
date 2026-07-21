@@ -1,1 +1,41 @@
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>@yield('title') | Desa Sukomulyo</title><link rel="stylesheet" href="{{ asset('admin-assets/bootstrap/css/bootstrap.min.css') }}"><link rel="stylesheet" href="{{ asset('admin-assets/bootstrap/css/font-awesome.min.css') }}"><link rel="stylesheet" href="{{ asset('admin-assets/css/login-style.css') }}"><link rel="stylesheet" href="{{ asset('admin-assets/css/login-form-elements.css') }}"></head><body class="login"><div class="top-content"><div class="inner-bg"><div class="container"><div class="row"><div class="col-sm-4 col-sm-offset-4 form-box"><div class="form-top"><a href="{{ route('home') }}"><span style="display:inline-block;width:100px;height:100px;border-radius:50%;background:#dd4b39;color:#fff;font-size:30px;line-height:100px;font-weight:bold">DS</span></a><div class="login-footer-top"><h1>Desa Sukomulyo</h1><h3>Panel Administrasi Website Desa<br>Kabupaten Indonesia</h3></div><x-admin.alert/></div><div class="form-bottom"><h3 style="color:#fff;margin-top:0">@yield('heading')</h3><p style="color:#ddd">@yield('description')</p>@yield('content')<hr style="margin:10px 0"><div class="login-footer-bottom"><a href="{{ route('home') }}">OpenSID UI</a> · Laravel CMS</div></div></div></div></div></div></div><script src="{{ asset('admin-assets/bootstrap/js/jquery.min.js') }}"></script>@stack('scripts')</body></html>
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>@yield('title') | Desa Sukomulyo</title>
+    <link rel="stylesheet" href="{{ asset('admin-assets/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin-assets/bootstrap/css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin-assets/css/login-style.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin-assets/css/login-form-elements.css') }}">
+</head>
+
+<body class="login">
+    <div class="top-content">
+        <div class="inner-bg">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-4 col-sm-offset-4 form-box">
+                        <div class="form-top"><a href="{{ route('beranda') }}"><span style="display:inline-block;width:100px;height:100px;border-radius:50%;background:#dd4b39;color:#fff;font-size:30px;line-height:100px;font-weight:bold">DS</span></a>
+                            <div class="login-footer-top">
+                                <h1>Desa Sukomulyo</h1>
+                                <h3>Panel Administrasi Website Desa<br>Kabupaten Indonesia</h3>
+                            </div><x-admin.alert />
+                        </div>
+                        <div class="form-bottom">
+                            <h3 style="color:#fff;margin-top:0">@yield('heading')</h3>
+                            <p style="color:#ddd">@yield('description')</p>@yield('content')
+                            <hr style="margin:10px 0">
+                            <div class="login-footer-bottom"><a href="{{ route('beranda') }}">OpenSID UI</a> · Laravel CMS</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ asset('admin-assets/bootstrap/js/jquery.min.js') }}"></script>@stack('scripts')
+</body>
+
+</html>

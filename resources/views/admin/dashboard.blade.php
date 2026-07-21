@@ -3,11 +3,28 @@
 @section('page-title','Beranda')
 @section('page-description','Ringkasan Sistem Informasi Desa')
 @section('content')
-<div class="row">
-@foreach($stats as $label=>$value)
-@php($color=match($loop->index){0=>'bg-aqua',1=>'bg-green',2=>'bg-yellow',3=>'bg-red',4=>'bg-purple',default=>'bg-maroon'})
-@php($icon=match($loop->index){0=>'fa-newspaper-o',1=>'fa-file-text-o',2=>'fa-picture-o',3=>'fa-folder-open',4=>'fa-bar-chart',default=>'fa-envelope'})
-<div class="col-lg-2 col-md-4 col-sm-6 col-xs-12"><div class="small-box {{ $color }}"><div class="inner"><h3>{{ number_format($value) }}</h3><p>{{ $label }}</p></div><div class="icon"><i class="fa {{ $icon }}"></i></div></div></div>
+<div class="row dashboard-stats">
+@foreach($stats as $stat)
+<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12"><div class="small-box {{ $stat['color'] }}"><div class="inner"><h3>{{ number_format($stat['value'], 0, ',', '.') }}</h3><p>{{ $stat['label'] }}</p></div><div class="icon"><i class="fa {{ $stat['icon'] }}"></i></div></div></div>
+@endforeach
+</div>
+<div class="dashboard-statistics">
+@foreach($statisticPanels as $panel)
+@php($panelTotal=collect($panel['items'])->sum('value'))
+@php($panelMax=max(collect($panel['items'])->max('value')??0,1))
+<section class="box dashboard-chart-card">
+    <div class="box-header with-border"><h3 class="box-title"><i class="fa {{ $panel['icon'] }}"></i> {{ $panel['title'] }}</h3><span class="chart-total">Total {{ number_format($panelTotal,0,',','.') }} {{ $panel['unit'] }}</span></div>
+    <div class="box-body statistic-bars">
+    @foreach($panel['items'] as $item)
+        @php($percentage=$panelTotal>0?round(($item['value']/$panelTotal)*100,1):0)
+        <div class="statistic-bar-item">
+            <div class="statistic-bar-label"><span>{{ $item['label'] }}</span><strong>{{ number_format($item['value'],0,',','.') }} <small>{{ $panel['unit'] }}</small></strong></div>
+            <div class="statistic-bar-track"><span style="width: {{ min(100,($item['value']/$panelMax)*100) }}%"></span></div>
+            <small class="statistic-percentage">{{ number_format($percentage,1,',','.') }}%</small>
+        </div>
+    @endforeach
+    </div>
+</section>
 @endforeach
 </div>
 <div class="row"><div class="col-md-8"><div class="box box-info"><div class="box-header with-border"><h3 class="box-title"><i class="fa fa-envelope"></i> Pesan Terbaru</h3><div class="box-tools"><a href="{{ route('admin.messages.index') }}" class="btn btn-box-tool">Lihat Semua</a></div></div><div class="box-body no-padding"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Pengirim</th><th>Pesan</th><th>Waktu</th></tr></thead><tbody>@forelse($messages as $message)<tr><td><a href="{{ route('admin.messages.show',$message) }}"><strong>{{ $message->name }}</strong></a><br><small>{{ $message->email }}</small></td><td>{{ Str::limit($message->message,70) }}</td><td><span class="label label-info">{{ $message->created_at->diffForHumans() }}</span></td></tr>@empty<tr><td colspan="3" class="empty-state">Belum ada pesan masuk.</td></tr>@endforelse</tbody></table></div></div></div></div>
