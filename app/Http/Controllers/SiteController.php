@@ -23,7 +23,7 @@ class SiteController extends Controller
             'villageStatistics' => [
                 ['icon' => 'fas fa-users', 'value' => 2150, 'unit' => 'jiwa', 'label' => 'Jumlah Penduduk'],
                 ['icon' => 'fas fa-home', 'value' => 720, 'unit' => 'KK', 'label' => 'Kepala Keluarga'],
-                ['icon' => 'fas fa-map-signs', 'value' => 4, 'unit' => 'dusun', 'label' => 'Wilayah Administratif', 'meta' => '— RW · — RT'],
+                ['icon' => 'fas fa-map-signs', 'value' => 4, 'unit' => 'dusun', 'label' => 'Wilayah Administratif'],
                 ['icon' => 'fas fa-map', 'value' => 430, 'unit' => 'hektare', 'label' => 'Luas Wilayah'],
             ],
             'featuredPotentials' => array_slice($this->potentialsData(), 0, 2),

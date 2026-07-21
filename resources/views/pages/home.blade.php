@@ -5,7 +5,7 @@
         <div class="container village-stats-layout">
             <div class="village-stats-intro">
                 <span class="section-kicker">Desa dalam Angka</span>
-                <h2 id="village-stats-title">Statistik Singkat Desa</h2>
+                <h2 id="village-stats-title">Statistik Desa</h2>
                 <p>Ringkasan data kependudukan dan wilayah Desa Sukomulyo dalam satu tampilan.</p>
                 <a href="{{ route('data-desa-statistik') }}">Lihat data selengkapnya <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </div>
