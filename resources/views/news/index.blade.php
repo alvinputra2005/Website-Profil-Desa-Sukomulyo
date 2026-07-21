@@ -11,7 +11,7 @@
                         <i class="far fa-folder-open" aria-hidden="true"></i>
                         <h2>Belum Ada Berita</h2>
                         <p>Belum ada berita yang tersimpan pada arsip ini.</p>
-                        <a class="button" href="{{ route('news.index') }}">Kembali ke Berita</a>
+                        <a class="button" href="{{ route('berita-desa.index') }}">Kembali ke Berita</a>
                     </div>
                 @endforelse
             </section>

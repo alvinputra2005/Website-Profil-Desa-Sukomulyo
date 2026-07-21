@@ -28,7 +28,7 @@
                             <i class="{{ $potential['icon'] }}" aria-hidden="true"></i>
                             <h3>{{ $potential['title'] }}</h3>
                             <p>{{ $potential['description'] }}</p>
-                            <a class="pagereadmore" href="{{ route('potentials') }}">Lihat Potensi</a>
+                            <a class="pagereadmore" href="{{ route('data-desa-statistik') }}">Lihat Data Desa</a>
                         </div>
                         <img src="{{ $potential['image'] }}" alt="{{ $potential['title'] }}">
                     </article>
@@ -44,10 +44,10 @@
                 <h2>Mengenal Desa Sukomulyo</h2>
                 <p>Desa Sukomulyo tumbuh melalui semangat gotong royong, pelayanan publik yang terbuka, serta pengembangan potensi masyarakat secara berkelanjutan.</p>
                 <p>Website ini menjadi ruang informasi bersama agar warga lebih mudah mengetahui program, kegiatan, dan layanan pemerintah desa.</p>
-                <a class="learnmore" href="{{ route('profile') }}">Baca Profil Desa</a>
+                <a class="learnmore" href="{{ route('profile-desa') }}">Baca Profile Desa</a>
             </div>
             <div class="aboutus_thumbox">
-                <img src="{{ asset('assets/social-care-lite/images/slides/slider-default.jpg') }}" alt="Suasana Desa Sukomulyo">
+                <img src="{{ asset('assets/village-rice-fields.jpg') }}" alt="Persawahan dan permukiman desa di Indonesia">
             </div>
         </div>
     </section>
@@ -61,7 +61,7 @@
                     <x-article-card :article="$article" />
                 @endforeach
             </div>
-            <div class="section-action"><a class="button" href="{{ route('news.index') }}">Lihat Semua Berita</a></div>
+            <div class="section-action"><a class="button" href="{{ route('berita-desa.index') }}">Lihat Semua Berita</a></div>
         </div>
     </section>
 </x-layouts.app>

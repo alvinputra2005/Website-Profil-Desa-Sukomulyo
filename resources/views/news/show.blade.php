@@ -5,7 +5,7 @@
         <div id="sc_innerpage_wrap">
             <article class="sc_innerpage_contentbx single-article">
                 <header class="entry-header">
-                    <a class="article-category" href="{{ route('news.category', $article['category_slug']) }}">{{ $article['category'] }}</a>
+                    <a class="article-category" href="{{ route('berita-desa.category', $article['category_slug']) }}">{{ $article['category'] }}</a>
                     <h1 class="entry-title">{{ $article['title'] }}</h1>
                     <div class="postmeta">
                         <span class="post-date"><i class="far fa-calendar-alt" aria-hidden="true"></i>{{ $article['date'] }}</span>
@@ -27,7 +27,7 @@
                 </footer>
 
                 <nav class="post-navigation" aria-label="Navigasi berita">
-                    <a href="{{ route('news.index') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Semua Berita</a>
+                    <a href="{{ route('berita-desa.index') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Semua Berita</a>
                 </nav>
             </article>
 

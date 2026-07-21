@@ -15,11 +15,11 @@ class SiteController extends Controller
     {
         return $this->render('pages.home', [
             'missions' => [
-                ['icon' => 'fas fa-landmark', 'title' => 'Pemerintahan', 'route' => 'government'],
-                ['icon' => 'fas fa-file-alt', 'title' => 'Layanan Publik', 'route' => 'contact.index'],
-                ['icon' => 'fas fa-chart-line', 'title' => 'Potensi Desa', 'route' => 'potentials'],
-                ['icon' => 'fas fa-newspaper', 'title' => 'Berita Desa', 'route' => 'news.index'],
-                ['icon' => 'fas fa-images', 'title' => 'Galeri Kegiatan', 'route' => 'gallery'],
+                ['icon' => 'fas fa-home', 'title' => 'Profile Desa', 'route' => 'profile-desa'],
+                ['icon' => 'fas fa-chart-bar', 'title' => 'Data & Statistik', 'route' => 'data-desa-statistik'],
+                ['icon' => 'fas fa-file-alt', 'title' => 'Informasi Publik', 'route' => 'informasi-publik-desa'],
+                ['icon' => 'fas fa-newspaper', 'title' => 'Berita Desa', 'route' => 'berita-desa.index'],
+                ['icon' => 'fas fa-map-marked-alt', 'title' => 'Peta Desa', 'route' => 'peta-desa'],
             ],
             'featuredPotentials' => array_slice($this->potentialsData(), 0, 2),
         ]);
@@ -28,6 +28,45 @@ class SiteController extends Controller
     public function profile(): View
     {
         return $this->render('pages.profile', ['profileSections' => Schema::hasTable('village_profile_sections') ? VillageProfileSection::where('status','published')->orderBy('display_order')->get() : collect()]);
+    }
+
+    public function statistics(): View
+    {
+        return $this->render('pages.statistics', [
+            'statistics' => [
+                ['icon' => 'fas fa-users', 'value' => '2.150', 'label' => 'Jumlah Penduduk', 'unit' => 'jiwa'],
+                ['icon' => 'fas fa-home', 'value' => '720', 'label' => 'Kepala Keluarga', 'unit' => 'KK'],
+                ['icon' => 'fas fa-map', 'value' => '430', 'label' => 'Luas Wilayah', 'unit' => 'hektare'],
+                ['icon' => 'fas fa-map-signs', 'value' => '4', 'label' => 'Wilayah Dusun', 'unit' => 'dusun'],
+            ],
+            'population' => [
+                ['label' => 'Laki-laki', 'value' => 1085, 'percentage' => 50.5],
+                ['label' => 'Perempuan', 'value' => 1065, 'percentage' => 49.5],
+            ],
+            'livelihoods' => [
+                ['label' => 'Pertanian dan Perkebunan', 'percentage' => 48],
+                ['label' => 'Perdagangan dan UMKM', 'percentage' => 24],
+                ['label' => 'Jasa dan Pegawai', 'percentage' => 18],
+                ['label' => 'Lainnya', 'percentage' => 10],
+            ],
+        ]);
+    }
+
+    public function publicInformation(): View
+    {
+        return $this->render('pages.public-information', [
+            'documents' => [
+                ['icon' => 'fas fa-file-pdf', 'title' => 'APBDes Desa Sukomulyo', 'category' => 'Keuangan Desa', 'year' => '2026'],
+                ['icon' => 'fas fa-file-alt', 'title' => 'Rencana Kerja Pemerintah Desa', 'category' => 'Perencanaan', 'year' => '2026'],
+                ['icon' => 'fas fa-clipboard-list', 'title' => 'Laporan Penyelenggaraan Pemerintahan Desa', 'category' => 'Laporan', 'year' => '2025'],
+                ['icon' => 'fas fa-bullhorn', 'title' => 'Standar Pelayanan Publik Desa', 'category' => 'Pelayanan', 'year' => '2026'],
+            ],
+        ]);
+    }
+
+    public function map(): View
+    {
+        return $this->render('pages.map');
     }
 
     public function government(): View
@@ -116,7 +155,7 @@ class SiteController extends Controller
 
     public function gallery(): View
     {
-        $image = asset('assets/social-care-lite/images/slides/slider-default.jpg');
+        $image = asset('assets/village-rice-fields.jpg');
 
         if (Schema::hasTable('galleries')) {
             $photos = Gallery::where('status','published')->with(['items.media','cover'])->latest('event_date')->get()->flatMap(function ($gallery) use ($image) {
@@ -185,13 +224,12 @@ class SiteController extends Controller
                 'address' => $setting('site.address','Kantor Desa Sukomulyo, Indonesia'),
             ],
             'navigation' => [
-                ['label' => 'Beranda', 'route' => 'home', 'active' => 'home'],
-                ['label' => 'Profil Desa', 'route' => 'profile', 'active' => 'profile'],
-                ['label' => 'Pemerintahan', 'route' => 'government', 'active' => 'government'],
-                ['label' => 'Potensi Desa', 'route' => 'potentials', 'active' => 'potentials'],
-                ['label' => 'Berita', 'route' => 'news.index', 'active' => 'news.*'],
-                ['label' => 'Galeri', 'route' => 'gallery', 'active' => 'gallery'],
-                ['label' => 'Kontak', 'route' => 'contact.index', 'active' => 'contact.*'],
+                ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
+                ['label' => 'Profile Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
+                ['label' => 'Data Desa/Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-desa-statistik'],
+                ['label' => 'Informasi Publik Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-publik-desa'],
+                ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
+                ['label' => 'Peta Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
             ],
             'articles' => $articles,
             'categories' => collect($articles)->unique('category_slug')->values()->all(),
@@ -201,7 +239,7 @@ class SiteController extends Controller
 
     private function articles(): array
     {
-        $image = asset('assets/social-care-lite/images/slides/slider-default.jpg');
+        $image = asset('assets/village-rice-fields.jpg');
 
         if (Schema::hasTable('news') && News::published()->exists()) {
             return News::published()->with(['category','featuredImage'])->latest('published_at')->get()->map(function (News $article) use ($image) {
@@ -212,7 +250,7 @@ class SiteController extends Controller
         return [
             [
                 'slug' => 'musyawarah-desa-penyusunan-program-kerja',
-                'title' => 'Musyawarah Desa Penyusunan Program Kerja',
+                'title' => 'Musyawarah Desa Penyusunan Program',
                 'date' => '18 Juli 2026',
                 'year' => '2026',
                 'category' => 'Pemerintahan',
@@ -275,7 +313,7 @@ class SiteController extends Controller
 
     private function potentialsData(): array
     {
-        $image = asset('assets/social-care-lite/images/slides/slider-default.jpg');
+        $image = asset('assets/village-rice-fields.jpg');
 
         return [
             ['title' => 'Pertanian Produktif', 'description' => 'Lahan pertanian menjadi penggerak ekonomi dan sumber pangan masyarakat.', 'image' => $image, 'icon' => 'fas fa-seedling'],

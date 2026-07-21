@@ -24,7 +24,7 @@
                         <h2>Punya produk atau potensi yang ingin ditampilkan?</h2>
                         <p>Sampaikan informasi kepada pemerintah desa agar dapat diverifikasi dan dipublikasikan.</p>
                     </div>
-                    <a class="learnmore" href="{{ route('contact.index') }}">Hubungi Kami</a>
+                    <a class="learnmore" href="{{ route('kontak.index') }}">Hubungi Kami</a>
                 </aside>
             </section>
         </div>

@@ -2,7 +2,7 @@
 
 <header class="page-banner">
     <div class="container">
-        <p class="breadcrumbs"><a href="{{ route('home') }}">Beranda</a><span>/</span>{{ $title }}</p>
+        <p class="breadcrumbs"><a href="{{ route('beranda') }}">Beranda</a><span>/</span>{{ $title }}</p>
         <h1>{{ $title }}</h1>
         @if ($description)
             <p>{{ $description }}</p>

@@ -30,7 +30,7 @@
                         </div>
                     @endif
 
-                    <form class="contact-form" action="{{ route('contact.store') }}" method="POST">
+                    <form class="contact-form" action="{{ route('kontak.store') }}" method="POST">
                         @csrf
                         <div class="form-row">
                             <label>Nama Lengkap<input type="text" name="name" value="{{ old('name') }}" maxlength="100" required></label>

@@ -51,7 +51,7 @@ h5{ font-size:18px;}
 h6{ font-size:14px;}
 figcaption,figure{	display: block;}
 figure {margin: 1em 0;}
-blockquote{ background-color:#eee; border-left:5px solid #c1331b; padding:15px 15px 15px 40px; color:#666; font-size:15px; line-height:1.5; margin-bottom:30px;}
+blockquote{ background-color:#eee; border-left:5px solid #526b42; padding:15px 15px 15px 40px; color:#666; font-size:15px; line-height:1.5; margin-bottom:30px;}
 blockquote p{ margin-bottom:0 !important;}
 hr {-webkit-box-sizing: content-box;-moz-box-sizing: content-box;box-sizing: content-box;	height: 0;	overflow: visible;}
 .textwidget select{ width:100%;}
@@ -140,14 +140,14 @@ Main site CSS
 .infobox{width:240px;float:left;text-align:left; box-sizing:border-box; padding-top:30px;padding-bottom:30px;}
 .infobox i{float:left;font-size:35px;margin-right:15px;position:relative;}
 .left-right-border{ border-left:solid 1px #e5e5e5;border-right:solid 1px #e5e5e5; padding-left:40px;padding-right:40px;}
-.donatenow{ float:right; font-weight:600; padding:12px 45px; text-transform:uppercase; font-size:17px; background-color:#c1331b; color:#ffffff ; display:inline-block; }
-.donatenow:hover{ background-color:#8f2817; color:#ffffff ;}
+.donatenow{ float:right; font-weight:600; padding:12px 45px; text-transform:uppercase; font-size:17px; background-color:#526b42; color:#ffffff ; display:inline-block; }
+.donatenow:hover{ background-color:#3d5032; color:#ffffff ;}
 
 /* = social icons css
 -------------------------------------------------------------- */
 .header-socialicons{ display:inline-block;}
 .header-socialicons a{  width:32px; height:45px; line-height:45px; margin:0 5px 0 0; padding:0; color:#eee; display:inline-block; text-align:center;  }
-.header-socialicons a:hover{ color:#c1331b; }
+.header-socialicons a:hover{ color:#526b42; }
 .header-socialicons br{ display:none;}
 .header-navigation{ position:relative; }
 /*header menu css*/
@@ -160,16 +160,16 @@ Main site CSS
 .mainhdrnav ul li{display:inline-block; position:relative; margin:0;}
 .mainhdrnav ul li:last-child{border-right:none;}
 .mainhdrnav ul li a{ padding:20px 25px; display:block; text-align:center; color:#fff; }
-.mainhdrnav ul li ul li{ display:block; position:relative; float:none; border-bottom:1px solid #c1331b;}
+.mainhdrnav ul li ul li{ display:block; position:relative; float:none; border-bottom:1px solid #526b42;}
 .mainhdrnav ul li ul li a{ display:block; padding-top:7px; padding-bottom:7px; position:relative; text-align:left;}
-.mainhdrnav ul li ul{display:none; z-index:9999999; position:relative; background-color:#8f2817 ;}
+.mainhdrnav ul li ul{display:none; z-index:9999999; position:relative; background-color:#3d5032 ;}
 .mainhdrnav ul li:hover > ul{display:block; width:200px; position:absolute; left:0; text-align:left; }
 .mainhdrnav ul li:hover ul li ul{display:none; position:relative;}
 .mainhdrnav ul li:hover ul li:hover > ul{display:block; position:absolute; left:200px; top:0;}
 .mainhdrnav ul li a:hover, 
 .mainhdrnav ul li.current-menu-item a,
 .mainhdrnav ul li.current-menu-parent a.parent,
-.mainhdrnav ul li.current-menu-item ul.sub-menu li a:hover{ background-color:#8f2817; text-shadow:0 0 15px #fff;}
+.mainhdrnav ul li.current-menu-item ul.sub-menu li a:hover{ background-color:#3d5032; text-shadow:0 0 15px #fff;}
 .mainhdrnav ul li.current-menu-item ul.sub-menu li a{ color: #fff;}
 
 
@@ -188,7 +188,7 @@ h2.section-title{ font-size:32px; font-weight:800; text-align:center; margin-bot
 .pagefeaturecolumn{ position:relative; background-color:#fff;}
 .features_column{padding:20px; width:16.7%; float:left; margin:0 4% 0 0; position:relative; box-sizing:border-box; text-align:center;-webkit-border-radius: 5px;
 -moz-border-radius:5px;border-radius: 5px;}
-.features_column .imagebox{ width:111px; height:111px; line-height:111px; overflow:hidden; margin:0 auto; box-sizing:border-box; border:solid 2px #c1331b;-webkit-border-radius:100%;-moz-border-radius:100%;border-radius:100%;}
+.features_column .imagebox{ width:111px; height:111px; line-height:111px; overflow:hidden; margin:0 auto; box-sizing:border-box; border:solid 2px #526b42;-webkit-border-radius:100%;-moz-border-radius:100%;border-radius:100%;}
 .features_column .imagebox img{backface-visibility:hidden; height:48px; width:56px; vertical-align: middle;}
 .features_column h3{ font-size:18px; margin:10px 0; font-weight:800;}
 .features_column h3 a{ color:#353535;}
@@ -258,7 +258,7 @@ body.single-post .blogpost_lyout { width:100%; float:none; margin:0; }
 #sidebar{ float:right; width:28%;}
 aside.widget{ margin-bottom:30px; }
 aside.widget ul{ list-style:disc; margin:0; padding:0; }
-h3.widget-title{ font-weight:400; margin:0; color:#fff; font-size:20px; position:relative; background-color:#c1331b; padding:10px 15px; }
+h3.widget-title{ font-weight:400; margin:0; color:#fff; font-size:20px; position:relative; background-color:#526b42; padding:10px 15px; }
 #sidebar ul li{ list-style:none; margin:0; margin-bottom:2px; padding:7px 10px 7px 25px; background-color:#f5f5f4; }
 #sidebar ul li:hover, #sidebar ul li:first-child{ background-color:#ddd;}
 #sidebar ul li a{ color:#3b3b3b; }
@@ -299,11 +299,11 @@ aside .textwidget{ padding:20px; background-color:#f5f5f4;}
 
 /* Buttons */
 .button{  border:1px solid #404040; color:#404040; padding:10px 30px; display:inline-block; border-radius:25px; -moz-border-radius:25px; -webkit-border-radius:25px; -o-border-radius:25px; -ms-border-radius:25px; }
-.button:hover{ border:1px solid #c1331b; color:#c1331b; }
+.button:hover{ border:1px solid #526b42; color:#526b42; }
 a.ReadMore{ background-color:#333339; color:#fff ; padding:5px 15px; display:inline-block;}
 a.ReadMore:hover{ background-color:#ffae00; color:#fff; }
 
-.learnmore{ background-color:#c1331b; color:#fff ;display: inline-block; padding:10px 30px; text-transform:uppercase; font-weight:600; border-radius:25px; -moz-border-radius:25px; -webkit-border-radius:25px; -o-border-radius:25px; -ms-border-radius:25px; font-size:14px; }
+.learnmore{ background-color:#526b42; color:#fff ;display: inline-block; padding:10px 30px; text-transform:uppercase; font-weight:600; border-radius:25px; -moz-border-radius:25px; -webkit-border-radius:25px; -o-border-radius:25px; -ms-border-radius:25px; font-size:14px; }
 .learnmore:hover{ background-color:#333;color:#fff ;}
 
 /* = Contact Form 7 css
