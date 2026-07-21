@@ -234,7 +234,7 @@ class SiteController extends Controller
         return [
             [
                 'slug' => 'musyawarah-desa-penyusunan-program-kerja',
-                'title' => 'Musyawarah Desa Penyusunan Program Kerja',
+                'title' => 'Musyawarah Desa Penyusunan Program',
                 'date' => '18 Juli 2026',
                 'year' => '2026',
                 'category' => 'Pemerintahan',

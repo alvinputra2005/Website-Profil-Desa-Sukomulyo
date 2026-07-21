@@ -3,16 +3,19 @@
 <section class="hero-slider" data-slider aria-label="Informasi unggulan">
     <div class="hero-slides">
         @foreach (array_slice($articles, 0, 3) as $index => $article)
-            <article class="hero-slide {{ $index === 0 ? 'is-active' : '' }}" data-slide style="background-image: linear-gradient(90deg, rgba(20, 25, 31, .88), rgba(20, 25, 31, .28)), url('{{ $article['image'] }}')" aria-hidden="{{ $index === 0 ? 'false' : 'true' }}">
+            <article class="hero-slide {{ $index === 0 ? 'is-active' : '' }}" data-slide style="background-position: {{ ['35% 35%', '50% 50%', '65% 65%'][$index] }}; background-image: linear-gradient(90deg, rgba(20, 25, 31, .88), rgba(20, 25, 31, .28)), url('{{ $article['image'] }}')" aria-hidden="{{ $index === 0 ? 'false' : 'true' }}">
                 <div class="container hero-content">
-                    <span class="hero-kicker">{{ $article['category'] }}</span>
-                    <h2>{{ $article['title'] }}</h2>
-                    <p>{{ $article['excerpt'] }}</p>
-                    <a class="slide_more" href="{{ route('berita-desa.show', $article['slug']) }}">Baca Selengkapnya</a>
+                    <div class="hero-copy">
+                        <h2>{{ $article['title'] }}</h2>
+                        <p>{{ $article['excerpt'] }}</p>
+                        <a class="slide_more" href="{{ route('berita-desa.show', $article['slug']) }}">Baca Selengkapnya</a>
+                    </div>
                 </div>
             </article>
         @endforeach
     </div>
+
+    <div class="pixel-transition" data-pixel-transition aria-hidden="true"></div>
 
     <div class="slider-controls container">
         <button type="button" data-slider-prev aria-label="Slide sebelumnya"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>

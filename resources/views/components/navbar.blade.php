@@ -28,7 +28,7 @@
     <div class="container brand-row">
         <div class="logo">
             <a class="brand-mark" href="{{ route('beranda') }}" aria-label="{{ $site['name'] }}">
-                <img src="{{ asset('assets/logo-brighter-sukomulyo.svg') }}" alt="Logo Brighter Sukomulyo">
+                <img src="{{ asset('assets/logo-brighter-sukomulyo.jpeg') }}" alt="Logo Brighter Sukomulyo">
             </a>
             <div>
                 <h1><a href="{{ route('beranda') }}">{{ $site['name'] }}</a></h1>
