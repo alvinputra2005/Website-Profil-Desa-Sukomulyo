@@ -71,6 +71,7 @@ return [
             'region' => env('R2_REGION', 'auto'),
             'bucket' => env('R2_BUCKET', 'web-sukomulyo'),
             'url' => env('R2_PUBLIC_URL'),
+            'proxy' => env('R2_PROXY_URL', false),
             'endpoint' => env('R2_ENDPOINT'),
             'use_path_style_endpoint' => false,
             'throw' => true,

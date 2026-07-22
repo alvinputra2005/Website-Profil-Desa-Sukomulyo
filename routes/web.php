@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\MediaFileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{LoginController,PasswordController};
 use App\Http\Controllers\Admin\{ActivityController,ContactMessageController,CrudController,DashboardController,MediaController,UserController,VillageContentController};
@@ -13,6 +14,12 @@ Route::middleware('guest')->group(function(){
     Route::get('/admin/reset-password/{token}',[PasswordController::class,'reset'])->name('password.reset');
     Route::post('/admin/reset-password',[PasswordController::class,'update'])->name('password.update');
 });
+
+Route::get('/media-file/{media}/{variant?}', MediaFileController::class)
+    ->where('variant', 'original|thumbnail')
+    ->middleware('throttle:120,1')
+    ->name('media.file');
+
 Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(function(){
     Route::post('/logout',[LoginController::class,'destroy'])->name('logout');
     Route::get('/',DashboardController::class)->name('dashboard');
