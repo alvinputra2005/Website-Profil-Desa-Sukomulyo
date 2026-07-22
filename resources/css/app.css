@@ -184,6 +184,14 @@ blockquote { border-left-color: var(--primary); }
 .single-article .entry-title { margin: 12px 0 18px; }
 .article-category { font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
 .single-article-image { width: 100%; max-height: 430px; margin-bottom: 30px; border-radius: var(--radius); object-fit: cover; }
+.entry-content .article-image { max-width: 100%; margin: 24px auto; clear: both; }
+.entry-content .article-image img { display: block; width: 100%; height: auto; border-radius: var(--radius); }
+.entry-content .article-image figcaption { padding-top: 7px; color: #737b72; font-size: 13px; text-align: center; }
+.entry-content .article-image.align-left { width: 45%; margin: 8px 24px 14px 0; float: left; }
+.entry-content .article-image.align-right { width: 45%; margin: 8px 0 14px 24px; float: right; }
+.entry-content .article-image.align-center { width: 72%; }
+.entry-content .article-image.align-full { width: 100%; }
+@media (max-width: 640px) { .entry-content .article-image.align-left, .entry-content .article-image.align-right, .entry-content .article-image.align-center { width: 100%; margin: 20px 0; float: none; } }
 .article-footer { display: flex; flex-wrap: wrap; padding: 20px 0; gap: 8px; border-top: 1px solid var(--border); }
 .article-footer span { padding: 3px 11px; border-radius: 20px; background: var(--surface); font-size: 13px; }
 .post-navigation { margin-top: 25px; }

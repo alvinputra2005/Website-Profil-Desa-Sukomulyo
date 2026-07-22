@@ -3,7 +3,7 @@
 use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{LoginController,PasswordController};
-use App\Http\Controllers\Admin\{ActivityController,ContactMessageController,CrudController,DashboardController,MediaController,UserController};
+use App\Http\Controllers\Admin\{ActivityController,ContactMessageController,CrudController,DashboardController,MediaController,UserController,VillageContentController};
 
 Route::middleware('guest')->group(function(){
     Route::get('/admin/login',[LoginController::class,'create'])->name('login');
@@ -17,9 +17,12 @@ Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/logout',[LoginController::class,'destroy'])->name('logout');
     Route::get('/',DashboardController::class)->name('dashboard');
     Route::get('/media',[MediaController::class,'index'])->name('media.index'); Route::post('/media',[MediaController::class,'store'])->name('media.store'); Route::delete('/media/{media}',[MediaController::class,'destroy'])->name('media.destroy');
+    Route::post('/media/editor-upload',[MediaController::class,'editorUpload'])->name('media.editor-upload');
     Route::resource('messages',ContactMessageController::class)->only(['index','show','destroy']);
     Route::resource('users',UserController::class)->except(['show','destroy']);
     Route::get('/activities',ActivityController::class)->name('activities.index');
+    Route::get('/info-desa/{page}',[VillageContentController::class,'edit'])->name('village-content.edit');
+    Route::put('/info-desa/{page}',[VillageContentController::class,'update'])->name('village-content.update');
     Route::get('/{resource}',[CrudController::class,'index'])->name('resources.index');
     Route::get('/{resource}/create',[CrudController::class,'create'])->name('resources.create');
     Route::post('/{resource}',[CrudController::class,'store'])->name('resources.store');

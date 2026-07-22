@@ -27,7 +27,7 @@ class SiteController extends Controller
 
     public function profile(): View
     {
-        return $this->render('pages.profile', ['profileSections' => Schema::hasTable('village_profile_sections') ? VillageProfileSection::where('status','published')->orderBy('display_order')->get() : collect()]);
+        return $this->render('pages.profile', ['profileSections' => Schema::hasTable('village_profile_sections') ? VillageProfileSection::whereIn('section_key',['profile','history','vision','mission'])->where('status','published')->orderBy('display_order')->get() : collect()]);
     }
 
     public function statistics(): View
@@ -99,7 +99,8 @@ class SiteController extends Controller
 
     public function article(string $slug): View|Response
     {
-        $article = collect($this->articles())->firstWhere('slug', $slug);
+        $canPreviewDraft = auth()->check() && auth()->user()->can('manage-content');
+        $article = collect($this->articles($canPreviewDraft))->firstWhere('slug', $slug);
 
         if (! $article) {
             return $this->notFound();
@@ -237,13 +238,17 @@ class SiteController extends Controller
         ];
     }
 
-    private function articles(): array
+    private function articles(bool $includeUnpublished = false): array
     {
         $image = asset('assets/village-rice-fields.jpg');
 
         if (Schema::hasTable('news') && News::published()->exists()) {
-            return News::published()->with(['category','featuredImage'])->latest('published_at')->get()->map(function (News $article) use ($image) {
-                return ['slug'=>$article->slug,'title'=>$article->title,'date'=>($article->published_at??$article->created_at)->translatedFormat('d F Y'),'year'=>(string)($article->published_at??$article->created_at)->year,'category'=>$article->category->name,'category_slug'=>$article->category->slug,'image'=>$article->featuredImage?->url??$image,'excerpt'=>$article->excerpt??strip_tags($article->content),'content'=>[strip_tags($article->content)],'html_content'=>$article->content,'tags'=>[]];
+            $query=News::with(['category','featuredImage']);
+            if(!$includeUnpublished)$query->published();
+            return $query->latest('published_at')->get()->map(function (News $article) use ($image) {
+                $htmlContent=preg_replace('~https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(/storage/)~i','$1',$article->content);
+                preg_match('~<img[^>]+src=["\']([^"\']+)["\']~i', $htmlContent, $inlineImage);
+                return ['slug'=>$article->slug,'title'=>$article->title,'date'=>($article->published_at??$article->created_at)->translatedFormat('d F Y'),'year'=>(string)($article->published_at??$article->created_at)->year,'category'=>$article->category->name,'category_slug'=>$article->category->slug,'image'=>$article->featuredImage?->url??($inlineImage[1]??$image),'excerpt'=>$article->excerpt??strip_tags($htmlContent),'content'=>[strip_tags($htmlContent)],'html_content'=>$htmlContent,'tags'=>[]];
             })->all();
         }
 

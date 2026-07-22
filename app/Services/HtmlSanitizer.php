@@ -6,7 +6,7 @@ use DOMElement;
 
 final class HtmlSanitizer
 {
-    private array $allowed = ['p'=>[],'br'=>[],'strong'=>[],'em'=>[],'u'=>[],'s'=>[],'h2'=>[],'h3'=>[],'h4'=>[],'blockquote'=>[],'ul'=>[],'ol'=>[],'li'=>[],'a'=>['href','title','target','rel'],'img'=>['src','alt','title'],'table'=>[],'thead'=>[],'tbody'=>[],'tr'=>[],'th'=>[],'td'=>[],'hr'=>[]];
+    private array $allowed = ['p'=>[],'br'=>[],'strong'=>[],'em'=>[],'u'=>[],'s'=>[],'h2'=>[],'h3'=>[],'h4'=>[],'blockquote'=>[],'ul'=>[],'ol'=>[],'li'=>[],'a'=>['href','title','target','rel'],'figure'=>['class'],'figcaption'=>[],'img'=>['src','alt','title'],'table'=>[],'thead'=>[],'tbody'=>[],'tr'=>[],'th'=>[],'td'=>[],'hr'=>[]];
 
     public function clean(?string $html): string
     {
@@ -31,6 +31,7 @@ final class HtmlSanitizer
             foreach (iterator_to_array($child->attributes) as $attribute) if (! in_array(strtolower($attribute->name),$this->allowed[$tag],true)) $child->removeAttribute($attribute->name);
             if ($tag==='a') { $href=$child->getAttribute('href'); if ($href && ! preg_match('~^(https?://|mailto:|tel:|/)~i',$href)) $child->removeAttribute('href'); if ($child->getAttribute('target')==='_blank') $child->setAttribute('rel','noopener noreferrer'); }
             if ($tag==='img' && ! preg_match('~^(https?://|/)~i',$child->getAttribute('src'))) $child->removeAttribute('src');
+            if ($tag==='figure' && ! in_array($child->getAttribute('class'), ['article-image align-left','article-image align-center','article-image align-right','article-image align-full'], true)) $child->setAttribute('class','article-image align-center');
             $this->walk($child);
         }
     }
