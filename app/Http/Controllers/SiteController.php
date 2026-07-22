@@ -23,8 +23,46 @@ class SiteController extends Controller
             'villageStatistics' => [
                 ['icon' => 'fas fa-users', 'value' => 2150, 'unit' => 'jiwa', 'label' => 'Jumlah Penduduk'],
                 ['icon' => 'fas fa-home', 'value' => 720, 'unit' => 'KK', 'label' => 'Kepala Keluarga'],
-                ['icon' => 'fas fa-map-signs', 'value' => 4, 'unit' => 'dusun', 'label' => 'Wilayah Administratif'],
-                ['icon' => 'fas fa-map', 'value' => 430, 'unit' => 'hektare', 'label' => 'Luas Wilayah'],
+                ['icon' => 'fas fa-graduation-cap', 'value' => 1680, 'unit' => 'orang', 'label' => 'Data Pendidikan', 'meta'],
+                ['icon' => 'fas fa-briefcase', 'value' => 1240, 'unit' => 'orang', 'label' => 'Data Pekerjaan', 'meta'],
+            ],
+            'apbdes' => [
+                'year' => 2026,
+                'panels' => [
+                    [
+                        'title' => 'Pendapatan APBDes 2026',
+                        'icon' => 'fas fa-wallet',
+                        'total' => 2485000000,
+                        'items' => [
+                            ['label' => 'Dana Desa', 'value' => 1150000000],
+                            ['label' => 'Alokasi Dana Desa', 'value' => 850000000],
+                            ['label' => 'Bagi Hasil Pajak dan Retribusi', 'value' => 310000000],
+                            ['label' => 'Pendapatan Asli Desa', 'value' => 175000000],
+                        ],
+                    ],
+                    [
+                        'title' => 'Belanja APBDes 2026',
+                        'icon' => 'fas fa-file-invoice-dollar',
+                        'total' => 2350000000,
+                        'items' => [
+                            ['label' => 'Penyelenggaraan Pemerintahan', 'value' => 720000000],
+                            ['label' => 'Pelaksanaan Pembangunan', 'value' => 930000000],
+                            ['label' => 'Pembinaan Kemasyarakatan', 'value' => 270000000],
+                            ['label' => 'Pemberdayaan Masyarakat', 'value' => 430000000],
+                        ],
+                    ],
+                    [
+                        'title' => 'Realisasi APBDes 2026',
+                        'icon' => 'fas fa-chart-line',
+                        'total' => 1739000000,
+                        'items' => [
+                            ['label' => 'Penyelenggaraan Pemerintahan', 'value' => 520000000, 'percentage' => 72],
+                            ['label' => 'Pelaksanaan Pembangunan', 'value' => 690000000, 'percentage' => 74],
+                            ['label' => 'Pembinaan Kemasyarakatan', 'value' => 194000000, 'percentage' => 72],
+                            ['label' => 'Pemberdayaan Masyarakat', 'value' => 335000000, 'percentage' => 78],
+                        ],
+                    ],
+                ],
             ],
             'featuredPotentials' => array_slice($this->potentialsData(), 0, 2),
         ]);
@@ -41,8 +79,8 @@ class SiteController extends Controller
             'statistics' => [
                 ['icon' => 'fas fa-users', 'value' => '2.150', 'label' => 'Jumlah Penduduk', 'unit' => 'jiwa'],
                 ['icon' => 'fas fa-home', 'value' => '720', 'label' => 'Kepala Keluarga', 'unit' => 'KK'],
-                ['icon' => 'fas fa-map', 'value' => '430', 'label' => 'Luas Wilayah', 'unit' => 'hektare'],
-                ['icon' => 'fas fa-map-signs', 'value' => '4', 'label' => 'Wilayah Dusun', 'unit' => 'dusun'],
+                ['icon' => 'fas fa-graduation-cap', 'value' => '1.680', 'label' => 'Data Pendidikan', 'unit' => 'orang'],
+                ['icon' => 'fas fa-briefcase', 'value' => '1.240', 'label' => 'Data Pekerjaan', 'unit' => 'orang'],
             ],
             'population' => [
                 ['label' => 'Laki-laki', 'value' => 1085, 'percentage' => 50.5],

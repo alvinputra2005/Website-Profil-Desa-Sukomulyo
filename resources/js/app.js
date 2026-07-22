@@ -153,6 +153,21 @@ if (villageStats && 'IntersectionObserver' in window && !window.matchMedia('(pre
     observer.observe(villageStats);
 }
 
+const budgetSection = document.querySelector('[data-budget-section]');
+
+if (budgetSection && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    budgetSection.classList.add('is-animated');
+
+    const observer = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting) return;
+
+        budgetSection.classList.add('is-visible');
+        observer.disconnect();
+    }, { threshold: 0.18 });
+
+    observer.observe(budgetSection);
+}
+
 const galleryDialog = document.querySelector('[data-gallery-dialog]');
 
 if (galleryDialog) {

@@ -4,9 +4,9 @@
     <section class="village-stats-section" aria-labelledby="village-stats-title" data-village-stats>
         <div class="container village-stats-layout">
             <div class="village-stats-intro">
-                <span class="section-kicker">Desa dalam Angka</span>
+                <span class="section-kicker"></span>
                 <h2 id="village-stats-title">Statistik Desa</h2>
-                <p>Ringkasan data kependudukan dan wilayah Desa Sukomulyo dalam satu tampilan.</p>
+                <p>Ringkasan data kependudukan, keluarga, pendidikan, dan pekerjaan Desa Sukomulyo.</p>
                 <a href="{{ route('data-desa-statistik') }}">Lihat data selengkapnya <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </div>
 
@@ -24,6 +24,39 @@
                                 <small>{{ $statistic['meta'] }}</small>
                             @endisset
                         </div>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="budget-section" aria-labelledby="budget-title" data-budget-section>
+        <div class="container">
+            <header class="budget-heading">
+                <h2 id="budget-title">Transparansi APBDes</h2>
+            </header>
+
+            <div class="budget-grid">
+                @foreach ($apbdes['panels'] as $panel)
+                    <article class="budget-card">
+                        <header class="budget-card-header">
+                            <i class="{{ $panel['icon'] }}" aria-hidden="true"></i>
+                            <h3>{{ $panel['title'] }}</h3>
+                        </header>
+                        <ul class="budget-list">
+                            @foreach ($panel['items'] as $item)
+                                @php($percentage = $item['percentage'] ?? round(($item['value'] / $panel['total']) * 100))
+                                <li>
+                                    <h4>{{ $item['label'] }}</h4>
+                                    <p>Rp {{ number_format($item['value'], 2, ',', '.') }}</p>
+                                    <div class="budget-progress" role="progressbar" aria-label="{{ $item['label'] }} {{ $percentage }} persen" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $percentage }}">
+                                        <span class="budget-progress-fill" style="--budget-value: {{ $percentage }}%; --budget-delay: {{ $loop->index * 100 }}ms">
+                                            <span class="budget-progress-percent">{{ $percentage }}%</span>
+                                        </span>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
                     </article>
                 @endforeach
             </div>

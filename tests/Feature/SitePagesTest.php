@@ -41,6 +41,15 @@ class SitePagesTest extends TestCase
             ->assertSee('Halaman Tidak Ditemukan');
     }
 
+    public function test_homepage_shows_budget_transparency_section(): void
+    {
+        $this->get(route('beranda'))
+            ->assertOk()
+            ->assertSee('Transparansi APBDes')
+            ->assertDontSee('Total Pendapatan')
+            ->assertDontSee('Total Anggaran');
+    }
+
     public function test_contact_form_validates_and_accepts_a_message(): void
     {
         $this->post(route('kontak.store'), [
