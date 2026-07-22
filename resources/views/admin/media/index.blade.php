@@ -24,6 +24,11 @@
                             <option value="documents" @selected(old('category') === 'documents')>Dokumen publik</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label class="required">Nama konten / folder</label>
+                        <input class="form-control" name="folder_name" maxlength="255" required value="{{ old('folder_name') }}" placeholder="Contoh: Musyawarah Desa 2026">
+                        <p class="help-block">Nama otomatis diubah menjadi folder aman, misalnya <code>musyawarah-desa-2026</code>.</p>
+                    </div>
                     <div class="form-group"><label>Teks Alternatif</label><input class="form-control" name="alt_text" value="{{ old('alt_text') }}"></div>
                     <div class="form-group"><label>Keterangan</label><textarea class="form-control" name="caption" rows="3">{{ old('caption') }}</textarea></div>
                 </div>
