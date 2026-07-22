@@ -191,6 +191,15 @@ blockquote { border-left-color: var(--primary); }
 .entry-content .article-image.align-right { width: 45%; margin: 8px 0 14px 24px; float: right; }
 .entry-content .article-image.align-center { width: 72%; }
 .entry-content .article-image.align-full { width: 100%; }
+.entry-content .article-image[data-width="20"] { width: 20%; } .entry-content .article-image[data-width="25"] { width: 25%; }
+.entry-content .article-image[data-width="30"] { width: 30%; } .entry-content .article-image[data-width="35"] { width: 35%; }
+.entry-content .article-image[data-width="40"] { width: 40%; } .entry-content .article-image[data-width="45"] { width: 45%; }
+.entry-content .article-image[data-width="50"] { width: 50%; } .entry-content .article-image[data-width="55"] { width: 55%; }
+.entry-content .article-image[data-width="60"] { width: 60%; } .entry-content .article-image[data-width="65"] { width: 65%; }
+.entry-content .article-image[data-width="70"] { width: 70%; } .entry-content .article-image[data-width="75"] { width: 75%; }
+.entry-content .article-image[data-width="80"] { width: 80%; } .entry-content .article-image[data-width="85"] { width: 85%; }
+.entry-content .article-image[data-width="90"] { width: 90%; } .entry-content .article-image[data-width="95"] { width: 95%; }
+.entry-content .article-image[data-width="100"], .entry-content .article-image.align-full { width: 100%; }
 @media (max-width: 640px) { .entry-content .article-image.align-left, .entry-content .article-image.align-right, .entry-content .article-image.align-center { width: 100%; margin: 20px 0; float: none; } }
 .article-footer { display: flex; flex-wrap: wrap; padding: 20px 0; gap: 8px; border-top: 1px solid var(--border); }
 .article-footer span { padding: 3px 11px; border-radius: 20px; background: var(--surface); font-size: 13px; }
