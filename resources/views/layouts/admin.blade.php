@@ -22,7 +22,7 @@
             <nav class="navbar navbar-static-top"><a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button"><span class="sr-only">Buka navigasi</span></a>
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
-                        <li><a href="{{ route('beranda') }}" target="_blank" title="Lihat website"><i class="fa fa-globe"></i><span class="hidden-xs"> Website</span></a></li>
+                        <!-- <li><a href="{{ route('beranda') }}" target="_blank" title="Lihat website"><i class="fa fa-globe"></i><span class="hidden-xs"> Website</span></a></li> -->
                         <li class="dropdown notifications-menu"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell-o"></i>@php($messageCount=\App\Models\ContactMessage::count())@if($messageCount)<span class="label label-warning">{{ $messageCount }}</span>@endif</a>
                             <ul class="dropdown-menu">
                                 <li class="header">{{ $messageCount ? "$messageCount pesan masuk" : 'Tidak ada pesan baru' }}</li>
@@ -46,7 +46,7 @@
                                 </li>
                             </ul>
                         </li>
-                        <li><a href="#" data-toggle="control-sidebar"><i class="fa fa-question-circle"></i></a></li>
+                        <!-- <li><a href="#" data-toggle="control-sidebar"><i class="fa fa-question-circle"></i></a></li> -->
                     </ul>
                 </div>
             </nav>
