@@ -1,5 +1,7 @@
 <x-layouts.app :title="$heading" :description="$description">
-    <x-page-header :title="$heading" :description="$description" />
+    <x-page-header :title="$heading" :description="$description" :breadcrumbs="$heading === 'Berita Desa'
+        ? [['label' => 'Berita']]
+        : [['label' => 'Berita', 'url' => route('berita-desa.index')], ['label' => $heading]]" />
 
     <div class="container">
         <div id="sc_innerpage_wrap">

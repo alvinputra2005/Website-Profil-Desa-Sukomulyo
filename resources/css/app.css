@@ -134,8 +134,9 @@ blockquote { border-left-color: var(--primary); }
 .page-banner { padding: 52px 0; background: linear-gradient(120deg, var(--ink), #3c414a); color: #d8dbe0; }
 .page-banner h1 { margin: 0; color: #fff; font-size: 40px; }
 .page-banner p:last-child { max-width: 700px; margin: 14px 0 0; }
-.breadcrumbs { display: flex; gap: 10px; padding: 0; color: #aeb3bb; font-size: 14px; }
+.breadcrumbs { display: flex; margin: 0 0 12px; gap: 10px; padding: 0; color: #aeb3bb; font-size: 14px; }
 .breadcrumbs a { color: var(--accent); }
+.breadcrumbs [aria-current="page"] { color: #d8dbe0; }
 #sc_innerpage_wrap { padding: 65px 0; }
 .sc_innerpage_contentbx { width: 70%; }
 .profile-content section + section { margin-top: 45px; }
