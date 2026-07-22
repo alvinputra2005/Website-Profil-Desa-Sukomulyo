@@ -143,6 +143,30 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .quick-actions .btn-app > .fa { position: static; margin: 0; font-size: 18px; line-height: 1; }
 .required::after { content: " *"; color: #b23b30; }
 
+/* Pengelolaan artikel: pola dua kolom dan editor seperti modul artikel OpenSID. */
+.news-list-header { display: flex; align-items: center; gap: 7px; }
+.news-filters { display: grid; margin-bottom: 18px; padding: 13px; border: 1px solid var(--admin-border); background: #f8f9f6; grid-template-columns: minmax(260px, 1fr) 190px 220px; gap: 12px; }
+.news-filters .form-group { margin: 0; }
+.news-filters label { font-size: 12px; }
+.news-table > tbody > tr > td { vertical-align: middle; }
+.news-title { color: var(--admin-primary-dark); font-size: 15px; font-weight: 700; }
+.news-meta { margin: 3px 0 5px; color: var(--admin-muted); font-size: 11px; }
+.news-table p { margin: 0; color: #626c65; font-size: 12px; }
+.news-thumb, .news-thumb-placeholder { width: 68px; height: 52px; border-radius: 2px; object-fit: cover; }
+.news-thumb-placeholder { display: flex; align-items: center; justify-content: center; background: #e9ede6; color: #9ca59c; font-size: 20px; }
+.article-editor { border: 1px solid #bcc6b8; background: #fff; }
+.article-editor-toolbar { display: flex; min-height: 43px; padding: 5px; align-items: center; flex-wrap: wrap; gap: 3px; border-bottom: 1px solid #ccd3c8; background: #f7f8f5; }
+.article-editor-toolbar button { min-width: 32px; height: 31px; border: 1px solid transparent; border-radius: 2px; background: transparent; color: #26343a; }
+.article-editor-toolbar button:hover, .article-editor-toolbar button:focus { border-color: #bdc7b9; background: #e8ece5; outline: 0; }
+.article-editor-toolbar > span { width: 1px; height: 25px; margin: 0 4px; background: #d2d8cf; }
+.article-editor-surface { min-height: 430px; padding: 18px; overflow: auto; color: #252a31; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.65; outline: 0; }
+.article-editor-surface:empty::before { content: attr(data-placeholder); color: #9ba39c; pointer-events: none; }
+.featured-preview { display: flex; height: 190px; margin-bottom: 15px; align-items: center; justify-content: center; flex-direction: column; overflow: hidden; border: 1px dashed #b9c3b5; background: #f2f4ef; color: #8b968c; gap: 7px; }
+.featured-preview > i { font-size: 42px; }
+.featured-preview img { width: 100%; height: 100%; object-fit: cover; }
+#news-form .input-lg { height: 42px; font-size: 17px; }
+#news-form .box-header .btn + .btn { margin-left: 4px; }
+
 @media (min-width: 768px) {
     .sidebar-mini.sidebar-collapse .main-header .logo { width: 50px; padding: 0 8px; }
     .sidebar-mini.sidebar-collapse .main-header .navbar { margin-left: 50px; }
@@ -151,7 +175,7 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
     .sidebar-mini:not(.sidebar-mini-expand-feature).sidebar-collapse .sidebar-menu > li:hover > .treeview-menu { left: 50px; width: 230px; }
 }
 @media (max-width: 1199px) { .media-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 991px) { .dashboard-statistics { grid-template-columns: 1fr; } .statistic-bars { min-height: 0; } }
+@media (max-width: 991px) { .dashboard-statistics { grid-template-columns: 1fr; } .statistic-bars { min-height: 0; } .news-filters { grid-template-columns: 1fr 1fr; } .news-filters .form-group:first-child { grid-column: 1 / -1; } }
 @media (max-width: 767px) {
     .main-header .logo { width: 100%; height: 60px; text-align: center; }
     .main-header .logo .logo-lg { text-align: center; }
@@ -166,6 +190,9 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
     .box-header > .box-tools { position: static; margin-top: 10px; }
     .table-responsive { border: 0; }
     .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .news-filters { grid-template-columns: 1fr; }
+    .news-filters .form-group:first-child { grid-column: auto; }
+    .article-editor-surface { min-height: 330px; }
 }
 @media (max-width: 480px) {
     .media-grid, .dashboard-stats { grid-template-columns: 1fr; }

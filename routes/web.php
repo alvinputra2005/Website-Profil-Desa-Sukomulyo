@@ -41,6 +41,7 @@ Route::controller(SiteController::class)->group(function () {
     Route::get('/berita-desa/kategori/{category}', 'category')->name('berita-desa.category');
     Route::get('/berita-desa/arsip/{year?}', 'archive')->where('year', '[0-9]{4}')->name('berita-desa.archive');
     Route::get('/berita-desa/{slug}', 'article')->name('berita-desa.show');
+    Route::get('/berita/{slug}', 'article')->name('berita.legacy-show');
     Route::get('/pencarian-berita', 'search')->name('berita-desa.search');
 
     // Form kontak pendukung informasi publik

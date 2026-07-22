@@ -4,7 +4,7 @@ use App\Models\{Gallery, GalleryItem, IdmScore, MapFeature, MapLayer, Media, New
 
 return ['resources' => [
     'news' => ['model'=>News::class,'title'=>'Berita','ability'=>'manage-content','search'=>['title','slug','excerpt'],'columns'=>['title'=>'Judul','status'=>'Status','published_at'=>'Terbit'],'fields'=>[
-        'category_id'=>['label'=>'Kategori','type'=>'relation','model'=>NewsCategory::class,'display'=>'name','rules'=>'required|exists:news_categories,id'], 'title'=>['label'=>'Judul','rules'=>'required|string|max:255'],
+        'category_id'=>['label'=>'Kategori','type'=>'relation','model'=>NewsCategory::class,'display'=>'name','rules'=>'required|exists:news_categories,id'], 'title'=>['label'=>'Judul','rules'=>'required|string|min:5|max:255'],
         'slug'=>['label'=>'Slug','rules'=>'nullable|string|max:255|unique:news,slug,{id}'], 'excerpt'=>['label'=>'Ringkasan','type'=>'textarea','rules'=>'nullable|string|max:1000'], 'content'=>['label'=>'Isi berita','type'=>'editor','rules'=>'required|string|max:100000'],
         'featured_image_id'=>['label'=>'ID gambar utama','type'=>'number','rules'=>'nullable|exists:media,id'], 'status'=>['label'=>'Status','type'=>'select','options'=>['draft'=>'Draf','published'=>'Terbit','archived'=>'Arsip'],'rules'=>'required|in:draft,published,archived'],
         'published_at'=>['label'=>'Waktu terbit','type'=>'datetime-local','rules'=>'nullable|date'], 'seo_title'=>['label'=>'Judul SEO','rules'=>'nullable|string|max:255'], 'seo_description'=>['label'=>'Deskripsi SEO','type'=>'textarea','rules'=>'nullable|string|max:320'],
