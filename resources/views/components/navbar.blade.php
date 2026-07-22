@@ -45,7 +45,6 @@
                 <i class="fas fa-phone" aria-hidden="true"></i>
                 <span><span class="statictext">Telepon</span>{{ $site['phone'] }}</span>
             </div>
-            <a class="donatenow service-button" href="{{ route('informasi-publik-desa') }}">Layanan Desa</a>
         </div>
     </div>
 </header>

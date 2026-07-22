@@ -1,6 +1,35 @@
 <x-layouts.app description="Portal informasi resmi Pemerintah Desa Sukomulyo.">
     <x-hero-slider :articles="$articles" />
 
+    <section class="village-stats-section" aria-labelledby="village-stats-title" data-village-stats>
+        <div class="container village-stats-layout">
+            <div class="village-stats-intro">
+                <span class="section-kicker">Desa dalam Angka</span>
+                <h2 id="village-stats-title">Statistik Singkat Desa</h2>
+                <p>Ringkasan data kependudukan dan wilayah Desa Sukomulyo dalam satu tampilan.</p>
+                <a href="{{ route('data-desa-statistik') }}">Lihat data selengkapnya <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+
+            <div class="village-stats-grid">
+                @foreach ($villageStatistics as $statistic)
+                    <article class="village-stat-card">
+                        <span class="village-stat-icon"><i class="{{ $statistic['icon'] }}" aria-hidden="true"></i></span>
+                        <div>
+                            <p>{{ $statistic['label'] }}</p>
+                            <div class="village-stat-value">
+                                <strong data-stat-count="{{ $statistic['value'] }}">{{ number_format($statistic['value'], 0, ',', '.') }}</strong>
+                                <span>{{ $statistic['unit'] }}</span>
+                            </div>
+                            @isset($statistic['meta'])
+                                <small>{{ $statistic['meta'] }}</small>
+                            @endisset
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
     <section class="ourmission_wrapper">
         <div class="container">
             <span class="section-kicker">Jelajahi Desa</span>
