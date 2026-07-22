@@ -6,6 +6,7 @@
     <div class="box-header with-border news-list-header">
         <a href="{{ route('admin.resources.create','news') }}" class="btn btn-social btn-info btn-sm"><i class="fa fa-plus"></i> Tambah Artikel</a>
         <a href="{{ route('admin.resources.index','categories') }}" class="btn btn-default btn-sm"><i class="fa fa-tags"></i> Kelola Kategori</a>
+        <a href="{{ route('admin.news.trash') }}" class="btn btn-default btn-sm"><i class="fa fa-trash"></i> Tempat Sampah</a>
     </div>
     <div class="box-body">
         <form class="news-filters" method="get">

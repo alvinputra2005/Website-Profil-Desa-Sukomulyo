@@ -23,6 +23,10 @@ Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/activities',ActivityController::class)->name('activities.index');
     Route::get('/info-desa/{page}',[VillageContentController::class,'edit'])->name('village-content.edit');
     Route::put('/info-desa/{page}',[VillageContentController::class,'update'])->name('village-content.update');
+    Route::get('/news-trash',[CrudController::class,'trash'])->name('news.trash');
+    Route::patch('/news-trash/{id}/restore',[CrudController::class,'restore'])->name('news.restore');
+    Route::delete('/news-trash/{id}/force',[CrudController::class,'forceDelete'])->name('news.force-delete');
+    Route::delete('/news-trash',[CrudController::class,'emptyTrash'])->name('news.empty-trash');
     Route::get('/{resource}',[CrudController::class,'index'])->name('resources.index');
     Route::get('/{resource}/create',[CrudController::class,'create'])->name('resources.create');
     Route::post('/{resource}',[CrudController::class,'store'])->name('resources.store');

@@ -22,6 +22,6 @@
         <input type="file" data-image-input accept="image/jpeg,image/png,image/webp" hidden>
     </div>
     <div class="article-editor-status" data-editor-status hidden></div>
-    <div class="article-editor-surface" contenteditable="true" data-placeholder="{{ $placeholder }}">{!! $value !!}</div>
+    <div class="article-editor-surface" contenteditable="true" data-placeholder="{{ $placeholder }}">{!! app(\App\Services\HtmlSanitizer::class)->clean((string) $value) !!}</div>
     <textarea hidden id="{{ $name }}" name="{{ $name }}">{{ $value }}</textarea>
 </div>

@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\{News, NewsCategory, Redirect, Role, User};
+use App\Models\{Media, News, NewsCategory, Redirect, Role, User};
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminCmsTest extends TestCase
@@ -71,5 +73,47 @@ class AdminCmsTest extends TestCase
         foreach (['admin.media.index','admin.messages.index','admin.users.index','admin.activities.index'] as $route) {
             $this->get(route($route))->assertOk();
         }
+    }
+
+    public function test_blank_news_slugs_are_unique_and_existing_slug_is_preserved(): void
+    {
+        $admin=$this->user('super_admin');
+        $category=NewsCategory::create(['name'=>'Desa','slug'=>'desa']);
+        $payload=['category_id'=>$category->id,'title'=>'Musyawarah Desa','slug'=>'','content'=>'<p>Isi berita desa.</p>','status'=>'draft'];
+        $this->actingAs($admin)->post('/admin/news',$payload)->assertSessionHasNoErrors();
+        $this->post('/admin/news',$payload)->assertSessionHasNoErrors();
+        $this->assertSame(['musyawarah-desa','musyawarah-desa-2'],News::orderBy('id')->pluck('slug')->all());
+        $first=News::first();
+        $this->put('/admin/news/'.$first->id,array_merge($payload,['title'=>'Judul Baru']))->assertSessionHasNoErrors();
+        $this->assertSame('musyawarah-desa',$first->fresh()->slug);
+    }
+
+    public function test_draft_preview_works_without_published_news_and_editor_old_input_is_sanitized(): void
+    {
+        $admin=$this->user('super_admin');
+        $category=NewsCategory::create(['name'=>'Kegiatan','slug'=>'kegiatan']);
+        $draft=News::create(['category_id'=>$category->id,'title'=>'Draf Tunggal','slug'=>'draf-tunggal','content'=>'<p>Draf</p>','status'=>'draft','author_id'=>$admin->id]);
+        $this->actingAs($admin)->get('/berita-desa/'.$draft->slug)->assertOk()->assertSee('Draf Tunggal');
+        $this->from('/admin/news/create')->post('/admin/news',['title'=>'Pendek','content'=>'<img src=x onerror=alert(1)><script>alert(2)</script>'])->assertRedirect('/admin/news/create');
+        $this->withSession(['_old_input'=>['content'=>'<img src=x onerror=alert(1)><script>alert(2)</script>']])->get('/admin/news/create')->assertOk()->assertDontSee('<img src=x onerror=',false)->assertDontSee('<script>alert(2)',false);
+    }
+
+    public function test_images_are_optimized_inline_media_is_protected_and_news_can_be_restored(): void
+    {
+        Storage::fake('public');
+        $admin=$this->user('super_admin');
+        $this->actingAs($admin)->post('/admin/media',['file'=>UploadedFile::fake()->image('foto.jpg',2400,1800),'alt_text'=>'Kegiatan'])->assertSessionHasNoErrors();
+        $media=Media::firstOrFail();
+        $this->assertSame('webp',$media->extension);
+        $this->assertLessThanOrEqual(1920,max($media->width,$media->height));
+        Storage::disk('public')->assertExists($media->storage_path);
+        Storage::disk('public')->assertExists($media->thumbnail_path);
+        $category=NewsCategory::create(['name'=>'Berita','slug'=>'berita']);
+        $news=News::create(['category_id'=>$category->id,'title'=>'Dengan Gambar','slug'=>'dengan-gambar','content'=>'<p><img src="/storage/'.$media->storage_path.'"></p>','status'=>'draft','author_id'=>$admin->id]);
+        $this->delete('/admin/media/'.$media->id)->assertSessionHasErrors('media');
+        $this->delete('/admin/news/'.$news->id)->assertRedirect('/admin/news');
+        $this->get('/admin/news-trash')->assertOk()->assertSee('Dengan Gambar');
+        $this->patch('/admin/news-trash/'.$news->id.'/restore')->assertSessionHasNoErrors();
+        $this->assertNull($news->fresh()->deleted_at);
     }
 }

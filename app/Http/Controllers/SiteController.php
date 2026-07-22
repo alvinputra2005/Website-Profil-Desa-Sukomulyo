@@ -242,7 +242,8 @@ class SiteController extends Controller
     {
         $image = asset('assets/village-rice-fields.jpg');
 
-        if (Schema::hasTable('news') && News::published()->exists()) {
+        $hasArticles = Schema::hasTable('news') && ($includeUnpublished ? News::exists() : News::published()->exists());
+        if ($hasArticles) {
             $query=News::with(['category','featuredImage']);
             if(!$includeUnpublished)$query->published();
             return $query->latest('published_at')->get()->map(function (News $article) use ($image) {
