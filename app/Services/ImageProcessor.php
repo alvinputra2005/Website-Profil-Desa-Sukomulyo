@@ -9,8 +9,9 @@ use RuntimeException;
 
 class ImageProcessor
 {
-    public function store(UploadedFile $file, string $directory): array
+    public function store(UploadedFile $file, string $directory, ?string $disk = null): array
     {
+        $disk ??= config('filesystems.media_disk', 'public');
         [$source, $width, $height] = $this->open($file);
         $source = $this->orient($source, $file, $width, $height);
         $width = imagesx($source);
@@ -23,15 +24,15 @@ class ImageProcessor
         $name = Str::uuid().'.webp';
         $path = trim($directory, '/').'/'.$name;
         $thumbnailPath = trim($directory, '/').'/thumbnails/'.$name;
-        Storage::disk('public')->put($path, $this->encode($main, 82));
-        Storage::disk('public')->put($thumbnailPath, $this->encode($thumb, 76));
+        Storage::disk($disk)->put($path, $this->encode($main, 82));
+        Storage::disk($disk)->put($thumbnailPath, $this->encode($thumb, 76));
         $result = [
             'stored_name' => $name,
             'storage_path' => $path,
             'thumbnail_path' => $thumbnailPath,
             'mime_type' => 'image/webp',
             'extension' => 'webp',
-            'file_size' => Storage::disk('public')->size($path),
+            'file_size' => Storage::disk($disk)->size($path),
             'width' => imagesx($main),
             'height' => imagesy($main),
         ];
