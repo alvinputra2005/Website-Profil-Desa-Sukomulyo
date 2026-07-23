@@ -185,7 +185,7 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 
 /* Buku Pemerintah Desa: mengikuti kepadatan daftar dan form OpenSID administrasi umum. */
 .official-toolbar { display: flex; flex-wrap: wrap; gap: 6px; }
-.official-filters { display: grid; margin-bottom: 18px; padding: 13px; border: 1px solid var(--admin-border); background: #f8f9f6; grid-template-columns: minmax(250px, 1fr) 165px 205px 210px auto; align-items: end; gap: 10px; }
+.official-filters { display: grid; margin-bottom: 18px; padding: 13px; border: 1px solid var(--admin-border); background: #f8f9f6; grid-template-columns: minmax(250px, 1fr) 165px 210px auto; align-items: end; gap: 10px; }
 .official-filters .form-group { margin: 0; }
 .official-filters label { display: block; color: var(--admin-muted); font-size: 12px; font-weight: 600; }
 .official-filters .filter-action { white-space: nowrap; }

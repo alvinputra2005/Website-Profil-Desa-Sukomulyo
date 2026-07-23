@@ -40,7 +40,6 @@ class OfficialManagementTest extends TestCase
             'position' => 'Kepala Desa',
             'display_order' => 1,
             'is_active' => 1,
-            'attendance_enabled' => 1,
         ]);
 
         $response->assertSessionHasNoErrors();
@@ -80,7 +79,6 @@ class OfficialManagementTest extends TestCase
             'organization_color' => '#526b42',
             'display_order' => 2,
             'is_active' => 1,
-            'attendance_enabled' => 1,
             'facebook' => 'https://facebook.com/budi',
         ];
 
@@ -93,8 +91,6 @@ class OfficialManagementTest extends TestCase
             ->assertSee('SK/02/2026');
         $this->patch(route('admin.officials.toggle-status', $official))->assertSessionHasNoErrors();
         $this->assertFalse($official->fresh()->is_active);
-        $this->patch(route('admin.officials.toggle-attendance', $official))->assertSessionHasNoErrors();
-        $this->assertFalse($official->fresh()->attendance_enabled);
         $this->get(route('admin.officials.organization'))->assertOk();
         $this->get(route('admin.officials.print', ['status' => 'all']))->assertOk()->assertSee('Budi Santoso');
         $this->get(route('admin.officials.export'))

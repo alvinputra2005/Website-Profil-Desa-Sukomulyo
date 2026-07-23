@@ -40,7 +40,6 @@ Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/officials/export', [OfficialController::class, 'export'])->name('officials.export');
         Route::delete('/officials/bulk', [OfficialController::class, 'bulkDestroy'])->name('officials.bulk-destroy');
         Route::patch('/officials/{official}/status', [OfficialController::class, 'toggleStatus'])->name('officials.toggle-status');
-        Route::patch('/officials/{official}/attendance', [OfficialController::class, 'toggleAttendance'])->name('officials.toggle-attendance');
         Route::patch('/officials/{official}/move/{direction}', [OfficialController::class, 'move'])->where('direction', 'up|down')->name('officials.move');
         Route::resource('officials', OfficialController::class)->except('show');
     });

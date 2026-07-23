@@ -43,9 +43,6 @@ class OfficialController extends Controller
         if ($request->filled('status')) {
             $query->where('is_active', $request->query('status') === 'active');
         }
-        if ($request->filled('attendance')) {
-            $query->where('attendance_enabled', $request->query('attendance') === 'enabled');
-        }
         if ($request->filled('position')) {
             $query->where('position', $request->query('position'));
         }
@@ -63,7 +60,6 @@ class OfficialController extends Controller
         return view('admin.officials.form', $this->formData(new Official([
             'display_order' => (int) Official::max('display_order') + 1,
             'is_active' => true,
-            'attendance_enabled' => true,
             'organization_color' => '#526b42',
             'registered_at' => now()->toDateString(),
         ])));
@@ -74,7 +70,6 @@ class OfficialController extends Controller
         $this->authorizeModule();
         $data = $this->validated($request);
         $data['is_active'] = array_key_exists('is_active', $data) ? $data['is_active'] : true;
-        $data['attendance_enabled'] = array_key_exists('attendance_enabled', $data) ? $data['attendance_enabled'] : true;
         $official = DB::transaction(function () use ($request, $data) {
             $data = $this->syncResidentData($data);
             $data['photo_id'] = $this->storePhoto($request, $data);
@@ -142,16 +137,6 @@ class OfficialController extends Controller
         $this->logger->log('status_changed', 'perangkat-desa', $official, $old, $official->fresh()->toArray());
 
         return back()->with('success', 'Status perangkat desa berhasil diubah.');
-    }
-
-    public function toggleAttendance(Official $official): RedirectResponse
-    {
-        $this->authorizeModule();
-        $old = $official->toArray();
-        $official->update(['attendance_enabled' => ! $official->attendance_enabled]);
-        $this->logger->log('attendance_changed', 'perangkat-desa', $official, $old, $official->fresh()->toArray());
-
-        return back()->with('success', 'Status kehadiran perangkat desa berhasil diubah.');
     }
 
     public function move(Official $official, string $direction): RedirectResponse
@@ -285,7 +270,6 @@ class OfficialController extends Controller
             'biography' => ['nullable', 'string', 'max:5000'],
             'display_order' => ['required', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
-            'attendance_enabled' => ['nullable', 'boolean'],
             'can_sign_on_behalf' => ['nullable', 'boolean'],
             'can_sign_for' => ['nullable', 'boolean'],
             'phone' => ['nullable', 'string', 'max:25'],
@@ -307,7 +291,7 @@ class OfficialController extends Controller
             'youtube' => $data['youtube'] ?? null,
             'x' => $data['x'] ?? null,
         ]);
-        foreach (['is_acting', 'is_active', 'attendance_enabled', 'can_sign_on_behalf', 'can_sign_for'] as $field) {
+        foreach (['is_acting', 'is_active', 'can_sign_on_behalf', 'can_sign_for'] as $field) {
             $data[$field] = (bool) ($data[$field] ?? false);
         }
 

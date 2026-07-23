@@ -39,14 +39,6 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="official-attendance">Status Kehadiran</label>
-                <select id="official-attendance" name="attendance" class="form-control input-sm select2">
-                    <option value="">Semua Kehadiran</option>
-                    <option value="enabled" @selected(request('attendance') === 'enabled')>Kehadiran Aktif</option>
-                    <option value="disabled" @selected(request('attendance') === 'disabled')>Kehadiran Tidak Aktif</option>
-                </select>
-            </div>
-            <div class="form-group">
                 <label for="official-position">Jabatan</label>
                 <select id="official-position" name="position" class="form-control input-sm select2">
                     <option value="">Semua Jabatan</option>
@@ -103,10 +95,6 @@
                                 <form method="post" action="{{ route('admin.officials.toggle-status', $official) }}" data-confirm="Ubah status pegawai ini?">
                                     @csrf @method('patch')
                                     <button class="btn {{ $official->is_active ? 'btn-success' : 'btn-default' }} btn-xs" title="{{ $official->is_active ? 'Nonaktifkan pegawai' : 'Aktifkan pegawai' }}"><i class="fa {{ $official->is_active ? 'fa-unlock' : 'fa-lock' }}"></i></button>
-                                </form>
-                                <form method="post" action="{{ route('admin.officials.toggle-attendance', $official) }}" data-confirm="Ubah status kehadiran perangkat ini?">
-                                    @csrf @method('patch')
-                                    <button class="btn {{ $official->attendance_enabled ? 'btn-info' : 'btn-default' }} btn-xs" title="Status kehadiran"><i class="fa fa-clock-o"></i></button>
                                 </form>
                                 <form method="post" action="{{ route('admin.officials.destroy', $official) }}" data-confirm="Hapus data {{ $official->full_name }}?">
                                     @csrf @method('delete')

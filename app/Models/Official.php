@@ -14,7 +14,6 @@ class Official extends CmsModel
             'social_media' => 'array',
             'is_acting' => 'boolean',
             'is_active' => 'boolean',
-            'attendance_enabled' => 'boolean',
             'can_sign_on_behalf' => 'boolean',
             'can_sign_for' => 'boolean',
         ];

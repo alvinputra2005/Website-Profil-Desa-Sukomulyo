@@ -33,8 +33,7 @@ return new class extends Migration
             $table->smallInteger('organization_offset')->default(0)->after('organization_level');
             $table->string('organization_layout', 30)->nullable()->after('organization_offset');
             $table->string('organization_color', 7)->nullable()->after('organization_layout');
-            $table->boolean('attendance_enabled')->default(true)->after('is_active')->index();
-            $table->boolean('can_sign_on_behalf')->default(false)->after('attendance_enabled');
+            $table->boolean('can_sign_on_behalf')->default(false)->after('is_active');
             $table->boolean('can_sign_for')->default(false)->after('can_sign_on_behalf');
             $table->string('phone', 25)->nullable()->after('can_sign_for');
             $table->string('email', 150)->nullable()->after('phone');
@@ -53,7 +52,6 @@ return new class extends Migration
             $table->dropIndex(['village_employee_number']);
             $table->dropIndex(['nip']);
             $table->dropIndex(['sex']);
-            $table->dropIndex(['attendance_enabled']);
             $table->dropColumn([
                 'resident_id',
                 'title_prefix',
@@ -79,7 +77,6 @@ return new class extends Migration
                 'organization_offset',
                 'organization_layout',
                 'organization_color',
-                'attendance_enabled',
                 'can_sign_on_behalf',
                 'can_sign_for',
                 'phone',

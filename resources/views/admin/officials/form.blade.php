@@ -235,13 +235,6 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-4 control-label">Kehadiran</label>
-                        <div class="col-sm-7">
-                            <input type="hidden" name="attendance_enabled" value="0">
-                            <label class="checkbox-inline"><input type="checkbox" name="attendance_enabled" value="1" @checked(old('attendance_enabled', $official->exists ? $official->attendance_enabled : true))> Aktifkan pencatatan kehadiran</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
                         <label class="col-sm-4 control-label">Hak Penandatanganan</label>
                         <div class="col-sm-7">
                             <input type="hidden" name="can_sign_on_behalf" value="0"><label class="checkbox-inline"><input type="checkbox" name="can_sign_on_behalf" value="1" @checked(old('can_sign_on_behalf', $official->can_sign_on_behalf))> a.n. (atas nama)</label>
