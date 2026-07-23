@@ -9,15 +9,6 @@
 @endphp
 
 @section('content')
-    <div class="identity-summary-actions">
-        <a href="{{ route('admin.village-content.profile-edit') }}" class="btn btn-social btn-warning">
-            <i class="fa fa-edit"></i> Ubah Data Identitas Desa
-        </a>
-        <a href="{{ route('profile-desa') }}" target="_blank" rel="noopener" class="btn btn-social btn-info">
-            <i class="fa fa-globe"></i> Lihat Halaman Publik
-        </a>
-    </div>
-
     <div class="box box-info identity-summary">
         <div class="box-header with-border">
             <h3 class="box-title"><i class="fa fa-home"></i> Identitas Desa</h3>
@@ -33,6 +24,16 @@
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#identitas-umum" data-toggle="tab">Umum</a></li>
                     <li><a href="#identitas-profil" data-toggle="tab">Profil</a></li>
+                    <li class="identity-tabs-actions" role="presentation">
+                        <div class="identity-tabs-buttons">
+                            <a href="{{ route('admin.village-content.profile-edit') }}" class="btn btn-warning btn-sm">
+                                <i class="fa fa-edit"></i> Ubah Data Identitas Desa
+                            </a>
+                            <a href="{{ route('profile-desa') }}" target="_blank" rel="noopener" class="btn btn-info btn-sm">
+                                <i class="fa fa-globe"></i> Lihat Halaman Publik
+                            </a>
+                        </div>
+                    </li>
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane active" id="identitas-umum">

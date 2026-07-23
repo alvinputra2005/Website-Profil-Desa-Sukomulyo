@@ -12,7 +12,7 @@
 @section('title',$titles[$page])
 @section('page-description','Kelola informasi yang ditampilkan pada website desa')
 @section('content')
-<form method="post" enctype="multipart/form-data" action="{{ route('admin.village-content.update',$page) }}" data-dirty-form>
+<form method="post" enctype="multipart/form-data" action="{{ route('admin.village-content.update',$page) }}" class="village-content-form village-content-{{ $page }}-form" data-dirty-form>
 @csrf @method('put')
 @if($page==='profile')
 <div class="callout callout-info">
