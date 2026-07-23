@@ -46,7 +46,10 @@ class DashboardController extends Controller
                 ['label' => 'Berita', 'value' => News::count(), 'icon' => 'fa-newspaper-o', 'color' => 'bg-red'],
             ],
             'messages' => ContactMessage::latest()->limit(5)->get(),
-            'activities' => ActivityLog::with('user')->latest('created_at')->limit(8)->get(),
+            'activities' => ActivityLog::with('user')
+                ->latest('created_at')
+                ->paginate(3, ['*'], 'activities_page')
+                ->withQueryString(),
             'statisticPanels' => [
                 [
                     'title' => 'Statistik Penduduk',

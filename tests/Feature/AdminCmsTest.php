@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Media, News, NewsCategory, Redirect, Role, User};
+use App\Models\{ActivityLog, Media, News, NewsCategory, Redirect, Role, User};
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -22,6 +22,34 @@ class AdminCmsTest extends TestCase
     {
         $this->get('/admin')->assertRedirect('/admin/login');
         $this->actingAs($this->user('super_admin'))->get('/admin')->assertOk()->assertSee('OpenSID');
+    }
+
+    public function test_dashboard_paginates_latest_activities_three_at_a_time(): void
+    {
+        $admin = $this->user('super_admin');
+
+        foreach (range(1, 4) as $number) {
+            ActivityLog::create([
+                'user_id' => $admin->id,
+                'action' => 'test',
+                'module' => 'dashboard',
+                'description' => 'Aktivitas '.$number,
+                'created_at' => now()->addSeconds($number),
+            ]);
+        }
+
+        $this->actingAs($admin)
+            ->get('/admin')
+            ->assertOk()
+            ->assertSee('Aktivitas 4')
+            ->assertSee('Aktivitas 2')
+            ->assertDontSee('Aktivitas 1')
+            ->assertSee('activities_page=2', false);
+
+        $this->get('/admin?activities_page=2')
+            ->assertOk()
+            ->assertSee('Aktivitas 1')
+            ->assertDontSee('Aktivitas 4');
     }
 
     public function test_roles_are_restricted_to_their_domain(): void
