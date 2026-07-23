@@ -8,7 +8,11 @@ import tailwindcss from '@tailwindcss/vite';
 // own loopback interface and all Vite assets will fail with ECONNREFUSED.
 const lanHost = Object.values(os.networkInterfaces())
     .flat()
-    .find(({ family, internal }) => (family === 'IPv4' || family === 4) && !internal)
+    .find(({ address, family, internal }) => (
+        (family === 'IPv4' || family === 4)
+        && !internal
+        && !address.startsWith('169.254.')
+    ))
     ?.address;
 const devServerHost = process.env.VITE_DEV_SERVER_HOST || lanHost || 'localhost';
 

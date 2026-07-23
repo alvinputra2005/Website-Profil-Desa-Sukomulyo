@@ -61,7 +61,6 @@
             <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-file-text-o"></i> Deskripsi Profil Desa</h3></div>
             <div class="box-body">
                 <x-admin.village-input name="profile_content" label="Deskripsi Profil Desa" type="editor" :value="$sections->get('profile')?->content ?? ''" required />
-                <x-admin.image-picker name="profile_image_id" label="Gambar Profil Desa" :media="$media" :selected="$sections->get('profile')?->image" />
             </div>
         </div>
     </div>
@@ -126,6 +125,13 @@
             <div class="box-footer">
                 <button type="reset" class="btn btn-warning"><i class="fa fa-refresh"></i> Reset</button>
                 <button class="btn btn-social btn-info pull-right"><i class="fa fa-save"></i> Simpan Perubahan</button>
+            </div>
+        </div>
+
+        <div class="box box-info">
+            <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-image"></i> Gambar Profil Desa</h3></div>
+            <div class="box-body">
+                <x-admin.image-picker name="profile_image_id" label="Gambar Profil Desa" :media="$media" :selected="$sections->get('profile')?->image" :show-label="false" />
             </div>
         </div>
     </div>
