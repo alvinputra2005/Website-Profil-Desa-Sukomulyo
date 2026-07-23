@@ -43,7 +43,12 @@ class SiteController extends Controller
 
     public function profile(): View
     {
-        return $this->render('pages.profile', ['profileSections' => Schema::hasTable('village_profile_sections') ? VillageProfileSection::with('image')->whereIn('section_key', ['profile', 'history', 'vision', 'mission'])->where('status', 'published')->orderBy('display_order')->get() : collect()]);
+        return $this->render('pages.profile', [
+            'profileSections' => Schema::hasTable('village_profile_sections')
+                ? VillageProfileSection::with('image')->whereIn('section_key', ['profile', 'history', 'vision', 'mission'])->where('status', 'published')->orderBy('display_order')->get()
+                : collect(),
+            'identityGroups' => $this->villageIdentity(),
+        ]);
     }
 
     public function statistics(PopulationStatisticsService $populationStatistics): View
@@ -279,6 +284,65 @@ class SiteController extends Controller
             'articles' => $articles,
             'categories' => collect($articles)->unique('category_slug')->values()->all(),
             'archiveYears' => collect($articles)->pluck('year')->unique()->values()->all(),
+        ];
+    }
+
+    private function villageIdentity(): array
+    {
+        $settings = Schema::hasTable('settings')
+            ? Setting::whereIn('key', [
+                'site.name', 'village.code', 'village.bps_code', 'village.postal_code',
+                'site.address', 'site.email', 'site.phone', 'village.mobile', 'site.url',
+                'district.name', 'district.code', 'district.head_name', 'district.head_nip',
+                'regency.name', 'regency.code', 'province.name', 'province.code',
+            ])->pluck('value', 'key')
+            : collect();
+
+        $value = fn (string $key, string $fallback = ''): string => (string) ($settings->get($key) ?: $fallback);
+        $villageHead = Schema::hasTable('officials')
+            ? Official::where('position', 'Kepala Desa')->where('is_active', true)->orderBy('display_order')->first()
+            : null;
+
+        return [
+            [
+                'title' => 'Desa',
+                'rows' => [
+                    ['label' => 'Nama Desa', 'value' => $value('site.name', 'Desa Sukomulyo')],
+                    ['label' => 'Kode Desa', 'value' => $value('village.code')],
+                    ['label' => 'Kode BPS Desa', 'value' => $value('village.bps_code')],
+                    ['label' => 'Kode Pos Desa', 'value' => $value('village.postal_code')],
+                    ['label' => 'Nama Kepala Desa', 'value' => $villageHead?->full_name ?? ''],
+                    ['label' => 'NIP Kepala Desa', 'value' => $villageHead?->nip ?? ''],
+                    ['label' => 'Alamat Kantor Desa', 'value' => $value('site.address', 'Kantor Desa Sukomulyo, Indonesia')],
+                    ['label' => 'E-Mail Desa', 'value' => $value('site.email', 'pemdes@sukomulyo.desa.id'), 'type' => 'email'],
+                    ['label' => 'Nomor Telepon Desa', 'value' => $value('site.phone')],
+                    ['label' => 'Nomor Ponsel Desa', 'value' => $value('village.mobile')],
+                    ['label' => 'Website Desa', 'value' => $value('site.url'), 'type' => 'url'],
+                ],
+            ],
+            [
+                'title' => 'Kecamatan',
+                'rows' => [
+                    ['label' => 'Nama Kecamatan', 'value' => $value('district.name')],
+                    ['label' => 'Kode Kecamatan', 'value' => $value('district.code')],
+                    ['label' => 'Nama Camat', 'value' => $value('district.head_name')],
+                    ['label' => 'NIP Camat', 'value' => $value('district.head_nip')],
+                ],
+            ],
+            [
+                'title' => 'Kabupaten',
+                'rows' => [
+                    ['label' => 'Nama Kabupaten', 'value' => $value('regency.name')],
+                    ['label' => 'Kode Kabupaten', 'value' => $value('regency.code')],
+                ],
+            ],
+            [
+                'title' => 'Provinsi',
+                'rows' => [
+                    ['label' => 'Nama Provinsi', 'value' => $value('province.name')],
+                    ['label' => 'Kode Provinsi', 'value' => $value('province.code')],
+                ],
+            ],
         ];
     }
 

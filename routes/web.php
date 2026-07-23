@@ -32,6 +32,8 @@ Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('messages',ContactMessageController::class)->only(['index','show','destroy']);
     Route::resource('users',UserController::class)->except(['show','destroy']);
     Route::get('/activities',ActivityController::class)->name('activities.index');
+    Route::get('/info-desa/profile',[VillageContentController::class,'showProfile'])->name('village-content.profile');
+    Route::get('/info-desa/profile/edit',[VillageContentController::class,'editProfile'])->name('village-content.profile-edit');
     Route::get('/info-desa/{page}',[VillageContentController::class,'edit'])->name('village-content.edit');
     Route::put('/info-desa/{page}',[VillageContentController::class,'update'])->name('village-content.update');
     Route::middleware('can:manage-content')->group(function () {

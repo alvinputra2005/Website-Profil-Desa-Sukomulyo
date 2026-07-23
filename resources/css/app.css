@@ -221,6 +221,8 @@ blockquote { border-left-color: var(--primary); }
 .info-table { border-collapse: collapse; }
 .info-table th, .info-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); text-align: left; }
 .info-table th { width: 32%; color: var(--ink); }
+.identity-table { width: 100%; }
+.identity-table .identity-group th { width: auto; padding: 11px 16px; border-bottom-color: #7ddbd7; background: #a5efec; color: #122b2a; font-size: 14px; text-transform: uppercase; }
 .content-intro { max-width: 720px; margin: 0 auto 45px; text-align: center; }
 .official-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .official-card { display: flex; padding: 24px; align-items: center; gap: 16px; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 8px 25px rgba(35,40,48,.05); }

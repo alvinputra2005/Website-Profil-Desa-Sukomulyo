@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\{ActivityLog, Gallery, GalleryItem, Media, News, NewsCategory, Official, Redirect, Role, User, VillageProfileSection};
+use App\Models\{ActivityLog, Gallery, GalleryItem, Media, News, NewsCategory, Official, Redirect, Role, Setting, User, VillageProfileSection};
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -206,5 +206,76 @@ class AdminCmsTest extends TestCase
             ->assertOk()
             ->assertSee('name="image_upload"', false)
             ->assertSee('Dokumentasi sejarah desa');
+    }
+
+    public function test_village_identity_and_profile_are_managed_in_one_form_and_shown_publicly(): void
+    {
+        $admin = $this->user('super_admin');
+        Official::create([
+            'name' => 'Siti Aminah',
+            'position' => 'Kepala Desa',
+            'nip' => '198001012010012001',
+            'display_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/info-desa/profile')
+            ->assertOk()
+            ->assertSee('Identitas Desa')
+            ->assertSee('Ubah Data Identitas Desa')
+            ->assertSee('Umum')
+            ->assertSee('Profil')
+            ->assertSee('Siti Aminah')
+            ->assertSee('198001012010012001');
+
+        $this->get('/admin/info-desa/profile/edit')
+            ->assertOk()
+            ->assertSee('name="village_code"', false)
+            ->assertSee('name="district_head_name"', false)
+            ->assertSee('name="profile_content"', false)
+            ->assertSee('Siti Aminah')
+            ->assertSee('198001012010012001');
+
+        $response = $this->put('/admin/info-desa/profile', [
+            'site_name' => 'Desa Sukomulyo',
+            'tagline' => 'Desa maju dan melayani',
+            'village_code' => '35.25.04.2008',
+            'village_bps_code' => '3525042008',
+            'postal_code' => '61152',
+            'address' => 'Jalan Raya Sukomulyo Nomor 1',
+            'email' => 'pemdes@sukomulyo.desa.id',
+            'phone' => '(031) 123456',
+            'mobile' => '+62 812-3456-7890',
+            'website' => 'https://sukomulyo.desa.id',
+            'district_name' => 'Kecamatan Contoh',
+            'district_code' => '35.25.04',
+            'district_head_name' => 'Budi Santoso',
+            'district_head_nip' => '197501012005011001',
+            'regency_name' => 'Kabupaten Contoh',
+            'regency_code' => '35.25',
+            'province_name' => 'Jawa Timur',
+            'province_code' => '35',
+            'profile_content' => '<p>Profil desa yang diperbarui.</p><script>alert(1)</script>',
+            'status' => 'published',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect(route('admin.village-content.profile'));
+        $this->assertSame('35.25.04.2008', Setting::where('key', 'village.code')->value('value'));
+        $this->assertSame('Kecamatan Contoh', Setting::where('key', 'district.name')->value('value'));
+        $this->assertSame('Jawa Timur', Setting::where('key', 'province.name')->value('value'));
+
+        $profile = VillageProfileSection::where('section_key', 'profile')->firstOrFail();
+        $this->assertStringContainsString('Profil desa yang diperbarui.', $profile->content);
+        $this->assertStringNotContainsString('<script', $profile->content);
+
+        $this->get('/profile-desa')
+            ->assertOk()
+            ->assertSee('Identitas Desa')
+            ->assertSee('35.25.04.2008')
+            ->assertSee('Kecamatan Contoh')
+            ->assertSee('Siti Aminah')
+            ->assertSee('Profil desa yang diperbarui.');
     }
 }

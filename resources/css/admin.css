@@ -186,6 +186,27 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .quick-actions .btn-app > .fa { position: static; margin: 0; font-size: 18px; line-height: 1; }
 .required::after { content: " *"; color: #b23b30; }
 
+/* Ringkasan Identitas Desa mengikuti alur halaman /identitas_desa OpenSID. */
+.identity-summary-actions { display: flex; flex-wrap: wrap; margin-bottom: 15px; gap: 8px; }
+.identity-summary-actions .btn { margin: 0; }
+.identity-hero { display: flex; min-height: 270px; padding: 28px 20px; align-items: center; justify-content: center; flex-direction: column; background-position: center; background-size: cover; color: #fff; text-align: center; }
+.identity-hero-logo { width: 92px; height: 92px; margin-bottom: 15px; padding: 5px; border-radius: 50%; background: rgba(255,255,255,.94); box-shadow: 0 2px 8px rgba(0,0,0,.22); object-fit: contain; }
+.identity-hero h3 { margin: 0 0 7px; color: #fff; font-size: 24px; font-weight: 700; text-shadow: 1px 2px 3px rgba(0,0,0,.65); }
+.identity-hero p { margin: 0; color: #fff; font-size: 14px; font-weight: 600; text-shadow: 1px 2px 3px rgba(0,0,0,.65); }
+.identity-tabs { margin-top: 20px; margin-bottom: 0; }
+.identity-table { margin-bottom: 0; font-size: 13px; }
+.identity-table > tbody > tr > td, .identity-table > tbody > tr > th { vertical-align: middle; }
+.identity-table-label { width: 300px; }
+.identity-table-separator { width: 1px; color: var(--admin-muted); text-align: center; }
+.identity-table-section { background: #eef5e9 !important; color: var(--admin-primary-dark) !important; letter-spacing: .3px; }
+.identity-profile-preview { padding: 8px 4px 4px; line-height: 1.7; }
+.identity-profile-preview h3 { margin-top: 0; color: var(--admin-primary-dark); }
+.identity-profile-preview img { display: block; max-width: 100%; max-height: 360px; margin: 0 0 18px; object-fit: contain; }
+@media (max-width: 767px) {
+    .identity-table-label { width: 42%; }
+    .identity-hero { min-height: 230px; }
+}
+
 /* Modul kependudukan: tabel padat, filter jelas, dan formulir bertahap. */
 .population-filters { display: grid; margin-bottom: 18px; padding: 13px; border: 1px solid var(--admin-border); background: #f8f9f6; grid-template-columns: minmax(240px, 1fr) 180px 180px minmax(170px, auto); align-items: end; gap: 12px; }
 .population-filters-compact { grid-template-columns: minmax(260px, 1fr) 220px minmax(170px, auto); }
