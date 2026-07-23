@@ -13,13 +13,6 @@ class SiteController extends Controller
     public function home(): View
     {
         return $this->render('pages.home', [
-            'missions' => [
-                ['icon' => 'fas fa-home', 'title' => 'Profile Desa', 'route' => 'profile-desa'],
-                ['icon' => 'fas fa-chart-bar', 'title' => 'Data & Statistik', 'route' => 'data-desa-statistik'],
-                ['icon' => 'fas fa-file-alt', 'title' => 'Informasi Publik', 'route' => 'informasi-publik-desa'],
-                ['icon' => 'fas fa-newspaper', 'title' => 'Berita Desa', 'route' => 'berita-desa.index'],
-                ['icon' => 'fas fa-map-marked-alt', 'title' => 'Peta Desa', 'route' => 'peta-desa'],
-            ],
             'villageStatistics' => [
                 ['icon' => 'fas fa-users', 'value' => 2150, 'unit' => 'jiwa', 'label' => 'Jumlah Penduduk'],
                 ['icon' => 'fas fa-home', 'value' => 720, 'unit' => 'KK', 'label' => 'Kepala Keluarga'],
@@ -71,7 +64,7 @@ class SiteController extends Controller
                     ],
                 ],
             ],
-            'featuredPotentials' => array_slice($this->potentialsData(), 0, 2),
+            'galleryPhotos' => array_slice($this->galleryPhotos(), 0, 4),
         ]);
     }
 
@@ -223,18 +216,7 @@ class SiteController extends Controller
 
     public function gallery(): View
     {
-        $image = asset('assets/village-rice-fields.jpg');
-
-        return $this->render('pages.gallery', [
-            'photos' => [
-                ['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa.'],
-                ['src' => $image, 'title' => 'Kerja Bakti Warga', 'caption' => 'Gotong royong menjaga lingkungan tetap bersih.'],
-                ['src' => $image, 'title' => 'Pelatihan UMKM', 'caption' => 'Peningkatan kapasitas pelaku usaha lokal.'],
-                ['src' => $image, 'title' => 'Kegiatan Posyandu', 'caption' => 'Pelayanan kesehatan rutin untuk ibu dan anak.'],
-                ['src' => $image, 'title' => 'Panen Bersama', 'caption' => 'Dokumentasi potensi pertanian Desa Sukomulyo.'],
-                ['src' => $image, 'title' => 'Pentas Seni Desa', 'caption' => 'Ruang ekspresi seni dan budaya masyarakat.'],
-            ],
-        ]);
+        return $this->render('pages.gallery', ['photos' => $this->galleryPhotos()]);
     }
 
     public function contact(): View
@@ -361,6 +343,20 @@ class SiteController extends Controller
                 ],
                 'tags' => ['posyandu', 'kesehatan'],
             ],
+        ];
+    }
+
+    private function galleryPhotos(): array
+    {
+        $image = asset('assets/village-rice-fields.jpg');
+
+        return [
+            ['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa.'],
+            ['src' => $image, 'title' => 'Kerja Bakti Warga', 'caption' => 'Gotong royong menjaga lingkungan tetap bersih.'],
+            ['src' => $image, 'title' => 'Pelatihan UMKM', 'caption' => 'Peningkatan kapasitas pelaku usaha lokal.'],
+            ['src' => $image, 'title' => 'Kegiatan Posyandu', 'caption' => 'Pelayanan kesehatan rutin untuk ibu dan anak.'],
+            ['src' => $image, 'title' => 'Panen Bersama', 'caption' => 'Dokumentasi potensi pertanian Desa Sukomulyo.'],
+            ['src' => $image, 'title' => 'Pentas Seni Desa', 'caption' => 'Ruang ekspresi seni dan budaya masyarakat.'],
         ];
     }
 

@@ -17,6 +17,7 @@ class SitePagesTest extends TestCase
             route('data-desa-statistik') => 'Data Desa/Statistik',
             route('informasi-publik-desa') => 'Informasi Publik Desa',
             route('peta-desa') => 'Peta Desa',
+            route('galeri-desa') => 'Galeri Desa',
             route('berita-desa.index') => 'Berita Desa',
             route('berita-desa.category', 'pemerintahan') => 'Kategori: Pemerintahan',
             route('berita-desa.archive', '2026') => 'Arsip Berita 2026',
@@ -47,7 +48,7 @@ class SitePagesTest extends TestCase
             ->assertOk()
             ->assertSee('Laki-laki')
             ->assertSee('Perempuan')
-            ->assertSee('TRANSPARANSI APBDES')
+            ->assertSee('Transparansi APBDes')
             ->assertSee('Pendapatan APBDes 2026')
             ->assertSee('Belanja APBDes 2026')
             ->assertSee('Realisasi APBDes 2026')
@@ -57,6 +58,23 @@ class SitePagesTest extends TestCase
             ->assertSee('Total Pendapatan APBDes 2026')
             ->assertSee('Total Penggunaan Belanja APBDes 2026')
             ->assertSee('Total Realisasi APBDes 2026');
+    }
+
+    public function test_homepage_shows_four_news_four_gallery_items_and_village_map(): void
+    {
+        $response = $this->get(route('beranda'))
+            ->assertOk()
+            ->assertSee('Berita Terbaru')
+            ->assertSee('Galeri Desa')
+            ->assertSee('Peta Desa Sukomulyo')
+            ->assertSee(route('berita-desa.index'), false)
+            ->assertSee(route('galeri-desa'), false)
+            ->assertSee('https://www.google.com/maps?q=Desa%20Sukomulyo&output=embed', false)
+            ->assertDontSee('data-home-location-map', false)
+            ->assertDontSee('router.project-osrm.org', false);
+
+        $this->assertSame(4, substr_count($response->getContent(), '<article class="article-card">'));
+        $this->assertSame(4, substr_count($response->getContent(), 'data-gallery-item'));
     }
 
     public function test_budget_history_shows_ten_years_of_dummy_data(): void

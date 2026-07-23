@@ -11,6 +11,7 @@ Route::controller(SiteController::class)->group(function () {
     Route::get('/transparansi-apbdes', 'budgetHistory')->name('transparansi-apbdes');
     Route::get('/informasi-publik-desa', 'publicInformation')->name('informasi-publik-desa');
     Route::get('/peta-desa', 'map')->name('peta-desa');
+    Route::get('/galeri-desa', 'gallery')->name('galeri-desa');
 
     // Berita desa
     Route::get('/berita-desa', 'news')->name('berita-desa.index');

@@ -41,14 +41,12 @@
     <section id="about_panel">
         <div class="container about-grid">
             <div class="aboutus_contentcol">
-                <span class="section-kicker">Tentang Kami</span>
                 <h2>Mengenal Desa Sukomulyo</h2>
-                <p>Desa Sukomulyo tumbuh melalui semangat gotong royong, pelayanan publik yang terbuka, serta pengembangan potensi masyarakat secara berkelanjutan.</p>
-                <p>Website ini menjadi ruang informasi bersama agar warga lebih mudah mengetahui program, kegiatan, dan layanan pemerintah desa.</p>
-                <a class="learnmore" href="{{ route('profile-desa') }}">Baca Profile Desa</a>
+                <p>Desa Sukomulyo tumbuh melalui semangat gotong royong yang kuat, pelayanan publik yang terbuka dan responsif, serta pengembangan potensi masyarakat secara berkelanjutan. Dengan dukungan warga dan pemerintah desa, Sukomulyo terus berupaya mewujudkan lingkungan yang maju, mandiri, nyaman, dan sejahtera bagi seluruh masyarakat.</p>
+                <a class="learnmore" href="{{ route('profile-desa') }}">Lihat Profile Desa <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </div>
             <div class="aboutus_thumbox">
-                <img src="{{ asset('assets/village-rice-fields.jpg') }}" alt="Persawahan dan permukiman desa di Indonesia">
+                <img src="{{ asset('assets/village-rice-fields.jpg') }}" alt="Hamparan persawahan hijau dengan latar pegunungan saat matahari terbenam">
             </div>
         </div>
     </section>
@@ -56,8 +54,9 @@
 
     <section class="budget-section" aria-labelledby="budget-title" data-budget-section>
         <div class="container">
-            <header class="budget-heading">
-                <h2 id="budget-title">TRANSPARANSI APBDES</h2>
+            <header class="home-section-heading budget-heading">
+                <h2 id="budget-title">Transparansi APBDes</h2>
+                <a class="home-section-link" href="{{ route('transparansi-apbdes') }}">Lihat selengkapnya <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </header>
 
             <div class="budget-grid">
@@ -98,58 +97,85 @@
                 @endforeach
             </div>
 
-            <div class="section-action budget-section-action">
-                <a class="button" href="{{ route('transparansi-apbdes') }}">Lihat selengkapnya</a>
-            </div>
-        </div>
-    </section>
-
-    <section class="ourmission_wrapper">
-        <div class="container">
-            <span class="section-kicker">Jelajahi Desa</span>
-            <h2 class="section-title">Informasi dan Layanan Desa</h2>
-            <p class="shortdesc">Akses cepat ke informasi pemerintahan, layanan publik, potensi, berita, dan dokumentasi kegiatan Desa Sukomulyo.</p>
-            <div class="mission-grid">
-                @foreach ($missions as $mission)
-                    <a class="mission-card" href="{{ route($mission['route']) }}">
-                        <span class="mission-icon"><i class="{{ $mission['icon'] }}" aria-hidden="true"></i></span>
-                        <h3>{{ $mission['title'] }}</h3>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <section id="fivebx_services_panel">
-        <div class="container">
-            <span class="section-kicker">Unggulan</span>
-            <h2 class="section-title">Potensi Desa</h2>
-            <div class="potential-feature-grid">
-                @foreach ($featuredPotentials as $potential)
-                    <article class="potential-feature">
-                        <div class="potential-feature-content">
-                            <i class="{{ $potential['icon'] }}" aria-hidden="true"></i>
-                            <h3>{{ $potential['title'] }}</h3>
-                            <p>{{ $potential['description'] }}</p>
-                            <a class="pagereadmore" href="{{ route('data-desa-statistik') }}">Lihat Data Desa</a>
-                        </div>
-                        <img src="{{ $potential['image'] }}" alt="{{ $potential['title'] }}">
-                    </article>
-                @endforeach
-            </div>
         </div>
     </section>
 
     <section class="latest-news-section">
         <div class="container">
-            <span class="section-kicker">Informasi Terkini</span>
-            <h2 class="section-title">Berita Terbaru</h2>
+            <header class="home-section-heading">
+                <div>
+                    <h2 class="section-title">Berita Terbaru</h2>
+                </div>
+                <a class="home-section-link" href="{{ route('berita-desa.index') }}">Lihat selengkapnya <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            </header>
             <div class="latest-news-grid">
-                @foreach (array_slice($articles, 0, 3) as $article)
+                @foreach (array_slice($articles, 0, 4) as $article)
                     <x-article-card :article="$article" />
                 @endforeach
             </div>
-            <div class="section-action"><a class="button" href="{{ route('berita-desa.index') }}">Lihat Semua Berita</a></div>
         </div>
     </section>
+
+    <section class="home-gallery-section" aria-labelledby="home-gallery-title">
+        <div class="container">
+            <header class="home-section-heading">
+                <div>
+                    <h2 class="section-title" id="home-gallery-title">Galeri Desa</h2>
+                </div>
+                <a class="home-section-link" href="{{ route('galeri-desa') }}">Lihat selengkapnya <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            </header>
+
+            <div class="home-gallery-grid">
+                @foreach ($galleryPhotos as $photo)
+                    <button class="gallery-item" type="button" data-gallery-item data-image="{{ $photo['src'] }}" data-title="{{ $photo['title'] }}" data-caption="{{ $photo['caption'] }}">
+                        <img src="{{ $photo['src'] }}" alt="{{ $photo['title'] }}" loading="lazy" decoding="async">
+                        <span class="gallery-overlay"><i class="fas fa-search-plus" aria-hidden="true"></i><strong>{{ $photo['title'] }}</strong></span>
+                    </button>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="home-map-section" aria-labelledby="home-map-title">
+        <div class="container">
+            <header class="home-section-heading">
+                <div>
+                    <h2 class="section-title" id="home-map-title">Peta Desa Sukomulyo</h2>
+                </div>
+            </header>
+
+            <div class="map-layout">
+                <div class="map-frame">
+                    <iframe
+                        src="https://www.google.com/maps?q=Desa%20Sukomulyo&output=embed"
+                        title="Peta lokasi Desa Sukomulyo"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+
+                <aside class="map-information">
+                    <span class="section-kicker">Lokasi Desa</span>
+                    <h2>{{ $site['name'] }}</h2>
+                    <p>Peta membantu masyarakat menemukan kantor desa dan mengenali posisi wilayah Desa Sukomulyo.</p>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt" aria-hidden="true"></i><span><strong>Alamat Kantor Desa</strong>{{ $site['address'] }}</span></li>
+                        <li><i class="fas fa-phone" aria-hidden="true"></i><span><strong>Telepon</strong>{{ $site['phone'] }}</span></li>
+                        <li><i class="fas fa-envelope" aria-hidden="true"></i><span><strong>Email</strong>{{ $site['email'] }}</span></li>
+                    </ul>
+                    <a class="learnmore" href="https://www.google.com/maps/search/?api=1&query=Desa+Sukomulyo" target="_blank" rel="noopener noreferrer">Buka di Google Maps</a>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <dialog class="gallery-dialog" data-gallery-dialog aria-labelledby="gallery-dialog-title">
+        <button class="dialog-close" type="button" data-gallery-close aria-label="Tutup galeri"><i class="fas fa-times" aria-hidden="true"></i></button>
+        <img data-gallery-image src="" alt="">
+        <div class="dialog-caption">
+            <h2 id="gallery-dialog-title" data-gallery-title></h2>
+            <p data-gallery-caption></p>
+        </div>
+    </dialog>
 </x-layouts.app>
