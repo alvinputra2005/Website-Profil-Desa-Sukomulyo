@@ -3,7 +3,7 @@
 @section('page-description','Laporan kependudukan bulanan')
 @section('content')
 <div class="box box-info population-report">
-    <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-file-text"></i> Laporan {{ $start->translatedFormat('F Y') }}</h3><div class="box-tools"><a href="{{ route('admin.population.report.export',['year'=>$year,'month'=>$month]) }}" class="btn btn-success btn-sm"><i class="fa fa-file-excel-o"></i> Unduh CSV</a> <button onclick="window.print()" class="btn btn-default btn-sm"><i class="fa fa-print"></i> Cetak</button></div></div>
+    <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-file-text"></i> Laporan {{ $start->translatedFormat('F Y') }}</h3><div class="box-tools"><a href="{{ route('admin.population.report.export',['year'=>$year,'month'=>$month]) }}" class="btn btn-success btn-sm" data-no-ajax><i class="fa fa-file-excel-o"></i> Unduh CSV</a> <button onclick="window.print()" class="btn btn-default btn-sm"><i class="fa fa-print"></i> Cetak</button></div></div>
     <div class="box-body">
         <form method="get" class="population-period-filter">
             <div><label>Bulan</label><select name="month" class="form-control">@foreach(range(1,12) as $number)<option value="{{ $number }}" @selected($month===$number)>{{ \Carbon\Carbon::create(null,$number)->translatedFormat('F') }}</option>@endforeach</select></div>

@@ -1,13 +1,128 @@
-document.addEventListener('DOMContentLoaded',()=>{
+import { initAjaxNavigation } from './ajax';
+
+const initAdminPage = () => {
   if(window.jQuery){const $=window.jQuery;
     const saved=localStorage.getItem('sidebar'); if(saved==='collapsed') document.body.classList.add('sidebar-collapse');
     $('.sidebar-toggle').on('click',()=>setTimeout(()=>localStorage.setItem('sidebar',document.body.classList.contains('sidebar-collapse')?'collapsed':'expanded'),0));
     $('#cari-menu').on('input',function(){const term=this.value.toLowerCase().trim();$('.sidebar-menu>li:not(.header)').each(function(){const $item=$(this),matches=$item.text().toLowerCase().includes(term);$item.toggle(matches);if(term&&matches)$item.addClass('menu-open').children('.treeview-menu').show();else if(!term&&!$item.hasClass('active'))$item.removeClass('menu-open').children('.treeview-menu').hide()})});
     $('.select2').select2({width:'100%'}); $('[data-toggle="tooltip"]').tooltip();
+    if($.fn.tree)$('[data-widget="tree"]').tree();
+    if($.fn.boxWidget)$('[data-widget="collapse"]').closest('.box').boxWidget();
+    if($.fn.layout&&$('body').data('lte.layout'))$('body').layout('fix');
     setTimeout(()=>$('#notifikasi').fadeTo(500,0).slideUp(500),5000);
   }
-  document.querySelectorAll('[data-confirm]').forEach(form=>form.addEventListener('submit',event=>{event.preventDefault();const message=form.dataset.confirm||'Yakin ingin melanjutkan?';if(window.Swal)Swal.fire({title:'Konfirmasi',text:message,icon:'warning',showCancelButton:true,confirmButtonColor:'#526b42',cancelButtonColor:'#6f7870',confirmButtonText:'Ya, lanjutkan',cancelButtonText:'Batal'}).then(r=>{if(r.isConfirmed)form.submit()});else if(confirm(message))form.submit()}));
-  document.querySelectorAll('[data-dirty-form]').forEach(form=>{let dirty=false;form.addEventListener('input',()=>dirty=true);form.addEventListener('submit',()=>dirty=false);window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}})});
+  document.querySelectorAll('[data-dirty-form]').forEach(form=>{
+    if(form.dataset.dirtyBound)return;
+    form.dataset.dirtyBound='true';
+    form.addEventListener('input',()=>{form.dataset.dirty='true'});
+    form.addEventListener('submit',()=>{delete form.dataset.dirty});
+  });
+  if(!window.__dirtyFormWarningBound){
+    window.__dirtyFormWarningBound=true;
+    window.addEventListener('beforeunload',event=>{
+      if(document.querySelector('[data-dirty-form][data-dirty="true"]')){
+        event.preventDefault();
+        event.returnValue='';
+      }
+    });
+  }
+  document.querySelectorAll('[data-image-picker]').forEach(picker=>{
+    if(picker.dataset.imagePickerBound)return;
+    picker.dataset.imagePickerBound='true';
+    const select=picker.querySelector('[data-image-select]'),upload=picker.querySelector('[data-image-upload]'),preview=picker.querySelector('[data-image-preview]'),alt=picker.querySelector('[data-image-alt]'),remove=picker.querySelector('[data-image-remove]');
+    const empty=()=>{preview.innerHTML='<i class="fa fa-picture-o" aria-hidden="true"></i><span>Belum ada gambar</span>'};
+    const show=url=>{
+      if(!url){empty();return}
+      preview.innerHTML='';
+      const image=document.createElement('img');
+      image.src=url;
+      image.alt=alt.value;
+      preview.appendChild(image);
+    };
+    select?.addEventListener('change',()=>{
+      const option=select.options[select.selectedIndex];
+      remove.value='0';
+      upload.value='';
+      if(option?.dataset.url){show(option.dataset.url);alt.value=option.dataset.alt||''}else empty();
+    });
+    upload?.addEventListener('change',()=>{
+      const file=upload.files?.[0];
+      if(!file)return;
+      select.value='';
+      if(window.jQuery)window.jQuery(select).trigger('change.select2');
+      remove.value='0';
+      show(URL.createObjectURL(file));
+      if(!alt.value)alt.value=file.name.replace(/\.[^/.]+$/,'');
+    });
+    alt?.addEventListener('input',()=>{
+      const image=preview.querySelector('img');
+      if(image)image.alt=alt.value;
+    });
+    picker.querySelector('[data-image-clear]')?.addEventListener('click',()=>{
+      select.value='';
+      if(window.jQuery)window.jQuery(select).trigger('change.select2');
+      upload.value='';
+      alt.value='';
+      remove.value='1';
+      empty();
+    });
+  });
+  const officialForm=document.getElementById('official-form');
+  if(officialForm&&!officialForm.dataset.officialBound){
+    officialForm.dataset.officialBound='true';
+    const sourceInputs=Array.from(officialForm.querySelectorAll('input[name="source"]')),residentPicker=officialForm.querySelector('[data-resident-picker]'),residentSelect=document.getElementById('resident_id'),residentFields=Array.from(officialForm.querySelectorAll('[data-resident-value]')),preview=officialForm.querySelector('[data-full-name-preview]'),color=document.getElementById('organization_color'),colorPreview=officialForm.querySelector('.official-color-preview'),camera=document.getElementById('photo_camera'),imagePreview=officialForm.querySelector('[data-image-preview]');
+    const currentSource=()=>sourceInputs.find(input=>input.checked)?.value||'external';
+    const updateFullName=()=>{
+      const prefix=document.getElementById('title_prefix')?.value.trim()||'',name=document.getElementById('name')?.value.trim()||'',suffix=document.getElementById('title_suffix')?.value.trim()||'';
+      if(preview)preview.value=[prefix,name].filter(Boolean).join(' ')+(suffix?', '+suffix:'');
+    };
+    const populateResident=()=>{
+      if(currentSource()!=='resident'||!residentSelect)return;
+      const option=residentSelect.options[residentSelect.selectedIndex];
+      if(!option?.value)return;
+      residentFields.forEach(field=>{const key=field.dataset.residentValue;field.value=option.dataset[key]||'';if(window.jQuery&&field.matches('select'))window.jQuery(field).trigger('change.select2')});
+      updateFullName();
+    };
+    const updateSource=()=>{
+      const fromResident=currentSource()==='resident';
+      if(residentPicker)residentPicker.hidden=!fromResident;
+      if(residentSelect)residentSelect.required=fromResident;
+      residentFields.forEach(field=>{field.readOnly=fromResident&&!field.matches('select');field.classList.toggle('official-readonly',fromResident)});
+      if(fromResident)populateResident();
+    };
+    sourceInputs.forEach(input=>input.addEventListener('change',updateSource));
+    residentSelect?.addEventListener('change',populateResident);
+    if(window.jQuery&&residentSelect)window.jQuery(residentSelect).on('select2:select select2:clear',populateResident);
+    ['name','title_prefix','title_suffix'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateFullName));
+    color?.addEventListener('input',()=>{if(/^#[0-9A-Fa-f]{6}$/.test(color.value)&&colorPreview)colorPreview.style.background=color.value});
+    camera?.addEventListener('change',()=>{
+      const file=camera.files?.[0];
+      if(!file||!imagePreview)return;
+      imagePreview.innerHTML='';
+      const image=document.createElement('img');
+      image.src=URL.createObjectURL(file);
+      image.alt='Pratinjau foto dari kamera';
+      imagePreview.appendChild(image);
+      const remove=officialForm.querySelector('[data-image-remove]');
+      if(remove)remove.value='0';
+    });
+    updateSource();
+    updateFullName();
+  }
+  const officialCheckAll=document.querySelector('[data-check-all-officials]');
+  if(officialCheckAll&&!officialCheckAll.dataset.bulkBound){
+    officialCheckAll.dataset.bulkBound='true';
+    const checks=Array.from(document.querySelectorAll('[data-official-check]')),bulkButton=document.querySelector('[data-bulk-delete]');
+    const update=()=>{
+      const checked=checks.filter(checkbox=>checkbox.checked).length;
+      if(bulkButton)bulkButton.disabled=checked===0;
+      officialCheckAll.checked=checks.length>0&&checked===checks.length;
+      officialCheckAll.indeterminate=checked>0&&checked<checks.length;
+    };
+    officialCheckAll.addEventListener('change',()=>{checks.forEach(checkbox=>{checkbox.checked=officialCheckAll.checked});update()});
+    checks.forEach(checkbox=>checkbox.addEventListener('change',update));
+    update();
+  }
   document.querySelectorAll('[data-article-editor]').forEach(editor=>{
     const area=editor.querySelector('textarea'),surface=editor.querySelector('[contenteditable]'),imageInput=editor.querySelector('[data-image-input]'),status=editor.querySelector('[data-editor-status]');
     if(!area||!surface)return;
@@ -32,4 +147,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     editor.closest('form')?.addEventListener('submit',sync);
   });
   const title=document.querySelector('#title'),titleCount=document.querySelector('#title-count');if(title&&titleCount){const count=()=>titleCount.textContent=title.value.length;title.addEventListener('input',count);count()}
+};
+
+window.initAdminPage = initAdminPage;
+
+initAjaxNavigation({
+  rootSelector: '.wrapper',
+  onRender: initAdminPage,
 });
+
+initAdminPage();

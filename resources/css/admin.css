@@ -12,6 +12,42 @@
     --admin-muted: #6f7870;
 }
 
+[data-ajax-progress] {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 9999;
+    height: 3px;
+    overflow: hidden;
+    background: transparent;
+    color: transparent;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .2s ease;
+}
+
+[data-ajax-progress]::after {
+    display: block;
+    width: 40%;
+    height: 100%;
+    background: var(--admin-accent);
+    content: "";
+    transform: translateX(-100%);
+}
+
+[data-ajax-progress].is-visible {
+    opacity: 1;
+}
+
+[data-ajax-progress].is-visible::after {
+    animation: ajax-progress 1s ease-in-out infinite;
+}
+
+@keyframes ajax-progress {
+    to { transform: translateX(280%); }
+}
+
 body { color: #37413b; background: var(--admin-sidebar-deep); font-family: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif; }
 a { color: var(--admin-primary); }
 a:hover, a:focus { color: var(--admin-primary-dark); }

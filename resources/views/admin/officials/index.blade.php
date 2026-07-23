@@ -18,7 +18,7 @@
             <a href="{{ route('admin.officials.print') }}" target="_blank" class="btn btn-social bg-purple btn-sm">
                 <i class="fa fa-print"></i> Cetak
             </a>
-            <a href="{{ route('admin.officials.export') }}" class="btn btn-social bg-navy btn-sm">
+            <a href="{{ route('admin.officials.export') }}" class="btn btn-social bg-navy btn-sm" data-no-ajax>
                 <i class="fa fa-download"></i> Unduh CSV
             </a>
         </div>
@@ -153,25 +153,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const all = document.querySelector('[data-check-all-officials]');
-    const checks = Array.from(document.querySelectorAll('[data-official-check]'));
-    const bulkButton = document.querySelector('[data-bulk-delete]');
-    const update = function () {
-        const checked = checks.filter(function (checkbox) { return checkbox.checked; }).length;
-        bulkButton.disabled = checked === 0;
-        all.checked = checks.length > 0 && checked === checks.length;
-        all.indeterminate = checked > 0 && checked < checks.length;
-    };
-    all?.addEventListener('change', function () {
-        checks.forEach(function (checkbox) { checkbox.checked = all.checked; });
-        update();
-    });
-    checks.forEach(function (checkbox) { checkbox.addEventListener('change', update); });
-    update();
-});
-</script>
-@endpush
