@@ -183,7 +183,7 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .timeline > li > .timeline-item { margin-right: 15px; }
 .timeline > li > .timeline-item > .timeline-body { padding-bottom: 12px; }
 
-/* Buku Pemerintah Desa: mengikuti kepadatan daftar dan form OpenSID administrasi umum. */
+/* Struktur pemerintahan: mengikuti kepadatan daftar dan form OpenSID. */
 .official-toolbar { display: flex; flex-wrap: wrap; gap: 6px; }
 .official-filters { display: grid; margin-bottom: 18px; padding: 13px; border: 1px solid var(--admin-border); background: #f8f9f6; grid-template-columns: minmax(250px, 1fr) 165px 210px auto; align-items: end; gap: 10px; }
 .official-filters .form-group { margin: 0; }

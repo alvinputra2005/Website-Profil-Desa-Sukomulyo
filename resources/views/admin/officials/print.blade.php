@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Buku Pemerintah Desa</title>
+    <title>Struktur Pemerintahan</title>
     <style>
         body{margin:28px;color:#111;font:12px Arial,sans-serif}h1,h2,p{text-align:center;margin:3px}.actions{margin-bottom:18px;text-align:right}.actions a,.actions button{padding:7px 12px;border:1px solid #777;background:#fff;color:#111;text-decoration:none;cursor:pointer}table{width:100%;margin-top:22px;border-collapse:collapse}th,td{padding:6px;border:1px solid #222;vertical-align:top}th{background:#eee;text-align:center;font-size:10px}td{font-size:10px}.nowrap{white-space:nowrap}@media print{body{margin:0}.actions{display:none}@page{size:landscape;margin:12mm}}
     </style>

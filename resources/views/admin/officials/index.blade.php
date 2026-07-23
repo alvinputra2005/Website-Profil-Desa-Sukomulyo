@@ -1,6 +1,6 @@
 @extends('layouts.admin')
-@section('title', 'Buku Pemerintah Desa')
-@section('page-description', 'Staf Pemerintah Desa')
+@section('title', 'Struktur Pemerintahan')
+@section('page-description', 'Kelola perangkat dan struktur organisasi pemerintah desa')
 
 @section('content')
 <div class="box box-info official-list-box">
