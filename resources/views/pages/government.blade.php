@@ -13,7 +13,13 @@
                 <div class="official-grid">
                     @foreach ($officials as $official)
                         <article class="official-card">
-                            <div class="official-avatar"><i class="fas fa-user" aria-hidden="true"></i></div>
+                            <div class="official-avatar">
+                                @if($official['photo'])
+                                    <img src="{{ $official['photo'] }}" alt="{{ $official['photo_alt'] ?: $official['name'] }}">
+                                @else
+                                    <i class="fas fa-user" aria-hidden="true"></i>
+                                @endif
+                            </div>
                             <div>
                                 <p>{{ $official['role'] }}</p>
                                 <h3>{{ $official['name'] }}</h3>

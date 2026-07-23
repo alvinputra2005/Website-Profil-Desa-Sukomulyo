@@ -2,7 +2,7 @@
 @section('title',($item->exists?'Ubah ':'Tambah ').$config['title'])
 @section('page-description','Lengkapi formulir berikut')
 @section('content')
-<form method="post" action="{{ $item->exists?route('admin.resources.update',[$resource,$item]):route('admin.resources.store',$resource) }}" data-dirty-form>
+<form method="post" enctype="multipart/form-data" action="{{ $item->exists?route('admin.resources.update',[$resource,$item]):route('admin.resources.store',$resource) }}" data-dirty-form>
 @csrf @if($item->exists)@method('put')@endif
 <div class="box box-info"><div class="box-header with-border"><h3 class="box-title">Form {{ $config['title'] }}</h3></div><div class="box-body">
 @foreach($config['fields'] as $name=>$field)
@@ -23,6 +23,9 @@
 <textarea id="{{ $name }}" name="{{ $name }}" class="form-control" rows="5">{{ $value }}</textarea>
 @elseif($type==='editor')
 <x-admin.rich-editor :name="$name" :value="$value" />
+@elseif($type==='image')
+@php($selectedMedia=isset($field['relation']) ? data_get($item,$field['relation']) : null)
+<x-admin.image-picker :name="$name" :label="$field['label']" :media="$media ?? collect()" :selected="$selectedMedia" :required="str_contains($field['rules']??'','required')" :show-label="false" :show-field-error="false" />
 @else
 <input id="{{ $name }}" name="{{ $name }}" type="{{ $type }}" value="{{ $value }}" class="form-control" @if(isset($field['step']))step="{{ $field['step'] }}"@endif>
 @endif

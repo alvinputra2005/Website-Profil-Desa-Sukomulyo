@@ -43,7 +43,7 @@ class SiteController extends Controller
 
     public function profile(): View
     {
-        return $this->render('pages.profile', ['profileSections' => Schema::hasTable('village_profile_sections') ? VillageProfileSection::whereIn('section_key', ['profile', 'history', 'vision', 'mission'])->where('status', 'published')->orderBy('display_order')->get() : collect()]);
+        return $this->render('pages.profile', ['profileSections' => Schema::hasTable('village_profile_sections') ? VillageProfileSection::with('image')->whereIn('section_key', ['profile', 'history', 'vision', 'mission'])->where('status', 'published')->orderBy('display_order')->get() : collect()]);
     }
 
     public function statistics(PopulationStatisticsService $populationStatistics): View
@@ -107,13 +107,13 @@ class SiteController extends Controller
     public function government(): View
     {
         return $this->render('pages.government', [
-            'officials' => Schema::hasTable('officials') && Official::where('is_active', true)->exists() ? Official::where('is_active', true)->orderBy('display_order')->get()->map(fn ($o) => ['role' => $o->position, 'name' => $o->name])->all() : [
-                ['role' => 'Kepala Desa', 'name' => 'Nama Kepala Desa'],
-                ['role' => 'Sekretaris Desa', 'name' => 'Nama Sekretaris Desa'],
-                ['role' => 'Kaur Tata Usaha dan Umum', 'name' => 'Nama Perangkat Desa'],
-                ['role' => 'Kaur Keuangan', 'name' => 'Nama Perangkat Desa'],
-                ['role' => 'Kasi Pemerintahan', 'name' => 'Nama Perangkat Desa'],
-                ['role' => 'Kasi Kesejahteraan', 'name' => 'Nama Perangkat Desa'],
+            'officials' => Schema::hasTable('officials') && Official::where('is_active', true)->exists() ? Official::with('photo')->where('is_active', true)->orderBy('display_order')->get()->map(fn ($o) => ['role' => $o->position_label, 'name' => $o->full_name, 'photo' => $o->photo?->url, 'photo_alt' => $o->photo?->alt_text])->all() : [
+                ['role' => 'Kepala Desa', 'name' => 'Nama Kepala Desa', 'photo' => null],
+                ['role' => 'Sekretaris Desa', 'name' => 'Nama Sekretaris Desa', 'photo' => null],
+                ['role' => 'Kaur Tata Usaha dan Umum', 'name' => 'Nama Perangkat Desa', 'photo' => null],
+                ['role' => 'Kaur Keuangan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
+                ['role' => 'Kasi Pemerintahan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
+                ['role' => 'Kasi Kesejahteraan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
             ],
         ]);
     }

@@ -15,13 +15,7 @@
     @php($selectedMediaId=old('featured_image_id',$item->featured_image_id))
     @php($selectedMedia=$media->firstWhere('id',(int)$selectedMediaId) ?? $item->featuredImage)
     <div class="box box-info"><div class="box-header with-border"><h3 class="box-title"><i class="fa fa-image"></i> Gambar Utama</h3></div><div class="box-body">
-        <div class="featured-preview" data-featured-preview>@if($selectedMedia)<img src="{{ $selectedMedia->url }}" alt="{{ $selectedMedia->alt_text }}">@else<i class="fa fa-picture-o"></i><span>Belum ada gambar utama</span>@endif</div>
-        <div class="form-group"><label for="featured_image_id">Pilih dari Media Library</label><select class="form-control select2" id="featured_image_id" name="featured_image_id"><option value="" data-url="">-- Tidak dipilih --</option>@foreach($media as $image)<option value="{{ $image->id }}" data-url="{{ $image->url }}" data-alt="{{ $image->alt_text }}" @selected((string)$selectedMediaId===(string)$image->id)>{{ $image->original_name }}</option>@endforeach</select></div>
-        <div class="form-group"><label for="featured_image_upload">Atau upload baru</label><input type="file" id="featured_image_upload" name="featured_image_upload" class="form-control" accept="image/jpeg,image/png,image/webp"><span class="help-block">JPG, PNG, atau WebP, maksimal 5 MB. Gambar otomatis dioptimalkan.</span></div>
-        <div class="form-group"><label for="featured_image_alt">Alt text</label><input class="form-control" id="featured_image_alt" name="featured_image_alt" maxlength="255" value="{{ old('featured_image_alt',$selectedMedia?->alt_text) }}" placeholder="Contoh: Kegiatan Musyawarah Desa Sukomulyo"></div>
-        <input type="hidden" name="remove_featured_image" value="0" data-remove-featured>
-        <button type="button" class="btn btn-default btn-sm" data-clear-featured><i class="fa fa-times"></i> Hapus gambar utama</button>
-        @error('featured_image_upload')<span class="field-error">{{ $message }}</span>@enderror @error('featured_image_id')<span class="field-error">{{ $message }}</span>@enderror
+        <x-admin.image-picker name="featured_image_id" label="Gambar Utama" :media="$media" :selected="$selectedMedia" :show-label="false" />
     </div></div>
     <div class="box box-info"><div class="box-header with-border"><h3 class="box-title"><i class="fa fa-folder-open"></i> Kategori & URL</h3></div><div class="box-body"><div class="form-group"><label class="required" for="category_id">Kategori</label><select class="form-control select2" required id="category_id" name="category_id"><option value="">-- Pilih kategori --</option>@foreach($relations['category_id'] as $category)<option value="{{ $category->id }}" @selected((string)old('category_id',$item->category_id)===(string)$category->id)>{{ $category->name }}</option>@endforeach</select></div><div class="form-group"><label for="slug">Slug / alamat URL</label><input class="form-control" id="slug" name="slug" maxlength="255" value="{{ old('slug',$item->slug) }}" placeholder="dibuat-otomatis-dari-judul"><span class="help-block">Boleh dikosongkan agar dibuat otomatis.</span></div></div></div>
     <div class="box box-info"><div class="box-header with-border"><h3 class="box-title"><i class="fa fa-send"></i> Publikasi</h3></div><div class="box-body">
@@ -31,13 +25,3 @@
     <div class="box box-info collapsed-box"><div class="box-header with-border"><h3 class="box-title"><i class="fa fa-search"></i> Pengaturan SEO</h3><div class="box-tools"><button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button></div></div><div class="box-body"><div class="form-group"><label for="seo_title">Judul SEO</label><input class="form-control" id="seo_title" name="seo_title" maxlength="255" value="{{ old('seo_title',$item->seo_title) }}"></div><div class="form-group"><label for="seo_description">Deskripsi SEO</label><textarea class="form-control" id="seo_description" name="seo_description" maxlength="320" rows="4">{{ old('seo_description',$item->seo_description) }}</textarea></div></div></div>
 </div></div></form>
 @endsection
-@push('scripts')<script>
-document.addEventListener('DOMContentLoaded',function(){
- const select=document.querySelector('#featured_image_id'),upload=document.querySelector('#featured_image_upload'),preview=document.querySelector('[data-featured-preview]'),remove=document.querySelector('[data-remove-featured]'),alt=document.querySelector('#featured_image_alt');
- const empty=()=>preview.innerHTML='<i class="fa fa-picture-o"></i><span>Belum ada gambar utama</span>';
- const show=url=>{preview.innerHTML='';const img=document.createElement('img');img.src=url;img.alt=alt.value;preview.appendChild(img)};
- select?.addEventListener('change',()=>{const option=select.options[select.selectedIndex];remove.value='0';upload.value='';if(option.dataset.url){show(option.dataset.url);alt.value=option.dataset.alt||''}else empty()});
- upload?.addEventListener('change',()=>{const file=upload.files?.[0];if(file){select.value='';if(window.jQuery)jQuery(select).trigger('change.select2');remove.value='0';show(URL.createObjectURL(file))}});
- document.querySelector('[data-clear-featured]')?.addEventListener('click',()=>{select.value='';if(window.jQuery)jQuery(select).trigger('change.select2');upload.value='';alt.value='';remove.value='1';empty()});
-});
-</script>@endpush

@@ -6,7 +6,13 @@
             <article class="sc_innerpage_contentbx profile-content">
                 @if($profileSections->isNotEmpty())
                     @foreach($profileSections as $section)
-                        <section><h2>{{ $section->title }}</h2><div>{!! $section->content !!}</div></section>
+                        <section>
+                            <h2>{{ $section->title }}</h2>
+                            @if($section->image)
+                                <img class="profile-section-image" src="{{ $section->image->url }}" alt="{{ $section->image->alt_text ?: $section->title }}">
+                            @endif
+                            <div>{!! $section->content !!}</div>
+                        </section>
                     @endforeach
                 @else
                 <section>

@@ -41,6 +41,11 @@ class Resident extends CmsModel
         return $this->hasMany(PopulationGroupMember::class);
     }
 
+    public function officialRecords()
+    {
+        return $this->hasMany(Official::class);
+    }
+
     public function chairedGroups()
     {
         return $this->hasMany(PopulationGroup::class, 'chairperson_id');

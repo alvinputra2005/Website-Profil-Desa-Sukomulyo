@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\{ActivityLog, Media, News, NewsCategory, Redirect, Role, User};
+use App\Models\{ActivityLog, Gallery, GalleryItem, Media, News, NewsCategory, Official, Redirect, Role, User, VillageProfileSection};
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -143,5 +143,68 @@ class AdminCmsTest extends TestCase
         $this->get('/admin/news-trash')->assertOk()->assertSee('Dengan Gambar');
         $this->patch('/admin/news-trash/'.$news->id.'/restore')->assertSessionHasNoErrors();
         $this->assertNull($news->fresh()->deleted_at);
+    }
+
+    public function test_image_upload_is_available_for_officials_and_village_sections(): void
+    {
+        Storage::fake('public');
+        $admin = $this->user('super_admin');
+
+        $officialResponse = $this->actingAs($admin)->post('/admin/officials', [
+            'name' => 'Siti Aminah',
+            'position' => 'Kepala Desa',
+            'photo_upload' => UploadedFile::fake()->image('kepala-desa.jpg', 800, 1000),
+            'photo_alt' => 'Kepala Desa Siti Aminah',
+            'display_order' => 1,
+            'is_active' => 1,
+        ]);
+
+        $officialResponse->assertSessionHasNoErrors();
+        $official = Official::with('photo')->firstOrFail();
+        $this->assertNotNull($official->photo_id);
+        $this->assertSame('Kepala Desa Siti Aminah', $official->photo->alt_text);
+        $this->assertStringStartsWith('perangkat-desa/', $official->photo->storage_path);
+        Storage::disk('public')->assertExists($official->photo->storage_path);
+        $this->get('/admin/officials/'.$official->id.'/edit')
+            ->assertOk()
+            ->assertSee('name="photo_upload"', false)
+            ->assertSee('Kepala Desa Siti Aminah');
+
+        $gallery = Gallery::create([
+            'title' => 'Kegiatan Warga',
+            'slug' => 'kegiatan-warga',
+            'status' => 'published',
+            'created_by' => $admin->id,
+        ]);
+        $galleryItemResponse = $this->post('/admin/gallery-items', [
+            'gallery_id' => $gallery->id,
+            'media_upload' => UploadedFile::fake()->image('kerja-bakti.jpg', 1200, 800),
+            'media_alt' => 'Warga sedang kerja bakti',
+            'caption' => 'Kerja bakti lingkungan desa',
+            'display_order' => 1,
+        ]);
+        $galleryItemResponse->assertSessionHasNoErrors();
+        $galleryItem = GalleryItem::with('media')->firstOrFail();
+        $this->assertNotNull($galleryItem->media_id);
+        $this->assertStringStartsWith('galeri/', $galleryItem->media->storage_path);
+
+        $sectionResponse = $this->put('/admin/info-desa/history', [
+            'title' => 'Sejarah Desa',
+            'content' => '<p>Sejarah desa diperbarui.</p>',
+            'image_upload' => UploadedFile::fake()->image('sejarah.png', 1200, 800),
+            'image_alt' => 'Dokumentasi sejarah desa',
+            'status' => 'published',
+        ]);
+
+        $sectionResponse->assertSessionHasNoErrors();
+        $section = VillageProfileSection::with('image')->where('section_key', 'history')->firstOrFail();
+        $this->assertNotNull($section->image_id);
+        $this->assertSame('Dokumentasi sejarah desa', $section->image->alt_text);
+        $this->assertStringStartsWith('profil/', $section->image->storage_path);
+        Storage::disk('public')->assertExists($section->image->storage_path);
+        $this->get('/admin/info-desa/history')
+            ->assertOk()
+            ->assertSee('name="image_upload"', false)
+            ->assertSee('Dokumentasi sejarah desa');
     }
 }

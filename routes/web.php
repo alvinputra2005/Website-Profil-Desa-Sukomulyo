@@ -4,7 +4,7 @@ use App\Http\Controllers\SiteController;
 use App\Http\Controllers\MediaFileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{LoginController,PasswordController};
-use App\Http\Controllers\Admin\{ActivityController,ContactMessageController,CrudController,DashboardController,MediaController,UserController,VillageContentController};
+use App\Http\Controllers\Admin\{ActivityController,ContactMessageController,CrudController,DashboardController,MediaController,OfficialController,UserController,VillageContentController};
 use App\Http\Controllers\Admin\{
     FamilyController, HouseholdController, PopulationGroupController, PopulationGroupMemberController,
     PopulationReportController, PopulationStatisticsController, ResidentController
@@ -34,6 +34,16 @@ Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/activities',ActivityController::class)->name('activities.index');
     Route::get('/info-desa/{page}',[VillageContentController::class,'edit'])->name('village-content.edit');
     Route::put('/info-desa/{page}',[VillageContentController::class,'update'])->name('village-content.update');
+    Route::middleware('can:manage-content')->group(function () {
+        Route::get('/officials/organization', [OfficialController::class, 'organization'])->name('officials.organization');
+        Route::get('/officials/print', [OfficialController::class, 'print'])->name('officials.print');
+        Route::get('/officials/export', [OfficialController::class, 'export'])->name('officials.export');
+        Route::delete('/officials/bulk', [OfficialController::class, 'bulkDestroy'])->name('officials.bulk-destroy');
+        Route::patch('/officials/{official}/status', [OfficialController::class, 'toggleStatus'])->name('officials.toggle-status');
+        Route::patch('/officials/{official}/attendance', [OfficialController::class, 'toggleAttendance'])->name('officials.toggle-attendance');
+        Route::patch('/officials/{official}/move/{direction}', [OfficialController::class, 'move'])->where('direction', 'up|down')->name('officials.move');
+        Route::resource('officials', OfficialController::class)->except('show');
+    });
     Route::middleware('can:manage-data')->prefix('kependudukan')->name('population.')->group(function () {
         Route::resource('penduduk', ResidentController::class)->parameters(['penduduk' => 'resident'])->names('residents');
         Route::resource('keluarga', FamilyController::class)->parameters(['keluarga' => 'family'])->except('show')->names('families');
