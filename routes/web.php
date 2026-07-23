@@ -8,6 +8,7 @@ Route::controller(SiteController::class)->group(function () {
     Route::get('/', 'home')->name('beranda');
     Route::get('/profile-desa', 'profile')->name('profile-desa');
     Route::get('/data-desa-statistik', 'statistics')->name('data-desa-statistik');
+    Route::get('/transparansi-apbdes', 'budgetHistory')->name('transparansi-apbdes');
     Route::get('/informasi-publik-desa', 'publicInformation')->name('informasi-publik-desa');
     Route::get('/peta-desa', 'map')->name('peta-desa');
 

@@ -45,9 +45,28 @@ class SitePagesTest extends TestCase
     {
         $this->get(route('beranda'))
             ->assertOk()
-            ->assertSee('Transparansi APBDes')
-            ->assertDontSee('Total Pendapatan')
-            ->assertDontSee('Total Anggaran');
+            ->assertSee('Laki-laki')
+            ->assertSee('Perempuan')
+            ->assertSee('TRANSPARANSI APBDES')
+            ->assertSee('Pendapatan APBDes 2026')
+            ->assertSee('Belanja APBDes 2026')
+            ->assertSee('Realisasi APBDes 2026')
+            ->assertSee('budget-progress-fill', false)
+            ->assertSee('budget-progress-percent', false)
+            ->assertSee(route('transparansi-apbdes'), false)
+            ->assertSee('Total Pendapatan APBDes 2026')
+            ->assertSee('Total Penggunaan Belanja APBDes 2026')
+            ->assertSee('Total Realisasi APBDes 2026');
+    }
+
+    public function test_budget_history_shows_ten_years_of_dummy_data(): void
+    {
+        $this->get(route('transparansi-apbdes'))
+            ->assertOk()
+            ->assertSee('Riwayat APBDes 10 Tahun Terakhir')
+            ->assertSee('2017')
+            ->assertSee('2026')
+            ->assertSee('data dummy');
     }
 
     public function test_contact_form_validates_and_accepts_a_message(): void
