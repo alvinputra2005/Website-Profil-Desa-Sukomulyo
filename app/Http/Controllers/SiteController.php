@@ -4,24 +4,36 @@ namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
 use App\Models\Gallery;
+use App\Models\MapLayer;
 use App\Models\News;
+use App\Models\NewsCategory;
 use App\Models\Official;
 use App\Models\Setting;
 use App\Models\VillageProfileSection;
 use App\Services\PopulationStatistics as PopulationStatisticsService;
+use App\Services\SiteCache;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
 class SiteController extends Controller
 {
+    public function __construct(private readonly SiteCache $cache) {}
+
     public function home(PopulationStatisticsService $populationStatistics): View
     {
-        $populationSummary = Schema::hasTable('residents')
-            ? $populationStatistics->summary()
-            : ['residents' => 0, 'families' => 0, 'areas' => 0];
+        $populationSummary = $this->cache->remember(
+            SiteCache::HOME_STATISTICS,
+            SiteCache::TEN_MINUTES,
+            fn () => Schema::hasTable('residents')
+                ? $populationStatistics->summary()
+                : ['residents' => 0, 'families' => 0, 'areas' => 0]
+        );
 
         return $this->render('pages.home', [
             'missions' => [
@@ -43,38 +55,52 @@ class SiteController extends Controller
 
     public function profile(): View
     {
-        return $this->render('pages.profile', [
-            'profileSections' => Schema::hasTable('village_profile_sections')
-                ? VillageProfileSection::with('image')->whereIn('section_key', ['profile', 'history', 'vision', 'mission'])->where('status', 'published')->orderBy('display_order')->get()
-                : collect(),
-            'identityGroups' => $this->villageIdentity(),
-        ]);
+        $profile = $this->cache->remember(
+            SiteCache::PROFILE,
+            SiteCache::ONE_HOUR,
+            fn () => [
+                'profileSections' => Schema::hasTable('village_profile_sections')
+                    ? VillageProfileSection::with('image')->whereIn('section_key', ['profile', 'history', 'vision', 'mission'])->where('status', 'published')->orderBy('display_order')->get()
+                    : collect(),
+                'identityGroups' => $this->villageIdentity(),
+            ]
+        );
+
+        return $this->render('pages.profile', $profile);
     }
 
     public function statistics(PopulationStatisticsService $populationStatistics): View
     {
-        $summary = Schema::hasTable('residents')
-            ? $populationStatistics->summary()
-            : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'households' => 0, 'areas' => 0];
-        $total = max($summary['residents'], 1);
-        $occupations = Schema::hasTable('residents') ? $populationStatistics->distribution('occupation') : [];
+        $statistics = $this->cache->remember(
+            SiteCache::PUBLIC_STATISTICS,
+            SiteCache::TEN_MINUTES,
+            function () use ($populationStatistics): array {
+                $summary = Schema::hasTable('residents')
+                    ? $populationStatistics->summary()
+                    : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'households' => 0, 'areas' => 0];
+                $total = max($summary['residents'], 1);
+                $occupations = Schema::hasTable('residents') ? $populationStatistics->distribution('occupation') : [];
 
-        return $this->render('pages.statistics', [
-            'statistics' => [
-                ['icon' => 'fas fa-users', 'value' => number_format($summary['residents'], 0, ',', '.'), 'label' => 'Jumlah Penduduk', 'unit' => 'jiwa'],
-                ['icon' => 'fas fa-home', 'value' => number_format($summary['families'], 0, ',', '.'), 'label' => 'Kepala Keluarga', 'unit' => 'KK'],
-                ['icon' => 'fas fa-building', 'value' => number_format($summary['households'], 0, ',', '.'), 'label' => 'Rumah Tangga', 'unit' => 'rumah tangga'],
-                ['icon' => 'fas fa-map-signs', 'value' => number_format($summary['areas'], 0, ',', '.'), 'label' => 'Wilayah Dusun', 'unit' => 'dusun'],
-            ],
-            'population' => [
-                ['label' => 'Laki-laki', 'value' => $summary['male'], 'percentage' => round($summary['male'] / $total * 100, 2)],
-                ['label' => 'Perempuan', 'value' => $summary['female'], 'percentage' => round($summary['female'] / $total * 100, 2)],
-            ],
-            'livelihoods' => collect($occupations)->take(6)->map(fn (array $row) => [
-                'label' => $row['label'],
-                'percentage' => $row['percentage'],
-            ])->all(),
-        ]);
+                return [
+                    'statistics' => [
+                        ['icon' => 'fas fa-users', 'value' => number_format($summary['residents'], 0, ',', '.'), 'label' => 'Jumlah Penduduk', 'unit' => 'jiwa'],
+                        ['icon' => 'fas fa-home', 'value' => number_format($summary['families'], 0, ',', '.'), 'label' => 'Kepala Keluarga', 'unit' => 'KK'],
+                        ['icon' => 'fas fa-building', 'value' => number_format($summary['households'], 0, ',', '.'), 'label' => 'Rumah Tangga', 'unit' => 'rumah tangga'],
+                        ['icon' => 'fas fa-map-signs', 'value' => number_format($summary['areas'], 0, ',', '.'), 'label' => 'Wilayah Dusun', 'unit' => 'dusun'],
+                    ],
+                    'population' => [
+                        ['label' => 'Laki-laki', 'value' => $summary['male'], 'percentage' => round($summary['male'] / $total * 100, 2)],
+                        ['label' => 'Perempuan', 'value' => $summary['female'], 'percentage' => round($summary['female'] / $total * 100, 2)],
+                    ],
+                    'livelihoods' => collect($occupations)->take(6)->map(fn (array $row) => [
+                        'label' => $row['label'],
+                        'percentage' => $row['percentage'],
+                    ])->all(),
+                ];
+            }
+        );
+
+        return $this->render('pages.statistics', $statistics);
     }
 
     public function populationReport(Request $request, PopulationStatisticsService $populationStatistics): View
@@ -109,17 +135,73 @@ class SiteController extends Controller
         return $this->render('pages.map');
     }
 
+    public function mapGeoJson(): JsonResponse
+    {
+        $geoJson = $this->cache->remember(
+            SiteCache::MAP_GEOJSON,
+            SiteCache::THIRTY_MINUTES,
+            function (): array {
+                if (! Schema::hasTable('map_layers') || ! Schema::hasTable('map_features')) {
+                    return ['type' => 'FeatureCollection', 'features' => []];
+                }
+
+                $layers = MapLayer::query()
+                    ->where('is_visible', true)
+                    ->with(['features' => fn ($query) => $query
+                        ->where('is_visible', true)
+                        ->with('photo')
+                        ->orderBy('id')])
+                    ->orderBy('display_order')
+                    ->get();
+
+                return [
+                    'type' => 'FeatureCollection',
+                    'features' => $layers->flatMap(fn (MapLayer $layer) => $layer->features->map(
+                        fn ($feature) => [
+                            'type' => 'Feature',
+                            'id' => $feature->id,
+                            'geometry' => $feature->geometry_json,
+                            'properties' => array_merge($feature->properties_json ?? [], [
+                                'name' => $feature->name,
+                                'description' => $feature->description,
+                                'photo_url' => $feature->photo?->url,
+                                'layer' => [
+                                    'id' => $layer->id,
+                                    'name' => $layer->name,
+                                    'slug' => $layer->slug,
+                                    'style' => $layer->style_json ?? [],
+                                ],
+                            ]),
+                        ]
+                    ))->values()->all(),
+                ];
+            }
+        );
+
+        return response()
+            ->json($geoJson)
+            ->header('Cache-Control', 'public, max-age='.SiteCache::THIRTY_MINUTES);
+    }
+
     public function government(): View
     {
+        $officials = $this->cache->remember(
+            SiteCache::OFFICIALS,
+            SiteCache::ONE_HOUR,
+            fn () => Schema::hasTable('officials') && Official::where('is_active', true)->exists()
+                ? Official::with('photo')->where('is_active', true)->orderBy('display_order')->get()->map(fn ($o) => ['role' => $o->position_label, 'name' => $o->full_name, 'photo' => $o->photo?->url, 'photo_alt' => $o->photo?->alt_text])->all()
+                : [
+                    ['role' => 'Kepala Desa', 'name' => 'Nama Kepala Desa', 'photo' => null],
+                    ['role' => 'Sekretaris Desa', 'name' => 'Nama Sekretaris Desa', 'photo' => null],
+                    ['role' => 'Kaur Tata Usaha dan Umum', 'name' => 'Nama Perangkat Desa', 'photo' => null],
+                    ['role' => 'Kaur Keuangan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
+                    ['role' => 'Kasi Pemerintahan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
+                    ['role' => 'Kasi Kesejahteraan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
+                ]
+        );
+
         return $this->render('pages.government', [
-            'officials' => Schema::hasTable('officials') && Official::where('is_active', true)->exists() ? Official::with('photo')->where('is_active', true)->orderBy('display_order')->get()->map(fn ($o) => ['role' => $o->position_label, 'name' => $o->full_name, 'photo' => $o->photo?->url, 'photo_alt' => $o->photo?->alt_text])->all() : [
-                ['role' => 'Kepala Desa', 'name' => 'Nama Kepala Desa', 'photo' => null],
-                ['role' => 'Sekretaris Desa', 'name' => 'Nama Sekretaris Desa', 'photo' => null],
-                ['role' => 'Kaur Tata Usaha dan Umum', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-                ['role' => 'Kaur Keuangan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-                ['role' => 'Kasi Pemerintahan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-                ['role' => 'Kasi Kesejahteraan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-            ],
+            'officials' => $officials,
         ]);
     }
 
@@ -140,7 +222,7 @@ class SiteController extends Controller
     public function article(string $slug): View|Response
     {
         $canPreviewDraft = auth()->check() && auth()->user()->can('manage-content');
-        $article = collect($this->articles($canPreviewDraft))->firstWhere('slug', $slug);
+        $article = $this->articleData($slug, $canPreviewDraft);
 
         if (! $article) {
             return $this->notFound();
@@ -196,31 +278,37 @@ class SiteController extends Controller
 
     public function gallery(): View
     {
-        $image = asset('assets/village-rice-fields.jpg');
+        $photos = $this->cache->remember(
+            SiteCache::GALLERY,
+            SiteCache::TEN_MINUTES,
+            function (): array {
+                $image = asset('assets/village-rice-fields.jpg');
 
-        if (Schema::hasTable('galleries')) {
-            $photos = Gallery::where('status', 'published')->with(['items.media', 'cover'])->latest('event_date')->get()->flatMap(function ($gallery) use ($image) {
-                if ($gallery->items->isEmpty()) {
-                    return [['src' => $gallery->cover?->url ?? $image, 'title' => $gallery->title, 'caption' => $gallery->description]];
+                if (Schema::hasTable('galleries')) {
+                    $photos = Gallery::where('status', 'published')->with(['items.media', 'cover'])->latest('event_date')->get()->flatMap(function ($gallery) use ($image) {
+                        if ($gallery->items->isEmpty()) {
+                            return [['src' => $gallery->cover?->url ?? $image, 'title' => $gallery->title, 'caption' => $gallery->description]];
+                        }
+
+                        return $gallery->items->map(fn ($item) => ['src' => $item->media->url, 'title' => $gallery->title, 'caption' => $item->caption ?? $gallery->description]);
+                    })->all();
+                    if ($photos !== []) {
+                        return $photos;
+                    }
                 }
 
-                return $gallery->items->map(fn ($item) => ['src' => $item->media->url, 'title' => $gallery->title, 'caption' => $item->caption ?? $gallery->description]);
-            })->all();
-            if ($photos !== []) {
-                return $this->render('pages.gallery', compact('photos'));
+                return [
+                    ['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa.'],
+                    ['src' => $image, 'title' => 'Kerja Bakti Warga', 'caption' => 'Gotong royong menjaga lingkungan tetap bersih.'],
+                    ['src' => $image, 'title' => 'Pelatihan UMKM', 'caption' => 'Peningkatan kapasitas pelaku usaha lokal.'],
+                    ['src' => $image, 'title' => 'Kegiatan Posyandu', 'caption' => 'Pelayanan kesehatan rutin untuk ibu dan anak.'],
+                    ['src' => $image, 'title' => 'Panen Bersama', 'caption' => 'Dokumentasi potensi pertanian Desa Sukomulyo.'],
+                    ['src' => $image, 'title' => 'Pentas Seni Desa', 'caption' => 'Ruang ekspresi seni dan budaya masyarakat.'],
+                ];
             }
-        }
+        );
 
-        return $this->render('pages.gallery', [
-            'photos' => [
-                ['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa.'],
-                ['src' => $image, 'title' => 'Kerja Bakti Warga', 'caption' => 'Gotong royong menjaga lingkungan tetap bersih.'],
-                ['src' => $image, 'title' => 'Pelatihan UMKM', 'caption' => 'Peningkatan kapasitas pelaku usaha lokal.'],
-                ['src' => $image, 'title' => 'Kegiatan Posyandu', 'caption' => 'Pelayanan kesehatan rutin untuk ibu dan anak.'],
-                ['src' => $image, 'title' => 'Panen Bersama', 'caption' => 'Dokumentasi potensi pertanian Desa Sukomulyo.'],
-                ['src' => $image, 'title' => 'Pentas Seni Desa', 'caption' => 'Ruang ekspresi seni dan budaya masyarakat.'],
-            ],
-        ]);
+        return $this->render('pages.gallery', compact('photos'));
     }
 
     public function contact(): View
@@ -258,18 +346,47 @@ class SiteController extends Controller
 
     private function shared(): array
     {
-        $articles = $this->articles();
-        $setting = fn (string $key, string $fallback) => Schema::hasTable('settings') ? (Setting::where('key', $key)->value('value') ?? $fallback) : $fallback;
+        return $this->cache->remember(
+            SiteCache::PUBLIC_LAYOUT,
+            SiteCache::TEN_MINUTES,
+            function (): array {
+                $settings = $this->publicSettings();
+                $setting = fn (string $key, string $fallback): string => (string) ($settings->get($key) ?: $fallback);
 
-        return [
-            'site' => [
-                'name' => $setting('site.name', 'Desa Sukomulyo'),
-                'tagline' => $setting('site.tagline', 'Website Resmi Pemerintah Desa Sukomulyo'),
-                'email' => $setting('site.email', 'pemdes@sukomulyo.desa.id'),
-                'phone' => $setting('site.phone', '(0000) 123 456'),
-                'address' => $setting('site.address', 'Kantor Desa Sukomulyo, Indonesia'),
-            ],
-            'navigation' => [
+                return [
+                    'site' => [
+                        'name' => $setting('site.name', 'Desa Sukomulyo'),
+                        'tagline' => $setting('site.tagline', 'Website Resmi Pemerintah Desa Sukomulyo'),
+                        'email' => $setting('site.email', 'pemdes@sukomulyo.desa.id'),
+                        'phone' => $setting('site.phone', '(0000) 123 456'),
+                        'address' => $setting('site.address', 'Kantor Desa Sukomulyo, Indonesia'),
+                    ],
+                    'navigation' => $this->navigation(),
+                    'articles' => $this->latestArticles(),
+                    'categories' => $this->newsCategories(),
+                    'archiveYears' => $this->newsArchiveYears(),
+                ];
+            }
+        );
+    }
+
+    private function publicSettings(): Collection
+    {
+        return $this->cache->remember(
+            SiteCache::SETTINGS,
+            SiteCache::ONE_HOUR,
+            fn () => Schema::hasTable('settings')
+                ? Setting::query()->where('is_public', true)->pluck('value', 'key')
+                : collect()
+        );
+    }
+
+    private function navigation(): array
+    {
+        return $this->cache->remember(
+            SiteCache::NAVIGATION,
+            SiteCache::ONE_HOUR,
+            fn () => [
                 ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
                 ['label' => 'Profile Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
                 ['label' => 'Data Desa/Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-desa-statistik'],
@@ -280,24 +397,13 @@ class SiteController extends Controller
                 ['label' => 'Informasi Publik Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-publik-desa'],
                 ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
                 ['label' => 'Peta Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
-            ],
-            'articles' => $articles,
-            'categories' => collect($articles)->unique('category_slug')->values()->all(),
-            'archiveYears' => collect($articles)->pluck('year')->unique()->values()->all(),
-        ];
+            ]
+        );
     }
 
     private function villageIdentity(): array
     {
-        $settings = Schema::hasTable('settings')
-            ? Setting::whereIn('key', [
-                'site.name', 'village.code', 'village.bps_code', 'village.postal_code',
-                'site.address', 'site.email', 'site.phone', 'village.mobile', 'site.url',
-                'district.name', 'district.code', 'district.head_name', 'district.head_nip',
-                'regency.name', 'regency.code', 'province.name', 'province.code',
-            ])->pluck('value', 'key')
-            : collect();
-
+        $settings = $this->publicSettings();
         $value = fn (string $key, string $fallback = ''): string => (string) ($settings->get($key) ?: $fallback);
         $villageHead = Schema::hasTable('officials')
             ? Official::where('position', 'Kepala Desa')->where('is_active', true)->orderBy('display_order')->first()
@@ -346,22 +452,180 @@ class SiteController extends Controller
 
     private function articles(bool $includeUnpublished = false): array
     {
-        $image = asset('assets/village-rice-fields.jpg');
-
-        $hasArticles = Schema::hasTable('news') && ($includeUnpublished ? News::exists() : News::published()->exists());
-        if ($hasArticles) {
-            $query = News::with(['category', 'featuredImage']);
-            if (! $includeUnpublished) {
-                $query->published();
-            }
-
-            return $query->latest('published_at')->get()->map(function (News $article) use ($image) {
-                $htmlContent = preg_replace('~https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(/storage/)~i', '$1', $article->content);
-                preg_match('~<img[^>]+src=["\']([^"\']+)["\']~i', $htmlContent, $inlineImage);
-
-                return ['slug' => $article->slug, 'title' => $article->title, 'date' => ($article->published_at ?? $article->created_at)->translatedFormat('d F Y'), 'year' => (string) ($article->published_at ?? $article->created_at)->year, 'category' => $article->category->name, 'category_slug' => $article->category->slug, 'image' => $article->featuredImage?->url ?? ($inlineImage[1] ?? $image), 'excerpt' => $article->excerpt ?? strip_tags($htmlContent), 'content' => [strip_tags($htmlContent)], 'html_content' => $htmlContent, 'tags' => []];
-            })->all();
+        if ($includeUnpublished) {
+            return $this->loadArticles(true);
         }
+
+        $articles = $this->cache->remember(
+            SiteCache::NEWS_LIST,
+            SiteCache::TEN_MINUTES,
+            fn () => $this->loadArticles()
+        );
+
+        request()->attributes->set('site.published_articles', $articles);
+
+        return $articles;
+    }
+
+    private function latestArticles(): array
+    {
+        return $this->cache->remember(
+            SiteCache::LATEST_NEWS,
+            SiteCache::TEN_MINUTES,
+            function (): array {
+                $articles = request()->attributes->get('site.published_articles');
+                if (! is_array($articles)) {
+                    $articles = Cache::get(SiteCache::NEWS_LIST);
+                }
+
+                return is_array($articles)
+                    ? array_slice($articles, 0, 10)
+                    : $this->loadArticles(limit: 10);
+            }
+        );
+    }
+
+    private function articleData(string $slug, bool $includeUnpublished = false): ?array
+    {
+        if ($includeUnpublished) {
+            return collect($this->loadArticles(true))->firstWhere('slug', $slug);
+        }
+
+        $article = $this->cache->remember(
+            $this->cache->newsDetailKey($slug),
+            SiteCache::TEN_MINUTES,
+            function () use ($slug): array|false {
+                if (! Schema::hasTable('news')) {
+                    return collect($this->fallbackArticles())->firstWhere('slug', $slug) ?: false;
+                }
+
+                $article = News::with(['category', 'featuredImage'])
+                    ->published()
+                    ->where('slug', $slug)
+                    ->first();
+
+                if ($article) {
+                    return $this->mapArticle($article);
+                }
+
+                return News::published()->exists()
+                    ? false
+                    : (collect($this->fallbackArticles())->firstWhere('slug', $slug) ?: false);
+            }
+        );
+
+        return is_array($article) ? $article : null;
+    }
+
+    private function newsCategories(): array
+    {
+        return $this->cache->remember(
+            SiteCache::NEWS_CATEGORIES,
+            SiteCache::TEN_MINUTES,
+            function (): array {
+                $articles = request()->attributes->get('site.published_articles');
+                if (! is_array($articles)) {
+                    $articles = Cache::get(SiteCache::NEWS_LIST);
+                }
+                if (is_array($articles)) {
+                    return collect($articles)->unique('category_slug')->values()->all();
+                }
+
+                if (Schema::hasTable('news') && Schema::hasTable('news_categories')) {
+                    $categories = NewsCategory::query()
+                        ->whereHas('news', fn ($query) => $query->published())
+                        ->orderBy('name')
+                        ->get(['name', 'slug'])
+                        ->map(fn ($category) => [
+                            'category' => $category->name,
+                            'category_slug' => $category->slug,
+                        ])
+                        ->all();
+
+                    if ($categories !== []) {
+                        return $categories;
+                    }
+                }
+
+                return collect($this->fallbackArticles())->unique('category_slug')->values()->all();
+            }
+        );
+    }
+
+    private function newsArchiveYears(): array
+    {
+        return $this->cache->remember(
+            SiteCache::NEWS_ARCHIVES,
+            SiteCache::TEN_MINUTES,
+            function (): array {
+                $articles = request()->attributes->get('site.published_articles');
+                if (! is_array($articles)) {
+                    $articles = Cache::get(SiteCache::NEWS_LIST);
+                }
+                if (is_array($articles)) {
+                    return collect($articles)->pluck('year')->unique()->values()->all();
+                }
+
+                if (Schema::hasTable('news')) {
+                    $years = News::published()
+                        ->latest('published_at')
+                        ->get(['published_at', 'created_at'])
+                        ->map(fn (News $article) => (string) ($article->published_at ?? $article->created_at)->year)
+                        ->unique()
+                        ->values()
+                        ->all();
+
+                    if ($years !== []) {
+                        return $years;
+                    }
+                }
+
+                return collect($this->fallbackArticles())->pluck('year')->unique()->values()->all();
+            }
+        );
+    }
+
+    private function loadArticles(bool $includeUnpublished = false, ?int $limit = null): array
+    {
+        if (! Schema::hasTable('news')) {
+            return $limit === null
+                ? $this->fallbackArticles()
+                : array_slice($this->fallbackArticles(), 0, $limit);
+        }
+
+        $query = News::with(['category', 'featuredImage']);
+        if (! $includeUnpublished) {
+            $query->published();
+        }
+        if ($limit !== null) {
+            $query->limit($limit);
+        }
+
+        $articles = $query->latest('published_at')->get()->map(
+            fn (News $article) => $this->mapArticle($article)
+        )->all();
+
+        if ($articles !== []) {
+            return $articles;
+        }
+
+        return $limit === null
+            ? $this->fallbackArticles()
+            : array_slice($this->fallbackArticles(), 0, $limit);
+    }
+
+    private function mapArticle(News $article): array
+    {
+        $image = asset('assets/village-rice-fields.jpg');
+        $htmlContent = preg_replace('~https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(/storage/)~i', '$1', $article->content);
+        preg_match('~<img[^>]+src=["\']([^"\']+)["\']~i', $htmlContent, $inlineImage);
+
+        return ['slug' => $article->slug, 'title' => $article->title, 'date' => ($article->published_at ?? $article->created_at)->translatedFormat('d F Y'), 'year' => (string) ($article->published_at ?? $article->created_at)->year, 'category' => $article->category->name, 'category_slug' => $article->category->slug, 'image' => $article->featuredImage?->url ?? ($inlineImage[1] ?? $image), 'excerpt' => $article->excerpt ?? strip_tags($htmlContent), 'content' => [strip_tags($htmlContent)], 'html_content' => $htmlContent, 'tags' => []];
+    }
+
+    private function fallbackArticles(): array
+    {
+        $image = asset('assets/village-rice-fields.jpg');
 
         return [
             [

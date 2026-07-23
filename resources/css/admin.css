@@ -58,9 +58,9 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .main-header .logo .logo-lg { height: 60px; line-height: 60px; text-align: left; }
 .main-header .logo .logo-lg b { font-size: 0; }
 .main-header .logo .logo-lg b::before { content: "Desa Sukomulyo"; font-size: 19px; font-weight: 700; }
-.main-header .logo .logo-lg::before { content: ""; display: inline-block; width: 35px; height: 35px; margin-right: 10px; vertical-align: middle; background: url('/assets/logo-brighter-sukomulyo.svg') center/contain no-repeat; }
+.main-header .logo .logo-lg::before { content: ""; display: inline-block; width: 35px; height: 35px; margin-right: 10px; vertical-align: middle; background: url('/assets/logo-brighter-sukomulyo.jpeg') center/contain no-repeat; }
 .main-header .logo .logo-mini { font-size: 0; }
-.main-header .logo .logo-mini::before { content: ""; display: inline-block; width: 34px; height: 34px; margin-top: 13px; background: url('/assets/logo-brighter-sukomulyo.svg') center/contain no-repeat; }
+.main-header .logo .logo-mini::before { content: ""; display: inline-block; width: 34px; height: 34px; margin-top: 13px; background: url('/assets/logo-brighter-sukomulyo.jpeg') center/contain no-repeat; }
 .main-header .navbar { min-height: 60px; margin-left: 250px; background: var(--admin-primary) !important; }
 .main-header .sidebar-toggle { padding: 20px 18px; }
 .main-header .navbar .nav > li > a { min-height: 60px; padding-top: 20px; padding-bottom: 20px; color: #fff; }

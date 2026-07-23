@@ -139,23 +139,54 @@
     </div>
 </div>
 @else
+@if($page==='vision-mission')
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Visi Desa</h3>
+        <div class="box-tools pull-right">
+            <button type="button" class="btn btn-box-tool" data-widget="collapse" aria-label="Buka atau tutup form visi desa">
+                <i class="fa fa-minus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="box-body">
+        <x-admin.village-input name="vision" label="Isi Visi Desa" type="editor" :value="$sections->get('vision')?->content ?? ''" required />
+    </div>
+</div>
+
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Misi Desa</h3>
+        <div class="box-tools pull-right">
+            <button type="button" class="btn btn-box-tool" data-widget="collapse" aria-label="Buka atau tutup form misi desa">
+                <i class="fa fa-minus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="box-body">
+        <x-admin.village-input name="mission" label="Isi Misi Desa" type="editor" :value="$sections->get('mission')?->content ?? ''" required />
+    </div>
+</div>
+
+<div class="box box-info">
+    <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-send"></i> Publikasi</h3></div>
+    <div class="box-body">
+        <div class="form-group {{ $errors->has('status')?'has-error':'' }}"><label class="control-label">Status Publikasi</label><select name="status" class="form-control select2"><option value="published" @selected(old('status',$section?->status ?? 'published')==='published')>Terbit</option><option value="draft" @selected(old('status',$section?->status)==='draft')>Draf</option></select>@error('status')<span class="field-error">{{ $message }}</span>@enderror</div>
+    </div>
+    <div class="box-footer"><button type="reset" class="btn btn-warning"><i class="fa fa-refresh"></i> Reset</button><button class="btn btn-social btn-info pull-right"><i class="fa fa-save"></i> Simpan Perubahan</button></div>
+</div>
+@else
 <div class="box box-info">
 <div class="box-header with-border"><h3 class="box-title">Form {{ $titles[$page] }}</h3></div>
 <div class="box-body">
-@if($page==='vision-mission')
-    <x-admin.village-input name="vision" label="Visi Desa" type="editor" :value="$sections->get('vision')?->content ?? ''" required />
-    <x-admin.image-picker name="vision_image_id" label="Gambar Visi Desa" :media="$media" :selected="$sections->get('vision')?->image" />
-    <x-admin.village-input name="mission" label="Misi Desa" type="editor" :value="$sections->get('mission')?->content ?? ''" required />
-    <x-admin.image-picker name="mission_image_id" label="Gambar Misi Desa" :media="$media" :selected="$sections->get('mission')?->image" />
-@else
     <x-admin.village-input name="title" label="Judul Halaman" :value="$section?->title ?? $titles[$page]" required />
     <x-admin.village-input name="content" :label="$page==='history'?'Isi Sejarah Desa':'Deskripsi Potensi Desa'" type="editor" :value="$section?->content ?? ''" required />
     <x-admin.image-picker name="image_id" :label="$page==='history'?'Gambar Sejarah Desa':'Gambar Potensi Desa'" :media="$media" :selected="$section?->image" />
-@endif
 <div class="form-group {{ $errors->has('status')?'has-error':'' }}"><label class="control-label">Status Publikasi</label><select name="status" class="form-control select2"><option value="published" @selected(old('status',$section?->status ?? 'published')==='published')>Terbit</option><option value="draft" @selected(old('status',$section?->status)==='draft')>Draf</option></select>@error('status')<span class="field-error">{{ $message }}</span>@enderror</div>
 </div>
 <div class="box-footer"><button type="reset" class="btn btn-warning"><i class="fa fa-refresh"></i> Reset</button><button class="btn btn-social btn-info pull-right"><i class="fa fa-save"></i> Simpan Perubahan</button></div>
 </div>
+@endif
 @endif
 </form>
 @endsection

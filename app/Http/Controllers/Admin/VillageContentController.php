@@ -9,6 +9,7 @@ use App\Models\Setting;
 use App\Models\VillageProfileSection;
 use App\Services\HtmlSanitizer;
 use App\Services\ImageProcessor;
+use App\Support\ImageUploadRules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -136,16 +137,14 @@ class VillageContentController extends Controller
                 $this->saveSection('profile', 'Profil Desa', $data['profile_content'], $data['status'], 0, $profileImageId);
             });
         } elseif ($page === 'vision-mission') {
-            $data = $request->validate(array_merge([
+            $data = $request->validate([
                 'vision' => 'required|string|max:100000',
                 'mission' => 'required|string|max:100000',
                 'status' => ['required', Rule::in(['draft', 'published'])],
-            ], $this->imageRules('vision_image_id'), $this->imageRules('mission_image_id')));
-            $visionImageId = $this->resolveImageId($request, 'vision_image_id', $sections->get('vision')?->image_id, 'visi-desa');
-            $missionImageId = $this->resolveImageId($request, 'mission_image_id', $sections->get('mission')?->image_id, 'misi-desa');
-            DB::transaction(function () use ($data, $visionImageId, $missionImageId) {
-                $this->saveSection('vision', 'Visi Desa', $data['vision'], $data['status'], 10, $visionImageId);
-                $this->saveSection('mission', 'Misi Desa', $data['mission'], $data['status'], 20, $missionImageId);
+            ]);
+            DB::transaction(function () use ($data) {
+                $this->saveSection('vision', 'Visi Desa', $data['vision'], $data['status'], 10);
+                $this->saveSection('mission', 'Misi Desa', $data['mission'], $data['status'], 20);
             });
         } else {
             $key = $page === 'history' ? 'history' : 'potential';
@@ -178,7 +177,7 @@ class VillageContentController extends Controller
 
         return [
             $name => 'nullable|integer|exists:media,id',
-            $base.'_upload' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            $base.'_upload' => ImageUploadRules::optional(),
             $base.'_alt' => 'nullable|string|max:255',
             'remove_'.$base => 'nullable|boolean',
         ];
@@ -210,7 +209,7 @@ class VillageContentController extends Controller
 
         $imageId = $request->exists($name) ? ($request->input($name) ?: null) : $currentId;
         if ($imageId && $request->exists($base.'_alt')) {
-            Media::whereKey($imageId)->update(['alt_text' => $request->input($base.'_alt')]);
+            Media::find($imageId)?->update(['alt_text' => $request->input($base.'_alt')]);
         }
 
         return $imageId ? (int) $imageId : null;

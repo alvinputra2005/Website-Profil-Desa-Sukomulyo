@@ -1,4 +1,5 @@
 import { initAjaxNavigation } from './ajax';
+import { bindImagePreparation, prepareImageFile, prepareImageInput } from './image-upload';
 import { initRegionSelectors } from './regions';
 
 const initAdminPage = () => {
@@ -54,15 +55,16 @@ const initAdminPage = () => {
       upload.value='';
       if(option?.dataset.url){show(option.dataset.url);alt.value=option.dataset.alt||''}else empty();
     });
-    upload?.addEventListener('change',()=>{
-      const file=upload.files?.[0];
-      if(!file)return;
-      select.value='';
-      if(window.jQuery)window.jQuery(select).trigger('change.select2');
-      remove.value='0';
-      show(URL.createObjectURL(file));
-      if(!alt.value)alt.value=file.name.replace(/\.[^/.]+$/,'');
-    });
+     upload?.addEventListener('change',async()=>{
+       const file=upload.files?.[0];
+       if(!file)return;
+       select.value='';
+       if(window.jQuery)window.jQuery(select).trigger('change.select2');
+       remove.value='0';
+       show(URL.createObjectURL(file));
+       if(!alt.value)alt.value=file.name.replace(/\.[^/.]+$/,'');
+       await prepareImageInput(upload);
+     });
     alt?.addEventListener('input',()=>{
       const image=preview.querySelector('img');
       if(image)image.alt=alt.value;
@@ -73,9 +75,10 @@ const initAdminPage = () => {
       upload.value='';
       alt.value='';
       remove.value='1';
-      empty();
-    });
-  });
+       empty();
+     });
+     bindImagePreparation(upload?.form);
+   });
   const officialForm=document.getElementById('official-form');
   if(officialForm&&!officialForm.dataset.officialBound){
     officialForm.dataset.officialBound='true';
@@ -104,17 +107,22 @@ const initAdminPage = () => {
     if(window.jQuery&&residentSelect)window.jQuery(residentSelect).on('select2:select select2:clear',populateResident);
     ['name','title_prefix','title_suffix'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateFullName));
     color?.addEventListener('input',()=>{if(/^#[0-9A-Fa-f]{6}$/.test(color.value)&&colorPreview)colorPreview.style.background=color.value});
-    camera?.addEventListener('change',()=>{
-      const file=camera.files?.[0];
-      if(!file||!imagePreview)return;
-      imagePreview.innerHTML='';
+     camera?.addEventListener('change',async()=>{
+       const file=camera.files?.[0];
+       if(!file||!imagePreview)return;
+       imagePreview.innerHTML='';
       const image=document.createElement('img');
       image.src=URL.createObjectURL(file);
       image.alt='Pratinjau foto dari kamera';
-      imagePreview.appendChild(image);
-      const remove=officialForm.querySelector('[data-image-remove]');
-      if(remove)remove.value='0';
-    });
+       imagePreview.appendChild(image);
+       const remove=officialForm.querySelector('[data-image-remove]');
+       if(remove)remove.value='0';
+       const prepared=await prepareImageInput(camera);
+       if(prepared&&prepared!==file){
+         image.src=URL.createObjectURL(prepared);
+       }
+     });
+     bindImagePreparation(officialForm);
     updateSource();
     updateFullName();
   }
@@ -152,11 +160,12 @@ const initAdminPage = () => {
     editor.querySelector('[data-action="link"]')?.addEventListener('click',()=>{rememberSelection();const url=window.prompt('Masukkan alamat tautan (https://...)');if(url){restoreSelection();document.execCommand('createLink',false,url);sync()}surface.focus()});
     editor.querySelector('[data-action="image"]')?.addEventListener('click',()=>{rememberSelection();imageInput?.click()});
     editor.querySelectorAll('[data-action="image-align"]').forEach(button=>button.addEventListener('click',()=>{if(!selectedFigure){showStatus('Klik gambar di dalam editor terlebih dahulu.',true);return}selectedFigure.className=`article-image align-${button.dataset.align} is-selected`;if(button.dataset.align==='full')selectedFigure.dataset.width='100';selectedFigure.querySelector('[data-resize-label]').textContent=`${selectedFigure.dataset.width}%`;sync();showStatus('Posisi gambar diperbarui.')}));
-    imageInput?.addEventListener('change',async()=>{const file=imageInput.files?.[0];if(!file)return;showStatus('Mengunggah gambar...');const data=new FormData();data.append('image',file);const slug=document.querySelector('#slug')?.value.trim(),title=document.querySelector('#title')?.value.trim();data.append('folder_name',slug||title||'berita-baru');try{const response=await fetch(editor.dataset.uploadUrl,{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]')?.content||'','Accept':'application/json'},body:data});const result=await response.json();if(!response.ok)throw new Error(result.message||Object.values(result.errors||{}).flat()[0]||'Gambar gagal diunggah.');restoreSelection();const figure=document.createElement('figure');figure.className='article-image align-center';figure.dataset.width='70';const image=document.createElement('img');image.src=result.url;image.alt=result.alt||file.name;const caption=document.createElement('figcaption');caption.textContent='Klik untuk menulis keterangan gambar';figure.append(image,caption);decorateFigure(figure);const range=window.getSelection()?.rangeCount?window.getSelection().getRangeAt(0):null;if(range){range.deleteContents();range.insertNode(figure);range.setStartAfter(figure);range.collapse(true);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);savedRange=range.cloneRange()}else surface.append(figure);selectedFigure=figure;figure.classList.add('is-selected');sync();showStatus('Gambar berhasil disisipkan. Klik gambar lalu tarik sudut kanan bawah untuk mengubah ukurannya.')}catch(error){showStatus(error.message||'Gambar gagal diunggah.',true)}finally{imageInput.value=''}});
+     imageInput?.addEventListener('change',async()=>{const file=imageInput.files?.[0];if(!file)return;showStatus('Menyiapkan gambar...');let prepared=file;try{prepared=await prepareImageFile(file)}catch(error){/* Server-side validation remains the fallback. */}showStatus('Mengunggah gambar...');const data=new FormData();data.append('image',prepared,prepared.name);const slug=document.querySelector('#slug')?.value.trim(),title=document.querySelector('#title')?.value.trim();data.append('folder_name',slug||title||'berita-baru');try{const response=await fetch(editor.dataset.uploadUrl,{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]')?.content||'','Accept':'application/json'},body:data});const result=await response.json();if(!response.ok)throw new Error(result.message||Object.values(result.errors||{}).flat()[0]||'Gambar gagal diunggah.');restoreSelection();const figure=document.createElement('figure');figure.className='article-image align-center';figure.dataset.width='70';const image=document.createElement('img');image.src=result.url;image.alt=result.alt||prepared.name;const caption=document.createElement('figcaption');caption.textContent='Klik untuk menulis keterangan gambar';figure.append(image,caption);decorateFigure(figure);const range=window.getSelection()?.rangeCount?window.getSelection().getRangeAt(0):null;if(range){range.deleteContents();range.insertNode(figure);range.setStartAfter(figure);range.collapse(true);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);savedRange=range.cloneRange()}else surface.append(figure);selectedFigure=figure;figure.classList.add('is-selected');sync();showStatus('Gambar berhasil disisipkan. Klik gambar lalu tarik sudut kanan bawah untuk mengubah ukurannya.')}catch(error){showStatus(error.message||'Gambar gagal diunggah.',true)}finally{imageInput.value=''}});
     editor.closest('form')?.addEventListener('submit',sync);
   });
   const title=document.querySelector('#title'),titleCount=document.querySelector('#title-count');if(title&&titleCount){const count=()=>titleCount.textContent=title.value.length;title.addEventListener('input',count);count()}
   initRegionSelectors();
+  document.querySelectorAll('form').forEach(bindImagePreparation);
 };
 
 window.initAdminPage = initAdminPage;

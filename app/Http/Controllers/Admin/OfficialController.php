@@ -8,6 +8,7 @@ use App\Models\Official;
 use App\Models\Resident;
 use App\Services\ActivityLogger;
 use App\Services\ImageProcessor;
+use App\Support\ImageUploadRules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -263,8 +264,8 @@ class OfficialController extends Controller
             'organization_layout' => ['nullable', Rule::in(['hanging', 'horizontal'])],
             'organization_color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'photo_id' => ['nullable', 'exists:media,id'],
-            'photo_upload' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-            'photo_camera' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'photo_upload' => ImageUploadRules::optional(),
+            'photo_camera' => ImageUploadRules::optional(),
             'photo_alt' => ['nullable', 'string', 'max:255'],
             'remove_photo' => ['nullable', 'boolean'],
             'biography' => ['nullable', 'string', 'max:5000'],

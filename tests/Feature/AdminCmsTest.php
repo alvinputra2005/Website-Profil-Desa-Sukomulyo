@@ -145,6 +145,21 @@ class AdminCmsTest extends TestCase
         $this->assertNull($news->fresh()->deleted_at);
     }
 
+    public function test_image_upload_rejects_dimensions_above_the_server_limit(): void
+    {
+        Storage::fake('public');
+        $admin = $this->user('super_admin');
+
+        $response = $this->actingAs($admin)
+            ->withHeaders(['Accept' => 'application/json'])
+            ->post('/admin/media/editor-upload', [
+                'image' => UploadedFile::fake()->image('terlalu-besar.jpg', 4001, 2000),
+            ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['image']);
+        $this->assertDatabaseCount('media', 0);
+    }
+
     public function test_image_upload_is_available_for_officials_and_village_sections(): void
     {
         Storage::fake('public');
@@ -282,5 +297,34 @@ class AdminCmsTest extends TestCase
             ->assertSee('Kecamatan Contoh')
             ->assertSee('Siti Aminah')
             ->assertSee('Profil desa yang diperbarui.');
+    }
+
+    public function test_vision_mission_forms_use_separate_collapsible_cards_and_have_no_image_fields(): void
+    {
+        $admin = $this->user('super_admin');
+
+        $response = $this->actingAs($admin)
+            ->get('/admin/info-desa/vision-mission')
+            ->assertOk()
+            ->assertSee('Buka atau tutup form visi desa')
+            ->assertSee('Buka atau tutup form misi desa')
+            ->assertSee('name="vision"', false)
+            ->assertSee('name="mission"', false)
+            ->assertDontSee('vision_image_id')
+            ->assertDontSee('mission_image_id')
+            ->assertDontSee('Gambar Visi Desa')
+            ->assertDontSee('Gambar Misi Desa');
+
+        $this->assertSame(2, substr_count($response->getContent(), 'data-widget="collapse"'));
+
+        $response = $this->put('/admin/info-desa/vision-mission', [
+            'vision' => '<p>Visi desa tanpa gambar.</p>',
+            'mission' => '<p>Misi desa tanpa gambar.</p>',
+            'status' => 'published',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertNull(VillageProfileSection::where('section_key', 'vision')->value('image_id'));
+        $this->assertNull(VillageProfileSection::where('section_key', 'mission')->value('image_id'));
     }
 }
