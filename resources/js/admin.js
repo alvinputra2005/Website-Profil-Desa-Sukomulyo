@@ -1,4 +1,5 @@
 import { initAjaxNavigation } from './ajax';
+import { initRegionSelectors } from './regions';
 
 const initAdminPage = () => {
   if(window.jQuery){const $=window.jQuery;
@@ -147,6 +148,7 @@ const initAdminPage = () => {
     editor.closest('form')?.addEventListener('submit',sync);
   });
   const title=document.querySelector('#title'),titleCount=document.querySelector('#title-count');if(title&&titleCount){const count=()=>titleCount.textContent=title.value.length;title.addEventListener('input',count);count()}
+  initRegionSelectors();
 };
 
 window.initAdminPage = initAdminPage;

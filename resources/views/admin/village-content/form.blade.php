@@ -2,6 +2,12 @@
 @php
     $titles=['profile'=>'Identitas Desa','vision-mission'=>'Visi Misi','history'=>'Sejarah Desa','potential'=>'Potensi Desa'];
     $section=$sections->first();
+    $regionValues=[
+        'province'=>['code'=>(string) old('province_code',$settings['province.code'] ?? ''),'name'=>(string) old('province_name',$settings['province.name'] ?? '')],
+        'regency'=>['code'=>(string) old('regency_code',$settings['regency.code'] ?? ''),'name'=>(string) old('regency_name',$settings['regency.name'] ?? '')],
+        'district'=>['code'=>(string) old('district_code',$settings['district.code'] ?? ''),'name'=>(string) old('district_name',$settings['district.name'] ?? '')],
+        'village'=>['code'=>(string) old('village_code',$settings['village.code'] ?? ''),'name'=>(string) old('site_name',$settings['site.name'] ?? '')],
+    ];
 @endphp
 @section('title',$titles[$page])
 @section('page-description','Kelola informasi yang ditampilkan pada website desa')
@@ -20,10 +26,8 @@
             <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-home"></i> Desa</h3></div>
             <div class="box-body">
                 <div class="row">
-                    <div class="col-md-8"><x-admin.village-input name="site_name" label="Nama Desa" :value="$settings['site.name'] ?? ''" maxlength="255" required /></div>
-                    <div class="col-md-4"><x-admin.village-input name="postal_code" label="Kode Pos Desa" :value="$settings['village.postal_code'] ?? ''" maxlength="5" inputmode="numeric" placeholder="Contoh: 61152" /></div>
-                    <div class="col-md-6"><x-admin.village-input name="village_code" label="Kode Desa" :value="$settings['village.code'] ?? ''" maxlength="20" inputmode="numeric" placeholder="Contoh: 35.25.04.2008" /></div>
                     <div class="col-md-6"><x-admin.village-input name="village_bps_code" label="Kode BPS Desa" :value="$settings['village.bps_code'] ?? ''" maxlength="20" inputmode="numeric" /></div>
+                    <div class="col-md-6"><x-admin.village-input name="postal_code" label="Kode Pos Desa" :value="$settings['village.postal_code'] ?? ''" maxlength="5" inputmode="numeric" placeholder="Contoh: 61152" /></div>
                 </div>
 
                 <div class="row">
@@ -63,29 +67,47 @@
     </div>
 
     <div class="col-md-4">
-        <div class="box box-info">
-            <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-map-marker"></i> Kecamatan</h3></div>
+        <div class="box box-info" data-region-selector data-regions-base-url="{{ url('/admin/wilayah') }}">
+            <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-map"></i> Wilayah Administratif</h3></div>
             <div class="box-body">
-                <x-admin.village-input name="district_name" label="Nama Kecamatan" :value="$settings['district.name'] ?? ''" maxlength="100" />
-                <x-admin.village-input name="district_code" label="Kode Kecamatan" :value="$settings['district.code'] ?? ''" maxlength="15" inputmode="numeric" />
-                <x-admin.village-input name="district_head_name" label="Nama Camat" :value="$settings['district.head_name'] ?? ''" maxlength="255" />
-                <x-admin.village-input name="district_head_nip" label="NIP Camat" :value="$settings['district.head_nip'] ?? ''" maxlength="30" inputmode="numeric" />
-            </div>
-        </div>
+                <p class="help-block">Pilih wilayah secara berurutan mulai dari provinsi hingga desa/kelurahan.</p>
 
-        <div class="box box-info">
-            <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-map"></i> Kabupaten</h3></div>
-            <div class="box-body">
-                <x-admin.village-input name="regency_name" label="Nama Kabupaten" :value="$settings['regency.name'] ?? ''" maxlength="100" />
-                <x-admin.village-input name="regency_code" label="Kode Kabupaten" :value="$settings['regency.code'] ?? ''" maxlength="15" inputmode="numeric" />
-            </div>
-        </div>
-
-        <div class="box box-info">
-            <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-globe"></i> Provinsi</h3></div>
-            <div class="box-body">
-                <x-admin.village-input name="province_name" label="Nama Provinsi" :value="$settings['province.name'] ?? ''" maxlength="100" />
-                <x-admin.village-input name="province_code" label="Kode Provinsi" :value="$settings['province.code'] ?? ''" maxlength="10" inputmode="numeric" />
+                @foreach([
+                    'province'=>['Provinsi','province_code','province_name'],
+                    'regency'=>['Kabupaten/Kota','regency_code','regency_name'],
+                    'district'=>['Kecamatan','district_code','district_name'],
+                    'village'=>['Desa/Kelurahan','village_code','site_name'],
+                ] as $regionKey=>[$regionLabel,$codeField,$nameField])
+                    <div class="form-group {{ $errors->has($codeField)||$errors->has($nameField)?'has-error':'' }}">
+                        <label for="{{ $codeField }}" class="control-label required">{{ $regionLabel }}</label>
+                        <select
+                            id="{{ $codeField }}"
+                            name="{{ $codeField }}"
+                            class="form-control select2"
+                            data-region="{{ $regionKey }}"
+                            data-selected-code="{{ $regionValues[$regionKey]['code'] }}"
+                            data-selected-name="{{ $regionValues[$regionKey]['name'] }}"
+                            required
+                            @disabled($regionKey!=='province' && !$regionValues[$regionKey]['code'])
+                        >
+                            <option value="">-- Pilih {{ strtolower($regionLabel) }} --</option>
+                            @if($regionValues[$regionKey]['code'])
+                                <option value="{{ $regionValues[$regionKey]['code'] }}" data-name="{{ $regionValues[$regionKey]['name'] }}" selected>
+                                    {{ $regionValues[$regionKey]['name'] }} ({{ $regionValues[$regionKey]['code'] }})
+                                </option>
+                            @endif
+                        </select>
+                        <input
+                            type="hidden"
+                            id="{{ $nameField }}"
+                            name="{{ $nameField }}"
+                            value="{{ $regionValues[$regionKey]['name'] }}"
+                            data-region-name="{{ $regionKey }}"
+                        >
+                        @error($codeField)<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
+                        @error($nameField)<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
+                    </div>
+                @endforeach
             </div>
         </div>
 

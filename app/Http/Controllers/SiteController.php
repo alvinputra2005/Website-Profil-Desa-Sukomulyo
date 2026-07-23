@@ -325,8 +325,6 @@ class SiteController extends Controller
                 'rows' => [
                     ['label' => 'Nama Kecamatan', 'value' => $value('district.name')],
                     ['label' => 'Kode Kecamatan', 'value' => $value('district.code')],
-                    ['label' => 'Nama Camat', 'value' => $value('district.head_name')],
-                    ['label' => 'NIP Camat', 'value' => $value('district.head_nip')],
                 ],
             ],
             [

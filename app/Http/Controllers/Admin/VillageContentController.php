@@ -98,7 +98,7 @@ class VillageContentController extends Controller
             $data = $request->validate(array_merge([
                 'site_name' => 'required|string|max:255',
                 'tagline' => 'nullable|string|max:255',
-                'village_code' => ['nullable', 'string', 'max:20', 'regex:/^[0-9.\-\s]+$/'],
+                'village_code' => ['required', 'string', 'regex:/^[0-9]{2}\.[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/'],
                 'village_bps_code' => ['nullable', 'string', 'max:20', 'regex:/^[0-9.\-\s]+$/'],
                 'postal_code' => ['nullable', 'regex:/^[0-9]{5}$/'],
                 'address' => 'nullable|string|max:1000',
@@ -106,14 +106,14 @@ class VillageContentController extends Controller
                 'phone' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+().\-\s]+$/'],
                 'mobile' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+().\-\s]+$/'],
                 'website' => 'nullable|url:http,https|max:255',
-                'district_name' => 'nullable|string|max:100',
-                'district_code' => ['nullable', 'string', 'max:15', 'regex:/^[0-9.\-\s]+$/'],
+                'district_name' => 'required|string|max:100',
+                'district_code' => ['required', 'string', 'regex:/^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$/'],
                 'district_head_name' => 'nullable|string|max:255',
                 'district_head_nip' => 'nullable|string|max:30',
-                'regency_name' => 'nullable|string|max:100',
-                'regency_code' => ['nullable', 'string', 'max:15', 'regex:/^[0-9.\-\s]+$/'],
-                'province_name' => 'nullable|string|max:100',
-                'province_code' => ['nullable', 'string', 'max:10', 'regex:/^[0-9.\-\s]+$/'],
+                'regency_name' => 'required|string|max:100',
+                'regency_code' => ['required', 'string', 'regex:/^[0-9]{2}\.[0-9]{2}$/'],
+                'province_name' => 'required|string|max:100',
+                'province_code' => ['required', 'string', 'regex:/^[0-9]{2}$/'],
                 'profile_content' => 'required|string|max:100000',
                 'status' => ['required', Rule::in(['draft', 'published'])],
             ], $this->imageRules('profile_image_id')));
@@ -281,8 +281,6 @@ class VillageContentController extends Controller
                 'rows' => [
                     ['label' => 'Nama Kecamatan', 'value' => $value('district.name')],
                     ['label' => 'Kode Kecamatan', 'value' => $value('district.code')],
-                    ['label' => 'Nama Camat', 'value' => $value('district.head_name')],
-                    ['label' => 'NIP Camat', 'value' => $value('district.head_nip')],
                 ],
             ],
             [

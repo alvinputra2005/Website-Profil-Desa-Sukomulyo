@@ -231,6 +231,11 @@ class AdminCmsTest extends TestCase
 
         $this->get('/admin/info-desa/profile/edit')
             ->assertOk()
+            ->assertSee('data-region-selector', false)
+            ->assertSee('data-region="province"', false)
+            ->assertSee('data-region="regency"', false)
+            ->assertSee('data-region="district"', false)
+            ->assertSee('data-region="village"', false)
             ->assertSee('name="village_code"', false)
             ->assertSee('name="district_head_name"', false)
             ->assertSee('name="profile_content"', false)

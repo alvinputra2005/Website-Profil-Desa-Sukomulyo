@@ -23,7 +23,7 @@
             <h3 class="box-title"><i class="fa fa-home"></i> Identitas Desa</h3>
         </div>
         <div class="box-body">
-            <div class="identity-hero" style="background-image: url('{{ asset('assets/village-rice-fields.jpg') }}');">
+            <div class="identity-hero" style="background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('{{ asset('assets/village-rice-fields.jpg') }}');">
                 <img src="{{ asset('assets/logo-brighter-sukomulyo.svg') }}" alt="Logo {{ $siteName }}" class="identity-hero-logo">
                 <h3>{{ $siteName }}</h3>
                 <p>{{ $location }}</p>
