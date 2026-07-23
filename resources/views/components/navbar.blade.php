@@ -57,10 +57,18 @@
         <div class="mainhdrnav" id="primary-menu">
             <ul>
                 @foreach ($navigation as $item)
-                    <li class="{{ request()->routeIs($item['active']) ? 'current-menu-item' : '' }}">
-                        <a href="{{ route($item['route']) }}" @if(request()->routeIs($item['active'])) aria-current="page" @endif>
+                    @php($itemActive = request()->routeIs($item['active']) || collect($item['children'] ?? [])->contains(fn ($child) => request()->routeIs($child['active'])))
+                    <li class="{{ $itemActive ? 'current-menu-item' : '' }}{{ !empty($item['children']) ? ' menu-item-has-children' : '' }}">
+                        <a href="{{ route($item['route']) }}" @if($itemActive) aria-current="page" @endif>
                             {{ $item['label'] }}
                         </a>
+                        @if (!empty($item['children']))
+                            <ul class="sub-menu">
+                                @foreach ($item['children'] as $child)
+                                    <li class="{{ request()->routeIs($child['active']) ? 'current-menu-item' : '' }}"><a href="{{ route($child['route']) }}">{{ $child['label'] }}</a></li>
+                                @endforeach
+                            </ul>
+                        @endif
                     </li>
                 @endforeach
             </ul>

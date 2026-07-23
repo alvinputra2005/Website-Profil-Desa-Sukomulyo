@@ -143,6 +143,47 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .quick-actions .btn-app > .fa { position: static; margin: 0; font-size: 18px; line-height: 1; }
 .required::after { content: " *"; color: #b23b30; }
 
+/* Modul kependudukan: tabel padat, filter jelas, dan formulir bertahap. */
+.population-filters { display: grid; margin-bottom: 18px; padding: 13px; border: 1px solid var(--admin-border); background: #f8f9f6; grid-template-columns: minmax(240px, 1fr) 180px 180px minmax(170px, auto); align-items: end; gap: 12px; }
+.population-filters-compact { grid-template-columns: minmax(260px, 1fr) 220px minmax(170px, auto); }
+.population-filters .form-group { margin: 0; }
+.population-filters label, .population-stat-selector label, .population-period-filter label { display: block; color: var(--admin-muted); font-size: 12px; font-weight: 600; }
+.population-filters .filter-action { white-space: nowrap; }
+.population-filters .filter-action .btn + .btn { margin-left: 4px; }
+.population-table { min-width: 1050px; }
+.population-table > tbody > tr > td { vertical-align: middle; }
+.population-table code { color: var(--admin-primary-dark); }
+.population-form-tabs { border-top: 3px solid var(--admin-primary); }
+.population-form-tabs > .box-footer { margin-top: 0; }
+.population-event-notes { margin-top: 8px; }
+.population-avatar { display: flex; width: 88px; height: 88px; margin: 5px auto 12px; align-items: center; justify-content: center; border-radius: 50%; background: var(--admin-primary); color: #fff; font-size: 38px; font-weight: 700; }
+.population-details dt { width: 145px; color: var(--admin-muted); font-weight: 600; }
+.population-details dd { margin-left: 165px; min-height: 24px; }
+.population-summary { margin-bottom: 20px; }
+.population-stat-selector { display: flex; max-width: 470px; margin-bottom: 18px; align-items: center; gap: 12px; }
+.population-stat-selector label { flex: 0 0 auto; margin: 0; }
+.population-stat-table th, .population-stat-table td { vertical-align: middle !important; }
+.population-period-filter { display: flex; margin-bottom: 20px; align-items: end; gap: 12px; }
+.population-period-filter > div { width: 180px; }
+.population-period-filter button { height: 34px; }
+.population-report-heading { margin: 10px 0 20px; text-align: center; }
+.population-report-heading h3 { margin-bottom: 3px; color: var(--admin-primary-dark); font-weight: 700; }
+.population-report-heading p { margin: 0; color: var(--admin-muted); }
+.population-report-table th, .population-report-table td { text-align: right; }
+.population-report-table th:first-child, .population-report-table td:first-child { text-align: left; }
+.population-report-table .report-ending th { background: #eef5e9; }
+.report-detail-title { margin-top: 28px; padding-bottom: 8px; border-bottom: 2px solid var(--admin-border); color: var(--admin-primary-dark); }
+.timeline > li > .timeline-item { margin-right: 15px; }
+.timeline > li > .timeline-item > .timeline-body { padding-bottom: 12px; }
+
+@media print {
+    .main-header, .main-sidebar, .main-footer, .content-header, .box-tools, .population-period-filter, .nav-tabs, .btn { display: none !important; }
+    .content-wrapper { margin: 0 !important; background: #fff; }
+    .content { padding: 0; }
+    .box { border: 0; box-shadow: none; }
+    .population-report-heading { margin-top: 0; }
+}
+
 /* Pengelolaan artikel: pola dua kolom dan editor seperti modul artikel OpenSID. */
 .news-list-header { display: flex; align-items: center; gap: 7px; }
 .news-filters { display: grid; margin-bottom: 18px; padding: 13px; border: 1px solid var(--admin-border); background: #f8f9f6; grid-template-columns: minmax(260px, 1fr) 190px 220px; gap: 12px; }
@@ -218,6 +259,12 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
     .news-filters { grid-template-columns: 1fr; }
     .news-filters .form-group:first-child { grid-column: auto; }
     .article-editor-surface { min-height: 330px; }
+    .population-filters, .population-filters-compact { grid-template-columns: 1fr; }
+    .population-filters .filter-action { margin-top: 3px; }
+    .population-stat-selector, .population-period-filter { display: block; max-width: none; }
+    .population-stat-selector select, .population-period-filter > div { width: 100%; margin-bottom: 10px; }
+    .population-details dt { width: 115px; }
+    .population-details dd { margin-left: 130px; }
 }
 @media (max-width: 480px) {
     .media-grid, .dashboard-stats { grid-template-columns: 1fr; }

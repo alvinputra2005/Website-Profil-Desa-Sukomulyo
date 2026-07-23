@@ -5,6 +5,10 @@ use App\Http\Controllers\MediaFileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{LoginController,PasswordController};
 use App\Http\Controllers\Admin\{ActivityController,ContactMessageController,CrudController,DashboardController,MediaController,UserController,VillageContentController};
+use App\Http\Controllers\Admin\{
+    FamilyController, HouseholdController, PopulationGroupController, PopulationGroupMemberController,
+    PopulationReportController, PopulationStatisticsController, ResidentController
+};
 
 Route::middleware('guest')->group(function(){
     Route::get('/admin/login',[LoginController::class,'create'])->name('login');
@@ -30,6 +34,20 @@ Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/activities',ActivityController::class)->name('activities.index');
     Route::get('/info-desa/{page}',[VillageContentController::class,'edit'])->name('village-content.edit');
     Route::put('/info-desa/{page}',[VillageContentController::class,'update'])->name('village-content.update');
+    Route::middleware('can:manage-data')->prefix('kependudukan')->name('population.')->group(function () {
+        Route::resource('penduduk', ResidentController::class)->parameters(['penduduk' => 'resident'])->names('residents');
+        Route::resource('keluarga', FamilyController::class)->parameters(['keluarga' => 'family'])->except('show')->names('families');
+        Route::resource('rumah-tangga', HouseholdController::class)->parameters(['rumah-tangga' => 'household'])->except('show')->names('households');
+        Route::resource('kelompok', PopulationGroupController::class)->parameters(['kelompok' => 'group'])->names('groups');
+        Route::get('kelompok/{group}/anggota/create', [PopulationGroupMemberController::class, 'create'])->name('groups.members.create');
+        Route::post('kelompok/{group}/anggota', [PopulationGroupMemberController::class, 'store'])->name('groups.members.store');
+        Route::get('kelompok/{group}/anggota/{membership}/edit', [PopulationGroupMemberController::class, 'edit'])->name('groups.members.edit');
+        Route::put('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'update'])->name('groups.members.update');
+        Route::delete('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'destroy'])->name('groups.members.destroy');
+        Route::get('statistik', PopulationStatisticsController::class)->name('statistics');
+        Route::get('laporan-penduduk', [PopulationReportController::class, 'index'])->name('report');
+        Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
+    });
     Route::get('/news-trash',[CrudController::class,'trash'])->name('news.trash');
     Route::patch('/news-trash/{id}/restore',[CrudController::class,'restore'])->name('news.restore');
     Route::delete('/news-trash/{id}/force',[CrudController::class,'forceDelete'])->name('news.force-delete');
@@ -47,6 +65,7 @@ Route::controller(SiteController::class)->group(function () {
     Route::get('/', 'home')->name('beranda');
     Route::get('/profile-desa', 'profile')->name('profile-desa');
     Route::get('/data-desa-statistik', 'statistics')->name('data-desa-statistik');
+    Route::get('/laporan-penduduk', 'populationReport')->name('laporan-penduduk');
     Route::get('/informasi-publik-desa', 'publicInformation')->name('informasi-publik-desa');
     Route::get('/peta-desa', 'map')->name('peta-desa');
 

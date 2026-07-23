@@ -2,17 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ContactMessage, Gallery, News, Official, Setting, VillageProfileSection};
+use App\Models\ContactMessage;
+use App\Models\Gallery;
+use App\Models\News;
+use App\Models\Official;
+use App\Models\Setting;
+use App\Models\VillageProfileSection;
+use App\Services\PopulationStatistics as PopulationStatisticsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Schema;
 
 class SiteController extends Controller
 {
-    public function home(): View
+    public function home(PopulationStatisticsService $populationStatistics): View
     {
+        $populationSummary = Schema::hasTable('residents')
+            ? $populationStatistics->summary()
+            : ['residents' => 0, 'families' => 0, 'areas' => 0];
+
         return $this->render('pages.home', [
             'missions' => [
                 ['icon' => 'fas fa-home', 'title' => 'Profile Desa', 'route' => 'profile-desa'],
@@ -22,9 +32,9 @@ class SiteController extends Controller
                 ['icon' => 'fas fa-map-marked-alt', 'title' => 'Peta Desa', 'route' => 'peta-desa'],
             ],
             'villageStatistics' => [
-                ['icon' => 'fas fa-users', 'value' => 2150, 'unit' => 'jiwa', 'label' => 'Jumlah Penduduk'],
-                ['icon' => 'fas fa-home', 'value' => 720, 'unit' => 'KK', 'label' => 'Kepala Keluarga'],
-                ['icon' => 'fas fa-map-signs', 'value' => 4, 'unit' => 'dusun', 'label' => 'Wilayah Administratif', 'meta' => '— RW · — RT'],
+                ['icon' => 'fas fa-users', 'value' => $populationSummary['residents'], 'unit' => 'jiwa', 'label' => 'Jumlah Penduduk'],
+                ['icon' => 'fas fa-home', 'value' => $populationSummary['families'], 'unit' => 'KK', 'label' => 'Kepala Keluarga'],
+                ['icon' => 'fas fa-map-signs', 'value' => $populationSummary['areas'], 'unit' => 'dusun', 'label' => 'Wilayah Administratif', 'meta' => 'Data wilayah kependudukan'],
                 ['icon' => 'fas fa-map', 'value' => 430, 'unit' => 'hektare', 'label' => 'Luas Wilayah'],
             ],
             'featuredPotentials' => array_slice($this->potentialsData(), 0, 2),
@@ -33,29 +43,48 @@ class SiteController extends Controller
 
     public function profile(): View
     {
-        return $this->render('pages.profile', ['profileSections' => Schema::hasTable('village_profile_sections') ? VillageProfileSection::whereIn('section_key',['profile','history','vision','mission'])->where('status','published')->orderBy('display_order')->get() : collect()]);
+        return $this->render('pages.profile', ['profileSections' => Schema::hasTable('village_profile_sections') ? VillageProfileSection::whereIn('section_key', ['profile', 'history', 'vision', 'mission'])->where('status', 'published')->orderBy('display_order')->get() : collect()]);
     }
 
-    public function statistics(): View
+    public function statistics(PopulationStatisticsService $populationStatistics): View
     {
+        $summary = Schema::hasTable('residents')
+            ? $populationStatistics->summary()
+            : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'households' => 0, 'areas' => 0];
+        $total = max($summary['residents'], 1);
+        $occupations = Schema::hasTable('residents') ? $populationStatistics->distribution('occupation') : [];
+
         return $this->render('pages.statistics', [
             'statistics' => [
-                ['icon' => 'fas fa-users', 'value' => '2.150', 'label' => 'Jumlah Penduduk', 'unit' => 'jiwa'],
-                ['icon' => 'fas fa-home', 'value' => '720', 'label' => 'Kepala Keluarga', 'unit' => 'KK'],
-                ['icon' => 'fas fa-map', 'value' => '430', 'label' => 'Luas Wilayah', 'unit' => 'hektare'],
-                ['icon' => 'fas fa-map-signs', 'value' => '4', 'label' => 'Wilayah Dusun', 'unit' => 'dusun'],
+                ['icon' => 'fas fa-users', 'value' => number_format($summary['residents'], 0, ',', '.'), 'label' => 'Jumlah Penduduk', 'unit' => 'jiwa'],
+                ['icon' => 'fas fa-home', 'value' => number_format($summary['families'], 0, ',', '.'), 'label' => 'Kepala Keluarga', 'unit' => 'KK'],
+                ['icon' => 'fas fa-building', 'value' => number_format($summary['households'], 0, ',', '.'), 'label' => 'Rumah Tangga', 'unit' => 'rumah tangga'],
+                ['icon' => 'fas fa-map-signs', 'value' => number_format($summary['areas'], 0, ',', '.'), 'label' => 'Wilayah Dusun', 'unit' => 'dusun'],
             ],
             'population' => [
-                ['label' => 'Laki-laki', 'value' => 1085, 'percentage' => 50.5],
-                ['label' => 'Perempuan', 'value' => 1065, 'percentage' => 49.5],
+                ['label' => 'Laki-laki', 'value' => $summary['male'], 'percentage' => round($summary['male'] / $total * 100, 2)],
+                ['label' => 'Perempuan', 'value' => $summary['female'], 'percentage' => round($summary['female'] / $total * 100, 2)],
             ],
-            'livelihoods' => [
-                ['label' => 'Pertanian dan Perkebunan', 'percentage' => 48],
-                ['label' => 'Perdagangan dan UMKM', 'percentage' => 24],
-                ['label' => 'Jasa dan Pegawai', 'percentage' => 18],
-                ['label' => 'Lainnya', 'percentage' => 10],
-            ],
+            'livelihoods' => collect($occupations)->take(6)->map(fn (array $row) => [
+                'label' => $row['label'],
+                'percentage' => $row['percentage'],
+            ])->all(),
         ]);
+    }
+
+    public function populationReport(Request $request, PopulationStatisticsService $populationStatistics): View
+    {
+        $validated = validator($request->query(), [
+            'year' => ['nullable', 'integer', 'min:1900', 'max:'.now()->year],
+            'month' => ['nullable', 'integer', 'between:1,12'],
+        ])->validate();
+        $year = (int) ($validated['year'] ?? now()->year);
+        $month = (int) ($validated['month'] ?? now()->month);
+
+        return $this->render('pages.population-report', array_merge(
+            $populationStatistics->monthlyReport($year, $month),
+            compact('year', 'month')
+        ));
     }
 
     public function publicInformation(): View
@@ -78,7 +107,7 @@ class SiteController extends Controller
     public function government(): View
     {
         return $this->render('pages.government', [
-            'officials' => Schema::hasTable('officials') && Official::where('is_active',true)->exists() ? Official::where('is_active',true)->orderBy('display_order')->get()->map(fn($o)=>['role'=>$o->position,'name'=>$o->name])->all() : [
+            'officials' => Schema::hasTable('officials') && Official::where('is_active', true)->exists() ? Official::where('is_active', true)->orderBy('display_order')->get()->map(fn ($o) => ['role' => $o->position, 'name' => $o->name])->all() : [
                 ['role' => 'Kepala Desa', 'name' => 'Nama Kepala Desa'],
                 ['role' => 'Sekretaris Desa', 'name' => 'Nama Sekretaris Desa'],
                 ['role' => 'Kaur Tata Usaha dan Umum', 'name' => 'Nama Perangkat Desa'],
@@ -165,11 +194,16 @@ class SiteController extends Controller
         $image = asset('assets/village-rice-fields.jpg');
 
         if (Schema::hasTable('galleries')) {
-            $photos = Gallery::where('status','published')->with(['items.media','cover'])->latest('event_date')->get()->flatMap(function ($gallery) use ($image) {
-                if ($gallery->items->isEmpty()) return [['src'=>$gallery->cover?->url ?? $image,'title'=>$gallery->title,'caption'=>$gallery->description]];
-                return $gallery->items->map(fn($item)=>['src'=>$item->media->url,'title'=>$gallery->title,'caption'=>$item->caption ?? $gallery->description]);
+            $photos = Gallery::where('status', 'published')->with(['items.media', 'cover'])->latest('event_date')->get()->flatMap(function ($gallery) use ($image) {
+                if ($gallery->items->isEmpty()) {
+                    return [['src' => $gallery->cover?->url ?? $image, 'title' => $gallery->title, 'caption' => $gallery->description]];
+                }
+
+                return $gallery->items->map(fn ($item) => ['src' => $item->media->url, 'title' => $gallery->title, 'caption' => $item->caption ?? $gallery->description]);
             })->all();
-            if ($photos !== []) return $this->render('pages.gallery', compact('photos'));
+            if ($photos !== []) {
+                return $this->render('pages.gallery', compact('photos'));
+            }
         }
 
         return $this->render('pages.gallery', [
@@ -220,20 +254,24 @@ class SiteController extends Controller
     private function shared(): array
     {
         $articles = $this->articles();
-        $setting = fn(string $key,string $fallback) => Schema::hasTable('settings') ? (Setting::where('key',$key)->value('value') ?? $fallback) : $fallback;
+        $setting = fn (string $key, string $fallback) => Schema::hasTable('settings') ? (Setting::where('key', $key)->value('value') ?? $fallback) : $fallback;
 
         return [
             'site' => [
-                'name' => $setting('site.name','Desa Sukomulyo'),
-                'tagline' => $setting('site.tagline','Website Resmi Pemerintah Desa Sukomulyo'),
-                'email' => $setting('site.email','pemdes@sukomulyo.desa.id'),
-                'phone' => $setting('site.phone','(0000) 123 456'),
-                'address' => $setting('site.address','Kantor Desa Sukomulyo, Indonesia'),
+                'name' => $setting('site.name', 'Desa Sukomulyo'),
+                'tagline' => $setting('site.tagline', 'Website Resmi Pemerintah Desa Sukomulyo'),
+                'email' => $setting('site.email', 'pemdes@sukomulyo.desa.id'),
+                'phone' => $setting('site.phone', '(0000) 123 456'),
+                'address' => $setting('site.address', 'Kantor Desa Sukomulyo, Indonesia'),
             ],
             'navigation' => [
                 ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
                 ['label' => 'Profile Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
                 ['label' => 'Data Desa/Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-desa-statistik'],
+                ['label' => 'Kependudukan', 'route' => 'data-desa-statistik', 'active' => 'data-desa-statistik', 'children' => [
+                    ['label' => 'Statistik Kependudukan', 'route' => 'data-desa-statistik', 'active' => 'data-desa-statistik'],
+                    ['label' => 'Laporan Penduduk', 'route' => 'laporan-penduduk', 'active' => 'laporan-penduduk'],
+                ]],
                 ['label' => 'Informasi Publik Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-publik-desa'],
                 ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
                 ['label' => 'Peta Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
@@ -250,12 +288,16 @@ class SiteController extends Controller
 
         $hasArticles = Schema::hasTable('news') && ($includeUnpublished ? News::exists() : News::published()->exists());
         if ($hasArticles) {
-            $query=News::with(['category','featuredImage']);
-            if(!$includeUnpublished)$query->published();
+            $query = News::with(['category', 'featuredImage']);
+            if (! $includeUnpublished) {
+                $query->published();
+            }
+
             return $query->latest('published_at')->get()->map(function (News $article) use ($image) {
-                $htmlContent=preg_replace('~https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(/storage/)~i','$1',$article->content);
+                $htmlContent = preg_replace('~https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(/storage/)~i', '$1', $article->content);
                 preg_match('~<img[^>]+src=["\']([^"\']+)["\']~i', $htmlContent, $inlineImage);
-                return ['slug'=>$article->slug,'title'=>$article->title,'date'=>($article->published_at??$article->created_at)->translatedFormat('d F Y'),'year'=>(string)($article->published_at??$article->created_at)->year,'category'=>$article->category->name,'category_slug'=>$article->category->slug,'image'=>$article->featuredImage?->url??($inlineImage[1]??$image),'excerpt'=>$article->excerpt??strip_tags($htmlContent),'content'=>[strip_tags($htmlContent)],'html_content'=>$htmlContent,'tags'=>[]];
+
+                return ['slug' => $article->slug, 'title' => $article->title, 'date' => ($article->published_at ?? $article->created_at)->translatedFormat('d F Y'), 'year' => (string) ($article->published_at ?? $article->created_at)->year, 'category' => $article->category->name, 'category_slug' => $article->category->slug, 'image' => $article->featuredImage?->url ?? ($inlineImage[1] ?? $image), 'excerpt' => $article->excerpt ?? strip_tags($htmlContent), 'content' => [strip_tags($htmlContent)], 'html_content' => $htmlContent, 'tags' => []];
             })->all();
         }
 
