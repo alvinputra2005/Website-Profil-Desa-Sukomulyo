@@ -66,6 +66,26 @@
     </div>
 
     <div class="col-md-4">
+        <div class="dropdown profile-save-dropdown">
+            <button type="button" class="btn btn-social btn-info btn-block dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-save"></i> Simpan Perubahan <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                <li>
+                    <button type="submit" data-submit-status="published">
+                        <i class="fa fa-check"></i> Simpan Perubahan
+                    </button>
+                </li>
+                <li>
+                    <button type="submit" data-submit-status="draft">
+                        <i class="fa fa-file-text-o"></i> Simpan sebagai Draf
+                    </button>
+                </li>
+            </ul>
+            <input type="hidden" id="status" name="status" value="{{ old('status',$section?->status ?? 'published') }}" data-publication-status>
+            @error('status')<span class="field-error">{{ $message }}</span>@enderror
+        </div>
+
         <div class="box box-info" data-region-selector data-regions-base-url="{{ url('/admin/wilayah') }}">
             <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-map"></i> Wilayah Administratif</h3></div>
             <div class="box-body">
@@ -107,24 +127,6 @@
                         @error($nameField)<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
                     </div>
                 @endforeach
-            </div>
-        </div>
-
-        <div class="box box-info">
-            <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-send"></i> Publikasi</h3></div>
-            <div class="box-body">
-                <div class="form-group {{ $errors->has('status')?'has-error':'' }}">
-                    <label class="control-label" for="status">Status Publikasi</label>
-                    <select id="status" name="status" class="form-control select2">
-                        <option value="published" @selected(old('status',$section?->status ?? 'published')==='published')>Terbit</option>
-                        <option value="draft" @selected(old('status',$section?->status)==='draft')>Draf</option>
-                    </select>
-                    @error('status')<span class="field-error">{{ $message }}</span>@enderror
-                </div>
-            </div>
-            <div class="box-footer">
-                <button type="reset" class="btn btn-warning"><i class="fa fa-refresh"></i> Reset</button>
-                <button class="btn btn-social btn-info pull-right"><i class="fa fa-save"></i> Simpan Perubahan</button>
             </div>
         </div>
 

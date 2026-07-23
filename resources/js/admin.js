@@ -18,6 +18,14 @@ const initAdminPage = () => {
     form.addEventListener('input',()=>{form.dataset.dirty='true'});
     form.addEventListener('submit',()=>{delete form.dataset.dirty});
   });
+  document.querySelectorAll('[data-submit-status]').forEach(button=>{
+    if(button.dataset.submitStatusBound)return;
+    button.dataset.submitStatusBound='true';
+    button.addEventListener('click',()=>{
+      const status=button.form?.querySelector('[data-publication-status]');
+      if(status)status.value=button.dataset.submitStatus;
+    });
+  });
   if(!window.__dirtyFormWarningBound){
     window.__dirtyFormWarningBound=true;
     window.addEventListener('beforeunload',event=>{
