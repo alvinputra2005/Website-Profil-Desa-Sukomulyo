@@ -108,7 +108,19 @@
                 </div>
                 <a class="home-section-link" href="{{ route('berita-desa.index') }}">Lihat selengkapnya <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </header>
-            <div class="latest-news-grid">
+
+            <nav class="home-news-categories" aria-label="Kategori berita desa">
+                <button class="home-news-category is-active" type="button" data-news-filter="all" aria-pressed="true" aria-controls="home-news-grid">
+                    Terbaru <i class="fas fa-check" aria-hidden="true"></i>
+                </button>
+                @foreach ($categories as $category)
+                    <button class="home-news-category" type="button" data-news-filter="{{ $category['category_slug'] }}" aria-pressed="false" aria-controls="home-news-grid">
+                        {{ $category['category'] }} <i class="fas fa-check" aria-hidden="true"></i>
+                    </button>
+                @endforeach
+            </nav>
+
+            <div class="latest-news-grid" id="home-news-grid">
                 @foreach (array_slice($articles, 0, 4) as $article)
                     <x-article-card :article="$article" />
                 @endforeach

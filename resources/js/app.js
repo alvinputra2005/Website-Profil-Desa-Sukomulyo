@@ -161,12 +161,31 @@ if (budgetSection && 'IntersectionObserver' in window && !window.matchMedia('(pr
     const observer = new IntersectionObserver(([entry]) => {
         if (!entry.isIntersecting) return;
 
-        budgetSection.classList.add('is-visible');
-        observer.disconnect();
-    }, { threshold: 0.18 });
+    budgetSection.classList.add('is-visible');
+    observer.disconnect();
+}, { threshold: 0.18 });
 
     observer.observe(budgetSection);
 }
+
+const newsFilters = [...document.querySelectorAll('[data-news-filter]')];
+const homeNewsCards = [...document.querySelectorAll('#home-news-grid [data-news-category]')];
+
+newsFilters.forEach((button) => {
+    button.addEventListener('click', () => {
+        const category = button.dataset.newsFilter;
+
+        homeNewsCards.forEach((card) => {
+            card.hidden = category !== 'all' && card.dataset.newsCategory !== category;
+        });
+
+        newsFilters.forEach((filter) => {
+            const active = filter === button;
+            filter.classList.toggle('is-active', active);
+            filter.setAttribute('aria-pressed', String(active));
+        });
+    });
+});
 
 const galleryDialog = document.querySelector('[data-gallery-dialog]');
 

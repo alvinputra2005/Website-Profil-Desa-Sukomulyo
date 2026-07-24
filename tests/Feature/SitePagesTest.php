@@ -65,6 +65,9 @@ class SitePagesTest extends TestCase
         $response = $this->get(route('beranda'))
             ->assertOk()
             ->assertSee('Berita Terbaru')
+            ->assertSee('home-news-categories', false)
+            ->assertSee('data-news-filter="pemerintahan"', false)
+            ->assertSee('data-news-category="pemerintahan"', false)
             ->assertSee('Galeri Desa')
             ->assertSee('Peta Desa Sukomulyo')
             ->assertSee(route('berita-desa.index'), false)
@@ -73,7 +76,7 @@ class SitePagesTest extends TestCase
             ->assertDontSee('data-home-location-map', false)
             ->assertDontSee('router.project-osrm.org', false);
 
-        $this->assertSame(4, substr_count($response->getContent(), '<article class="article-card">'));
+        $this->assertSame(4, substr_count($response->getContent(), '<article class="article-card"'));
         $this->assertSame(4, substr_count($response->getContent(), 'data-gallery-item'));
     }
 
