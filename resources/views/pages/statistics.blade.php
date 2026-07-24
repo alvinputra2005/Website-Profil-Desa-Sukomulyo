@@ -21,8 +21,11 @@
                         @foreach ($population as $item)
                             <div class="data-progress">
                                 <div><span>{{ $item['label'] }}</span><strong>{{ number_format($item['value'], 0, ',', '.') }} jiwa</strong></div>
-                                <div class="progress-track"><span style="width: {{ $item['percentage'] }}%"></span></div>
-                                <small>{{ $item['percentage'] }}%</small>
+                                <div class="progress-track" role="progressbar" aria-label="{{ $item['label'] }} {{ $item['percentage'] }} persen" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $item['percentage'] }}">
+                                    <span class="progress-fill" style="width: {{ $item['percentage'] }}%">
+                                        <span class="progress-percent">{{ $item['percentage'] }}%</span>
+                                    </span>
+                                </div>
                             </div>
                         @endforeach
                     </section>
@@ -32,8 +35,12 @@
                         <h2>Mata Pencaharian</h2>
                         @foreach ($livelihoods as $item)
                             <div class="data-progress">
-                                <div><span>{{ $item['label'] }}</span><strong>{{ $item['percentage'] }}%</strong></div>
-                                <div class="progress-track"><span style="width: {{ $item['percentage'] }}%"></span></div>
+                                <div><span>{{ $item['label'] }}</span></div>
+                                <div class="progress-track" role="progressbar" aria-label="{{ $item['label'] }} {{ $item['percentage'] }} persen" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $item['percentage'] }}">
+                                    <span class="progress-fill" style="width: {{ $item['percentage'] }}%">
+                                        <span class="progress-percent">{{ $item['percentage'] }}%</span>
+                                    </span>
+                                </div>
                             </div>
                         @endforeach
                     </section>

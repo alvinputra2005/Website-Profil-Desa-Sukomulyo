@@ -83,9 +83,11 @@ Route::controller(SiteController::class)->group(function () {
     Route::get('/profile-desa', 'profile')->name('profile-desa');
     Route::get('/data-desa-statistik', 'statistics')->name('data-desa-statistik');
     Route::get('/laporan-penduduk', 'populationReport')->name('laporan-penduduk');
+    Route::get('/transparansi-apbdes', 'budgetHistory')->name('transparansi-apbdes');
     Route::get('/informasi-publik-desa', 'publicInformation')->name('informasi-publik-desa');
     Route::get('/peta-desa', 'map')->name('peta-desa');
     Route::get('/peta-desa/geojson', 'mapGeoJson')->middleware('throttle:60,1')->name('peta-desa.geojson');
+    Route::get('/galeri-desa', 'gallery')->name('galeri-desa');
 
     // Berita desa
     Route::get('/berita-desa', 'news')->name('berita-desa.index');

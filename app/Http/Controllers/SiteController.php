@@ -32,24 +32,62 @@ class SiteController extends Controller
             SiteCache::TEN_MINUTES,
             fn () => Schema::hasTable('residents')
                 ? $populationStatistics->summary()
-                : ['residents' => 0, 'families' => 0, 'areas' => 0]
+                : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'households' => 0, 'areas' => 0]
         );
 
         return $this->render('pages.home', [
-            'missions' => [
-                ['icon' => 'fas fa-home', 'title' => 'Profile Desa', 'route' => 'profile-desa'],
-                ['icon' => 'fas fa-chart-bar', 'title' => 'Data & Statistik', 'route' => 'data-desa-statistik'],
-                ['icon' => 'fas fa-file-alt', 'title' => 'Informasi Publik', 'route' => 'informasi-publik-desa'],
-                ['icon' => 'fas fa-newspaper', 'title' => 'Berita Desa', 'route' => 'berita-desa.index'],
-                ['icon' => 'fas fa-map-marked-alt', 'title' => 'Peta Desa', 'route' => 'peta-desa'],
-            ],
             'villageStatistics' => [
                 ['icon' => 'fas fa-users', 'value' => $populationSummary['residents'], 'unit' => 'jiwa', 'label' => 'Jumlah Penduduk'],
                 ['icon' => 'fas fa-home', 'value' => $populationSummary['families'], 'unit' => 'KK', 'label' => 'Kepala Keluarga'],
                 ['icon' => 'fas fa-map-signs', 'value' => $populationSummary['areas'], 'unit' => 'dusun', 'label' => 'Wilayah Administratif', 'meta' => 'Data wilayah kependudukan'],
                 ['icon' => 'fas fa-map', 'value' => 430, 'unit' => 'hektare', 'label' => 'Luas Wilayah'],
             ],
-            'featuredPotentials' => array_slice($this->potentialsData(), 0, 2),
+            'populationByGender' => [
+                ['label' => 'Laki-laki', 'value' => $populationSummary['male'], 'image' => 'assets/male-resident-avatar.jpg'],
+                ['label' => 'Perempuan', 'value' => $populationSummary['female'], 'image' => 'assets/female-resident-avatar.jpg'],
+            ],
+            'apbdes' => [
+                'year' => 2026,
+                'panels' => [
+                    [
+                        'title' => 'Pendapatan APBDes 2026',
+                        'total' => 2485000000,
+                        'total_label' => 'Total Pendapatan APBDes 2026',
+                        'total_percentage' => 100,
+                        'items' => [
+                            ['label' => 'Dana Desa', 'value' => 1150000000],
+                            ['label' => 'Alokasi Dana Desa', 'value' => 850000000],
+                            ['label' => 'Bagi Hasil Pajak dan Retribusi', 'value' => 310000000],
+                            ['label' => 'Pendapatan Asli Desa', 'value' => 175000000],
+                        ],
+                    ],
+                    [
+                        'title' => 'Belanja APBDes 2026',
+                        'total' => 2350000000,
+                        'total_label' => 'Total Penggunaan Belanja APBDes 2026',
+                        'total_percentage' => 95,
+                        'items' => [
+                            ['label' => 'Penyelenggaraan Pemerintahan', 'value' => 720000000],
+                            ['label' => 'Pelaksanaan Pembangunan', 'value' => 930000000],
+                            ['label' => 'Pembinaan Kemasyarakatan', 'value' => 270000000],
+                            ['label' => 'Pemberdayaan Masyarakat', 'value' => 430000000],
+                        ],
+                    ],
+                    [
+                        'title' => 'Realisasi APBDes 2026',
+                        'total' => 1739000000,
+                        'total_label' => 'Total Realisasi APBDes 2026',
+                        'total_percentage' => 74,
+                        'items' => [
+                            ['label' => 'Penyelenggaraan Pemerintahan', 'value' => 520000000, 'percentage' => 72],
+                            ['label' => 'Pelaksanaan Pembangunan', 'value' => 690000000, 'percentage' => 74],
+                            ['label' => 'Pembinaan Kemasyarakatan', 'value' => 194000000, 'percentage' => 72],
+                            ['label' => 'Pemberdayaan Masyarakat', 'value' => 335000000, 'percentage' => 78],
+                        ],
+                    ],
+                ],
+            ],
+            'galleryPhotos' => array_slice($this->galleryPhotos(), 0, 4),
         ]);
     }
 
@@ -116,6 +154,24 @@ class SiteController extends Controller
             $populationStatistics->monthlyReport($year, $month),
             compact('year', 'month')
         ));
+    }
+
+    public function budgetHistory(): View
+    {
+        return $this->render('pages.budget-history', [
+            'budgetHistory' => [
+                ['year' => 2026, 'income' => 2485000000, 'spending' => 2350000000, 'realization' => 1739000000, 'percentage' => 74],
+                ['year' => 2025, 'income' => 2360000000, 'spending' => 2240000000, 'realization' => 1859200000, 'percentage' => 83],
+                ['year' => 2024, 'income' => 2225000000, 'spending' => 2100000000, 'realization' => 1743000000, 'percentage' => 83],
+                ['year' => 2023, 'income' => 2080000000, 'spending' => 1980000000, 'realization' => 1623600000, 'percentage' => 82],
+                ['year' => 2022, 'income' => 1950000000, 'spending' => 1860000000, 'realization' => 1488000000, 'percentage' => 80],
+                ['year' => 2021, 'income' => 1820000000, 'spending' => 1740000000, 'realization' => 1357200000, 'percentage' => 78],
+                ['year' => 2020, 'income' => 1690000000, 'spending' => 1610000000, 'realization' => 1207500000, 'percentage' => 75],
+                ['year' => 2019, 'income' => 1560000000, 'spending' => 1480000000, 'realization' => 1213600000, 'percentage' => 82],
+                ['year' => 2018, 'income' => 1420000000, 'spending' => 1360000000, 'realization' => 1074400000, 'percentage' => 79],
+                ['year' => 2017, 'income' => 1300000000, 'spending' => 1240000000, 'realization' => 954800000, 'percentage' => 77],
+            ],
+        ]);
     }
 
     public function publicInformation(): View
@@ -688,6 +744,20 @@ class SiteController extends Controller
                 ],
                 'tags' => ['posyandu', 'kesehatan'],
             ],
+        ];
+    }
+
+    private function galleryPhotos(): array
+    {
+        $image = asset('assets/village-rice-fields.jpg');
+
+        return [
+            ['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa.'],
+            ['src' => $image, 'title' => 'Kerja Bakti Warga', 'caption' => 'Gotong royong menjaga lingkungan tetap bersih.'],
+            ['src' => $image, 'title' => 'Pelatihan UMKM', 'caption' => 'Peningkatan kapasitas pelaku usaha lokal.'],
+            ['src' => $image, 'title' => 'Kegiatan Posyandu', 'caption' => 'Pelayanan kesehatan rutin untuk ibu dan anak.'],
+            ['src' => $image, 'title' => 'Panen Bersama', 'caption' => 'Dokumentasi potensi pertanian Desa Sukomulyo.'],
+            ['src' => $image, 'title' => 'Pentas Seni Desa', 'caption' => 'Ruang ekspresi seni dan budaya masyarakat.'],
         ];
     }
 
