@@ -174,6 +174,25 @@ const initPublicPage = () => {
         observer.observe(budgetSection);
     }
 
+    const newsFilters = [...document.querySelectorAll('[data-news-filter]')];
+    const homeNewsCards = [...document.querySelectorAll('#home-news-grid [data-news-category]')];
+
+    newsFilters.forEach((button) => {
+        button.addEventListener('click', () => {
+            const category = button.dataset.newsFilter;
+
+            homeNewsCards.forEach((card) => {
+                card.hidden = category !== 'all' && card.dataset.newsCategory !== category;
+            });
+
+            newsFilters.forEach((filter) => {
+                const active = filter === button;
+                filter.classList.toggle('is-active', active);
+                filter.setAttribute('aria-pressed', String(active));
+            });
+        });
+    });
+
     const galleryDialog = document.querySelector('[data-gallery-dialog]');
 
     if (galleryDialog) {
