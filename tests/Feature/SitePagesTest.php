@@ -60,15 +60,18 @@ class SitePagesTest extends TestCase
             ->assertSee('Total Realisasi APBDes 2026');
     }
 
-    public function test_homepage_shows_four_news_four_gallery_items_and_village_map(): void
+    public function test_homepage_shows_four_news_five_gallery_items_and_village_map(): void
     {
         $response = $this->get(route('beranda'))
             ->assertOk()
             ->assertSee('Berita Terbaru')
-            ->assertSee('home-news-categories', false)
-            ->assertSee('data-news-filter="pemerintahan"', false)
-            ->assertSee('data-news-category="pemerintahan"', false)
+            ->assertDontSee('data-news-filter', false)
+            ->assertDontSee('data-news-category', false)
             ->assertSee('Galeri Desa')
+            ->assertSee('data-gallery-carousel', false)
+            ->assertSee('data-carousel-position="0"', false)
+            ->assertSee('data-gallery-next', false)
+            ->assertDontSee('data-gallery-status', false)
             ->assertSee('Peta Desa Sukomulyo')
             ->assertSee(route('berita-desa.index'), false)
             ->assertSee(route('galeri-desa'), false)
@@ -77,7 +80,14 @@ class SitePagesTest extends TestCase
             ->assertDontSee('router.project-osrm.org', false);
 
         $this->assertSame(4, substr_count($response->getContent(), '<article class="article-card"'));
-        $this->assertSame(4, substr_count($response->getContent(), 'data-gallery-item'));
+        $this->assertSame(5, substr_count($response->getContent(), 'data-gallery-item'));
+    }
+
+    public function test_news_category_filter_is_not_shown(): void
+    {
+        $this->get(route('berita-desa.index'))
+            ->assertOk()
+            ->assertDontSee('data-news-filter', false);
     }
 
     public function test_budget_history_shows_ten_years_of_dummy_data(): void

@@ -8,6 +8,24 @@ menuButton?.addEventListener('click', () => {
     menuButton.setAttribute('aria-expanded', String(open));
 });
 
+const revealSections = document.querySelectorAll('main section:not(.hero-slider), .footer-wrapper .footer-widget');
+
+if (revealSections.length && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+
+            entry.target.classList.add('is-revealed');
+            observer.unobserve(entry.target);
+        });
+    }, { threshold: 0.08, rootMargin: '0px 0px -8% 0px' });
+
+    revealSections.forEach((section) => {
+        section.classList.add('scroll-reveal');
+        observer.observe(section);
+    });
+}
+
 const slider = document.querySelector('[data-slider]');
 
 if (slider) {
@@ -168,23 +186,40 @@ if (budgetSection && 'IntersectionObserver' in window && !window.matchMedia('(pr
     observer.observe(budgetSection);
 }
 
-const newsFilters = [...document.querySelectorAll('[data-news-filter]')];
-const homeNewsCards = [...document.querySelectorAll('#home-news-grid [data-news-category]')];
+document.querySelectorAll('[data-gallery-carousel]').forEach((carousel) => {
+    const items = [...carousel.querySelectorAll('[data-carousel-item]')];
+    const previous = carousel.querySelector('[data-gallery-prev]');
+    const next = carousel.querySelector('[data-gallery-next]');
+    let selected = Math.floor(items.length / 2);
 
-newsFilters.forEach((button) => {
-    button.addEventListener('click', () => {
-        const category = button.dataset.newsFilter;
+    const select = (index) => {
+        selected = Math.min(Math.max(index, 0), items.length - 1);
 
-        homeNewsCards.forEach((card) => {
-            card.hidden = category !== 'all' && card.dataset.newsCategory !== category;
+        items.forEach((item, itemIndex) => {
+            const position = itemIndex - selected;
+
+            item.dataset.carouselPosition = position;
+            item.classList.toggle('is-outside', Math.abs(position) > 2);
+            item.setAttribute('aria-pressed', String(position === 0));
+            item.setAttribute('aria-label', `${position === 0 ? 'Buka detail' : 'Pilih'} ${item.dataset.title}`);
         });
 
-        newsFilters.forEach((filter) => {
-            const active = filter === button;
-            filter.classList.toggle('is-active', active);
-            filter.setAttribute('aria-pressed', String(active));
+        if (previous) previous.disabled = selected === 0;
+        if (next) next.disabled = selected === items.length - 1;
+    };
+
+    items.forEach((item, index) => {
+        item.addEventListener('click', (event) => {
+            if (index === selected) return;
+
+            event.stopImmediatePropagation();
+            select(index);
         });
     });
+
+    previous?.addEventListener('click', () => select(selected - 1));
+    next?.addEventListener('click', () => select(selected + 1));
+    select(selected);
 });
 
 const galleryDialog = document.querySelector('[data-gallery-dialog]');

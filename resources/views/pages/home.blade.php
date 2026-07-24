@@ -109,18 +109,7 @@
                 <a class="home-section-link" href="{{ route('berita-desa.index') }}">Lihat selengkapnya <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </header>
 
-            <nav class="home-news-categories" aria-label="Kategori berita desa">
-                <button class="home-news-category is-active" type="button" data-news-filter="all" aria-pressed="true" aria-controls="home-news-grid">
-                    Terbaru <i class="fas fa-check" aria-hidden="true"></i>
-                </button>
-                @foreach ($categories as $category)
-                    <button class="home-news-category" type="button" data-news-filter="{{ $category['category_slug'] }}" aria-pressed="false" aria-controls="home-news-grid">
-                        {{ $category['category'] }} <i class="fas fa-check" aria-hidden="true"></i>
-                    </button>
-                @endforeach
-            </nav>
-
-            <div class="latest-news-grid" id="home-news-grid">
+            <div class="latest-news-grid">
                 @foreach (array_slice($articles, 0, 4) as $article)
                     <x-article-card :article="$article" />
                 @endforeach
@@ -137,20 +126,30 @@
                 <a class="home-section-link" href="{{ route('galeri-desa') }}">Lihat selengkapnya <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </header>
 
-            <div class="home-gallery-grid">
-                @foreach ($galleryPhotos as $photo)
-                    <button class="gallery-item" type="button" data-gallery-item data-image="{{ $photo['src'] }}" data-title="{{ $photo['title'] }}" data-caption="{{ $photo['caption'] }}">
-                        <img src="{{ $photo['src'] }}" alt="{{ $photo['title'] }}" loading="lazy" decoding="async">
-                        <span class="gallery-overlay"><i class="fas fa-search-plus" aria-hidden="true"></i><strong>{{ $photo['title'] }}</strong></span>
-                    </button>
-                @endforeach
+            <div class="home-gallery-carousel" data-gallery-carousel>
+                <div class="home-gallery-stage">
+                    @foreach ($galleryPhotos as $photo)
+                        <button class="gallery-item home-gallery-card" type="button" data-gallery-item data-carousel-item data-carousel-position="{{ $loop->index - 2 }}" data-image="{{ $photo['src'] }}" data-title="{{ $photo['title'] }}" data-caption="{{ $photo['caption'] }}" aria-label="Pilih {{ $photo['title'] }}" aria-pressed="{{ $loop->index === 2 ? 'true' : 'false' }}">
+                            <img src="{{ $photo['src'] }}" alt="{{ $photo['title'] }}" loading="lazy" decoding="async">
+                            <span class="gallery-overlay">
+                                <strong>{{ $photo['title'] }}</strong>
+                                <span>{{ $photo['caption'] }}</span>
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
+
+                <div class="home-gallery-controls" aria-label="Kontrol carousel galeri">
+                    <button type="button" data-gallery-prev aria-label="Galeri sebelumnya"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+                    <button type="button" data-gallery-next aria-label="Galeri berikutnya"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+                </div>
             </div>
         </div>
     </section>
 
     <section class="home-map-section" aria-labelledby="home-map-title">
         <div class="container">
-            <header class="home-section-heading">
+            <header class="home-section-heading home-map-heading">
                 <div>
                     <h2 class="section-title" id="home-map-title">Peta Desa Sukomulyo</h2>
                 </div>
@@ -168,15 +167,15 @@
                 </div>
 
                 <aside class="map-information">
-                    <span class="section-kicker">Lokasi Desa</span>
-                    <h2>{{ $site['name'] }}</h2>
+                    <span class="section-kicker">Informasi Lokasi</span>
+                    <h2>Kantor {{ $site['name'] }}</h2>
                     <p>Peta membantu masyarakat menemukan kantor desa dan mengenali posisi wilayah Desa Sukomulyo.</p>
                     <ul>
                         <li><i class="fas fa-map-marker-alt" aria-hidden="true"></i><span><strong>Alamat Kantor Desa</strong>{{ $site['address'] }}</span></li>
                         <li><i class="fas fa-phone" aria-hidden="true"></i><span><strong>Telepon</strong>{{ $site['phone'] }}</span></li>
                         <li><i class="fas fa-envelope" aria-hidden="true"></i><span><strong>Email</strong>{{ $site['email'] }}</span></li>
                     </ul>
-                    <a class="learnmore" href="https://www.google.com/maps/search/?api=1&query=Desa+Sukomulyo" target="_blank" rel="noopener noreferrer">Buka di Google Maps</a>
+                    <a class="learnmore" href="https://www.google.com/maps/search/?api=1&query=Desa+Sukomulyo" target="_blank" rel="noopener noreferrer">Buka di Google Maps <i class="fas fa-location-arrow" aria-hidden="true"></i></a>
                 </aside>
             </div>
         </div>
