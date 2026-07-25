@@ -1,5 +1,8 @@
 <x-layouts.app title="Pemerintahan Desa">
-    <x-page-header title="Pemerintahan Desa" description="Struktur organisasi dan prinsip pelayanan Pemerintah Desa Sukomulyo." />
+    <x-page-header title="Pemerintahan Desa" description="Struktur organisasi dan prinsip pelayanan Pemerintah Desa Sukomulyo." :breadcrumbs="[
+        ['label' => 'Profile Desa', 'url' => route('profile-desa')],
+        ['label' => 'Pemerintahan Desa'],
+    ]" />
 
     <div class="container">
         <div id="sc_innerpage_wrap">

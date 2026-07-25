@@ -1,5 +1,8 @@
 <x-layouts.app title="Laporan Penduduk" description="Laporan agregat perkembangan penduduk Desa Sukomulyo.">
-    <x-page-header title="Laporan Penduduk" description="Rekapitulasi agregat penduduk Desa Sukomulyo per bulan." />
+    <x-page-header title="Laporan Penduduk" description="Rekapitulasi agregat penduduk Desa Sukomulyo per bulan." :breadcrumbs="[
+        ['label' => 'Kependudukan', 'url' => route('kependudukan')],
+        ['label' => 'Laporan Penduduk'],
+    ]" />
     <div class="container">
         <div id="sc_innerpage_wrap"><section class="sc_innerpage_contentbx fullwidth">
             <form method="get" class="public-period-filter">

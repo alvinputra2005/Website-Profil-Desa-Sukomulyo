@@ -17,6 +17,7 @@ use App\Services\SiteCache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -34,15 +35,15 @@ class SiteController extends Controller
             SiteCache::TEN_MINUTES,
             fn () => Schema::hasTable('residents')
                 ? $populationStatistics->summary()
-                : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'households' => 0, 'areas' => 0]
+                : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'households' => 0, 'areas' => 0, 'education_records' => 0, 'occupation_records' => 0]
         );
 
         return $this->render('pages.home', [
             'villageStatistics' => [
                 ['icon' => 'fas fa-users', 'value' => $populationSummary['residents'], 'unit' => 'jiwa', 'label' => 'Jumlah Penduduk'],
                 ['icon' => 'fas fa-home', 'value' => $populationSummary['families'], 'unit' => 'KK', 'label' => 'Kepala Keluarga'],
-                ['icon' => 'fas fa-map-signs', 'value' => $populationSummary['areas'], 'unit' => 'dusun', 'label' => 'Wilayah Administratif', 'meta' => 'Data wilayah kependudukan'],
-                ['icon' => 'fas fa-map', 'value' => 430, 'unit' => 'hektare', 'label' => 'Luas Wilayah'],
+                ['icon' => 'fas fa-graduation-cap', 'value' => $populationSummary['education_records'], 'unit' => 'jiwa', 'label' => 'Data Pendidikan'],
+                ['icon' => 'fas fa-briefcase', 'value' => $populationSummary['occupation_records'], 'unit' => 'jiwa', 'label' => 'Data Pekerjaan'],
             ],
             'populationByGender' => [
                 ['label' => 'Laki-laki', 'value' => $populationSummary['male'], 'image' => 'assets/male-resident-avatar.jpg'],
@@ -416,12 +417,27 @@ class SiteController extends Controller
         return $this->render('pages.potentials', ['potentials' => $this->potentialsData()]);
     }
 
-    public function news(): View
+    public function news(Request $request): View
     {
+        $selectedCategory = trim((string) $request->query('category', ''));
+        $selectedDate = $this->validatedNewsDate($request);
+        $articles = collect($this->articles());
+
+        if ($selectedCategory !== '') {
+            $articles = $articles->where('category_slug', $selectedCategory);
+        }
+        if ($selectedDate !== '') {
+            $articles = $articles->where('iso_date', $selectedDate);
+        }
+
         return $this->render('news.index', [
             'heading' => 'Berita Desa',
             'description' => 'Informasi terbaru mengenai kegiatan dan perkembangan Desa Sukomulyo.',
-            'visibleArticles' => $this->articles(),
+            'visibleArticles' => $this->paginateArticles($articles, $request),
+            'featuredArticles' => $articles->take(3)->values()->all(),
+            'showFeatured' => $selectedCategory === '' && $selectedDate === '' && LengthAwarePaginator::resolveCurrentPage() === 1,
+            'selectedCategory' => $selectedCategory,
+            'selectedDate' => $selectedDate,
         ]);
     }
 
@@ -437,7 +453,7 @@ class SiteController extends Controller
         return $this->render('news.show', ['article' => $article]);
     }
 
-    public function category(string $category): View|Response
+    public function category(Request $request, string $category): View|Response
     {
         $articles = collect($this->articles())
             ->filter(fn (array $article) => $article['category_slug'] === $category)
@@ -448,22 +464,35 @@ class SiteController extends Controller
             return $this->notFound();
         }
 
+        $selectedDate = $this->validatedNewsDate($request);
+        $visibleArticles = $selectedDate === ''
+            ? $articles
+            : collect($articles)->where('iso_date', $selectedDate)->values()->all();
+
         return $this->render('news.index', [
             'heading' => 'Kategori: '.$articles[0]['category'],
             'description' => 'Kumpulan berita dalam kategori '.$articles[0]['category'].'.',
-            'visibleArticles' => $articles,
+            'visibleArticles' => $this->paginateArticles(collect($visibleArticles), $request),
+            'featuredArticles' => [],
+            'showFeatured' => false,
+            'selectedCategory' => $category,
+            'selectedDate' => $selectedDate,
         ]);
     }
 
-    public function archive(?string $year = null): View
+    public function archive(Request $request, ?string $year = null): View
     {
         $year ??= collect($this->articles())->max('year');
-        $articles = collect($this->articles())->where('year', $year)->values()->all();
+        $articles = collect($this->articles())->where('year', $year)->values();
 
         return $this->render('news.index', [
             'heading' => 'Arsip Berita '.$year,
             'description' => 'Dokumentasi berita dan kegiatan Desa Sukomulyo pada tahun '.$year.'.',
-            'visibleArticles' => $articles,
+            'visibleArticles' => $this->paginateArticles($articles, $request),
+            'featuredArticles' => [],
+            'showFeatured' => false,
+            'selectedCategory' => '',
+            'selectedDate' => '',
         ]);
     }
 
@@ -480,6 +509,37 @@ class SiteController extends Controller
             ->all();
 
         return $this->render('news.search', compact('query', 'results'));
+    }
+
+    private function validatedNewsDate(Request $request): string
+    {
+        $date = trim((string) $request->query('date', ''));
+
+        if ($date === '') {
+            return '';
+        }
+
+        return validator(
+            ['date' => $date],
+            ['date' => ['date_format:Y-m-d']]
+        )->validate()['date'];
+    }
+
+    private function paginateArticles(Collection $articles, Request $request): LengthAwarePaginator
+    {
+        $perPage = 5;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+
+        return new LengthAwarePaginator(
+            $articles->forPage($currentPage, $perPage)->values()->all(),
+            $articles->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
     }
 
     public function gallery(): View
@@ -849,7 +909,9 @@ class SiteController extends Controller
         $htmlContent = preg_replace('~https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(/storage/)~i', '$1', $article->content);
         preg_match('~<img[^>]+src=["\']([^"\']+)["\']~i', $htmlContent, $inlineImage);
 
-        return ['slug' => $article->slug, 'title' => $article->title, 'date' => ($article->published_at ?? $article->created_at)->translatedFormat('d F Y'), 'year' => (string) ($article->published_at ?? $article->created_at)->year, 'category' => $article->category->name, 'category_slug' => $article->category->slug, 'image' => $article->featuredImage?->url ?? ($inlineImage[1] ?? $image), 'excerpt' => $article->excerpt ?? strip_tags($htmlContent), 'content' => [strip_tags($htmlContent)], 'html_content' => $htmlContent, 'tags' => []];
+        $publishedAt = $article->published_at ?? $article->created_at;
+
+        return ['slug' => $article->slug, 'title' => $article->title, 'date' => $publishedAt->locale('id')->translatedFormat('d F Y'), 'iso_date' => $publishedAt->format('Y-m-d'), 'year' => (string) $publishedAt->year, 'category' => $article->category->name, 'category_slug' => $article->category->slug, 'image' => $article->featuredImage?->url ?? ($inlineImage[1] ?? $image), 'excerpt' => $article->excerpt ?? strip_tags($htmlContent), 'content' => [strip_tags($htmlContent)], 'html_content' => $htmlContent, 'tags' => []];
     }
 
     private function fallbackArticles(): array
@@ -861,6 +923,7 @@ class SiteController extends Controller
                 'slug' => 'musyawarah-desa-penyusunan-program-kerja',
                 'title' => 'Musyawarah Desa Penyusunan Program Kerja',
                 'date' => '18 Juli 2026',
+                'iso_date' => '2026-07-18',
                 'year' => '2026',
                 'category' => 'Pemerintahan',
                 'category_slug' => 'pemerintahan',
@@ -876,6 +939,7 @@ class SiteController extends Controller
                 'slug' => 'kerja-bakti-lingkungan-desa',
                 'title' => 'Kerja Bakti Menjaga Lingkungan Desa',
                 'date' => '14 Juli 2026',
+                'iso_date' => '2026-07-14',
                 'year' => '2026',
                 'category' => 'Kemasyarakatan',
                 'category_slug' => 'kemasyarakatan',
@@ -891,6 +955,7 @@ class SiteController extends Controller
                 'slug' => 'pelatihan-pemasaran-digital-umkm',
                 'title' => 'Pelatihan Pemasaran Digital untuk UMKM',
                 'date' => '9 Juli 2026',
+                'iso_date' => '2026-07-09',
                 'year' => '2026',
                 'category' => 'Potensi Desa',
                 'category_slug' => 'potensi-desa',
@@ -906,6 +971,7 @@ class SiteController extends Controller
                 'slug' => 'pelayanan-posyandu-rutin',
                 'title' => 'Pelayanan Posyandu Rutin untuk Ibu dan Anak',
                 'date' => '3 Juli 2025',
+                'iso_date' => '2025-07-03',
                 'year' => '2025',
                 'category' => 'Kesehatan',
                 'category_slug' => 'kesehatan',

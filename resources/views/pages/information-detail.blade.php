@@ -1,5 +1,8 @@
 <x-layouts.app :title="$page['title']">
-    <x-page-header :title="$page['title']" :description="$page['description']" />
+    <x-page-header :title="$page['title']" :description="$page['description']" :breadcrumbs="[
+        ['label' => 'Informasi Desa', 'url' => route('informasi-publik-desa')],
+        ['label' => $page['title']],
+    ]" />
 
     <div class="container">
         <div id="sc_innerpage_wrap">

@@ -34,10 +34,38 @@ const initPublicPage = () => {
         const slides = [...slider.querySelectorAll('[data-slide]')];
         const dots = [...slider.querySelectorAll('[data-slider-dot]')];
         const pixelLayer = slider.querySelector('[data-pixel-transition]');
+        const controls = slider.querySelector('.slider-controls');
         let current = 0;
         let timer;
         let animating = false;
         let transition;
+
+        const syncControls = () => {
+            const cta = slides[current]?.querySelector('.slide_more');
+
+            if (!controls || !cta) return;
+
+            const sliderRect = slider.getBoundingClientRect();
+            const ctaRect = cta.getBoundingClientRect();
+            const styles = window.getComputedStyle(slider);
+            const gap = Number.parseFloat(styles.getPropertyValue('--hero-controls-gap')) || 48;
+            const desiredTop = ctaRect.bottom - sliderRect.top + gap;
+            const maximumTop = slider.clientHeight - controls.offsetHeight - 18;
+
+            controls.style.top = `${Math.min(desiredTop, maximumTop)}px`;
+            controls.style.bottom = 'auto';
+        };
+
+        const controlsObserver = 'ResizeObserver' in window
+            ? new ResizeObserver(syncControls)
+            : null;
+
+        controlsObserver?.observe(slider);
+        slides.forEach((slide) => {
+            const copy = slide.querySelector('.hero-copy');
+            if (copy) controlsObserver?.observe(copy);
+        });
+        window.requestAnimationFrame(syncControls);
 
         const waveClip = (progress, direction) => {
             const offsets = [-4, 3, -2, 4, -3, 2, -1, 1];
@@ -70,6 +98,7 @@ const initPublicPage = () => {
             current = next;
             dots.forEach((dot, position) => dot.classList.toggle('is-active', position === current));
             animating = false;
+            window.requestAnimationFrame(syncControls);
         };
 
         const show = (index, direction = 'next') => {
@@ -141,6 +170,7 @@ const initPublicPage = () => {
         window.addEventListener('ajax:before-render', () => {
             window.clearInterval(timer);
             transition?.cancel();
+            controlsObserver?.disconnect();
         }, { once: true });
         play();
     }

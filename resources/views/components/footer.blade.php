@@ -39,14 +39,14 @@
                 <img src="{{ asset('assets/logo-universitas-negeri-malang.webp') }}" alt="Logo Universitas Negeri Malang">
                 <img class="footer-kkn-logo" src="{{ asset('assets/logo-kkn-sukomulyo.png') }}" alt="Logo KKN Sukomulyo">
             </div>
-            <p>Dikembangkan bersama oleh Tim KKN Desa Sukomulyo Universitas Negeri Malang 2026.</p>
+            <p>Dikembangkan bersama oleh Tim UM-BBM Universitas Negeri Malang 2026.</p>
         </section>
     </div>
 
     <div class="footer-copyright">
         <div class="container copyright-row">
             <span>&copy; {{ date('Y') }} Pemerintah {{ $site['name'] }}.</span>
-            <span>Bersama KKN Universitas Negeri Malang 2026.</span>
+            <span>Bersama UM-BBM Universitas Negeri Malang 2026.</span>
         </div>
     </div>
 </footer>
