@@ -19,9 +19,12 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'role_id',
         'name',
         'email',
         'password',
+        'is_active',
+        'last_login_at',
     ];
 
     /**
@@ -44,6 +47,12 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'last_login_at' => 'datetime',
         ];
     }
+
+    public function role() { return $this->belongsTo(Role::class); }
+    public function hasRole(string ...$codes): bool { return $this->role && in_array($this->role->code, $codes, true); }
+    public function isSuperAdmin(): bool { return $this->hasRole('super_admin'); }
 }

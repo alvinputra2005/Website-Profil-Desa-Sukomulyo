@@ -1,5 +1,8 @@
 <x-layouts.app title="Pencarian Berita">
-    <x-page-header title="Pencarian Berita" description="Temukan informasi dan kegiatan Desa Sukomulyo." />
+    <x-page-header title="Pencarian Berita" description="Temukan informasi dan kegiatan Desa Sukomulyo." :breadcrumbs="[
+        ['label' => 'Berita', 'url' => route('berita-desa.index')],
+        ['label' => 'Pencarian'],
+    ]" />
 
     <div class="container">
         <div id="sc_innerpage_wrap">

@@ -1,9 +1,49 @@
 <x-layouts.app title="Profil Desa">
-    <x-page-header title="Profil Desa" description="Mengenal sejarah, visi, misi, dan identitas Desa Sukomulyo." />
+    <x-page-header title="Profil Desa" :description="'Mengenal sejarah, visi, misi, dan identitas '.$site['name'].'.'" />
 
     <div class="container">
         <div id="sc_innerpage_wrap">
             <article class="sc_innerpage_contentbx profile-content">
+                <section class="village-identity">
+                    <h2>Identitas Desa</h2>
+                    <div class="info-table-wrap">
+                        <table class="info-table identity-table">
+                            <tbody>
+                                @foreach($identityGroups as $group)
+                                    <tr class="identity-group">
+                                        <th colspan="2">{{ $group['title'] }}</th>
+                                    </tr>
+                                    @foreach($group['rows'] as $row)
+                                        <tr>
+                                            <th>{{ $row['label'] }}</th>
+                                            <td>
+                                                @if(($row['type'] ?? null) === 'email' && $row['value'])
+                                                    <a href="mailto:{{ $row['value'] }}">{{ $row['value'] }}</a>
+                                                @elseif(($row['type'] ?? null) === 'url' && filter_var($row['value'], FILTER_VALIDATE_URL) && in_array(parse_url($row['value'], PHP_URL_SCHEME), ['http', 'https'], true))
+                                                    <a href="{{ $row['value'] }}" target="_blank" rel="noopener noreferrer">{{ $row['value'] }}</a>
+                                                @else
+                                                    {{ $row['value'] ?: '-' }}
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                @if($profileSections->isNotEmpty())
+                    @foreach($profileSections as $section)
+                        <section>
+                            <h2>{{ $section->title }}</h2>
+                            @if($section->image && !in_array($section->section_key, ['vision', 'mission'], true))
+                                <img class="profile-section-image" src="{{ $section->image->url }}" alt="{{ $section->image->alt_text ?: $section->title }}">
+                            @endif
+                            <div>{!! $section->content !!}</div>
+                        </section>
+                    @endforeach
+                @else
                 <section>
                     <h2>Sejarah Singkat</h2>
                     <p>Desa Sukomulyo berkembang dari kehidupan masyarakat yang menjunjung kebersamaan, kerja keras, dan gotong royong. Nilai tersebut menjadi dasar dalam setiap kegiatan sosial maupun pembangunan desa.</p>
@@ -25,20 +65,7 @@
                     </ol>
                 </section>
 
-                <section>
-                    <h2>Identitas Desa</h2>
-                    <div class="info-table-wrap">
-                        <table class="info-table">
-                            <tbody>
-                                <tr><th>Nama Desa</th><td>Sukomulyo</td></tr>
-                                <tr><th>Status</th><td>Pemerintahan Desa</td></tr>
-                                <tr><th>Alamat Kantor</th><td>{{ $site['address'] }}</td></tr>
-                                <tr><th>Email</th><td>{{ $site['email'] }}</td></tr>
-                                <tr><th>Telepon</th><td>{{ $site['phone'] }}</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+                @endif
             </article>
 
             <x-sidebar :categories="$categories" :archive-years="$archiveYears" />

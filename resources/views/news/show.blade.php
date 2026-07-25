@@ -1,5 +1,8 @@
 <x-layouts.app :title="$article['title']" :description="$article['excerpt']">
-    <x-page-header title="Detail Berita" />
+    <x-page-header title="Detail Berita" :breadcrumbs="[
+        ['label' => 'Berita', 'url' => route('berita-desa.index')],
+        ['label' => $article['title']],
+    ]" />
 
     <div class="container">
         <div id="sc_innerpage_wrap">
@@ -13,12 +16,12 @@
                     </div>
                 </header>
 
-                <img class="single-article-image" src="{{ $article['image'] }}" alt="{{ $article['title'] }}">
-
                 <div class="entry-content">
-                    @foreach ($article['content'] as $paragraph)
-                        <p>{{ $paragraph }}</p>
-                    @endforeach
+                    @if(!empty($article['html_content']))
+                        {!! $article['html_content'] !!}
+                    @else
+                        @foreach($article['content'] ?? [] as $paragraph)<p>{{ $paragraph }}</p>@endforeach
+                    @endif
                 </div>
 
                 <footer class="article-footer">
