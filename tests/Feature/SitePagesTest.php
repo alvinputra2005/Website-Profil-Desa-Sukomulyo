@@ -14,8 +14,31 @@ class SitePagesTest extends TestCase
         $pages = [
             route('beranda') => 'Desa Sukomulyo',
             route('profile-desa') => 'Profil Desa',
-            route('data-desa-statistik') => 'Data Desa/Statistik',
+            route('profile-desa.detail', ['section' => 'sejarah']) => 'Sejarah Desa',
+            route('profile-desa.detail', ['section' => 'visi-misi']) => 'Visi dan Misi',
+            route('pemerintahan-desa') => 'Pemerintahan Desa',
+            route('potensi-desa') => 'Potensi Desa',
+            route('data-desa-statistik') => 'Data Desa',
+            route('data-statistik.detail', ['section' => 'penduduk']) => 'Statistik Penduduk',
+            route('data-statistik.detail', ['section' => 'pendidikan']) => 'Statistik Pendidikan',
+            route('data-statistik.detail', ['section' => 'pekerjaan']) => 'Statistik Pekerjaan',
+            route('data-statistik.detail', ['section' => 'ekonomi']) => 'Statistik Ekonomi',
+            route('data-statistik.detail', ['section' => 'idm']) => 'IDM (Indeks Desa Membangun)',
+            route('data-statistik.detail', ['section' => 'visualisasi']) => 'Visualisasi Data',
+            route('kependudukan') => 'Data Desa',
+            route('kependudukan.detail', ['section' => 'ringkasan']) => 'Ringkasan Penduduk',
+            route('kependudukan.detail', ['section' => 'jenis-kelamin']) => 'Jenis Kelamin',
+            route('kependudukan.detail', ['section' => 'kelompok-umur']) => 'Kelompok Umur',
+            route('kependudukan.detail', ['section' => 'pendidikan']) => 'Pendidikan',
+            route('kependudukan.detail', ['section' => 'pekerjaan']) => 'Pekerjaan',
+            route('kependudukan.detail', ['section' => 'agama']) => 'Agama',
+            route('kependudukan.detail', ['section' => 'status-perkawinan']) => 'Status Perkawinan',
             route('informasi-publik-desa') => 'Informasi Publik Desa',
+            route('informasi-desa.detail', ['section' => 'pengumuman']) => 'Pengumuman Desa',
+            route('informasi-desa.detail', ['section' => 'layanan-administrasi']) => 'Layanan Administrasi',
+            route('informasi-desa.detail', ['section' => 'agenda']) => 'Agenda Desa',
+            route('informasi-desa.detail', ['section' => 'bantuan-sosial']) => 'Informasi Bantuan Sosial',
+            route('informasi-desa.detail', ['section' => 'informasi-publik']) => 'Informasi Publik',
             route('peta-desa') => 'Peta Desa',
             route('galeri-desa') => 'Galeri Desa',
             route('berita-desa.index') => 'Berita Desa',
@@ -29,6 +52,30 @@ class SitePagesTest extends TestCase
         foreach ($pages as $url => $content) {
             $this->get($url)->assertOk()->assertSee($content);
         }
+    }
+
+    public function test_navigation_uses_the_requested_dropdown_groups(): void
+    {
+        $response = $this->get(route('beranda'))->assertOk();
+        $html = $response->getContent();
+        preg_match('/<nav class="header-navigation".*?<\/nav>/s', $html, $matches);
+        $navigation = $matches[0] ?? '';
+
+        $this->assertSame(4, substr_count($navigation, '<ul class="sub-menu">'));
+        $this->assertSame(4, substr_count($navigation, 'class="nav-dropdown-toggle"'));
+        foreach (['Profile Desa', 'Data Statistik', 'Kependudukan', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Pendidikan', 'Layanan Administrasi', 'APBDes'] as $label) {
+            $this->assertStringContainsString($label, $navigation);
+        }
+        foreach (['profile-desa', 'data-desa-statistik', 'kependudukan', 'informasi-publik-desa'] as $route) {
+            $this->assertDoesNotMatchRegularExpression('/<a href="'.preg_quote(route($route), '/').'"/', $navigation);
+        }
+        $this->assertStringNotContainsString('>Peta Desa</a>', $navigation);
+        $this->assertStringNotContainsString('#', $navigation);
+        $this->assertGreaterThan(strpos($navigation, 'Berita Desa'), strpos($navigation, 'Galeri Desa'));
+        $this->assertStringNotContainsString('Asal-usul dan perkembangan', $navigation);
+        $this->assertStringNotContainsString('Jumlah penduduk berdasarkan jenjang pendidikan', $navigation);
+        $this->assertStringContainsString(route('pemerintahan-desa'), $navigation);
+        $this->assertStringContainsString(route('potensi-desa'), $navigation);
     }
 
     public function test_unknown_pages_use_the_converted_404_page(): void

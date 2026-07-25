@@ -59,15 +59,21 @@
                 @foreach ($navigation as $item)
                     @php($itemActive = request()->routeIs($item['active']) || collect($item['children'] ?? [])->contains(fn ($child) => request()->routeIs($child['active'])))
                     <li class="{{ $itemActive ? 'current-menu-item' : '' }}{{ !empty($item['children']) ? ' menu-item-has-children' : '' }}">
-                        <a href="{{ route($item['route']) }}" @if($itemActive) aria-current="page" @endif>
-                            {{ $item['label'] }}
-                        </a>
                         @if (!empty($item['children']))
+                            <button class="nav-dropdown-toggle" type="button" aria-haspopup="true">{{ $item['label'] }}</button>
                             <ul class="sub-menu">
                                 @foreach ($item['children'] as $child)
-                                    <li class="{{ request()->routeIs($child['active']) ? 'current-menu-item' : '' }}"><a href="{{ route($child['route']) }}">{{ $child['label'] }}</a></li>
+                                    @php($childParameters = $child['parameters'] ?? [])
+                                    @php($childActive = request()->routeIs($child['active']) && collect($childParameters)->every(fn ($value, $key) => (string) request()->route($key) === (string) $value))
+                                    <li class="{{ $childActive ? 'current-menu-item' : '' }}">
+                                        <a href="{{ route($child['route'], $childParameters) }}" @if($childActive) aria-current="page" @endif>
+                                            <span>{{ $child['label'] }}</span>
+                                        </a>
+                                    </li>
                                 @endforeach
                             </ul>
+                        @else
+                            <a href="{{ route($item['route']) }}" @if($itemActive) aria-current="page" @endif>{{ $item['label'] }}</a>
                         @endif
                     </li>
                 @endforeach

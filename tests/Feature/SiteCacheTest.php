@@ -26,7 +26,6 @@ class SiteCacheTest extends TestCase
 
         foreach ([
             SiteCache::SETTINGS,
-            SiteCache::NAVIGATION,
             SiteCache::PUBLIC_LAYOUT,
             SiteCache::HOME_STATISTICS,
             SiteCache::LATEST_NEWS,
@@ -48,6 +47,22 @@ class SiteCacheTest extends TestCase
         );
 
         $this->assertCount(0, $contentQueries, $contentQueries->implode(PHP_EOL));
+    }
+
+    public function test_navigation_is_not_stale_when_the_layout_cache_contains_an_old_menu(): void
+    {
+        Cache::flush();
+        $this->get(route('beranda'))->assertOk();
+
+        $layout = Cache::get(SiteCache::PUBLIC_LAYOUT);
+        $layout['navigation'] = [['label' => 'Peta Desa']];
+        Cache::put(SiteCache::PUBLIC_LAYOUT, $layout, SiteCache::TEN_MINUTES);
+
+        $this->get(route('beranda'))
+            ->assertOk()
+            ->assertSee('Sejarah Desa')
+            ->assertSee('Statistik Pendidikan')
+            ->assertSee('Pengumuman Desa');
     }
 
     public function test_setting_change_invalidates_public_settings_and_profile_cache(): void

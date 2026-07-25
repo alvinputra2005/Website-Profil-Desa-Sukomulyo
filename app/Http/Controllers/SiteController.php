@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
 use App\Models\Gallery;
+use App\Models\IdmScore;
 use App\Models\MapLayer;
 use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Official;
+use App\Models\Publication;
 use App\Models\Setting;
 use App\Models\VillageProfileSection;
 use App\Services\PopulationStatistics as PopulationStatisticsService;
@@ -107,6 +109,34 @@ class SiteController extends Controller
         return $this->render('pages.profile', $profile);
     }
 
+    public function profileDetail(string $section): View
+    {
+        $pages = [
+            'sejarah' => [
+                'title' => 'Sejarah Desa',
+                'description' => 'Asal-usul dan perkembangan Desa Sukomulyo dari masa ke masa.',
+                'keys' => ['history'],
+                'fallback' => [['title' => 'Sejarah Desa Sukomulyo', 'content' => 'Desa Sukomulyo tumbuh melalui semangat gotong royong, kebersamaan, dan kerja keras masyarakat.']],
+            ],
+            'visi-misi' => [
+                'title' => 'Visi dan Misi',
+                'description' => 'Arah pembangunan dan cita-cita Pemerintah Desa Sukomulyo.',
+                'keys' => ['vision', 'mission'],
+                'fallback' => [
+                    ['title' => 'Visi Desa', 'content' => 'Terwujudnya desa yang maju, mandiri, transparan, dan sejahtera.'],
+                    ['title' => 'Misi Desa', 'content' => 'Meningkatkan pelayanan publik, ekonomi warga, dan pembangunan berkelanjutan.'],
+                ],
+            ],
+        ];
+        abort_unless(isset($pages[$section]), 404);
+        $page = $pages[$section];
+        $sections = Schema::hasTable('village_profile_sections')
+            ? VillageProfileSection::with('image')->whereIn('section_key', $page['keys'])->where('status', 'published')->orderBy('display_order')->get()
+            : collect();
+
+        return $this->render('pages.profile-detail', compact('page', 'sections'));
+    }
+
     public function statistics(PopulationStatisticsService $populationStatistics): View
     {
         $statistics = $this->cache->remember(
@@ -134,11 +164,69 @@ class SiteController extends Controller
                         'label' => $row['label'],
                         'percentage' => $row['percentage'],
                     ])->all(),
+                    'distributions' => collect([
+                        'kelompok-umur' => ['title' => 'Kelompok Umur', 'category' => 'age'],
+                        'statistik-pendidikan' => ['title' => 'Statistik Pendidikan', 'category' => 'education'],
+                        'statistik-pekerjaan' => ['title' => 'Statistik Pekerjaan', 'category' => 'occupation'],
+                        'agama' => ['title' => 'Agama', 'category' => 'religion'],
+                        'status-perkawinan' => ['title' => 'Status Perkawinan', 'category' => 'marital_status'],
+                    ])->map(fn (array $panel) => [
+                        'title' => $panel['title'],
+                        'items' => Schema::hasTable('residents') ? $populationStatistics->distribution($panel['category']) : [],
+                    ])->all(),
+                    'idm' => Schema::hasTable('idm_scores')
+                        ? IdmScore::query()->latest('year')->first()?->only(['year', 'idm_score', 'iks_score', 'ike_score', 'ikl_score', 'status_label', 'source'])
+                        : null,
                 ];
             }
         );
 
         return $this->render('pages.statistics', $statistics);
+    }
+
+    public function statisticDetail(string $section, PopulationStatisticsService $populationStatistics): View
+    {
+        $dataPages = [
+            'penduduk' => ['title' => 'Statistik Penduduk', 'description' => 'Jumlah penduduk, jenis kelamin, usia, dan kepala keluarga.', 'categories' => ['sex'], 'summary' => true],
+            'pendidikan' => ['title' => 'Statistik Pendidikan', 'description' => 'Jumlah penduduk berdasarkan jenjang pendidikan.', 'categories' => ['education']],
+            'pekerjaan' => ['title' => 'Statistik Pekerjaan', 'description' => 'Sebaran pekerjaan dan mata pencaharian masyarakat.', 'categories' => ['occupation']],
+            'ekonomi' => ['title' => 'Statistik Ekonomi', 'description' => 'Gambaran aktivitas dan potensi ekonomi masyarakat desa.', 'categories' => ['occupation']],
+            'idm' => ['title' => 'IDM (Indeks Desa Membangun)', 'description' => 'Indeks Ketahanan Sosial, Ekonomi, dan Lingkungan desa.', 'categories' => []],
+            'visualisasi' => ['title' => 'Visualisasi Data', 'description' => 'Ringkasan data desa dalam tabel, grafik, dan angka.', 'categories' => ['age', 'education', 'occupation'], 'summary' => true],
+        ];
+        $populationPages = [
+            'ringkasan' => ['title' => 'Ringkasan Penduduk', 'description' => 'Ringkasan jumlah penduduk, keluarga, rumah tangga, dan wilayah.', 'categories' => ['sex'], 'summary' => true],
+            'jenis-kelamin' => ['title' => 'Jenis Kelamin', 'description' => 'Komposisi penduduk laki-laki dan perempuan.', 'categories' => ['sex']],
+            'kelompok-umur' => ['title' => 'Kelompok Umur', 'description' => 'Sebaran penduduk berdasarkan kelompok usia.', 'categories' => ['age']],
+            'pendidikan' => ['title' => 'Pendidikan', 'description' => 'Sebaran penduduk berdasarkan jenjang pendidikan.', 'categories' => ['education']],
+            'pekerjaan' => ['title' => 'Pekerjaan', 'description' => 'Sebaran profesi dan mata pencaharian warga.', 'categories' => ['occupation']],
+            'agama' => ['title' => 'Agama', 'description' => 'Komposisi penduduk berdasarkan agama.', 'categories' => ['religion']],
+            'status-perkawinan' => ['title' => 'Status Perkawinan', 'description' => 'Komposisi status perkawinan penduduk.', 'categories' => ['marital_status']],
+        ];
+        $pages = request()->routeIs('kependudukan.detail') ? $populationPages : $dataPages;
+        abort_unless(isset($pages[$section]), 404);
+        $page = $pages[$section];
+        $hasResidents = Schema::hasTable('residents');
+        $summary = $hasResidents
+            ? $populationStatistics->summary()
+            : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'households' => 0, 'areas' => 0];
+        $categoryLabels = [
+            'sex' => 'Jenis Kelamin',
+            'age' => 'Kelompok Umur',
+            'education' => 'Pendidikan',
+            'occupation' => 'Pekerjaan',
+            'religion' => 'Agama',
+            'marital_status' => 'Status Perkawinan',
+        ];
+        $panels = collect($page['categories'])->map(fn (string $category) => [
+            'title' => $categoryLabels[$category],
+            'items' => $hasResidents ? $populationStatistics->distribution($category) : [],
+        ])->all();
+        $idm = $section === 'idm' && Schema::hasTable('idm_scores')
+            ? IdmScore::query()->latest('year')->first()?->only(['year', 'idm_score', 'iks_score', 'ike_score', 'ikl_score', 'status_label', 'source'])
+            : null;
+
+        return $this->render('pages.statistic-detail', compact('page', 'summary', 'panels', 'idm'));
     }
 
     public function populationReport(Request $request, PopulationStatisticsService $populationStatistics): View
@@ -184,6 +272,68 @@ class SiteController extends Controller
                 ['icon' => 'fas fa-bullhorn', 'title' => 'Standar Pelayanan Publik Desa', 'category' => 'Pelayanan', 'year' => '2026'],
             ],
         ]);
+    }
+
+    public function informationDetail(string $section): View
+    {
+        $pages = [
+            'pengumuman' => [
+                'title' => 'Pengumuman Desa',
+                'description' => 'Informasi resmi dan pengumuman penting dari Pemerintah Desa Sukomulyo.',
+                'type' => 'announcement',
+                'fallback' => [['title' => 'Belum Ada Pengumuman Terbaru', 'content' => 'Pengumuman resmi desa akan ditampilkan pada halaman ini.']],
+            ],
+            'layanan-administrasi' => [
+                'title' => 'Layanan Administrasi',
+                'description' => 'Persyaratan surat, jadwal pelayanan, dan alur pelayanan masyarakat.',
+                'fallback' => [
+                    ['title' => 'Persyaratan Surat', 'content' => 'Siapkan KTP, Kartu Keluarga, dan dokumen pendukung sesuai jenis layanan yang diajukan.'],
+                    ['title' => 'Jadwal Pelayanan', 'content' => 'Pelayanan administrasi dilaksanakan pada hari dan jam kerja kantor desa.'],
+                    ['title' => 'Alur Pelayanan', 'content' => 'Ajukan berkas ke petugas, lakukan verifikasi data, kemudian ambil dokumen setelah selesai diproses.'],
+                ],
+            ],
+            'agenda' => [
+                'title' => 'Agenda Desa',
+                'description' => 'Jadwal kegiatan desa, musyawarah, dan kegiatan masyarakat.',
+                'type' => 'agenda',
+                'fallback' => [['title' => 'Belum Ada Agenda Terbaru', 'content' => 'Jadwal kegiatan desa akan ditampilkan pada halaman ini.']],
+            ],
+            'bantuan-sosial' => [
+                'title' => 'Informasi Bantuan Sosial',
+                'description' => 'Jadwal bantuan, syarat penerima, dan informasi penyaluran.',
+                'fallback' => [
+                    ['title' => 'Jadwal Penyaluran', 'content' => 'Jadwal penyaluran bantuan diumumkan setelah pemerintah desa menerima informasi resmi.'],
+                    ['title' => 'Syarat Penerima', 'content' => 'Penerima mengikuti hasil pendataan dan ketentuan program bantuan yang berlaku.'],
+                    ['title' => 'Informasi Penyaluran', 'content' => 'Konfirmasi penyaluran dapat diperoleh melalui kantor desa atau pengumuman resmi desa.'],
+                ],
+            ],
+            'informasi-publik' => [
+                'title' => 'Informasi Publik',
+                'description' => 'Program kerja, peraturan desa, dan dokumen publik.',
+                'type' => 'document',
+                'fallback' => [
+                    ['title' => 'Program Kerja Desa', 'content' => 'Informasi program kerja pemerintah desa tersedia untuk mendukung keterbukaan publik.'],
+                    ['title' => 'Peraturan Desa', 'content' => 'Dokumen peraturan desa akan ditampilkan setelah dipublikasikan secara resmi.'],
+                ],
+            ],
+        ];
+        abort_unless(isset($pages[$section]), 404);
+        $page = $pages[$section];
+        $items = collect();
+        if (isset($page['type']) && Schema::hasTable('publications')) {
+            $items = Publication::published()->where('type', $page['type'])->latest('published_at')->get()->map(fn (Publication $publication) => [
+                'title' => $publication->title,
+                'content' => $publication->content,
+                'excerpt' => $publication->excerpt,
+                'html' => true,
+                'date' => $publication->start_date?->translatedFormat('d F Y') ?? $publication->published_at?->translatedFormat('d F Y'),
+            ]);
+        }
+        if ($items->isEmpty()) {
+            $items = collect($page['fallback']);
+        }
+
+        return $this->render('pages.information-detail', compact('page', 'items'));
     }
 
     public function map(): View
@@ -402,7 +552,7 @@ class SiteController extends Controller
 
     private function shared(): array
     {
-        return $this->cache->remember(
+        $layout = $this->cache->remember(
             SiteCache::PUBLIC_LAYOUT,
             SiteCache::TEN_MINUTES,
             function (): array {
@@ -417,13 +567,14 @@ class SiteController extends Controller
                         'phone' => $setting('site.phone', '(0000) 123 456'),
                         'address' => $setting('site.address', 'Kantor Desa Sukomulyo, Indonesia'),
                     ],
-                    'navigation' => $this->navigation(),
                     'articles' => $this->latestArticles(),
                     'categories' => $this->newsCategories(),
                     'archiveYears' => $this->newsArchiveYears(),
                 ];
             }
         );
+
+        return array_merge($layout, ['navigation' => $this->navigation()]);
     }
 
     private function publicSettings(): Collection
@@ -439,22 +590,44 @@ class SiteController extends Controller
 
     private function navigation(): array
     {
-        return $this->cache->remember(
-            SiteCache::NAVIGATION,
-            SiteCache::ONE_HOUR,
-            fn () => [
+        return [
                 ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
-                ['label' => 'Profile Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
-                ['label' => 'Data Desa/Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-desa-statistik'],
-                ['label' => 'Kependudukan', 'route' => 'data-desa-statistik', 'active' => 'data-desa-statistik', 'children' => [
-                    ['label' => 'Statistik Kependudukan', 'route' => 'data-desa-statistik', 'active' => 'data-desa-statistik'],
+                ['label' => 'Profile Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
+                    ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
+                    ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
+                    ['label' => 'Struktur Pemerintahan', 'route' => 'pemerintahan-desa', 'active' => 'pemerintahan-desa'],
+                    ['label' => 'Wilayah Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
+                    ['label' => 'Potensi Desa', 'route' => 'potensi-desa', 'active' => 'potensi-desa'],
+                ]],
+                ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => [
+                    ['label' => 'Statistik Penduduk', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'penduduk']],
+                    ['label' => 'Statistik Pendidikan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pendidikan']],
+                    ['label' => 'Statistik Pekerjaan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pekerjaan']],
+                    ['label' => 'Statistik Ekonomi', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'ekonomi']],
+                    ['label' => 'IDM (Indeks Desa Membangun)', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'idm']],
+                    ['label' => 'Visualisasi Data', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'visualisasi']],
+                ]],
+                ['label' => 'Kependudukan', 'route' => 'kependudukan', 'active' => 'kependudukan*', 'children' => [
+                    ['label' => 'Ringkasan Penduduk', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'ringkasan']],
+                    ['label' => 'Jenis Kelamin', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'jenis-kelamin']],
+                    ['label' => 'Kelompok Umur', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'kelompok-umur']],
+                    ['label' => 'Pendidikan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pendidikan']],
+                    ['label' => 'Pekerjaan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pekerjaan']],
+                    ['label' => 'Agama', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'agama']],
+                    ['label' => 'Status Perkawinan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'status-perkawinan']],
                     ['label' => 'Laporan Penduduk', 'route' => 'laporan-penduduk', 'active' => 'laporan-penduduk'],
                 ]],
-                ['label' => 'Informasi Publik Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-publik-desa'],
+                ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
+                    ['label' => 'Pengumuman Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'pengumuman']],
+                    ['label' => 'Layanan Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
+                    ['label' => 'Agenda Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'agenda']],
+                    ['label' => 'Informasi Bantuan Sosial', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'bantuan-sosial']],
+                    ['label' => 'Informasi Publik', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'informasi-publik']],
+                    ['label' => 'APBDes', 'route' => 'transparansi-apbdes', 'active' => 'transparansi-apbdes'],
+                ]],
                 ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
-                ['label' => 'Peta Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
-            ]
-        );
+                ['label' => 'Galeri Desa', 'route' => 'galeri-desa', 'active' => 'galeri-desa'],
+        ];
     }
 
     private function villageIdentity(): array

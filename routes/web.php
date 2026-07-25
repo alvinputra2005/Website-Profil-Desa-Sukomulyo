@@ -81,10 +81,17 @@ Route::controller(SiteController::class)->group(function () {
     // Menu utama
     Route::get('/', 'home')->name('beranda');
     Route::get('/profile-desa', 'profile')->name('profile-desa');
+    Route::get('/profile-desa/{section}', 'profileDetail')->where('section', 'sejarah|visi-misi')->name('profile-desa.detail');
+    Route::get('/pemerintahan-desa', 'government')->name('pemerintahan-desa');
+    Route::get('/potensi-desa', 'potentials')->name('potensi-desa');
     Route::get('/data-desa-statistik', 'statistics')->name('data-desa-statistik');
+    Route::get('/data-statistik/{section}', 'statisticDetail')->where('section', 'penduduk|pendidikan|pekerjaan|ekonomi|idm|visualisasi')->name('data-statistik.detail');
+    Route::get('/kependudukan', 'statistics')->name('kependudukan');
+    Route::get('/kependudukan/{section}', 'statisticDetail')->where('section', 'ringkasan|jenis-kelamin|kelompok-umur|pendidikan|pekerjaan|agama|status-perkawinan')->name('kependudukan.detail');
     Route::get('/laporan-penduduk', 'populationReport')->name('laporan-penduduk');
     Route::get('/transparansi-apbdes', 'budgetHistory')->name('transparansi-apbdes');
     Route::get('/informasi-publik-desa', 'publicInformation')->name('informasi-publik-desa');
+    Route::get('/informasi-desa/{section}', 'informationDetail')->where('section', 'pengumuman|layanan-administrasi|agenda|bantuan-sosial|informasi-publik')->name('informasi-desa.detail');
     Route::get('/peta-desa', 'map')->name('peta-desa');
     Route::get('/peta-desa/geojson', 'mapGeoJson')->middleware('throttle:60,1')->name('peta-desa.geojson');
     Route::get('/galeri-desa', 'gallery')->name('galeri-desa');
@@ -103,8 +110,6 @@ Route::controller(SiteController::class)->group(function () {
 });
 
 Route::redirect('/profil-desa', '/profile-desa', 301);
-Route::redirect('/pemerintahan-desa', '/informasi-publik-desa', 301);
-Route::redirect('/potensi-desa', '/data-desa-statistik', 301);
 Route::redirect('/berita', '/berita-desa', 301);
 
 Route::fallback([SiteController::class, 'notFound']);

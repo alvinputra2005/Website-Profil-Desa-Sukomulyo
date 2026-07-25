@@ -4,7 +4,7 @@
     <div class="container">
         <div id="sc_innerpage_wrap">
             <section class="sc_innerpage_contentbx fullwidth">
-                <div class="public-info-intro">
+                <div id="informasi-publik" class="public-info-intro">
                     <div>
                         <span class="section-kicker">Keterbukaan Informasi</span>
                         <h2>Dokumen Publik Desa</h2>
@@ -29,11 +29,12 @@
                 </div>
 
                 <section class="information-services">
-                    <h2>Layanan Informasi</h2>
+                    <h2>Akses Informasi Desa</h2>
                     <div class="value-grid">
-                        <article><i class="fas fa-id-card" aria-hidden="true"></i><h3>Administrasi Penduduk</h3><p>Informasi persyaratan pengantar administrasi kependudukan.</p></article>
-                        <article><i class="fas fa-certificate" aria-hidden="true"></i><h3>Surat Keterangan</h3><p>Informasi pengajuan surat keterangan melalui kantor desa.</p></article>
-                        <article><i class="fas fa-comments" aria-hidden="true"></i><h3>Permohonan Informasi</h3><p>Saluran pertanyaan dan permintaan data publik desa.</p></article>
+                        <article id="pengumuman-desa"><i class="fas fa-bullhorn" aria-hidden="true"></i><h3>Pengumuman Desa</h3><p>Informasi resmi dan pengumuman penting dari pemerintah desa.</p></article>
+                        <article id="layanan-administrasi"><i class="fas fa-id-card" aria-hidden="true"></i><h3>Layanan Administrasi</h3><p>Persyaratan surat, jadwal pelayanan, dan alur pelayanan masyarakat.</p></article>
+                        <article id="agenda-desa"><i class="fas fa-calendar-alt" aria-hidden="true"></i><h3>Agenda Desa</h3><p>Jadwal kegiatan desa, musyawarah, dan kegiatan masyarakat.</p></article>
+                        <article id="informasi-bantuan-sosial"><i class="fas fa-hands-helping" aria-hidden="true"></i><h3>Informasi Bantuan Sosial</h3><p>Jadwal bantuan, syarat penerima, dan informasi penyaluran.</p></article>
                     </div>
                 </section>
             </section>

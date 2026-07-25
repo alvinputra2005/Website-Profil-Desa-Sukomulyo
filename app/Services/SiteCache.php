@@ -9,8 +9,6 @@ class SiteCache
 {
     public const SETTINGS = 'site.settings.public';
 
-    public const NAVIGATION = 'site.navigation.public';
-
     public const PUBLIC_LAYOUT = 'site.layout.public';
 
     public const PROFILE = 'profile.sections';
