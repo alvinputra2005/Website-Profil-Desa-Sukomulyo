@@ -676,7 +676,23 @@ class SiteController extends Controller
         $htmlContent = preg_replace('~https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(/storage/)~i', '$1', $article->content);
         preg_match('~<img[^>]+src=["\']([^"\']+)["\']~i', $htmlContent, $inlineImage);
 
-        return ['slug' => $article->slug, 'title' => $article->title, 'date' => ($article->published_at ?? $article->created_at)->translatedFormat('d F Y'), 'year' => (string) ($article->published_at ?? $article->created_at)->year, 'category' => $article->category->name, 'category_slug' => $article->category->slug, 'image' => $article->featuredImage?->url ?? ($inlineImage[1] ?? $image), 'excerpt' => $article->excerpt ?? strip_tags($htmlContent), 'content' => [strip_tags($htmlContent)], 'html_content' => $htmlContent, 'tags' => []];
+        return [
+            'slug' => $article->slug,
+            'title' => $article->title,
+            'date' => ($article->published_at ?? $article->created_at)->translatedFormat('d F Y'),
+            'year' => (string) ($article->published_at ?? $article->created_at)->year,
+            'category' => $article->category->name,
+            'category_slug' => $article->category->slug,
+            'image' => $article->featuredImage?->url ?? ($inlineImage[1] ?? $image),
+            'featured_image' => $article->featuredImage ? [
+                'url' => $article->featuredImage->url,
+                'alt' => $article->featuredImage->alt_text ?: $article->title,
+            ] : null,
+            'excerpt' => $article->excerpt ?? strip_tags($htmlContent),
+            'content' => [strip_tags($htmlContent)],
+            'html_content' => $htmlContent,
+            'tags' => [],
+        ];
     }
 
     private function fallbackArticles(): array

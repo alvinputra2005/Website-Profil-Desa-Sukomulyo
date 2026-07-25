@@ -360,7 +360,7 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .article-editor-surface .article-image { position: relative; max-width: 100%; margin: 18px auto; clear: both; }
 .article-editor-surface .article-image img { display: block; max-width: 100%; height: auto; border: 2px solid transparent; }
 .article-editor-surface .article-image:hover img { border-color: #8ba47c; }
-.article-editor-surface .article-image figcaption { padding: 6px; color: #6f786f; font-size: 12px; text-align: center; }
+.article-editor-surface .article-image figcaption { padding: 6px; color: #6f786f; font-size: 12px; text-align: center; cursor: text; }
 .article-editor-surface .article-image.align-left { width: 45%; margin: 8px 18px 12px 0; float: left; }
 .article-editor-surface .article-image.align-right { width: 45%; margin: 8px 0 12px 18px; float: right; }
 .article-editor-surface .article-image.align-center { width: 70%; }

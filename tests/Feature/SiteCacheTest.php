@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\MapFeature;
 use App\Models\MapLayer;
-use App\Models\News;
+use App\Models\{Media, News};
 use App\Models\NewsCategory;
 use App\Models\Setting;
 use App\Models\User;
@@ -112,6 +112,45 @@ class SiteCacheTest extends TestCase
             ->assertOk()
             ->assertSee('Judul Baru')
             ->assertDontSee('Judul Lama');
+    }
+
+    public function test_featured_news_image_is_rendered_before_article_content(): void
+    {
+        $user = User::factory()->create();
+        $category = NewsCategory::create(['name' => 'Kegiatan', 'slug' => 'kegiatan']);
+        $media = Media::create([
+            'original_name' => 'gambar-utama.webp',
+            'stored_name' => 'gambar-utama.webp',
+            'disk' => 'public',
+            'storage_path' => 'berita/gambar-utama/gambar-utama.webp',
+            'mime_type' => 'image/webp',
+            'extension' => 'webp',
+            'file_size' => 1234,
+            'width' => 1200,
+            'height' => 800,
+            'alt_text' => 'Dokumentasi kegiatan desa',
+            'uploaded_by' => $user->id,
+        ]);
+        $news = News::create([
+            'category_id' => $category->id,
+            'title' => 'Berita Dengan Gambar Utama',
+            'slug' => 'berita-dengan-gambar-utama',
+            'content' => '<p>Isi berita berada setelah gambar utama.</p>',
+            'featured_image_id' => $media->id,
+            'status' => 'published',
+            'published_at' => now(),
+            'author_id' => $user->id,
+        ]);
+
+        $this->get(route('berita-desa.show', $news->slug))
+            ->assertOk()
+            ->assertSee('class="entry-content"', false)
+            ->assertSee('src="/storage/berita/gambar-utama/gambar-utama.webp"', false)
+            ->assertSee('alt="Dokumentasi kegiatan desa"', false)
+            ->assertSeeInOrder([
+                'class="article-image article-featured-image align-center"',
+                '<p>Isi berita berada setelah gambar utama.</p>',
+            ], false);
     }
 
     public function test_geojson_only_contains_visible_content_and_is_invalidated_after_update(): void

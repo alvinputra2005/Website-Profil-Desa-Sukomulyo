@@ -144,6 +144,7 @@ const initAdminPage = () => {
     const area=editor.querySelector('textarea'),surface=editor.querySelector('[contenteditable]'),imageInput=editor.querySelector('[data-image-input]'),status=editor.querySelector('[data-editor-status]');
     if(!area||!surface)return;
     let savedRange=null,selectedFigure=null;
+    const captionPlaceholder='Klik untuk menulis keterangan gambar';
     const sync=()=>{const clean=surface.cloneNode(true);clean.querySelectorAll('[data-resize-handle],[data-resize-label]').forEach(node=>node.remove());clean.querySelectorAll('.is-selected,.is-resizing').forEach(node=>node.classList.remove('is-selected','is-resizing'));area.value=clean.innerHTML};
     const rememberSelection=()=>{const selection=window.getSelection();if(selection?.rangeCount&&surface.contains(selection.anchorNode))savedRange=selection.getRangeAt(0).cloneRange()};
     const restoreSelection=()=>{surface.focus();if(savedRange){const selection=window.getSelection();selection.removeAllRanges();selection.addRange(savedRange)}};
@@ -154,6 +155,19 @@ const initAdminPage = () => {
     sync();
     surface.addEventListener('input',()=>{rememberSelection();sync()});
     surface.addEventListener('keyup',rememberSelection);
+    surface.addEventListener('mousedown',event=>{
+      const caption=event.target.closest('figcaption');
+      if(!caption||!surface.contains(caption)||caption.textContent.trim()!==captionPlaceholder)return;
+      event.preventDefault();
+      event.stopPropagation();
+      surface.focus();
+      const range=document.createRange();
+      range.selectNodeContents(caption);
+      const selection=window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      savedRange=range.cloneRange();
+    });
     surface.addEventListener('mouseup',event=>{rememberSelection();selectedFigure=event.target.closest('figure.article-image');surface.querySelectorAll('figure.article-image').forEach(figure=>figure.classList.toggle('is-selected',figure===selectedFigure))});
     editor.querySelectorAll('[data-command]').forEach(button=>button.addEventListener('mousedown',event=>event.preventDefault()));
     editor.querySelectorAll('[data-command]').forEach(button=>button.addEventListener('click',()=>{restoreSelection();document.execCommand(button.dataset.command,false,button.dataset.value||null);rememberSelection();sync()}));

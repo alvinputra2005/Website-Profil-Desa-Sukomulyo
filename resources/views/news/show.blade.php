@@ -17,6 +17,12 @@
                 </header>
 
                 <div class="entry-content">
+                    @if(!empty($article['featured_image']))
+                        <figure class="article-image article-featured-image align-center">
+                            <img src="{{ $article['featured_image']['url'] }}" alt="{{ $article['featured_image']['alt'] }}">
+                        </figure>
+                    @endif
+
                     @if(!empty($article['html_content']))
                         {!! $article['html_content'] !!}
                     @else
