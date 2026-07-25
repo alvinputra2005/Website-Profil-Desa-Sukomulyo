@@ -12,7 +12,7 @@ use App\Http\Controllers\Admin\{
 
 Route::middleware('guest')->group(function(){
     Route::get('/admin/login',[LoginController::class,'create'])->name('login');
-    Route::post('/admin/login',[LoginController::class,'store'])->middleware('throttle:5,1')->name('login.store');
+    Route::post('/admin/login',[LoginController::class,'store'])->middleware('throttle:admin-login')->name('login.store');
     Route::get('/admin/lupa-password',[PasswordController::class,'request'])->name('password.request');
     Route::post('/admin/lupa-password',[PasswordController::class,'email'])->middleware('throttle:3,1')->name('password.email');
     Route::get('/admin/reset-password/{token}',[PasswordController::class,'reset'])->name('password.reset');
