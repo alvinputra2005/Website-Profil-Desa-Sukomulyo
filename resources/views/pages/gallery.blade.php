@@ -1,5 +1,10 @@
 <x-layouts.app title="Galeri Desa">
-    <x-page-header title="Galeri Desa" description="Dokumentasi kegiatan, pelayanan, dan potensi Desa Sukomulyo." />
+    <x-page-header
+        title="Galeri Desa"
+        description="Dokumentasi kegiatan, pelayanan, dan potensi Desa Sukomulyo."
+        :show-breadcrumbs="false"
+        :show-divider="false"
+    />
 
     <div class="container">
         <div id="sc_innerpage_wrap">

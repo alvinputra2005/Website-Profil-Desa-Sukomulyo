@@ -420,14 +420,10 @@ class SiteController extends Controller
     public function news(Request $request): View
     {
         $selectedCategory = trim((string) $request->query('category', ''));
-        $selectedDate = $this->validatedNewsDate($request);
         $articles = collect($this->articles());
 
         if ($selectedCategory !== '') {
             $articles = $articles->where('category_slug', $selectedCategory);
-        }
-        if ($selectedDate !== '') {
-            $articles = $articles->where('iso_date', $selectedDate);
         }
 
         return $this->render('news.index', [
@@ -435,9 +431,8 @@ class SiteController extends Controller
             'description' => 'Informasi terbaru mengenai kegiatan dan perkembangan Desa Sukomulyo.',
             'visibleArticles' => $this->paginateArticles($articles, $request),
             'featuredArticles' => $articles->take(3)->values()->all(),
-            'showFeatured' => $selectedCategory === '' && $selectedDate === '' && LengthAwarePaginator::resolveCurrentPage() === 1,
+            'showFeatured' => $selectedCategory === '' && LengthAwarePaginator::resolveCurrentPage() === 1,
             'selectedCategory' => $selectedCategory,
-            'selectedDate' => $selectedDate,
         ]);
     }
 
@@ -464,19 +459,13 @@ class SiteController extends Controller
             return $this->notFound();
         }
 
-        $selectedDate = $this->validatedNewsDate($request);
-        $visibleArticles = $selectedDate === ''
-            ? $articles
-            : collect($articles)->where('iso_date', $selectedDate)->values()->all();
-
         return $this->render('news.index', [
             'heading' => 'Kategori: '.$articles[0]['category'],
             'description' => 'Kumpulan berita dalam kategori '.$articles[0]['category'].'.',
-            'visibleArticles' => $this->paginateArticles(collect($visibleArticles), $request),
+            'visibleArticles' => $this->paginateArticles(collect($articles), $request),
             'featuredArticles' => [],
             'showFeatured' => false,
             'selectedCategory' => $category,
-            'selectedDate' => $selectedDate,
         ]);
     }
 
@@ -492,7 +481,6 @@ class SiteController extends Controller
             'featuredArticles' => [],
             'showFeatured' => false,
             'selectedCategory' => '',
-            'selectedDate' => '',
         ]);
     }
 
@@ -509,20 +497,6 @@ class SiteController extends Controller
             ->all();
 
         return $this->render('news.search', compact('query', 'results'));
-    }
-
-    private function validatedNewsDate(Request $request): string
-    {
-        $date = trim((string) $request->query('date', ''));
-
-        if ($date === '') {
-            return '';
-        }
-
-        return validator(
-            ['date' => $date],
-            ['date' => ['date_format:Y-m-d']]
-        )->validate()['date'];
     }
 
     private function paginateArticles(Collection $articles, Request $request): LengthAwarePaginator
@@ -846,31 +820,7 @@ class SiteController extends Controller
         return $this->cache->remember(
             SiteCache::NEWS_ARCHIVES,
             SiteCache::TEN_MINUTES,
-            function (): array {
-                $articles = request()->attributes->get('site.published_articles');
-                if (! is_array($articles)) {
-                    $articles = Cache::get(SiteCache::NEWS_LIST);
-                }
-                if (is_array($articles)) {
-                    return collect($articles)->pluck('year')->unique()->values()->all();
-                }
-
-                if (Schema::hasTable('news')) {
-                    $years = News::published()
-                        ->latest('published_at')
-                        ->get(['published_at', 'created_at'])
-                        ->map(fn (News $article) => (string) ($article->published_at ?? $article->created_at)->year)
-                        ->unique()
-                        ->values()
-                        ->all();
-
-                    if ($years !== []) {
-                        return $years;
-                    }
-                }
-
-                return collect($this->fallbackArticles())->pluck('year')->unique()->values()->all();
-            }
+            fn (): array => range(now()->year, now()->year - 4)
         );
     }
 

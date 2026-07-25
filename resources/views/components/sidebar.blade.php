@@ -2,8 +2,19 @@
     'categories',
     'archiveYears' => [],
     'selectedCategory' => request()->route('category', request('category', '')),
-    'selectedDate' => request('date', ''),
+    'selectedYear' => request()->route('year', ''),
 ])
+
+@php
+    $visibleCategories = collect($categories)->take(4);
+    $activeCategory = collect($categories)->firstWhere('category_slug', $selectedCategory);
+    $categoryExpanded = $selectedCategory !== '';
+    $archiveExpanded = $selectedYear !== '';
+
+    if ($activeCategory && ! $visibleCategories->contains('category_slug', $selectedCategory)) {
+        $visibleCategories = $visibleCategories->take(3)->push($activeCategory);
+    }
+@endphp
 
 <aside id="sidebar" aria-label="Informasi berita">
     <div class="news-filter-panel">
@@ -14,43 +25,60 @@
         </form>
 
         <section class="widget news-category-widget">
-            <h3 class="widget-title">Kategori Berita</h3>
-            <ul>
-                <li>
-                    <a class="{{ $selectedCategory === '' ? 'is-active' : '' }}" href="{{ route('berita-desa.index', array_filter(['date' => $selectedDate])) }}">
-                        <span>Semua Kategori</span>
-                        <i class="fas fa-chevron-right" aria-hidden="true"></i>
-                    </a>
-                </li>
-                @foreach ($categories as $category)
+            <h3 class="widget-title">
+                <button
+                    class="widget-toggle"
+                    type="button"
+                    aria-expanded="{{ $categoryExpanded ? 'true' : 'false' }}"
+                    aria-controls="news-category-list"
+                    data-sidebar-toggle
+                >
+                    <span>Kategori</span>
+                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                </button>
+            </h3>
+            <div id="news-category-list" class="widget-panel" data-sidebar-panel @if (! $categoryExpanded) hidden @endif>
+                <ul>
                     <li>
-                        <a class="{{ $selectedCategory === $category['category_slug'] ? 'is-active' : '' }}" href="{{ route('berita-desa.category', array_filter(['category' => $category['category_slug'], 'date' => $selectedDate])) }}">
-                            <span>{{ $category['category'] }}</span>
-                            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                        <a class="{{ $selectedCategory === '' ? 'is-active' : '' }}" href="{{ route('berita-desa.index') }}">
+                            <span>Semua Kategori</span>
                         </a>
                     </li>
-                @endforeach
-            </ul>
+                    @foreach ($visibleCategories as $category)
+                        <li>
+                            <a class="{{ $selectedCategory === $category['category_slug'] ? 'is-active' : '' }}" href="{{ route('berita-desa.category', $category['category_slug']) }}">
+                                <span>{{ $category['category'] }}</span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
         </section>
 
-        <section class="widget news-date-widget">
-            <h3 class="widget-title">Kalender Berita</h3>
-            <form action="{{ $selectedCategory !== '' ? route('berita-desa.category', $selectedCategory) : route('berita-desa.index') }}" method="GET">
-                <label for="news-date">
-                    <span>Pilih tanggal terbit</span>
-                    <small>Lihat berita pada tanggal, bulan, dan tahun tertentu.</small>
-                </label>
-                <div class="news-date-control">
-                    <i class="far fa-calendar-alt" aria-hidden="true"></i>
-                    <input id="news-date" type="date" name="date" value="{{ $selectedDate }}">
-                </div>
-                <div class="news-date-actions">
-                    <button type="submit">Tampilkan</button>
-                    @if ($selectedDate !== '')
-                        <a href="{{ $selectedCategory !== '' ? route('berita-desa.category', $selectedCategory) : route('berita-desa.index') }}">Hapus tanggal</a>
-                    @endif
-                </div>
-            </form>
+        <section class="widget news-archive-widget">
+            <h3 class="widget-title">
+                <button
+                    class="widget-toggle"
+                    type="button"
+                    aria-expanded="{{ $archiveExpanded ? 'true' : 'false' }}"
+                    aria-controls="news-archive-list"
+                    data-sidebar-toggle
+                >
+                    <span>Arsip</span>
+                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                </button>
+            </h3>
+            <div id="news-archive-list" class="widget-panel" data-sidebar-panel @if (! $archiveExpanded) hidden @endif>
+                <ul>
+                    @foreach ($archiveYears as $year)
+                        <li>
+                            <a class="{{ (string) $selectedYear === (string) $year ? 'is-active' : '' }}" href="{{ route('berita-desa.archive', $year) }}">
+                                <span>Tahun {{ $year }}</span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
         </section>
     </div>
 </aside>

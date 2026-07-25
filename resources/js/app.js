@@ -241,6 +241,25 @@ const initPublicPage = () => {
         });
     });
 
+    document.querySelectorAll('[data-sidebar-toggle]').forEach((toggle) => {
+        if (toggle.dataset.bound === 'true') return;
+
+        const panel = document.getElementById(toggle.getAttribute('aria-controls'));
+        if (!panel) return;
+
+        const setExpanded = (expanded) => {
+            toggle.setAttribute('aria-expanded', String(expanded));
+            panel.hidden = !expanded;
+        };
+
+        toggle.dataset.bound = 'true';
+        toggle.addEventListener('click', () => {
+            const expanded = toggle.getAttribute('aria-expanded') === 'true';
+
+            setExpanded(!expanded);
+        });
+    });
+
     document.querySelectorAll('[data-gallery-carousel]').forEach((carousel) => {
         const items = [...carousel.querySelectorAll('[data-carousel-item]')];
         const previous = carousel.querySelector('[data-gallery-prev]');

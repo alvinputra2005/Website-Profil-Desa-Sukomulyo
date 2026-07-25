@@ -130,30 +130,49 @@ class SitePagesTest extends TestCase
         $this->assertSame(5, substr_count($response->getContent(), 'data-gallery-item'));
     }
 
-    public function test_news_page_shows_featured_layout_category_and_date_filters(): void
+    public function test_news_page_shows_featured_layout_categories_and_five_year_archive(): void
     {
-        $this->get(route('berita-desa.index'))
+        $response = $this->get(route('berita-desa.index'))
             ->assertOk()
-            ->assertSee('Berita Utama')
+            ->assertDontSee('>Berita Utama<', false)
             ->assertDontSee('Semua Berita')
-            ->assertSee('Kategori Berita')
-            ->assertSee('Kalender Berita')
-            ->assertSee('type="date"', false)
-            ->assertSee('featured-news-card--main', false);
+            ->assertDontSee('Pilihan Redaksi')
+            ->assertDontSee('Kabar terbaru dan informasi penting dari Desa Sukomulyo.')
+            ->assertDontSee('<p>Informasi terbaru mengenai kegiatan dan perkembangan Desa Sukomulyo.</p>', false)
+            ->assertSee('>Kategori<', false)
+            ->assertSee('>Arsip<', false)
+            ->assertSee('Tahun 2026')
+            ->assertSee('Tahun 2022')
+            ->assertDontSee('Tahun 2021')
+            ->assertDontSee('Filter berdasarkan bulan')
+            ->assertDontSee('news-month', false)
+            ->assertSee('featured-news-card--main', false)
+            ->assertSee('featured-news-meta', false);
 
-        $this->get(route('berita-desa.index', ['date' => '2026-07-18']))
-            ->assertOk()
-            ->assertSee('Musyawarah Desa Penyusunan Program Kerja')
-            ->assertDontSee('news-list-heading', false)
-            ->assertDontSee('featured-news-section', false);
+        $html = $response->getContent();
+        preg_match('/<div class="news-filter-panel">(.*?)<\/aside>/s', $html, $sidebar);
+        $sidebarHtml = $sidebar[1] ?? '';
+        $this->assertLessThan(strpos($sidebarHtml, '>Kategori<'), strpos($sidebarHtml, 'Cari berita'));
+        $this->assertLessThan(strpos($sidebarHtml, '>Arsip<'), strpos($sidebarHtml, '>Kategori<'));
+        preg_match('/<section class="widget news-category-widget">(.*?)<\/section>/s', $sidebarHtml, $categoryWidget);
+        $this->assertSame(5, substr_count($categoryWidget[1] ?? '', '<li>'));
+        preg_match('/<section class="widget news-archive-widget">(.*?)<\/section>/s', $sidebarHtml, $archiveWidget);
+        $this->assertSame(5, substr_count($archiveWidget[1] ?? '', '<li>'));
+        $this->assertSame(2, substr_count($sidebarHtml, 'data-sidebar-toggle'));
+        $this->assertSame(2, substr_count($sidebarHtml, 'data-sidebar-panel'));
+        $this->assertSame(2, substr_count($sidebarHtml, 'aria-expanded="false"'));
+        $this->assertStringContainsString('id="news-category-list"', $sidebarHtml);
+        $this->assertStringContainsString('id="news-archive-list"', $sidebarHtml);
 
-        $this->get(route('berita-desa.category', [
-            'category' => 'kemasyarakatan',
-            'date' => '2026-07-14',
-        ]))
+        $this->get(route('berita-desa.category', 'kemasyarakatan'))
             ->assertOk()
             ->assertSee('Kerja Bakti Menjaga Lingkungan Desa')
-            ->assertSee('value="2026-07-14"', false);
+            ->assertSee('aria-expanded="true"', false);
+
+        $this->get(route('berita-desa.archive', '2026'))
+            ->assertOk()
+            ->assertSee('aria-controls="news-archive-list"', false)
+            ->assertSee('aria-expanded="true"', false);
     }
 
     public function test_news_pagination_shows_five_articles_per_page(): void
@@ -188,19 +207,33 @@ class SitePagesTest extends TestCase
         foreach ($pages as $url => [$parent, $child]) {
             $response = $this->get($url)->assertOk();
             $html = $response->getContent();
+            preg_match('/<header class="page-banner">(.*?)<\/header>/s', $html, $bannerMatches);
+            $banner = $bannerMatches[1] ?? '';
             preg_match('/<nav class="breadcrumbs".*?<\/nav>/s', $html, $matches);
             $breadcrumbs = $matches[0] ?? '';
 
+            $this->assertStringContainsString('class="breadcrumb-home"', $breadcrumbs);
+            $this->assertStringContainsString('Beranda', $breadcrumbs);
             $this->assertStringContainsString($parent, $breadcrumbs);
-            $this->assertStringContainsString('<span aria-hidden="true">/</span>', $breadcrumbs);
+            $this->assertStringContainsString('breadcrumb-separator', $breadcrumbs);
             $this->assertStringContainsString($child, $breadcrumbs);
+            $this->assertStringContainsString('class="page-banner-heading"', $banner);
+            $this->assertStringContainsString('<h1>'.$child.'</h1>', $banner);
         }
 
         foreach ([route('berita-desa.index'), route('galeri-desa')] as $url) {
             $response = $this->get($url)->assertOk();
-            preg_match('/<nav class="breadcrumbs".*?<\/nav>/s', $response->getContent(), $matches);
-            $this->assertStringNotContainsString('<span aria-hidden="true">/</span>', $matches[0] ?? '');
+            $response
+                ->assertDontSee('<nav class="breadcrumbs"', false)
+                ->assertSee('page-banner--no-breadcrumbs', false)
+                ->assertSee('page-banner--no-divider', false);
         }
+
+        $this->get(route('berita-desa.show', 'musyawarah-desa-penyusunan-program-kerja'))
+            ->assertOk()
+            ->assertSee('<nav class="breadcrumbs"', false)
+            ->assertSee('class="breadcrumb-home"', false)
+            ->assertSee('Musyawarah Desa Penyusunan Program Kerja');
     }
 
     public function test_budget_history_shows_ten_years_of_dummy_data(): void
