@@ -11,6 +11,9 @@
         </div>
         <h2><a href="{{ route('berita-desa.show', $article['slug']) }}">{{ $article['title'] }}</a></h2>
         <p>{{ $article['excerpt'] }}</p>
-        <a class="read-more" href="{{ route('berita-desa.show', $article['slug']) }}">Baca selengkapnya <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <a class="read-more" href="{{ route('berita-desa.show', $article['slug']) }}">
+            <span>Baca selengkapnya</span>
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </a>
     </div>
 </article>
