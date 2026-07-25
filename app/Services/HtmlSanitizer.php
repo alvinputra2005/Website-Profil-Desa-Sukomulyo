@@ -31,7 +31,15 @@ final class HtmlSanitizer
             foreach (iterator_to_array($child->attributes) as $attribute) if (! in_array(strtolower($attribute->name),$this->allowed[$tag],true)) $child->removeAttribute($attribute->name);
             if ($tag==='a') { $href=$child->getAttribute('href'); if ($href && ! preg_match('~^(https?://|mailto:|tel:|/)~i',$href)) $child->removeAttribute('href'); if ($child->getAttribute('target')==='_blank') $child->setAttribute('rel','noopener noreferrer'); }
             if ($tag==='img' && ! preg_match('~^(https?://|/)~i',$child->getAttribute('src'))) $child->removeAttribute('src');
-            if ($tag==='figure' && ! in_array($child->getAttribute('class'), ['article-image align-left','article-image align-center','article-image align-right','article-image align-full'], true)) $child->setAttribute('class','article-image align-center');
+            if ($tag==='figure') {
+                $class = trim($child->getAttribute('class'));
+                if (preg_match('/(?:^|\s)align-(left|right|full|center)(?:\s|$)/i', $class, $match)) {
+                    $alignment = 'align-'.strtolower($match[1]);
+                } else {
+                    $alignment = 'align-center';
+                }
+                $child->setAttribute('class', 'article-image '.$alignment);
+            }
             if ($tag==='figure') { $width=(int)$child->getAttribute('data-width'); $child->setAttribute('data-width',(string)(in_array($width,range(20,100,5),true)?$width:70)); }
             $this->walk($child);
         }

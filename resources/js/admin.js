@@ -1,6 +1,25 @@
 import { initAjaxNavigation } from './ajax';
 import { bindImagePreparation, prepareImageFile, prepareImageInput } from './image-upload';
 import { initRegionSelectors } from './regions';
+import tinymce from 'tinymce/tinymce';
+import 'tinymce/icons/default';
+import 'tinymce/themes/silver';
+import 'tinymce/models/dom';
+import 'tinymce/plugins/advlist';
+import 'tinymce/plugins/autolink';
+import 'tinymce/plugins/anchor';
+import 'tinymce/plugins/charmap';
+import 'tinymce/plugins/code';
+import 'tinymce/plugins/fullscreen';
+import 'tinymce/plugins/image';
+import 'tinymce/plugins/link';
+import 'tinymce/plugins/lists';
+import 'tinymce/plugins/media';
+import 'tinymce/plugins/preview';
+import 'tinymce/plugins/searchreplace';
+import 'tinymce/plugins/table';
+import 'tinymce/plugins/visualblocks';
+import 'tinymce/plugins/wordcount';
 
 const initAdminPage = () => {
   if(window.jQuery){const $=window.jQuery;
@@ -140,43 +159,81 @@ const initAdminPage = () => {
     checks.forEach(checkbox=>checkbox.addEventListener('change',update));
     update();
   }
-  document.querySelectorAll('[data-article-editor]').forEach(editor=>{
-    const area=editor.querySelector('textarea'),surface=editor.querySelector('[contenteditable]'),imageInput=editor.querySelector('[data-image-input]'),status=editor.querySelector('[data-editor-status]');
-    if(!area||!surface)return;
-    let savedRange=null,selectedFigure=null;
-    const captionPlaceholder='Klik untuk menulis keterangan gambar';
-    const sync=()=>{const clean=surface.cloneNode(true);clean.querySelectorAll('[data-resize-handle],[data-resize-label]').forEach(node=>node.remove());clean.querySelectorAll('.is-selected,.is-resizing').forEach(node=>node.classList.remove('is-selected','is-resizing'));area.value=clean.innerHTML};
-    const rememberSelection=()=>{const selection=window.getSelection();if(selection?.rangeCount&&surface.contains(selection.anchorNode))savedRange=selection.getRangeAt(0).cloneRange()};
-    const restoreSelection=()=>{surface.focus();if(savedRange){const selection=window.getSelection();selection.removeAllRanges();selection.addRange(savedRange)}};
-    const showStatus=(message,isError=false)=>{if(!status)return;status.hidden=false;status.textContent=message;status.classList.toggle('is-error',isError)};
-    const decorateFigure=figure=>{if(figure.querySelector('[data-resize-handle]'))return;figure.dataset.width=figure.dataset.width||'70';const label=document.createElement('span');label.dataset.resizeLabel='';label.contentEditable='false';label.textContent=`${figure.dataset.width}%`;const handle=document.createElement('span');handle.dataset.resizeHandle='';handle.contentEditable='false';handle.title='Tarik untuk mengubah ukuran gambar';figure.append(label,handle);handle.addEventListener('mousedown',event=>{event.preventDefault();event.stopPropagation();selectedFigure=figure;if(figure.classList.contains('align-full')){figure.classList.remove('align-full');figure.classList.add('align-center')}const startX=event.clientX,startWidth=Number(figure.dataset.width||70),editorWidth=surface.getBoundingClientRect().width;figure.classList.add('is-resizing','is-selected');const move=moveEvent=>{const direction=figure.classList.contains('align-right')?-1:1;const change=((moveEvent.clientX-startX)*direction/editorWidth)*100;const width=Math.max(20,Math.min(100,Math.round((startWidth+change)/5)*5));figure.dataset.width=String(width);label.textContent=`${width}%`};const stop=()=>{document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',stop);figure.classList.remove('is-resizing');sync();showStatus(`Ukuran gambar diubah menjadi ${figure.dataset.width}%.`)};document.addEventListener('mousemove',move);document.addEventListener('mouseup',stop)})};
-    surface.querySelectorAll('img').forEach(image=>{try{const url=new URL(image.src);if((url.hostname==='localhost'||url.hostname==='127.0.0.1')&&url.pathname.startsWith('/storage/'))image.src=url.pathname}catch(error){}});
-    surface.querySelectorAll('figure.article-image').forEach(decorateFigure);
-    sync();
-    surface.addEventListener('input',()=>{rememberSelection();sync()});
-    surface.addEventListener('keyup',rememberSelection);
-    surface.addEventListener('mousedown',event=>{
-      const caption=event.target.closest('figcaption');
-      if(!caption||!surface.contains(caption)||caption.textContent.trim()!==captionPlaceholder)return;
-      event.preventDefault();
-      event.stopPropagation();
-      surface.focus();
-      const range=document.createRange();
-      range.selectNodeContents(caption);
-      const selection=window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
-      savedRange=range.cloneRange();
+  const initTinyMce = async () => {
+    const fields = Array.from(document.querySelectorAll('textarea[data-tinymce]'));
+    if (!fields.length) return;
+    tinymce.remove();
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const uploadUrl = document.querySelector('[data-tinymce-upload-url]')?.dataset.tinymceUploadUrl;
+    await tinymce.init({
+      selector: 'textarea[data-tinymce]',
+      license_key: 'gpl',
+      menubar: false,
+      height: 520,
+      placeholder: fields[0].dataset.placeholder || 'Mulai tulis konten di sini...',
+      branding: false,
+      promotion: false,
+      plugins: 'advlist autolink anchor charmap code fullscreen image link lists media preview searchreplace table visualblocks wordcount',
+      toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright | bullist numlist blockquote | link image media table | removeformat code fullscreen preview',
+      toolbar_mode: 'sliding',
+      image_caption: true,
+      image_advtab: true,
+      image_class_list: [
+        { title: 'Gambar artikel', value: 'article-image align-center' },
+        { title: 'Rata kiri', value: 'article-image align-left' },
+        { title: 'Rata kanan', value: 'article-image align-right' },
+        { title: 'Lebar penuh', value: 'article-image align-full' },
+      ],
+      images_file_types: 'jpg,jpeg,png,webp',
+      automatic_uploads: true,
+      relative_urls: false,
+      remove_script_host: false,
+      content_style: `
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.65; }
+        figure.image, figure.article-image { width: 70%; margin: 18px auto; }
+        figure.image.align-left, figure.article-image.align-left { float: left; width: 45%; margin: 8px 18px 12px 0; }
+        figure.image.align-right, figure.article-image.align-right { float: right; width: 45%; margin: 8px 0 12px 18px; }
+        figure.image.align-full, figure.article-image.align-full { width: 100%; }
+        figure figcaption { padding: 6px; color: #6f786f; font-size: 12px; text-align: center; cursor: text; }
+        figure figcaption:empty::before { content: "Klik untuk menulis keterangan gambar"; color: #9ba39c; }
+      `,
+      images_upload_handler: (blobInfo, progress) => new Promise((resolve, reject) => {
+        if (!uploadUrl) {
+          reject('URL upload gambar tidak tersedia.');
+          return;
+        }
+        const data = new FormData();
+        data.append('image', blobInfo.blob(), blobInfo.filename());
+        const slug = document.querySelector('#slug')?.value.trim();
+        const title = document.querySelector('#title')?.value.trim();
+        data.append('folder_name', slug || title || 'berita-baru');
+        fetch(uploadUrl, {
+          method: 'POST',
+          headers: { 'X-CSRF-TOKEN': csrfToken, Accept: 'application/json' },
+          body: data,
+        })
+          .then(response => response.json().then(result => ({ response, result })))
+          .then(({ response, result }) => {
+            if (!response.ok) throw new Error(result.message || Object.values(result.errors || {}).flat()[0] || 'Gambar gagal diunggah.');
+            resolve(result.location || result.url);
+          })
+          .catch(error => reject(error.message || 'Gambar gagal diunggah.'));
+      }),
+      setup: editor => {
+        editor.on('init change input undo redo keyup', () => editor.save());
+        editor.on('BeforeSetContent', event => {
+          event.content = event.content.replaceAll('<figure class="image">', '<figure class="article-image align-center">');
+        });
+        editor.on('ObjectSelected', event => {
+          if (event.target?.nodeName === 'IMG') {
+            const figure = event.target.closest('figure');
+            if (figure && !figure.classList.contains('article-image')) figure.classList.add('article-image', 'align-center');
+          }
+        });
+      },
     });
-    surface.addEventListener('mouseup',event=>{rememberSelection();selectedFigure=event.target.closest('figure.article-image');surface.querySelectorAll('figure.article-image').forEach(figure=>figure.classList.toggle('is-selected',figure===selectedFigure))});
-    editor.querySelectorAll('[data-command]').forEach(button=>button.addEventListener('mousedown',event=>event.preventDefault()));
-    editor.querySelectorAll('[data-command]').forEach(button=>button.addEventListener('click',()=>{restoreSelection();document.execCommand(button.dataset.command,false,button.dataset.value||null);rememberSelection();sync()}));
-    editor.querySelector('[data-action="link"]')?.addEventListener('click',()=>{rememberSelection();const url=window.prompt('Masukkan alamat tautan (https://...)');if(url){restoreSelection();document.execCommand('createLink',false,url);sync()}surface.focus()});
-    editor.querySelector('[data-action="image"]')?.addEventListener('click',()=>{rememberSelection();imageInput?.click()});
-    editor.querySelectorAll('[data-action="image-align"]').forEach(button=>button.addEventListener('click',()=>{if(!selectedFigure){showStatus('Klik gambar di dalam editor terlebih dahulu.',true);return}selectedFigure.className=`article-image align-${button.dataset.align} is-selected`;if(button.dataset.align==='full')selectedFigure.dataset.width='100';selectedFigure.querySelector('[data-resize-label]').textContent=`${selectedFigure.dataset.width}%`;sync();showStatus('Posisi gambar diperbarui.')}));
-     imageInput?.addEventListener('change',async()=>{const file=imageInput.files?.[0];if(!file)return;showStatus('Menyiapkan gambar...');let prepared=file;try{prepared=await prepareImageFile(file)}catch(error){/* Server-side validation remains the fallback. */}showStatus('Mengunggah gambar...');const data=new FormData();data.append('image',prepared,prepared.name);const slug=document.querySelector('#slug')?.value.trim(),title=document.querySelector('#title')?.value.trim();data.append('folder_name',slug||title||'berita-baru');try{const response=await fetch(editor.dataset.uploadUrl,{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]')?.content||'','Accept':'application/json'},body:data});const result=await response.json();if(!response.ok)throw new Error(result.message||Object.values(result.errors||{}).flat()[0]||'Gambar gagal diunggah.');restoreSelection();const figure=document.createElement('figure');figure.className='article-image align-center';figure.dataset.width='70';const image=document.createElement('img');image.src=result.url;image.alt=result.alt||prepared.name;const caption=document.createElement('figcaption');caption.textContent='Klik untuk menulis keterangan gambar';figure.append(image,caption);decorateFigure(figure);const range=window.getSelection()?.rangeCount?window.getSelection().getRangeAt(0):null;if(range){range.deleteContents();range.insertNode(figure);range.setStartAfter(figure);range.collapse(true);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);savedRange=range.cloneRange()}else surface.append(figure);selectedFigure=figure;figure.classList.add('is-selected');sync();showStatus('Gambar berhasil disisipkan. Klik gambar lalu tarik sudut kanan bawah untuk mengubah ukurannya.')}catch(error){showStatus(error.message||'Gambar gagal diunggah.',true)}finally{imageInput.value=''}});
-    editor.closest('form')?.addEventListener('submit',sync);
-  });
+  };
+  initTinyMce();
   const title=document.querySelector('#title'),titleCount=document.querySelector('#title-count');if(title&&titleCount){const count=()=>titleCount.textContent=title.value.length;title.addEventListener('input',count);count()}
   initRegionSelectors();
   document.querySelectorAll('form').forEach(bindImagePreparation);
