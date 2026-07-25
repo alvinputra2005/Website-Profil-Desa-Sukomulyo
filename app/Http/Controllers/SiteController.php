@@ -87,7 +87,7 @@ class SiteController extends Controller
                     ],
                 ],
             ],
-            'galleryPhotos' => array_slice($this->galleryPhotos(), 0, 4),
+            'galleryPhotos' => array_slice($this->galleryPhotos(), 0, 5),
         ]);
     }
 

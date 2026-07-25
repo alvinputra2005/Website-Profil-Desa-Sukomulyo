@@ -1,6 +1,6 @@
 @props(['article'])
 
-<article class="article-card" data-news-category="{{ $article['category_slug'] }}">
+<article class="article-card">
     <a class="article-image" href="{{ route('berita-desa.show', $article['slug']) }}">
         <img src="{{ $article['image'] }}" alt="{{ $article['title'] }}">
     </a>
