@@ -1,10 +1,21 @@
 import { initAjaxNavigation } from './ajax';
-import { bindImagePreparation, prepareImageFile, prepareImageInput } from './image-upload';
+import {
+    bindImagePreparation,
+    prepareImageFile,
+    prepareImageInput
+} from './image-upload';
 import { initRegionSelectors } from './regions';
+
 import tinymce from 'tinymce/tinymce';
 import 'tinymce/icons/default';
 import 'tinymce/themes/silver';
 import 'tinymce/models/dom';
+
+// Tambahan untuk skin TinyMCE pada Vite
+import 'tinymce/skins/ui/oxide/skin.js';
+import 'tinymce/skins/ui/oxide/content.js';
+import 'tinymce/skins/content/default/content.js';
+
 import 'tinymce/plugins/advlist';
 import 'tinymce/plugins/autolink';
 import 'tinymce/plugins/anchor';
