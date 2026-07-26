@@ -25,6 +25,8 @@ class SiteCache
 
     public const NEWS_ARCHIVES = 'news.archives';
 
+    public const NEWS_POPULAR = 'news.popular';
+
     public const NEWS_DETAIL_VERSION = 'news.detail.version';
 
     public const OFFICIALS = 'government.officials';
@@ -78,6 +80,7 @@ class SiteCache
             self::NEWS_LIST,
             self::NEWS_CATEGORIES,
             self::NEWS_ARCHIVES,
+            self::NEWS_POPULAR,
             self::PUBLIC_LAYOUT,
             self::SEO_SITEMAP,
         ] as $key) {

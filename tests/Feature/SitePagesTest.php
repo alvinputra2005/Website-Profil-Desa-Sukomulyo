@@ -134,7 +134,14 @@ class SitePagesTest extends TestCase
     {
         $response = $this->get(route('berita-desa.index'))
             ->assertOk()
-            ->assertDontSee('>Berita Utama<', false)
+            ->assertSee('>Berita Utama<', false)
+            ->assertSee('>Berita Terkini<', false)
+            ->assertSee('id="featured-news-heading"', false)
+            ->assertSee('id="latest-news-heading"', false)
+            ->assertSee('<nav class="breadcrumbs"', false)
+            ->assertSee('<span class="breadcrumb-separator" aria-hidden="true">/</span>', false)
+            ->assertSee('page-banner--no-heading', false)
+            ->assertDontSee('class="page-banner-heading"', false)
             ->assertDontSee('Semua Berita')
             ->assertDontSee('Pilihan Redaksi')
             ->assertDontSee('Kabar terbaru dan informasi penting dari Desa Sukomulyo.')
@@ -184,7 +191,8 @@ class SitePagesTest extends TestCase
         $this->assertSame(5, substr_count($firstPage->getContent(), '<article class="article-card"'));
         $firstPage
             ->assertDontSee('Semua Berita')
-            ->assertDontSee('news-list-heading', false)
+            ->assertSee('>Berita Utama<', false)
+            ->assertSee('>Berita Terkini<', false)
             ->assertSee('aria-label="Navigasi halaman berita"', false)
             ->assertSee('page=2', false);
 
@@ -192,6 +200,8 @@ class SitePagesTest extends TestCase
         $this->assertSame(5, substr_count($secondPage->getContent(), '<article class="article-card"'));
         $secondPage
             ->assertDontSee('featured-news-section', false)
+            ->assertDontSee('>Berita Utama<', false)
+            ->assertSee('>Berita Terkini<', false)
             ->assertSee('page=1', false);
     }
 
@@ -216,18 +226,24 @@ class SitePagesTest extends TestCase
             $this->assertStringContainsString('Beranda', $breadcrumbs);
             $this->assertStringContainsString($parent, $breadcrumbs);
             $this->assertStringContainsString('breadcrumb-separator', $breadcrumbs);
+            $this->assertStringContainsString('aria-hidden="true">/</span>', $breadcrumbs);
+            $this->assertStringNotContainsString('fa-chevron-right', $breadcrumbs);
             $this->assertStringContainsString($child, $breadcrumbs);
             $this->assertStringContainsString('class="page-banner-heading"', $banner);
             $this->assertStringContainsString('<h1>'.$child.'</h1>', $banner);
         }
 
-        foreach ([route('berita-desa.index'), route('galeri-desa')] as $url) {
-            $response = $this->get($url)->assertOk();
-            $response
-                ->assertDontSee('<nav class="breadcrumbs"', false)
-                ->assertSee('page-banner--no-breadcrumbs', false)
-                ->assertSee('page-banner--no-divider', false);
-        }
+        $this->get(route('galeri-desa'))
+            ->assertOk()
+            ->assertDontSee('<nav class="breadcrumbs"', false)
+            ->assertSee('page-banner--no-breadcrumbs', false)
+            ->assertSee('page-banner--no-divider', false);
+
+        $this->get(route('berita-desa.index'))
+            ->assertOk()
+            ->assertSee('<nav class="breadcrumbs"', false)
+            ->assertSee('page-banner--no-heading', false)
+            ->assertDontSee('class="page-banner-heading"', false);
 
         $this->get(route('berita-desa.show', 'musyawarah-desa-penyusunan-program-kerja'))
             ->assertOk()

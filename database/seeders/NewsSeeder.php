@@ -144,6 +144,12 @@ class NewsSeeder extends Seeder
             ],
         ];
 
+        $viewCounts = [
+            'musyawarah-desa-penyusunan-program-kerja' => 186,
+            'perbaikan-jalan-lingkungan-dusun' => 142,
+            'kelas-literasi-digital-remaja-desa' => 97,
+        ];
+
         foreach ($articles as $article) {
             $content = collect($article['content'])
                 ->map(fn (string $paragraph): string => '<p>'.$paragraph.'</p>')
@@ -159,6 +165,7 @@ class NewsSeeder extends Seeder
                     'status' => 'published',
                     'published_at' => $article['published_at'],
                     'author_id' => $author->id,
+                    'view_count' => $viewCounts[$article['slug']] ?? 0,
                     'seo_title' => $article['title'],
                     'seo_description' => $article['excerpt'],
                 ]

@@ -1,8 +1,9 @@
 @props([
     'categories',
     'archiveYears' => [],
+    'popularArticles' => [],
     'selectedCategory' => request()->route('category', request('category', '')),
-    'selectedYear' => request()->route('year', ''),
+    'selectedYear' => request()->route('year', request('year', '')),
 ])
 
 @php
@@ -40,13 +41,19 @@
             <div id="news-category-list" class="widget-panel" data-sidebar-panel @if (! $categoryExpanded) hidden @endif>
                 <ul>
                     <li>
-                        <a class="{{ $selectedCategory === '' ? 'is-active' : '' }}" href="{{ route('berita-desa.index') }}">
+                        <a
+                            class="{{ $selectedCategory === '' ? 'is-active' : '' }}"
+                            href="{{ $selectedYear !== '' ? route('berita-desa.archive', ['year' => $selectedYear]) : route('berita-desa.index') }}"
+                        >
                             <span>Semua Kategori</span>
                         </a>
                     </li>
                     @foreach ($visibleCategories as $category)
                         <li>
-                            <a class="{{ $selectedCategory === $category['category_slug'] ? 'is-active' : '' }}" href="{{ route('berita-desa.category', $category['category_slug']) }}">
+                            <a
+                                class="{{ $selectedCategory === $category['category_slug'] ? 'is-active' : '' }}"
+                                href="{{ route('berita-desa.category', array_filter(['category' => $category['category_slug'], 'year' => $selectedYear])) }}"
+                            >
                                 <span>{{ $category['category'] }}</span>
                             </a>
                         </li>
@@ -72,13 +79,37 @@
                 <ul>
                     @foreach ($archiveYears as $year)
                         <li>
-                            <a class="{{ (string) $selectedYear === (string) $year ? 'is-active' : '' }}" href="{{ route('berita-desa.archive', $year) }}">
+                            <a
+                                class="{{ (string) $selectedYear === (string) $year ? 'is-active' : '' }}"
+                                href="{{ route('berita-desa.archive', array_filter(['year' => $year, 'category' => $selectedCategory])) }}"
+                            >
                                 <span>Tahun {{ $year }}</span>
                             </a>
                         </li>
                     @endforeach
                 </ul>
             </div>
+        </section>
+
+        <section class="widget news-popular-widget">
+            <h3 class="widget-title"><span>Berita Populer</span></h3>
+            <ol class="news-popular-list">
+                @forelse ($popularArticles as $article)
+                    <li>
+                        <a href="{{ route('berita-desa.show', $article['slug']) }}">
+                            <span class="news-popular-image">
+                                <img src="{{ $article['image'] }}" alt="" loading="lazy">
+                            </span>
+                            <span class="news-popular-content">
+                                <strong>{{ $article['title'] }}</strong>
+                                <small><i class="far fa-eye" aria-hidden="true"></i>{{ number_format($article['view_count'] ?? 0, 0, ',', '.') }} kali dibaca</small>
+                            </span>
+                        </a>
+                    </li>
+                @empty
+                    <li class="news-popular-empty">Belum ada berita populer.</li>
+                @endforelse
+            </ol>
         </section>
     </div>
 </aside>

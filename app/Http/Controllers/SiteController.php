@@ -420,25 +420,51 @@ class SiteController extends Controller
     public function news(Request $request): View
     {
         $selectedCategory = trim((string) $request->query('category', ''));
+        $selectedYear = trim((string) $request->query('year', ''));
         $articles = collect($this->articles());
 
         if ($selectedCategory !== '') {
             $articles = $articles->where('category_slug', $selectedCategory);
         }
 
-        return $this->render('news.index', [
+        if ($selectedYear !== '') {
+            $articles = $articles->where('year', $selectedYear);
+        }
+
+        // Berita utama selalu berasal dari tahun berjalan. Berita tahun
+        // sebelumnya tetap tersedia melalui daftar berita dan menu arsip.
+        $featuredArticles = $articles
+            ->filter(fn (array $article): bool => $article['year'] === (string) now()->year)
+            ->take(3)
+            ->values()
+            ->all();
+
+        return $this->renderNews($request, [
             'heading' => 'Berita Desa',
             'description' => 'Informasi terbaru mengenai kegiatan dan perkembangan Desa Sukomulyo.',
             'visibleArticles' => $this->paginateArticles($articles, $request),
-            'featuredArticles' => $articles->take(3)->values()->all(),
-            'showFeatured' => $selectedCategory === '' && LengthAwarePaginator::resolveCurrentPage() === 1,
+            'featuredArticles' => $featuredArticles,
+            'showFeatured' => $selectedCategory === '' && $selectedYear === '',
             'selectedCategory' => $selectedCategory,
+            'selectedYear' => $selectedYear,
         ]);
     }
 
     public function article(string $slug): View|Response
     {
         $canPreviewDraft = auth()->check() && auth()->user()->can('manage-content');
+
+        if (! $canPreviewDraft && Schema::hasTable('news')) {
+            $viewed = News::query()
+                ->published()
+                ->where('slug', $slug)
+                ->increment('view_count');
+
+            if ($viewed > 0) {
+                $this->cache->invalidateNews();
+            }
+        }
+
         $article = $this->articleData($slug, $canPreviewDraft);
 
         if (! $article) {
@@ -450,37 +476,49 @@ class SiteController extends Controller
 
     public function category(Request $request, string $category): View|Response
     {
-        $articles = collect($this->articles())
+        $categoryArticles = collect($this->articles())
             ->filter(fn (array $article) => $article['category_slug'] === $category)
-            ->values()
-            ->all();
+            ->values();
 
-        if ($articles === []) {
+        if ($categoryArticles->isEmpty()) {
             return $this->notFound();
         }
 
-        return $this->render('news.index', [
-            'heading' => 'Kategori: '.$articles[0]['category'],
-            'description' => 'Kumpulan berita dalam kategori '.$articles[0]['category'].'.',
-            'visibleArticles' => $this->paginateArticles(collect($articles), $request),
+        $selectedYear = trim((string) $request->query('year', ''));
+        $articles = $selectedYear === ''
+            ? $categoryArticles
+            : $categoryArticles->where('year', $selectedYear)->values();
+
+        return $this->renderNews($request, [
+            'heading' => 'Kategori: '.$categoryArticles->first()['category'],
+            'description' => 'Kumpulan berita dalam kategori '.$categoryArticles->first()['category'].'.',
+            'visibleArticles' => $this->paginateArticles($articles, $request),
             'featuredArticles' => [],
             'showFeatured' => false,
             'selectedCategory' => $category,
+            'selectedYear' => $selectedYear,
         ]);
     }
 
     public function archive(Request $request, ?string $year = null): View
     {
         $year ??= collect($this->articles())->max('year');
-        $articles = collect($this->articles())->where('year', $year)->values();
+        $selectedCategory = trim((string) $request->query('category', ''));
+        $articles = collect($this->articles())
+            ->where('year', $year)
+            ->when($selectedCategory !== '', fn (Collection $articles) => $articles->where('category_slug', $selectedCategory))
+            ->values();
+        $showFeatured = (string) $year === (string) now()->year
+            && $selectedCategory === '';
 
-        return $this->render('news.index', [
+        return $this->renderNews($request, [
             'heading' => 'Arsip Berita '.$year,
             'description' => 'Dokumentasi berita dan kegiatan Desa Sukomulyo pada tahun '.$year.'.',
             'visibleArticles' => $this->paginateArticles($articles, $request),
-            'featuredArticles' => [],
-            'showFeatured' => false,
-            'selectedCategory' => '',
+            'featuredArticles' => $showFeatured ? $articles->take(3)->values()->all() : [],
+            'showFeatured' => $showFeatured,
+            'selectedCategory' => $selectedCategory,
+            'selectedYear' => (string) $year,
         ]);
     }
 
@@ -496,7 +534,7 @@ class SiteController extends Controller
             ->values()
             ->all();
 
-        return $this->render('news.search', compact('query', 'results'));
+        return $this->renderNews($request, compact('query', 'results'), 'search');
     }
 
     private function paginateArticles(Collection $articles, Request $request): LengthAwarePaginator
@@ -584,6 +622,20 @@ class SiteController extends Controller
         return view($view, $data);
     }
 
+    private function renderNews(Request $request, array $data, string $page = 'index'): View
+    {
+        $view = $page === 'search' ? 'news.search' : 'news.index';
+        $partial = $page === 'search' ? 'news.partials.search-content' : 'news.partials.index-content';
+
+        if ($request->header('X-Ajax-Root') === '#news-ajax-root') {
+            view()->share($this->shared());
+
+            return view($partial, $data);
+        }
+
+        return $this->render($view, $data);
+    }
+
     private function shared(): array
     {
         $layout = $this->cache->remember(
@@ -604,6 +656,7 @@ class SiteController extends Controller
                     'articles' => $this->latestArticles(),
                     'categories' => $this->newsCategories(),
                     'archiveYears' => $this->newsArchiveYears(),
+                    'popularArticles' => $this->popularArticles(),
                 ];
             }
         );
@@ -824,6 +877,36 @@ class SiteController extends Controller
         );
     }
 
+    private function popularArticles(): array
+    {
+        return $this->cache->remember(
+            SiteCache::NEWS_POPULAR,
+            SiteCache::TEN_MINUTES,
+            function (): array {
+                if (Schema::hasTable('news')) {
+                    $articles = News::with(['category', 'featuredImage'])
+                        ->published()
+                        ->orderByDesc('view_count')
+                        ->latest('published_at')
+                        ->limit(3)
+                        ->get()
+                        ->map(fn (News $article) => $this->mapArticle($article))
+                        ->all();
+
+                    if ($articles !== []) {
+                        return $articles;
+                    }
+                }
+
+                return collect($this->fallbackArticles())
+                    ->sortByDesc('view_count')
+                    ->take(3)
+                    ->values()
+                    ->all();
+            }
+        );
+    }
+
     private function loadArticles(bool $includeUnpublished = false, ?int $limit = null): array
     {
         if (! Schema::hasTable('news')) {
@@ -860,8 +943,9 @@ class SiteController extends Controller
         preg_match('~<img[^>]+src=["\']([^"\']+)["\']~i', $htmlContent, $inlineImage);
 
         $publishedAt = $article->published_at ?? $article->created_at;
+        $detailImage = $article->featuredImage?->url ?? (isset($inlineImage[1]) ? null : $image);
 
-        return ['slug' => $article->slug, 'title' => $article->title, 'date' => $publishedAt->locale('id')->translatedFormat('d F Y'), 'iso_date' => $publishedAt->format('Y-m-d'), 'year' => (string) $publishedAt->year, 'category' => $article->category->name, 'category_slug' => $article->category->slug, 'image' => $article->featuredImage?->url ?? ($inlineImage[1] ?? $image), 'excerpt' => $article->excerpt ?? strip_tags($htmlContent), 'content' => [strip_tags($htmlContent)], 'html_content' => $htmlContent, 'tags' => []];
+        return ['slug' => $article->slug, 'title' => $article->title, 'date' => $publishedAt->locale('id')->translatedFormat('d F Y'), 'iso_date' => $publishedAt->format('Y-m-d'), 'year' => (string) $publishedAt->year, 'category' => $article->category->name, 'category_slug' => $article->category->slug, 'image' => $article->featuredImage?->url ?? ($inlineImage[1] ?? $image), 'detail_image' => $detailImage, 'excerpt' => $article->excerpt ?? strip_tags($htmlContent), 'content' => [strip_tags($htmlContent)], 'html_content' => $htmlContent, 'tags' => [], 'view_count' => (int) $article->view_count];
     }
 
     private function fallbackArticles(): array

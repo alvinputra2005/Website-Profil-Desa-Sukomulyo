@@ -5,7 +5,7 @@
             <span class="screen-reader-text">Halaman sebelumnya</span>
         </span>
     @else
-        <a class="news-pagination-arrow" href="{{ $paginator->previousPageUrl() }}" rel="prev">
+        <a class="news-pagination-arrow" href="{{ $paginator->previousPageUrl() }}#news-list" rel="prev" data-ajax-scroll-target="#news-list">
             <i class="fas fa-chevron-left" aria-hidden="true"></i>
             <span class="screen-reader-text">Halaman sebelumnya</span>
         </a>
@@ -22,7 +22,7 @@
                     @if ($page === $paginator->currentPage())
                         <span class="is-current" aria-current="page">{{ $page }}</span>
                     @else
-                        <a href="{{ $url }}" aria-label="Buka halaman {{ $page }}">{{ $page }}</a>
+                        <a href="{{ $url }}#news-list" aria-label="Buka halaman {{ $page }}" data-ajax-scroll-target="#news-list">{{ $page }}</a>
                     @endif
                 @endforeach
             @endif
@@ -30,7 +30,7 @@
     </div>
 
     @if ($paginator->hasMorePages())
-        <a class="news-pagination-arrow" href="{{ $paginator->nextPageUrl() }}" rel="next">
+        <a class="news-pagination-arrow" href="{{ $paginator->nextPageUrl() }}#news-list" rel="next" data-ajax-scroll-target="#news-list">
             <i class="fas fa-chevron-right" aria-hidden="true"></i>
             <span class="screen-reader-text">Halaman berikutnya</span>
         </a>
