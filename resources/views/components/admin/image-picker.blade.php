@@ -17,7 +17,7 @@
     @if($showLabel)
         <label for="{{ $name }}" class="control-label {{ $required ? 'required' : '' }}">{{ $label }}</label>
     @endif
-    <div class="image-picker-preview" data-image-preview>
+    <div class="image-picker-preview {{ $selectedMedia ? '' : 'is-empty' }}" data-image-preview tabindex="0" role="button" aria-label="{{ $selectedMedia ? 'Pratinjau gambar' : 'Pilih gambar untuk diunggah' }}">
         @if($selectedMedia)
             <img src="{{ $selectedMedia->url }}" alt="{{ $alt }}">
             <button type="button" class="image-picker-remove" data-image-clear data-toggle="tooltip" title="Hapus gambar" aria-label="Hapus gambar">
@@ -32,7 +32,7 @@
     <div class="form-group image-picker-control">
         <label for="{{ $uploadBase }}_upload">Upload gambar baru</label>
         <input type="file" id="{{ $uploadBase }}_upload" name="{{ $uploadBase }}_upload" class="form-control" accept="image/jpeg,image/png,image/webp" data-image-upload>
-        <span class="help-block">JPG, PNG, atau WebP, maksimal 5 MB. Gambar otomatis dioptimalkan.</span>
+        <span class="help-block">JPG, PNG, atau WebP, maksimal 5 MB.</span>
     </div>
     <div class="form-group image-picker-control">
         <label for="{{ $uploadBase }}_alt">Alt text</label>

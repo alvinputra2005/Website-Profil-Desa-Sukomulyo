@@ -571,7 +571,6 @@ blockquote { border-left-color: var(--primary); }
     text-align: center;
 }
 .news-detail-hero {
-    height: clamp(240px, 28vw, 340px);
     margin: 0;
     overflow: hidden;
     background: var(--surface);
@@ -579,8 +578,7 @@ blockquote { border-left-color: var(--primary); }
 .news-detail-hero img {
     display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
 }
 .article-reading-body {
     padding: clamp(30px, 5vw, 56px) var(--article-inline-padding) clamp(34px, 5vw, 56px);
@@ -813,7 +811,7 @@ h3.widget-title { background: var(--primary); }
 .news-page-layout { display: grid; grid-template-columns: minmax(0, 1fr) 250px; align-items: start; gap: 30px; }
 .news-page-layout #news-list { scroll-margin-top: 140px; }
 .news-page-layout .sc_innerpage_contentbx, .news-page-layout #sidebar { width: auto; min-width: 0; float: none; }
-.news-page-layout .article-card { height: 170px; min-height: 170px; max-height: 170px; margin-bottom: 16px; grid-template-columns: 190px minmax(0, 1fr); border-radius: 8px; box-shadow: 0 8px 24px rgba(35,40,48,.055); font-family: 'Open Sans', sans-serif; transition: box-shadow .25s ease, transform .25s ease; }
+.news-page-layout .article-card { height: 170px; min-height: 170px; max-height: 170px; margin-bottom: 16px; grid-template-columns: 190px minmax(0, 1fr); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(35,40,48,.055); font-family: 'Open Sans', sans-serif; transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease; }
 .news-page-layout .article-card:hover, .news-page-layout .article-card:focus-within { box-shadow: 0 15px 32px rgba(35,40,48,.11); transform: translateY(-3px); }
 .news-page-layout .article-image { width: 190px; height: 170px; min-height: 0; }
 .news-page-layout .article-image img { display: block; width: 190px; height: 170px; object-fit: cover; }
@@ -1139,7 +1137,6 @@ h3.widget-title { background: var(--primary); }
     .single-article .entry-header { padding: 24px 0 22px; }
     .single-article .entry-title { font-size: clamp(27px, 8vw, 36px); letter-spacing: -.4px; }
     .single-article .postmeta { align-items: flex-start; flex-direction: column; gap: 8px; }
-    .news-detail-hero { height: 220px; }
     .article-reading-body { padding: 28px 0 36px; }
     .article-lead { font-size: 18px; line-height: 1.6; }
     .single-article .entry-content { font-size: 16px; line-height: 1.8; }

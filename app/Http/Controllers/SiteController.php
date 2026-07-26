@@ -813,7 +813,7 @@ class SiteController extends Controller
     private function articles(bool $includeUnpublished = false): array
     {
         if ($includeUnpublished) {
-            return $this->loadArticles(true);
+            return $this->sortArticlesByDate($this->loadArticles(true));
         }
 
         $articles = $this->cache->remember(
@@ -822,9 +822,22 @@ class SiteController extends Controller
             fn () => $this->loadArticles()
         );
 
+        $articles = $this->sortArticlesByDate($articles);
         request()->attributes->set('site.published_articles', $articles);
 
         return $articles;
+    }
+
+    private function sortArticlesByDate(array $articles): array
+    {
+        return collect($articles)
+            ->sortByDesc(
+                fn (array $article): string => $article['published_at']
+                    ?? $article['iso_date']
+                    ?? ''
+            )
+            ->values()
+            ->all();
     }
 
     private function latestArticles(): array
@@ -967,7 +980,11 @@ class SiteController extends Controller
             $query->limit($limit);
         }
 
-        $articles = $query->latest('published_at')->get()->map(
+        $articles = $query
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->get()
+            ->map(
             fn (News $article) => $this->mapArticle($article)
         )->all();
 
@@ -984,6 +1001,7 @@ class SiteController extends Controller
     {
         $image = asset('assets/village-rice-fields.jpg');
         $htmlContent = preg_replace('~https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(/storage/)~i', '$1', $article->content);
+        $htmlContent = $this->removeDuplicateLeadingTitle($htmlContent, $article->title);
         preg_match('~<img[^>]+src=["\']([^"\']+)["\']~i', $htmlContent, $inlineImage);
 
         $publishedAt = $article->published_at ?? $article->created_at;
@@ -1015,6 +1033,24 @@ class SiteController extends Controller
             'tags' => [],
             'view_count' => (int) $article->view_count,
         ];
+    }
+
+    private function removeDuplicateLeadingTitle(string $html, string $title): string
+    {
+        if (! preg_match('~^\s*<(h[2-4])(?:\s[^>]*)?>(.*?)</\1>~is', $html, $heading)) {
+            return $html;
+        }
+
+        $headingText = html_entity_decode(strip_tags($heading[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $normalize = static fn (string $text): string => mb_strtolower(
+            preg_replace('/\s+/u', ' ', trim($text))
+        );
+
+        if ($normalize($headingText) !== $normalize($title)) {
+            return $html;
+        }
+
+        return preg_replace('~^\s*<(h[2-4])(?:\s[^>]*)?>.*?</\1>\s*~is', '', $html, 1) ?? $html;
     }
 
     private function fallbackArticles(): array

@@ -52,10 +52,6 @@
                 @endif
 
                 <div class="article-reading-body">
-                    @if (!empty($article['excerpt']))
-                        <p class="article-lead">{{ $article['excerpt'] }}</p>
-                    @endif
-
                     <div class="entry-content">
                         @if(!empty($article['html_content']))
                             {!! $article['html_content'] !!}

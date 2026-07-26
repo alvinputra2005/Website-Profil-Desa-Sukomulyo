@@ -24,6 +24,16 @@ class AdminCmsTest extends TestCase
         $this->actingAs($this->user('super_admin'))->get('/admin')->assertOk()->assertSee('OpenSID');
     }
 
+    public function test_admin_success_flash_is_rendered_as_a_dialog_payload(): void
+    {
+        $this->actingAs($this->user('super_admin'))
+            ->withSession(['success' => 'Konten berhasil diperbarui.'])
+            ->get('/admin')
+            ->assertOk()
+            ->assertSee('data-success-dialog', false)
+            ->assertSee('data-message="Konten berhasil diperbarui."', false);
+    }
+
     public function test_dashboard_paginates_latest_activities_three_at_a_time(): void
     {
         $admin = $this->user('super_admin');
@@ -122,6 +132,43 @@ class AdminCmsTest extends TestCase
         $first=News::first();
         $this->put('/admin/news/'.$first->id,array_merge($payload,['title'=>'Judul Baru']))->assertSessionHasNoErrors();
         $this->assertSame('musyawarah-desa',$first->fresh()->slug);
+    }
+
+    public function test_news_list_paginates_ten_items_and_news_can_be_archived(): void
+    {
+        $admin = $this->user('super_admin');
+        $category = NewsCategory::create(['name' => 'Desa', 'slug' => 'desa']);
+
+        foreach (range(1, 11) as $number) {
+            News::create([
+                'category_id' => $category->id,
+                'title' => 'Artikel '.$number,
+                'slug' => 'artikel-'.$number,
+                'content' => '<p>Isi artikel.</p>',
+                'status' => 'published',
+                'author_id' => $admin->id,
+            ]);
+        }
+
+        $firstPage = $this->actingAs($admin)->get('/admin/news');
+        $firstPage->assertOk()
+            ->assertSee('Artikel 11')
+            ->assertDontSee('Artikel 1</a>', false)
+            ->assertSee('page=2', false)
+            ->assertSee('Arsip');
+
+        $news = News::where('slug', 'artikel-11')->firstOrFail();
+        $this->patch(route('admin.news.archive', $news))
+            ->assertRedirect()
+            ->assertSessionHas('success', 'Artikel berhasil diarsipkan.');
+
+        $this->assertSame('archived', $news->fresh()->status);
+        $this->get('/admin/news')
+            ->assertOk()
+            ->assertDontSee('Artikel 11');
+        $this->get('/admin/news?status=archived')
+            ->assertOk()
+            ->assertSee('Artikel 11');
     }
 
     public function test_draft_preview_works_without_published_news_and_editor_old_input_is_sanitized(): void

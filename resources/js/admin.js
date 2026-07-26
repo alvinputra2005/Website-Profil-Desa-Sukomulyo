@@ -33,6 +33,24 @@ import 'tinymce/plugins/visualblocks';
 import 'tinymce/plugins/wordcount';
 
 const initAdminPage = () => {
+  const successDialog=document.querySelector('[data-success-dialog]');
+  if(successDialog){
+    const message=successDialog.dataset.message||'Perubahan berhasil disimpan.';
+    successDialog.remove();
+    if(window.Swal){
+      window.Swal.fire({
+        title:'Berhasil!',
+        text:message,
+        icon:'success',
+        confirmButtonText:'Oke',
+        confirmButtonColor:'#526b42',
+        allowOutsideClick:false,
+        returnFocus:false,
+      });
+    }else{
+      window.alert(message);
+    }
+  }
   if(window.jQuery){const $=window.jQuery;
     const saved=localStorage.getItem('sidebar'); if(saved==='collapsed') document.body.classList.add('sidebar-collapse');
     $('.sidebar-toggle').on('click',()=>setTimeout(()=>localStorage.setItem('sidebar',document.body.classList.contains('sidebar-collapse')?'collapsed':'expanded'),0));
@@ -70,10 +88,16 @@ const initAdminPage = () => {
     if(picker.dataset.imagePickerBound)return;
     picker.dataset.imagePickerBound='true';
     const select=picker.querySelector('[data-image-select]'),upload=picker.querySelector('[data-image-upload]'),preview=picker.querySelector('[data-image-preview]'),alt=picker.querySelector('[data-image-alt]'),remove=picker.querySelector('[data-image-remove]');
-    const empty=()=>{preview.innerHTML='<i class="fa fa-picture-o" aria-hidden="true"></i><span>Belum ada gambar</span>'};
+    const empty=()=>{
+      preview.innerHTML='<i class="fa fa-picture-o" aria-hidden="true"></i><span>Belum ada gambar</span>';
+      preview.classList.add('is-empty');
+      preview.setAttribute('aria-label','Pilih gambar untuk diunggah');
+    };
     const show=url=>{
       if(!url){empty();return}
       preview.innerHTML='';
+      preview.classList.remove('is-empty');
+      preview.setAttribute('aria-label','Pratinjau gambar');
       const image=document.createElement('img');
       image.src=url;
       image.alt=alt.value;
@@ -97,6 +121,15 @@ const initAdminPage = () => {
       remove.value='1';
       empty();
     };
+    const openUpload=event=>{
+      if(event.target.closest?.('[data-image-clear]'))return;
+      if(!preview.classList.contains('is-empty')||!upload)return;
+      if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
+      event.preventDefault();
+      upload.click();
+    };
+    preview?.addEventListener('click',openUpload);
+    preview?.addEventListener('keydown',openUpload);
      upload?.addEventListener('change',async()=>{
        const file=upload.files?.[0];
        if(!file)return;

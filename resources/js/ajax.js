@@ -41,15 +41,19 @@ const confirmAction = async (element) => {
     if (!message) return true;
 
     if (window.Swal) {
+        const tone = element.dataset.confirmTone || 'warning';
+        const isDanger = tone === 'danger';
         const result = await window.Swal.fire({
-            title: 'Konfirmasi',
+            title: element.dataset.confirmTitle || 'Konfirmasi',
             text: message,
-            icon: 'warning',
+            icon: isDanger ? 'error' : 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#526b42',
+            confirmButtonColor: isDanger ? '#b42318' : '#d68a00',
             cancelButtonColor: '#6f7870',
-            confirmButtonText: 'Ya, lanjutkan',
+            confirmButtonText: element.dataset.confirmButton || 'Ya, lanjutkan',
             cancelButtonText: 'Batal',
+            reverseButtons: true,
+            focusCancel: true,
         });
 
         return result.isConfirmed;
