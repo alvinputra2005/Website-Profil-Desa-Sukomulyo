@@ -554,7 +554,7 @@ class SiteController extends Controller
         );
     }
 
-    public function gallery(): View
+    public function gallery(Request $request): View
     {
         $photos = $this->cache->remember(
             SiteCache::GALLERY,
@@ -564,11 +564,23 @@ class SiteController extends Controller
 
                 if (Schema::hasTable('galleries')) {
                     $photos = Gallery::where('status', 'published')->with(['items.media', 'cover'])->latest('event_date')->get()->flatMap(function ($gallery) use ($image) {
+                        $date = $gallery->event_date?->translatedFormat('d F Y') ?? 'Tanggal belum ditentukan';
+
                         if ($gallery->items->isEmpty()) {
-                            return [['src' => $gallery->cover?->url ?? $image, 'title' => $gallery->title, 'caption' => $gallery->description]];
+                            return [[
+                                'src' => $gallery->cover?->url ?? $image,
+                                'title' => $gallery->title,
+                                'caption' => $gallery->description,
+                                'date' => $date,
+                            ]];
                         }
 
-                        return $gallery->items->map(fn ($item) => ['src' => $item->media->url, 'title' => $gallery->title, 'caption' => $item->caption ?? $gallery->description]);
+                        return $gallery->items->map(fn ($item) => [
+                            'src' => $item->media->url,
+                            'title' => $item->media->alt_text ?: $gallery->title,
+                            'caption' => $item->caption ?? $gallery->description,
+                            'date' => $date,
+                        ]);
                     })->all();
                     if ($photos !== []) {
                         return $photos;
@@ -576,15 +588,35 @@ class SiteController extends Controller
                 }
 
                 return [
-                    ['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa.'],
-                    ['src' => $image, 'title' => 'Kerja Bakti Warga', 'caption' => 'Gotong royong menjaga lingkungan tetap bersih.'],
-                    ['src' => $image, 'title' => 'Pelatihan UMKM', 'caption' => 'Peningkatan kapasitas pelaku usaha lokal.'],
-                    ['src' => $image, 'title' => 'Kegiatan Posyandu', 'caption' => 'Pelayanan kesehatan rutin untuk ibu dan anak.'],
-                    ['src' => $image, 'title' => 'Panen Bersama', 'caption' => 'Dokumentasi potensi pertanian Desa Sukomulyo.'],
-                    ['src' => $image, 'title' => 'Pentas Seni Desa', 'caption' => 'Ruang ekspresi seni dan budaya masyarakat.'],
+                    ['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa.', 'date' => now()->translatedFormat('d F Y')],
+                    ['src' => $image, 'title' => 'Kerja Bakti Warga', 'caption' => 'Gotong royong menjaga lingkungan tetap bersih.', 'date' => now()->translatedFormat('d F Y')],
+                    ['src' => $image, 'title' => 'Pelatihan UMKM', 'caption' => 'Peningkatan kapasitas pelaku usaha lokal.', 'date' => now()->translatedFormat('d F Y')],
+                    ['src' => $image, 'title' => 'Kegiatan Posyandu', 'caption' => 'Pelayanan kesehatan rutin untuk ibu dan anak.', 'date' => now()->translatedFormat('d F Y')],
+                    ['src' => $image, 'title' => 'Panen Bersama', 'caption' => 'Dokumentasi potensi pertanian Desa Sukomulyo.', 'date' => now()->translatedFormat('d F Y')],
+                    ['src' => $image, 'title' => 'Pentas Seni Desa', 'caption' => 'Ruang ekspresi seni dan budaya masyarakat.', 'date' => now()->translatedFormat('d F Y')],
                 ];
             }
         );
+
+        $photoCollection = collect($photos);
+        $perPage = 6;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $photos = new LengthAwarePaginator(
+            $photoCollection->forPage($currentPage, $perPage)->values()->all(),
+            $photoCollection->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ],
+        );
+
+        if ($request->header('X-Ajax-Root') === '#gallery-ajax-root') {
+            view()->share($this->shared());
+
+            return view('pages.partials.gallery-content', compact('photos'));
+        }
 
         return $this->render('pages.gallery', compact('photos'));
     }
