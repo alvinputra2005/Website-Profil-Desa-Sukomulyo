@@ -14,8 +14,31 @@ class SitePagesTest extends TestCase
         $pages = [
             route('beranda') => 'Desa Sukomulyo',
             route('profile-desa') => 'Profil Desa',
-            route('data-desa-statistik') => 'Data Desa/Statistik',
+            route('profile-desa.detail', ['section' => 'sejarah']) => 'Sejarah Desa',
+            route('profile-desa.detail', ['section' => 'visi-misi']) => 'Visi dan Misi',
+            route('pemerintahan-desa') => 'Pemerintahan Desa',
+            route('potensi-desa') => 'Potensi Desa',
+            route('data-desa-statistik') => 'Data Desa',
+            route('data-statistik.detail', ['section' => 'penduduk']) => 'Statistik Penduduk',
+            route('data-statistik.detail', ['section' => 'pendidikan']) => 'Statistik Pendidikan',
+            route('data-statistik.detail', ['section' => 'pekerjaan']) => 'Statistik Pekerjaan',
+            route('data-statistik.detail', ['section' => 'ekonomi']) => 'Statistik Ekonomi',
+            route('data-statistik.detail', ['section' => 'idm']) => 'IDM (Indeks Desa Membangun)',
+            route('data-statistik.detail', ['section' => 'visualisasi']) => 'Visualisasi Data',
+            route('kependudukan') => 'Data Desa',
+            route('kependudukan.detail', ['section' => 'ringkasan']) => 'Ringkasan Penduduk',
+            route('kependudukan.detail', ['section' => 'jenis-kelamin']) => 'Jenis Kelamin',
+            route('kependudukan.detail', ['section' => 'kelompok-umur']) => 'Kelompok Umur',
+            route('kependudukan.detail', ['section' => 'pendidikan']) => 'Pendidikan',
+            route('kependudukan.detail', ['section' => 'pekerjaan']) => 'Pekerjaan',
+            route('kependudukan.detail', ['section' => 'agama']) => 'Agama',
+            route('kependudukan.detail', ['section' => 'status-perkawinan']) => 'Status Perkawinan',
             route('informasi-publik-desa') => 'Informasi Publik Desa',
+            route('informasi-desa.detail', ['section' => 'pengumuman']) => 'Pengumuman Desa',
+            route('informasi-desa.detail', ['section' => 'layanan-administrasi']) => 'Layanan Administrasi',
+            route('informasi-desa.detail', ['section' => 'agenda']) => 'Agenda Desa',
+            route('informasi-desa.detail', ['section' => 'bantuan-sosial']) => 'Informasi Bantuan Sosial',
+            route('informasi-desa.detail', ['section' => 'informasi-publik']) => 'Informasi Publik',
             route('peta-desa') => 'Peta Desa',
             route('galeri-desa') => 'Galeri Desa',
             route('berita-desa.index') => 'Berita Desa',
@@ -29,6 +52,30 @@ class SitePagesTest extends TestCase
         foreach ($pages as $url => $content) {
             $this->get($url)->assertOk()->assertSee($content);
         }
+    }
+
+    public function test_navigation_uses_the_requested_dropdown_groups(): void
+    {
+        $response = $this->get(route('beranda'))->assertOk();
+        $html = $response->getContent();
+        preg_match('/<nav class="header-navigation".*?<\/nav>/s', $html, $matches);
+        $navigation = $matches[0] ?? '';
+
+        $this->assertSame(4, substr_count($navigation, '<ul class="sub-menu">'));
+        $this->assertSame(4, substr_count($navigation, 'class="nav-dropdown-toggle"'));
+        foreach (['Profile Desa', 'Data Statistik', 'Kependudukan', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Pendidikan', 'Layanan Administrasi', 'APBDes'] as $label) {
+            $this->assertStringContainsString($label, $navigation);
+        }
+        foreach (['profile-desa', 'data-desa-statistik', 'kependudukan', 'informasi-publik-desa'] as $route) {
+            $this->assertDoesNotMatchRegularExpression('/<a href="'.preg_quote(route($route), '/').'"/', $navigation);
+        }
+        $this->assertStringNotContainsString('>Peta Desa</a>', $navigation);
+        $this->assertStringNotContainsString('#', $navigation);
+        $this->assertGreaterThan(strpos($navigation, 'Berita Desa'), strpos($navigation, 'Galeri Desa'));
+        $this->assertStringNotContainsString('Asal-usul dan perkembangan', $navigation);
+        $this->assertStringNotContainsString('Jumlah penduduk berdasarkan jenjang pendidikan', $navigation);
+        $this->assertStringContainsString(route('pemerintahan-desa'), $navigation);
+        $this->assertStringContainsString(route('potensi-desa'), $navigation);
     }
 
     public function test_unknown_pages_use_the_converted_404_page(): void
@@ -83,11 +130,126 @@ class SitePagesTest extends TestCase
         $this->assertSame(5, substr_count($response->getContent(), 'data-gallery-item'));
     }
 
-    public function test_news_category_filter_is_not_shown(): void
+    public function test_news_page_shows_featured_layout_categories_and_five_year_archive(): void
     {
+        $response = $this->get(route('berita-desa.index'))
+            ->assertOk()
+            ->assertSee('>Berita Utama<', false)
+            ->assertSee('>Berita Terkini<', false)
+            ->assertSee('id="featured-news-heading"', false)
+            ->assertSee('id="latest-news-heading"', false)
+            ->assertSee('<nav class="breadcrumbs"', false)
+            ->assertSee('<span class="breadcrumb-separator" aria-hidden="true">/</span>', false)
+            ->assertSee('page-banner--no-heading', false)
+            ->assertDontSee('class="page-banner-heading"', false)
+            ->assertDontSee('Semua Berita')
+            ->assertDontSee('Pilihan Redaksi')
+            ->assertDontSee('Kabar terbaru dan informasi penting dari Desa Sukomulyo.')
+            ->assertDontSee('<p>Informasi terbaru mengenai kegiatan dan perkembangan Desa Sukomulyo.</p>', false)
+            ->assertSee('>Kategori<', false)
+            ->assertSee('>Arsip<', false)
+            ->assertSee('Tahun 2026')
+            ->assertSee('Tahun 2022')
+            ->assertDontSee('Tahun 2021')
+            ->assertDontSee('Filter berdasarkan bulan')
+            ->assertDontSee('news-month', false)
+            ->assertSee('featured-news-card--main', false)
+            ->assertSee('featured-news-meta', false);
+
+        $html = $response->getContent();
+        preg_match('/<div class="news-filter-panel">(.*?)<\/aside>/s', $html, $sidebar);
+        $sidebarHtml = $sidebar[1] ?? '';
+        $this->assertLessThan(strpos($sidebarHtml, '>Kategori<'), strpos($sidebarHtml, 'Cari berita'));
+        $this->assertLessThan(strpos($sidebarHtml, '>Arsip<'), strpos($sidebarHtml, '>Kategori<'));
+        preg_match('/<section class="widget news-category-widget">(.*?)<\/section>/s', $sidebarHtml, $categoryWidget);
+        $this->assertSame(5, substr_count($categoryWidget[1] ?? '', '<li>'));
+        preg_match('/<section class="widget news-archive-widget">(.*?)<\/section>/s', $sidebarHtml, $archiveWidget);
+        $this->assertSame(5, substr_count($archiveWidget[1] ?? '', '<li>'));
+        $this->assertSame(2, substr_count($sidebarHtml, 'data-sidebar-toggle'));
+        $this->assertSame(2, substr_count($sidebarHtml, 'data-sidebar-panel'));
+        $this->assertSame(2, substr_count($sidebarHtml, 'aria-expanded="false"'));
+        $this->assertStringContainsString('id="news-category-list"', $sidebarHtml);
+        $this->assertStringContainsString('id="news-archive-list"', $sidebarHtml);
+
+        $this->get(route('berita-desa.category', 'kemasyarakatan'))
+            ->assertOk()
+            ->assertSee('Kerja Bakti Menjaga Lingkungan Desa')
+            ->assertSee('aria-expanded="true"', false);
+
+        $this->get(route('berita-desa.archive', '2026'))
+            ->assertOk()
+            ->assertSee('aria-controls="news-archive-list"', false)
+            ->assertSee('aria-expanded="true"', false);
+    }
+
+    public function test_news_pagination_shows_five_articles_per_page(): void
+    {
+        $this->seed();
+        cache()->flush();
+
+        $firstPage = $this->get(route('berita-desa.index'))->assertOk();
+        $this->assertSame(5, substr_count($firstPage->getContent(), '<article class="article-card"'));
+        $firstPage
+            ->assertDontSee('Semua Berita')
+            ->assertSee('>Berita Utama<', false)
+            ->assertSee('>Berita Terkini<', false)
+            ->assertSee('aria-label="Navigasi halaman berita"', false)
+            ->assertSee('page=2', false);
+
+        $secondPage = $this->get(route('berita-desa.index', ['page' => 2]))->assertOk();
+        $this->assertSame(5, substr_count($secondPage->getContent(), '<article class="article-card"'));
+        $secondPage
+            ->assertDontSee('featured-news-section', false)
+            ->assertDontSee('>Berita Utama<', false)
+            ->assertSee('>Berita Terkini<', false)
+            ->assertSee('page=1', false);
+    }
+
+    public function test_dropdown_pages_show_parent_and_child_breadcrumbs(): void
+    {
+        $pages = [
+            route('profile-desa.detail', 'visi-misi') => ['Profile Desa', 'Visi dan Misi'],
+            route('data-statistik.detail', 'pendidikan') => ['Data Statistik', 'Statistik Pendidikan'],
+            route('kependudukan.detail', 'pekerjaan') => ['Kependudukan', 'Pekerjaan'],
+            route('informasi-desa.detail', 'agenda') => ['Informasi Desa', 'Agenda Desa'],
+        ];
+
+        foreach ($pages as $url => [$parent, $child]) {
+            $response = $this->get($url)->assertOk();
+            $html = $response->getContent();
+            preg_match('/<header class="page-banner">(.*?)<\/header>/s', $html, $bannerMatches);
+            $banner = $bannerMatches[1] ?? '';
+            preg_match('/<nav class="breadcrumbs".*?<\/nav>/s', $html, $matches);
+            $breadcrumbs = $matches[0] ?? '';
+
+            $this->assertStringContainsString('class="breadcrumb-home"', $breadcrumbs);
+            $this->assertStringContainsString('Beranda', $breadcrumbs);
+            $this->assertStringContainsString($parent, $breadcrumbs);
+            $this->assertStringContainsString('breadcrumb-separator', $breadcrumbs);
+            $this->assertStringContainsString('aria-hidden="true">/</span>', $breadcrumbs);
+            $this->assertStringNotContainsString('fa-chevron-right', $breadcrumbs);
+            $this->assertStringContainsString($child, $breadcrumbs);
+            $this->assertStringContainsString('class="page-banner-heading"', $banner);
+            $this->assertStringContainsString('<h1>'.$child.'</h1>', $banner);
+        }
+
+        $this->get(route('galeri-desa'))
+            ->assertOk()
+            ->assertDontSee('<nav class="breadcrumbs"', false)
+            ->assertSee('page-banner--no-breadcrumbs', false)
+            ->assertSee('page-banner--no-divider', false);
+
         $this->get(route('berita-desa.index'))
             ->assertOk()
-            ->assertDontSee('data-news-filter', false);
+            ->assertSee('<nav class="breadcrumbs"', false)
+            ->assertSee('page-banner--no-heading', false)
+            ->assertDontSee('class="page-banner-heading"', false);
+
+        $this->get(route('berita-desa.show', 'musyawarah-desa-penyusunan-program-kerja'))
+            ->assertOk()
+            ->assertSee('<nav class="breadcrumbs"', false)
+            ->assertSee('class="breadcrumb-home"', false)
+            ->assertSee('Musyawarah Desa Penyusunan Program Kerja');
     }
 
     public function test_budget_history_shows_ten_years_of_dummy_data(): void

@@ -9,8 +9,6 @@ class SiteCache
 {
     public const SETTINGS = 'site.settings.public';
 
-    public const NAVIGATION = 'site.navigation.public';
-
     public const PUBLIC_LAYOUT = 'site.layout.public';
 
     public const PROFILE = 'profile.sections';
@@ -26,6 +24,8 @@ class SiteCache
     public const NEWS_CATEGORIES = 'news.categories';
 
     public const NEWS_ARCHIVES = 'news.archives';
+
+    public const NEWS_POPULAR = 'news.popular';
 
     public const NEWS_DETAIL_VERSION = 'news.detail.version';
 
@@ -80,6 +80,7 @@ class SiteCache
             self::NEWS_LIST,
             self::NEWS_CATEGORIES,
             self::NEWS_ARCHIVES,
+            self::NEWS_POPULAR,
             self::PUBLIC_LAYOUT,
             self::SEO_SITEMAP,
         ] as $key) {

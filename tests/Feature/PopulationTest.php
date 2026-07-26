@@ -82,6 +82,14 @@ class PopulationTest extends TestCase
         $this->get(route('admin.population.report'))->assertOk()->assertSee('Laporan Kependudukan Bulanan');
         $this->get(route('admin.population.report.export'))->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
         $this->get(route('data-desa-statistik'))->assertOk()->assertSee('Jumlah Penduduk');
+        $this->get(route('beranda'))
+            ->assertOk()
+            ->assertSee('Data Pendidikan')
+            ->assertSee('Data Pekerjaan')
+            ->assertSee('fas fa-graduation-cap', false)
+            ->assertSee('fas fa-briefcase', false)
+            ->assertDontSee('Wilayah Administratif')
+            ->assertDontSee('Luas Wilayah');
         $this->get(route('laporan-penduduk'))->assertOk()->assertSee('Laporan Penduduk');
     }
 }

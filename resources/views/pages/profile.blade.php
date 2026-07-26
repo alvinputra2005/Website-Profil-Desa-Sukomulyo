@@ -34,8 +34,9 @@
                 </section>
 
                 @if($profileSections->isNotEmpty())
+                    @php($sectionAnchors = ['history' => 'sejarah-desa', 'vision' => 'visi-dan-misi', 'mission' => 'misi-desa', 'profile' => 'profil-desa'])
                     @foreach($profileSections as $section)
-                        <section>
+                        <section id="{{ $sectionAnchors[$section->section_key] ?? $section->section_key }}">
                             <h2>{{ $section->title }}</h2>
                             @if($section->image && !in_array($section->section_key, ['vision', 'mission'], true))
                                 <img class="profile-section-image" src="{{ $section->image->url }}" alt="{{ $section->image->alt_text ?: $section->title }}">
@@ -44,18 +45,18 @@
                         </section>
                     @endforeach
                 @else
-                <section>
+                <section id="sejarah-desa">
                     <h2>Sejarah Singkat</h2>
                     <p>Desa Sukomulyo berkembang dari kehidupan masyarakat yang menjunjung kebersamaan, kerja keras, dan gotong royong. Nilai tersebut menjadi dasar dalam setiap kegiatan sosial maupun pembangunan desa.</p>
                     <p>Informasi sejarah pada halaman ini disiapkan sebagai struktur awal dan dapat disesuaikan dengan data resmi serta cerita para tokoh masyarakat.</p>
                 </section>
 
-                <section class="vision-box">
+                <section id="visi-dan-misi" class="vision-box">
                     <span class="section-kicker">Visi</span>
                     <blockquote>Terwujudnya Desa Sukomulyo yang maju, mandiri, sejahtera, dan berkarakter melalui tata kelola pemerintahan yang melayani.</blockquote>
                 </section>
 
-                <section>
+                <section id="misi-desa">
                     <h2>Misi Desa</h2>
                     <ol class="mission-list">
                         <li>Meningkatkan kualitas pelayanan publik yang cepat, terbuka, dan bertanggung jawab.</li>

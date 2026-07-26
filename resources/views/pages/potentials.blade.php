@@ -1,5 +1,8 @@
 <x-layouts.app title="Potensi Desa">
-    <x-page-header title="Potensi Desa" description="Sumber daya dan kekuatan lokal yang mendukung kemajuan masyarakat." />
+    <x-page-header title="Potensi Desa" description="Sumber daya dan kekuatan lokal yang mendukung kemajuan masyarakat." :breadcrumbs="[
+        ['label' => 'Profile Desa', 'url' => route('profile-desa')],
+        ['label' => 'Potensi Desa'],
+    ]" />
 
     <div class="container">
         <div id="sc_innerpage_wrap">

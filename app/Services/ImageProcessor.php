@@ -15,6 +15,8 @@ class ImageProcessor
 
     public function store(UploadedFile $file, string $directory, ?string $disk = null): array
     {
+        if (! extension_loaded('gd')) throw new RuntimeException('Ekstensi PHP GD diperlukan untuk memproses gambar.');
+
         $startedAt = hrtime(true);
         $disk ??= config('filesystems.media_disk', 'public');
         $timings = [];

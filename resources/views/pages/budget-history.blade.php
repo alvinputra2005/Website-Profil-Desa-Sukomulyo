@@ -1,5 +1,8 @@
 <x-layouts.app title="Transparansi APBDes">
-    <x-page-header title="Transparansi APBDes" description="Riwayat pendapatan, belanja, dan realisasi anggaran Desa Sukomulyo selama 10 tahun terakhir." />
+    <x-page-header title="Transparansi APBDes" description="Riwayat pendapatan, belanja, dan realisasi anggaran Desa Sukomulyo selama 10 tahun terakhir." :breadcrumbs="[
+        ['label' => 'Informasi Desa', 'url' => route('informasi-publik-desa')],
+        ['label' => 'Transparansi APBDes'],
+    ]" />
 
     <div class="container">
         <div id="sc_innerpage_wrap">

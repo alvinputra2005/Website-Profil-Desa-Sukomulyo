@@ -79,9 +79,11 @@ const updateDocumentMetadata = (incomingDocument) => {
     }
 };
 
-const renderPageResponse = async (response, state, historyMode = 'push') => {
+const renderPageResponse = async (response, state, historyMode = 'push', requestedUrl = null, scrollTarget = null, rootSelector = state.rootSelector) => {
     const contentType = response.headers.get('content-type') || '';
     const finalUrl = response.url || window.location.href;
+    const requestedHash = requestedUrl ? new URL(requestedUrl, window.location.href).hash : '';
+    const historyUrl = requestedHash ? `${finalUrl}${requestedHash}` : finalUrl;
 
     if (!contentType.includes('text/html')) {
         window.location.assign(finalUrl);
@@ -90,8 +92,8 @@ const renderPageResponse = async (response, state, historyMode = 'push') => {
 
     const html = await response.text();
     const incomingDocument = new DOMParser().parseFromString(html, 'text/html');
-    const currentRoot = document.querySelector(state.rootSelector);
-    const incomingRoot = incomingDocument.querySelector(state.rootSelector);
+    const currentRoot = document.querySelector(rootSelector);
+    const incomingRoot = incomingDocument.querySelector(rootSelector);
 
     if (!currentRoot || !incomingRoot) {
         window.location.assign(finalUrl);
@@ -104,12 +106,20 @@ const renderPageResponse = async (response, state, historyMode = 'push') => {
 
     incomingRoot.setAttribute('data-ajax-root', '');
     currentRoot.replaceWith(incomingRoot);
-    updateDocumentMetadata(incomingDocument);
+    if (incomingRoot.dataset.pageTitle) {
+        document.title = incomingRoot.dataset.pageTitle;
+        const description = document.querySelector('meta[name="description"]');
+        if (description && incomingRoot.dataset.pageDescription) {
+            description.setAttribute('content', incomingRoot.dataset.pageDescription);
+        }
+    } else {
+        updateDocumentMetadata(incomingDocument);
+    }
 
     if (historyMode === 'replace') {
-        window.history.replaceState({}, '', finalUrl);
+        window.history.replaceState({ ajaxRootSelector: rootSelector }, '', historyUrl);
     } else if (historyMode === 'push') {
-        window.history.pushState({}, '', finalUrl);
+        window.history.pushState({ ajaxRootSelector: rootSelector }, '', historyUrl);
     }
 
     window.dispatchEvent(new CustomEvent('ajax:page-loaded', {
@@ -117,12 +127,28 @@ const renderPageResponse = async (response, state, historyMode = 'push') => {
     }));
 
     state.onRender?.(incomingRoot);
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
+    const targetSelector = scrollTarget || requestedHash;
+    let target = null;
+
+    if (targetSelector) {
+        try {
+            target = document.querySelector(targetSelector);
+        } catch {
+            target = null;
+        }
+    }
+
+    if (target) {
+        target.scrollIntoView({ block: 'start', behavior: 'auto' });
+    } else {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
 
     return true;
 };
 
-const fetchPage = async (url, state, options = {}, historyMode = 'push') => {
+const fetchPage = async (url, state, options = {}, historyMode = 'push', scrollTarget = null, rootSelector = state.rootSelector) => {
     state.controller?.abort();
     const controller = new AbortController();
     const { headers = {}, ...requestOptions } = options;
@@ -137,11 +163,12 @@ const fetchPage = async (url, state, options = {}, historyMode = 'push') => {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 Accept: 'text/html, application/xhtml+xml',
+                'X-Ajax-Root': rootSelector,
                 ...headers,
             },
         });
 
-        return await renderPageResponse(response, state, historyMode);
+        return await renderPageResponse(response, state, historyMode, url, scrollTarget, rootSelector);
     } catch (error) {
         if (error.name !== 'AbortError') window.location.assign(url);
         return false;
@@ -165,6 +192,7 @@ const submitForm = async (form, state) => {
 
     const method = (form.getAttribute('method') || 'get').toUpperCase();
     const action = new URL(form.getAttribute('action') || window.location.href, window.location.href);
+    const rootSelector = form.closest('[data-ajax-scope]')?.dataset.ajaxScope || state.rootSelector;
     state.controller?.abort();
     const controller = new AbortController();
     state.controller = controller;
@@ -176,7 +204,7 @@ const submitForm = async (form, state) => {
                 if (typeof value === 'string' && value !== '') query.append(key, value);
             });
             action.search = query.toString();
-            await fetchPage(action.href, state);
+            await fetchPage(action.href, state, {}, 'push', null, rootSelector);
             return;
         }
 
@@ -189,11 +217,12 @@ const submitForm = async (form, state) => {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 Accept: 'text/html, application/xhtml+xml',
+                'X-Ajax-Root': rootSelector,
                 'X-CSRF-TOKEN': csrfToken(),
             },
         });
 
-        await renderPageResponse(response, state);
+        await renderPageResponse(response, state, 'push', action.href, null, rootSelector);
     } catch (error) {
         if (error.name !== 'AbortError') {
             const message = 'Permintaan gagal dikirim. Periksa koneksi lalu coba lagi.';
@@ -236,7 +265,8 @@ export const initAjaxNavigation = ({ rootSelector, onRender } = {}) => {
         const url = new URL(link.href, window.location.href);
         event.preventDefault();
         if (!confirmDiscardChanges()) return;
-        fetchPage(url.href, state);
+        const scopedRoot = link.closest('[data-ajax-scope]')?.dataset.ajaxScope || state.rootSelector;
+        fetchPage(url.href, state, {}, 'push', link.dataset.ajaxScrollTarget || null, scopedRoot);
     });
 
     document.addEventListener('submit', (event) => {
@@ -249,7 +279,7 @@ export const initAjaxNavigation = ({ rootSelector, onRender } = {}) => {
     });
 
     window.addEventListener('popstate', () => {
-        fetchPage(window.location.href, state, {}, 'none');
+        fetchPage(window.location.href, state, {}, 'none', null, window.history.state?.ajaxRootSelector || state.rootSelector);
     });
 
     return state;

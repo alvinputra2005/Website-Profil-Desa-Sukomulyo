@@ -34,10 +34,38 @@ const initPublicPage = () => {
         const slides = [...slider.querySelectorAll('[data-slide]')];
         const dots = [...slider.querySelectorAll('[data-slider-dot]')];
         const pixelLayer = slider.querySelector('[data-pixel-transition]');
+        const controls = slider.querySelector('.slider-controls');
         let current = 0;
         let timer;
         let animating = false;
         let transition;
+
+        const syncControls = () => {
+            const cta = slides[current]?.querySelector('.slide_more');
+
+            if (!controls || !cta) return;
+
+            const sliderRect = slider.getBoundingClientRect();
+            const ctaRect = cta.getBoundingClientRect();
+            const styles = window.getComputedStyle(slider);
+            const gap = Number.parseFloat(styles.getPropertyValue('--hero-controls-gap')) || 48;
+            const desiredTop = ctaRect.bottom - sliderRect.top + gap;
+            const maximumTop = slider.clientHeight - controls.offsetHeight - 18;
+
+            controls.style.top = `${Math.min(desiredTop, maximumTop)}px`;
+            controls.style.bottom = 'auto';
+        };
+
+        const controlsObserver = 'ResizeObserver' in window
+            ? new ResizeObserver(syncControls)
+            : null;
+
+        controlsObserver?.observe(slider);
+        slides.forEach((slide) => {
+            const copy = slide.querySelector('.hero-copy');
+            if (copy) controlsObserver?.observe(copy);
+        });
+        window.requestAnimationFrame(syncControls);
 
         const waveClip = (progress, direction) => {
             const offsets = [-4, 3, -2, 4, -3, 2, -1, 1];
@@ -70,6 +98,7 @@ const initPublicPage = () => {
             current = next;
             dots.forEach((dot, position) => dot.classList.toggle('is-active', position === current));
             animating = false;
+            window.requestAnimationFrame(syncControls);
         };
 
         const show = (index, direction = 'next') => {
@@ -141,6 +170,7 @@ const initPublicPage = () => {
         window.addEventListener('ajax:before-render', () => {
             window.clearInterval(timer);
             transition?.cancel();
+            controlsObserver?.disconnect();
         }, { once: true });
         play();
     }
@@ -211,6 +241,107 @@ const initPublicPage = () => {
         });
     });
 
+    document.querySelectorAll('[data-sidebar-toggle]').forEach((toggle) => {
+        if (toggle.dataset.bound === 'true') return;
+
+        const panel = document.getElementById(toggle.getAttribute('aria-controls'));
+        if (!panel) return;
+
+        const setExpanded = (expanded) => {
+            toggle.setAttribute('aria-expanded', String(expanded));
+            panel.hidden = !expanded;
+        };
+
+        toggle.dataset.bound = 'true';
+        toggle.addEventListener('click', () => {
+            const expanded = toggle.getAttribute('aria-expanded') === 'true';
+
+            setExpanded(!expanded);
+        });
+    });
+
+    const shareStatus = document.querySelector('[data-share-status]');
+    const setShareStatus = (message) => {
+        if (!shareStatus) return;
+
+        shareStatus.textContent = message;
+        window.setTimeout(() => {
+            if (shareStatus.textContent === message) shareStatus.textContent = '';
+        }, 2600);
+    };
+
+    const sharePanel = document.querySelector('.article-share-panel');
+    const detailArticle = sharePanel?.closest('.news-detail-layout')?.querySelector('.single-article');
+    const detailHero = detailArticle?.querySelector('.news-detail-hero');
+    window.__detailShareCleanup?.();
+    window.__detailShareCleanup = null;
+    const alignSharePanel = () => {
+        if (!sharePanel || !detailArticle || !detailHero) return;
+
+        if (window.matchMedia('(max-width: 767px)').matches) {
+            sharePanel.style.removeProperty('margin-top');
+            return;
+        }
+
+        const articleRect = detailArticle.getBoundingClientRect();
+        const heroRect = detailHero.getBoundingClientRect();
+        sharePanel.style.marginTop = `${Math.max(0, heroRect.top - articleRect.top)}px`;
+    };
+
+    if (sharePanel && detailHero) {
+        alignSharePanel();
+        window.addEventListener('resize', alignSharePanel, { passive: true });
+        let detailObserver = null;
+        if (window.ResizeObserver) {
+            detailObserver = new ResizeObserver(alignSharePanel);
+            detailObserver.observe(detailArticle);
+            detailObserver.observe(detailHero);
+        }
+        window.__detailShareCleanup = () => {
+            window.removeEventListener('resize', alignSharePanel);
+            detailObserver?.disconnect();
+        };
+    }
+
+    const copyShareText = async (text) => {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
+
+        const input = document.createElement('textarea');
+        input.value = text;
+        input.setAttribute('readonly', '');
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        document.body.appendChild(input);
+        input.select();
+        const copied = document.execCommand('copy');
+        input.remove();
+
+        return copied;
+    };
+
+    document.querySelector('[data-share-native]')?.addEventListener('click', async (event) => {
+        const button = event.currentTarget;
+        const url = button.dataset.shareUrl;
+        const text = button.dataset.shareText;
+
+        if (navigator.share) {
+            await navigator.share({ title: text, text, url }).catch(() => {});
+            return;
+        }
+
+        const copied = await copyShareText(`${text} ${url}`).catch(() => false);
+        setShareStatus(copied ? 'Tautan disalin' : 'Salin tautan artikel');
+    });
+
+    document.querySelector('[data-share-instagram]')?.addEventListener('click', async (event) => {
+        const link = event.currentTarget;
+        const copied = await copyShareText(`${link.dataset.shareText} ${link.dataset.shareUrl}`).catch(() => false);
+        setShareStatus(copied ? 'Tautan disalin' : 'Salin tautan artikel');
+    });
+
     document.querySelectorAll('[data-gallery-carousel]').forEach((carousel) => {
         const items = [...carousel.querySelectorAll('[data-carousel-item]')];
         const previous = carousel.querySelector('[data-gallery-prev]');
@@ -272,19 +403,32 @@ const initPublicPage = () => {
 
     const backToTop = document.querySelector('.back-to-top');
 
-    if (backToTop && !backToTop.dataset.ajaxBound) {
+    if (backToTop) {
         const updateButton = () => {
+            const isDisabled = Boolean(document.querySelector('[data-hide-back-to-top]'));
+
+            if (isDisabled) {
+                backToTop.hidden = true;
+                backToTop.classList.remove('is-visible');
+                backToTop.setAttribute('aria-hidden', 'true');
+                backToTop.tabIndex = -1;
+                return;
+            }
+
             const hero = document.querySelector('.hero-slider');
             const heroPassed = hero ? hero.getBoundingClientRect().bottom <= 0 : window.scrollY >= 500;
+            backToTop.hidden = false;
             backToTop.classList.toggle('is-visible', heroPassed);
             backToTop.setAttribute('aria-hidden', String(!heroPassed));
             backToTop.tabIndex = heroPassed ? 0 : -1;
         };
 
-        backToTop.hidden = false;
-        backToTop.dataset.ajaxBound = 'true';
-        window.addEventListener('scroll', updateButton, { passive: true });
-        backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        if (!backToTop.dataset.ajaxBound) {
+            backToTop.dataset.ajaxBound = 'true';
+            window.addEventListener('scroll', updateButton, { passive: true });
+            backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        }
+
         updateButton();
     }
 

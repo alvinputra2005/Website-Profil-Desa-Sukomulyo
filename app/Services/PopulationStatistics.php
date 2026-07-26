@@ -28,6 +28,8 @@ class PopulationStatistics
             'families' => FamilyCard::where('is_active', true)->count(),
             'households' => Household::where('is_active', true)->count(),
             'areas' => PopulationArea::distinct()->count('hamlet'),
+            'education_records' => (clone $base)->whereNotNull('education')->where('education', '!=', '')->count(),
+            'occupation_records' => (clone $base)->whereNotNull('occupation')->where('occupation', '!=', '')->count(),
         ];
     }
 
