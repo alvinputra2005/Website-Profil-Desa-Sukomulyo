@@ -19,6 +19,7 @@
                             class="gallery-item gallery-collage-card"
                             type="button"
                             data-gallery-item
+                            data-gallery-index="{{ $loop->index }}"
                             data-image="{{ $photo['src'] }}"
                             data-title="{{ $photo['title'] }}"
                             data-caption="{{ $photo['caption'] }}"
@@ -39,4 +40,43 @@
             </section>
         </div>
     </div>
+
+    <dialog class="gallery-dialog" data-gallery-dialog aria-labelledby="gallery-dialog-title">
+        <div class="gallery-dialog-layout">
+            <div class="dialog-caption">
+                <h2 id="gallery-dialog-title" data-gallery-title></h2>
+                <p data-gallery-caption></p>
+            </div>
+            <div class="gallery-dialog-media">
+                <div class="gallery-dialog-main">
+                    <img data-gallery-image src="" alt="">
+                    <button class="dialog-close" type="button" data-gallery-close aria-label="Tutup galeri">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                    <button class="gallery-dialog-nav gallery-dialog-nav--prev" type="button" data-gallery-prev aria-label="Foto sebelumnya">
+                        <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                    </button>
+                    <button class="gallery-dialog-nav gallery-dialog-nav--next" type="button" data-gallery-next aria-label="Foto berikutnya">
+                        <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="gallery-dialog-thumbs" aria-label="Pilih foto galeri">
+                    @foreach ($photos as $photo)
+                        <button
+                            class="gallery-dialog-thumb"
+                            type="button"
+                            data-gallery-thumb
+                            data-gallery-index="{{ $loop->index }}"
+                            data-image="{{ $photo['src'] }}"
+                            data-title="{{ $photo['title'] }}"
+                            data-caption="{{ $photo['caption'] }}"
+                            aria-label="Tampilkan {{ $photo['title'] }}"
+                        >
+                            <img src="{{ $photo['src'] }}" alt="" loading="lazy">
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </dialog>
 </div>

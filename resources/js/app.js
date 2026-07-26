@@ -344,24 +344,113 @@ const initPublicPage = () => {
 
     document.querySelectorAll('[data-gallery-carousel]').forEach((carousel) => {
         const items = [...carousel.querySelectorAll('[data-carousel-item]')];
+        const stage = carousel.querySelector('.home-gallery-stage');
         const previous = carousel.querySelector('[data-gallery-prev]');
         const next = carousel.querySelector('[data-gallery-next]');
         let selected = Math.floor(items.length / 2);
+        const positionRadius = Math.floor(items.length / 2);
+        const recyclingTimers = new WeakMap();
+        let cardSelectionTimer = 0;
 
-        const select = (index) => {
-            selected = Math.min(Math.max(index, 0), items.length - 1);
+        const cancelCardSelection = () => {
+            window.clearTimeout(cardSelectionTimer);
+            cardSelectionTimer = 0;
+        };
+
+        const select = (index, direction = 0) => {
+            if (!items.length) return;
+
+            // Keep the active index in a circular range so the carousel never
+            // gets stuck at either end of the five gallery items.
+            selected = ((index % items.length) + items.length) % items.length;
+            const recyclePosition = direction > 0 ? positionRadius + 1 : -(positionRadius + 1);
+            const edgePosition = direction > 0 ? -positionRadius : positionRadius;
+            const recycledItem = direction && items.length > 2
+                ? items.find((item) => Number(item.dataset.carouselPosition) === edgePosition)
+                : null;
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            // Cancel a pending recycle before starting the next movement. This
+            // keeps rapid clicks from leaving a card hidden at the wrong edge.
+            items.forEach((item) => {
+                const pending = recyclingTimers.get(item);
+                if (pending) {
+                    window.cancelAnimationFrame(pending.teleportFrame);
+                    window.cancelAnimationFrame(pending.revealFrame);
+                    window.clearTimeout(pending.timer);
+                    recyclingTimers.delete(item);
+                    item.classList.remove('is-recycling', 'is-recycling-teleport');
+                }
+            });
+
+            // Let a visual copy of the outgoing card glide behind the stack
+            // while the real card is recycled to the opposite side.
+            if (recycledItem && stage && !reducedMotion) {
+                const outgoingClone = recycledItem.cloneNode(true);
+                outgoingClone.removeAttribute('data-gallery-item');
+                outgoingClone.removeAttribute('data-carousel-item');
+                outgoingClone.removeAttribute('aria-pressed');
+                outgoingClone.setAttribute('aria-hidden', 'true');
+                outgoingClone.tabIndex = -1;
+                outgoingClone.classList.remove('is-outside', 'is-recycling', 'is-recycling-teleport');
+                outgoingClone.classList.add('is-recycle-clone');
+                outgoingClone.dataset.carouselPosition = edgePosition;
+                stage.appendChild(outgoingClone);
+                void outgoingClone.offsetWidth;
+
+                window.requestAnimationFrame(() => {
+                    outgoingClone.dataset.carouselPosition = direction > 0
+                        ? -(positionRadius + 1)
+                        : positionRadius + 1;
+                    outgoingClone.classList.add('is-leaving');
+                });
+
+                window.setTimeout(() => outgoingClone.remove(), 500);
+            }
+
+            recycledItem?.classList.add('is-recycling', 'is-recycling-teleport');
 
             items.forEach((item, itemIndex) => {
-                const position = itemIndex - selected;
+                // Pick the shortest direction around the carousel. For five
+                // items this keeps every card between positions -2 and 2,
+                // including when moving from the last item back to the first.
+                const position = ((itemIndex - selected + items.length + positionRadius) % items.length) - positionRadius;
 
-                item.dataset.carouselPosition = position;
+                item.dataset.carouselPosition = item === recycledItem ? recyclePosition : position;
                 item.classList.toggle('is-outside', Math.abs(position) > 2);
                 item.setAttribute('aria-pressed', String(position === 0));
                 item.setAttribute('aria-label', `${position === 0 ? 'Buka detail' : 'Pilih'} ${item.dataset.title}`);
             });
 
-            if (previous) previous.disabled = selected === 0;
-            if (next) next.disabled = selected === items.length - 1;
+            if (recycledItem) {
+                const targetPosition = direction > 0 ? positionRadius : -positionRadius;
+                const pending = { teleportFrame: 0, revealFrame: 0, timer: 0 };
+
+                if (reducedMotion) {
+                    recycledItem.dataset.carouselPosition = targetPosition;
+                    recycledItem.classList.remove('is-recycling', 'is-recycling-teleport');
+                } else {
+                    // Teleport the recycled card outside the visible stack,
+                    // then slide and fade it in from that same edge.
+                    void recycledItem.offsetWidth;
+                    pending.teleportFrame = window.requestAnimationFrame(() => {
+                        recycledItem.classList.remove('is-recycling-teleport');
+                        pending.revealFrame = window.requestAnimationFrame(() => {
+                            recycledItem.dataset.carouselPosition = targetPosition;
+                            recycledItem.classList.remove('is-recycling');
+                            pending.timer = window.setTimeout(() => {
+                                recyclingTimers.delete(recycledItem);
+                            }, 450);
+                        });
+                    });
+                    recyclingTimers.set(recycledItem, pending);
+                }
+            }
+
+            // A circular carousel only disables controls when there is
+            // nothing to navigate (zero or one item).
+            if (previous) previous.disabled = items.length < 2;
+            if (next) next.disabled = items.length < 2;
         };
 
         items.forEach((item, index) => {
@@ -369,12 +458,38 @@ const initPublicPage = () => {
                 if (index === selected) return;
 
                 event.stopImmediatePropagation();
-                select(index);
+                cancelCardSelection();
+
+                const itemPosition = Number(item.dataset.carouselPosition);
+                const direction = Math.sign(itemPosition);
+                let remainingSteps = Math.abs(itemPosition);
+
+                // Move through the same one-step animation used by the arrow
+                // controls. An outer card therefore takes two smooth steps
+                // instead of visibly rotating across the whole carousel.
+                const selectNextStep = () => {
+                    if (!direction || remainingSteps <= 0) return;
+
+                    select(selected + direction, direction);
+                    remainingSteps -= 1;
+
+                    if (remainingSteps > 0) {
+                        cardSelectionTimer = window.setTimeout(selectNextStep, 470);
+                    }
+                };
+
+                selectNextStep();
             });
         });
 
-        previous?.addEventListener('click', () => select(selected - 1));
-        next?.addEventListener('click', () => select(selected + 1));
+        previous?.addEventListener('click', () => {
+            cancelCardSelection();
+            select(selected - 1, -1);
+        });
+        next?.addEventListener('click', () => {
+            cancelCardSelection();
+            select(selected + 1, 1);
+        });
         select(selected);
     });
 
@@ -382,22 +497,151 @@ const initPublicPage = () => {
 
     if (galleryDialog) {
         const image = galleryDialog.querySelector('[data-gallery-image]');
+        const main = galleryDialog.querySelector('.gallery-dialog-main');
         const title = galleryDialog.querySelector('[data-gallery-title]');
         const caption = galleryDialog.querySelector('[data-gallery-caption]');
+        const captionBlock = caption?.closest('.dialog-caption');
+        const thumbnails = [...galleryDialog.querySelectorAll('[data-gallery-thumb]')];
+        const galleryItems = [...document.querySelectorAll('[data-gallery-item]')];
+        const slides = thumbnails.length ? thumbnails : galleryItems;
+        const previousButton = galleryDialog.querySelector('[data-gallery-prev]');
+        const nextButton = galleryDialog.querySelector('[data-gallery-next]');
+        let selectedIndex = -1;
+        let changeTimer;
+        let settleTimer;
+        const navigationTimers = new WeakMap();
+        const galleryKey = (item) => item.dataset.galleryIndex
+            ?? `${item.dataset.title}\u0000${item.dataset.caption}\u0000${item.dataset.image}`;
 
-        document.querySelectorAll('[data-gallery-item]').forEach((item) => {
+        const contextualCaption = (item) => {
+            const text = item.dataset.caption?.trim() || '';
+            if (text.length >= 110) return text;
+
+            const titleText = (item.dataset.title || '').toLowerCase();
+            const context = titleText.includes('musyawarah')
+                ? 'Warga berdiskusi terbuka untuk menyepakati langkah yang bermanfaat bagi kemajuan desa.'
+                : titleText.includes('kerja bakti')
+                    ? 'Kegiatan ini memperkuat semangat gotong royong dan kepedulian warga terhadap lingkungan.'
+                    : titleText.includes('umkm')
+                        ? 'Pembekalan ini diharapkan membantu usaha warga tumbuh lebih kreatif dan berdaya saing.'
+                        : titleText.includes('posyandu')
+                            ? 'Pelayanan dilakukan secara berkala agar keluarga mendapat pendampingan kesehatan yang mudah dijangkau.'
+                            : titleText.includes('panen')
+                                ? 'Hasil kegiatan menunjukkan potensi pertanian lokal yang terus dijaga dan dikembangkan bersama.'
+                                : titleText.includes('seni') || titleText.includes('festival')
+                                    ? 'Kegiatan ini menjadi ruang untuk merawat budaya sekaligus mempererat kebersamaan masyarakat.'
+                                    : 'Kegiatan ini menjadi bagian dari aktivitas warga yang mendukung kemajuan dan kebersamaan Desa Sukomulyo.';
+
+            return `${text.replace(/[.!?]+$/, '') || 'Dokumentasi kegiatan warga Desa Sukomulyo'}. ${context}`;
+        };
+
+        const updateGalleryContent = (item) => {
+            image.src = item.dataset.image;
+            image.alt = item.dataset.title;
+            title.textContent = item.dataset.title;
+            caption.textContent = contextualCaption(item);
+        };
+
+        const animateGalleryChange = (item, direction = 'next') => {
+            if (!main || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                updateGalleryContent(item);
+                return;
+            }
+
+            window.clearTimeout(changeTimer);
+            window.clearTimeout(settleTimer);
+            [main, captionBlock].filter(Boolean).forEach((part) => {
+                part.classList.remove('is-leaving', 'is-entering', 'is-next', 'is-prev');
+            });
+            void main.offsetWidth;
+            [main, captionBlock].filter(Boolean).forEach((part) => {
+                part.classList.add('is-leaving', direction === 'prev' ? 'is-prev' : 'is-next');
+            });
+
+            changeTimer = window.setTimeout(() => {
+                updateGalleryContent(item);
+                [main, captionBlock].filter(Boolean).forEach((part) => {
+                    part.classList.remove('is-leaving');
+                    part.classList.add('is-entering');
+                });
+
+                settleTimer = window.setTimeout(() => {
+                    [main, captionBlock].filter(Boolean).forEach((part) => {
+                        part.classList.remove('is-entering', 'is-next', 'is-prev');
+                    });
+                }, 320);
+            }, 140);
+        };
+
+        const selectGalleryItem = (item, animate = false, direction = 'next') => {
+            const selectedKey = galleryKey(item);
+
+            thumbnails.forEach((thumbnail) => {
+                const isSelected = galleryKey(thumbnail) === selectedKey;
+                thumbnail.classList.toggle('is-selected', isSelected);
+                thumbnail.setAttribute('aria-pressed', String(isSelected));
+            });
+
+            const itemIndex = slides.findIndex((slide) => galleryKey(slide) === selectedKey);
+            if (itemIndex >= 0) selectedIndex = itemIndex;
+
+            if (animate) {
+                animateGalleryChange(item, direction);
+            } else {
+                updateGalleryContent(item);
+            }
+        };
+
+        const selectAdjacentGalleryItem = (offset) => {
+            if (!slides.length) return;
+
+            const nextIndex = (selectedIndex + offset + slides.length) % slides.length;
+            selectGalleryItem(slides[nextIndex], true, offset < 0 ? 'prev' : 'next');
+        };
+
+        const indicateKeyboardNavigation = (button) => {
+            if (!button) return;
+
+            window.clearTimeout(navigationTimers.get(button));
+            button.classList.remove('is-keyboard-active');
+            void button.offsetWidth;
+            button.classList.add('is-keyboard-active');
+            navigationTimers.set(button, window.setTimeout(() => {
+                button.classList.remove('is-keyboard-active');
+            }, 180));
+        };
+
+        galleryItems.forEach((item) => {
             item.addEventListener('click', () => {
-                image.src = item.dataset.image;
-                image.alt = item.dataset.title;
-                title.textContent = item.dataset.title;
-                caption.textContent = item.dataset.caption;
+                selectGalleryItem(item);
                 galleryDialog.showModal();
             });
         });
 
+        thumbnails.forEach((thumbnail) => {
+            thumbnail.addEventListener('click', () => {
+                const direction = thumbnails.indexOf(thumbnail) < selectedIndex ? 'prev' : 'next';
+                selectGalleryItem(thumbnail, true, direction);
+            });
+        });
+
+        previousButton?.addEventListener('click', () => selectAdjacentGalleryItem(-1));
+        nextButton?.addEventListener('click', () => selectAdjacentGalleryItem(1));
         galleryDialog.querySelector('[data-gallery-close]')?.addEventListener('click', () => galleryDialog.close());
         galleryDialog.addEventListener('click', (event) => {
             if (event.target === galleryDialog) galleryDialog.close();
+        });
+        galleryDialog.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                indicateKeyboardNavigation(previousButton);
+                selectAdjacentGalleryItem(-1);
+            }
+            if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                indicateKeyboardNavigation(nextButton);
+                selectAdjacentGalleryItem(1);
+            }
         });
     }
 
