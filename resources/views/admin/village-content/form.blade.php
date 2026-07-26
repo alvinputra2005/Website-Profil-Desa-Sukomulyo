@@ -242,7 +242,7 @@
     <div class="box-body">
         <div class="form-group {{ $errors->has('status')?'has-error':'' }}"><label class="control-label">Status Publikasi</label><select name="status" class="form-control select2"><option value="published" @selected(old('status',$section?->status ?? 'published')==='published')>Terbit</option><option value="draft" @selected(old('status',$section?->status)==='draft')>Draf</option></select>@error('status')<span class="field-error">{{ $message }}</span>@enderror</div>
     </div>
-    <div class="box-footer"><button type="reset" class="btn btn-warning"><i class="fa fa-refresh"></i> Reset</button><button class="btn btn-social btn-info pull-right"><i class="fa fa-save"></i> Simpan Perubahan</button></div>
+    <div class="box-footer vision-mission-actions"><a href="{{ route('admin.dashboard') }}" class="btn btn-default"><i class="fa fa-arrow-left"></i> Kembali</a><button type="reset" class="btn btn-warning"><i class="fa fa-refresh"></i> Reset</button><button class="btn btn-social btn-info pull-right"><i class="fa fa-save"></i> Simpan Perubahan</button></div>
 </div>
 @else
 <div class="box box-info">

@@ -207,6 +207,94 @@ const initAdminPage = () => {
     checks.forEach(checkbox=>checkbox.addEventListener('change',update));
     update();
   }
+  const galleryManager=document.querySelector('[data-gallery-manager]');
+  const galleryFiles=document.querySelector('[data-gallery-files]');
+  const galleryGrid=document.querySelector('[data-gallery-photo-grid]');
+  if(galleryManager&&galleryFiles&&galleryGrid&&!galleryManager.dataset.galleryBound){
+    galleryManager.dataset.galleryBound='true';
+    let selectedFiles=[];
+    let dragged=null;
+    const addButton=galleryGrid.querySelector('[data-gallery-add]');
+    const cards=()=>Array.from(galleryGrid.querySelectorAll('[data-gallery-photo-card]:not(.is-removed)'));
+    const syncFiles=()=>{
+      const transfer=new DataTransfer();
+      selectedFiles.forEach(file=>transfer.items.add(file));
+      galleryFiles.files=transfer.files;
+    };
+    const update=()=>{
+      let uploadIndex=0;
+      cards().forEach((card,index)=>{
+        card.classList.toggle('is-cover',index===0);
+        card.querySelector('[data-gallery-cover]')?.setAttribute('title',index===0?'Gambar sampul':'Jadikan sampul');
+        const order=card.querySelector('[data-gallery-order]');
+        if(order)order.value=index+1;
+        if(card.matches('[data-new-photo]')){
+          card.dataset.fileIndex=uploadIndex;
+          const caption=card.querySelector('[data-gallery-caption]');
+          if(caption)caption.name=`gallery_item_captions[${uploadIndex}]`;
+          card.querySelector('[data-gallery-sequence]').value=`new:${uploadIndex}`;
+          uploadIndex++;
+        }
+      });
+      syncFiles();
+    };
+    const renderNewCards=()=>{
+      galleryGrid.querySelectorAll('[data-new-photo]').forEach(card=>card.remove());
+      selectedFiles.forEach(file=>{
+        const card=document.createElement('div');
+        card.className='gallery-photo-card';
+        card.draggable=true;
+        card.dataset.galleryPhotoCard='';
+        card.dataset.newPhoto='';
+        card.innerHTML='<img alt=""><button type="button" class="gallery-photo-cover" data-gallery-cover title="Jadikan sampul" aria-label="Jadikan sampul"><i class="fa fa-star"></i></button><button type="button" class="gallery-photo-remove" data-gallery-remove title="Hapus gambar" aria-label="Hapus gambar">&times;</button><span class="gallery-photo-drag"><i class="fa fa-bars"></i></span><input type="hidden" data-gallery-caption><input type="hidden" name="gallery_sequence[]" data-gallery-sequence>';
+        card.querySelector('img').src=URL.createObjectURL(file);
+        galleryGrid.insertBefore(card,addButton);
+      });
+      update();
+    };
+    addButton?.addEventListener('click',()=>galleryFiles.click());
+    galleryFiles.addEventListener('change',()=>{
+      selectedFiles=[...selectedFiles,...Array.from(galleryFiles.files)].slice(0,30);
+      renderNewCards();
+    });
+    galleryGrid.addEventListener('click',event=>{
+      const card=event.target.closest('[data-gallery-photo-card]');
+      if(!card)return;
+      if(event.target.closest('[data-gallery-cover]')){
+        galleryGrid.insertBefore(card,galleryGrid.querySelector('[data-gallery-photo-card]:not(.is-removed)'));
+        selectedFiles=cards().filter(item=>item.matches('[data-new-photo]')).map(item=>selectedFiles[Number(item.dataset.fileIndex)]);
+      }else if(event.target.closest('[data-gallery-remove]')){
+        if(card.matches('[data-new-photo]')){
+          selectedFiles.splice(Number(card.dataset.fileIndex),1);
+          card.remove();
+        }else{
+          card.classList.add('is-removed');
+          card.querySelector('[data-gallery-remove-input]').checked=true;
+        }
+      }else return;
+      update();
+    });
+    galleryGrid.addEventListener('dragstart',event=>{
+      dragged=event.target.closest('[data-gallery-photo-card]');
+      dragged?.classList.add('is-dragging');
+    });
+    galleryGrid.addEventListener('dragover',event=>{
+      if(!dragged)return;
+      event.preventDefault();
+      const target=event.target.closest('[data-gallery-photo-card]');
+      if(!target||target===dragged||target.classList.contains('is-removed'))return;
+      const box=target.getBoundingClientRect();
+      galleryGrid.insertBefore(dragged,event.clientX<box.left+box.width/2?target:target.nextSibling);
+    });
+    galleryGrid.addEventListener('dragend',()=>{
+      dragged?.classList.remove('is-dragging');
+      dragged=null;
+      const newOrder=cards().filter(card=>card.matches('[data-new-photo]')).map(card=>selectedFiles[Number(card.dataset.fileIndex)]);
+      selectedFiles=newOrder;
+      update();
+    });
+    update();
+  }
   const initTinyMce = async () => {
     const fields = Array.from(document.querySelectorAll('textarea[data-tinymce]'));
     if (!fields.length) return;

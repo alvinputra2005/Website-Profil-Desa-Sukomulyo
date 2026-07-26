@@ -24,8 +24,32 @@
 @elseif($type==='editor')
 <x-admin.rich-editor :name="$name" :value="$value" />
 @elseif($type==='image')
+@if($resource==='galleries' && $name==='cover_media_id')
+<div class="gallery-manager" data-gallery-manager>
+    <input type="file" name="gallery_item_uploads[]" class="form-control" accept="image/jpeg,image/png,image/webp" multiple data-gallery-files>
+    <p class="help-block">Pilih beberapa gambar sekaligus. Foto pertama menjadi sampul. Seret untuk mengurutkan atau tekan bintang untuk menjadikannya sampul.</p>
+    @error('gallery_item_uploads')<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
+    @error('gallery_item_uploads.*')<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
+    <div class="gallery-photo-grid" data-gallery-photo-grid>
+        @foreach($galleryItems as $galleryItem)
+        <div class="gallery-photo-card" draggable="true" data-gallery-photo-card data-existing-photo>
+            <img src="{{ $galleryItem->media?->thumbnail_url ?: $galleryItem->media?->url }}" alt="{{ $galleryItem->media?->alt_text }}">
+            <button type="button" class="gallery-photo-cover" data-gallery-cover title="Jadikan sampul" aria-label="Jadikan sampul"><i class="fa fa-star"></i></button>
+            <button type="button" class="gallery-photo-remove" data-gallery-remove title="Hapus gambar" aria-label="Hapus gambar">&times;</button>
+            <span class="gallery-photo-drag"><i class="fa fa-bars"></i></span>
+            <input type="hidden" name="gallery_items[{{ $galleryItem->id }}][display_order]" value="{{ $galleryItem->display_order }}" data-gallery-order>
+            <input type="hidden" name="gallery_items[{{ $galleryItem->id }}][caption]" value="{{ $galleryItem->caption }}">
+            <input type="hidden" name="gallery_sequence[]" value="existing:{{ $galleryItem->id }}" data-gallery-sequence>
+            <input type="checkbox" name="remove_gallery_items[]" value="{{ $galleryItem->id }}" data-gallery-remove-input hidden>
+        </div>
+        @endforeach
+        <button type="button" class="gallery-photo-add" data-gallery-add><i class="fa fa-plus"></i><span>Tambah gambar</span></button>
+    </div>
+</div>
+@else
 @php($selectedMedia=isset($field['relation']) ? data_get($item,$field['relation']) : null)
 <x-admin.image-picker :name="$name" :label="$field['label']" :media="$media ?? collect()" :selected="$selectedMedia" :required="str_contains($field['rules']??'','required')" :show-label="false" :show-field-error="false" />
+@endif
 @else
 <input id="{{ $name }}" name="{{ $name }}" type="{{ $type }}" value="{{ $value }}" class="form-control" @if(isset($field['step']))step="{{ $field['step'] }}"@endif>
 @endif
@@ -34,45 +58,5 @@
 @endforeach
 </div><div class="box-footer {{ $resource==='galleries' ? 'gallery-form-actions' : '' }}"><a href="{{ route('admin.resources.index',$resource) }}" class="btn btn-default"><i class="fa fa-arrow-left"></i> Kembali</a>@if($resource!=='categories')<button type="reset" class="btn btn-warning"><i class="fa fa-refresh"></i> Reset</button>@endif<button type="submit" class="btn btn-social btn-info pull-right"><i class="fa fa-save"></i> Simpan</button></div></div>
 
-@if($resource==='galleries' && $item->exists)
-<div class="box box-info">
-    <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-picture-o"></i> Foto Galeri</h3></div>
-    <div class="box-body">
-        <div class="row">
-            <div class="col-md-5">
-                <div class="form-group @error('gallery_item_upload') has-error @enderror">
-                    <label class="control-label">Tambah Foto</label>
-                    <input type="file" name="gallery_item_upload" class="form-control" accept="image/jpeg,image/png,image/webp">
-                    @error('gallery_item_upload')<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
-                </div>
-            </div>
-            <div class="col-md-5">
-                <div class="form-group"><label class="control-label">Keterangan Foto</label><input type="text" name="gallery_item_caption" class="form-control" value="{{ old('gallery_item_caption') }}" maxlength="2000"></div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group"><label class="control-label">Urutan</label><input type="number" name="gallery_item_order" class="form-control" value="{{ old('gallery_item_order',($galleryItems->max('display_order') ?? 0)+1) }}" min="0"></div>
-            </div>
-        </div>
-        <p class="help-block">Pilih foto lalu klik Simpan untuk menambahkannya ke galeri ini.</p>
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-                <thead><tr><th style="width:90px">Foto</th><th>Keterangan</th><th style="width:90px">Urutan</th><th style="width:80px">Hapus</th></tr></thead>
-                <tbody>
-                @forelse($galleryItems as $galleryItem)
-                    <tr>
-                        <td>@if($galleryItem->media)<img src="{{ $galleryItem->media->thumbnail_url ?: $galleryItem->media->url }}" alt="{{ $galleryItem->media->alt_text }}" style="width:70px;height:50px;object-fit:cover">@else - @endif</td>
-                        <td><input type="text" name="gallery_items[{{ $galleryItem->id }}][caption]" class="form-control" value="{{ old('gallery_items.'.$galleryItem->id.'.caption',$galleryItem->caption) }}" maxlength="2000"></td>
-                        <td><input type="number" name="gallery_items[{{ $galleryItem->id }}][display_order]" class="form-control" value="{{ old('gallery_items.'.$galleryItem->id.'.display_order',$galleryItem->display_order) }}" min="0"></td>
-                        <td class="text-center"><label title="Hapus foto saat disimpan"><input type="checkbox" name="remove_gallery_items[]" value="{{ $galleryItem->id }}"> <i class="fa fa-trash text-red"></i></label></td>
-                    </tr>
-                @empty
-                    <tr><td colspan="4" class="text-center text-muted">Belum ada foto dalam galeri ini.</td></tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-@endif
 </form>
 @endsection

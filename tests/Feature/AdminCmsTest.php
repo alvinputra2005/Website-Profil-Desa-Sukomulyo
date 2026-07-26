@@ -285,6 +285,65 @@ class AdminCmsTest extends TestCase
             ->assertSee('Dokumentasi sejarah desa');
     }
 
+    public function test_gallery_accepts_multiple_images_and_saves_the_requested_order(): void
+    {
+        Storage::fake('public');
+        $admin = $this->user('super_admin');
+        $gallery = Gallery::create([
+            'title' => 'Dokumentasi Desa',
+            'slug' => 'dokumentasi-desa',
+            'status' => 'draft',
+            'created_by' => $admin->id,
+        ]);
+        $first = GalleryItem::create([
+            'gallery_id' => $gallery->id,
+            'media_id' => Media::create([
+                'original_name' => 'lama.jpg',
+                'stored_name' => 'lama.jpg',
+                'disk' => 'public',
+                'storage_path' => 'galeri/dokumentasi-desa/lama.jpg',
+                'mime_type' => 'image/jpeg',
+                'extension' => 'jpg',
+                'file_size' => 10,
+                'uploaded_by' => $admin->id,
+            ])->id,
+            'caption' => 'Foto lama',
+            'display_order' => 8,
+        ]);
+
+        $response = $this->actingAs($admin)->put('/admin/galleries/'.$gallery->id, [
+            'title' => $gallery->title,
+            'slug' => $gallery->slug,
+            'status' => 'draft',
+            'gallery_items' => [
+                $first->id => ['caption' => 'Foto pertama', 'display_order' => 1],
+            ],
+            'gallery_item_uploads' => [
+                UploadedFile::fake()->image('kedua.jpg', 800, 600),
+                UploadedFile::fake()->image('ketiga.png', 800, 600),
+            ],
+            'gallery_item_captions' => ['Foto kedua', 'Foto ketiga'],
+            'gallery_sequence' => [
+                'existing:'.$first->id,
+                'new:0',
+                'new:1',
+            ],
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $items = $gallery->fresh()->items()->with('media')->get();
+        $this->assertCount(3, $items);
+        $this->assertSame([1, 2, 3], $items->pluck('display_order')->all());
+        $this->assertSame(['Foto pertama', 'Foto kedua', 'Foto ketiga'], $items->pluck('caption')->all());
+        $this->assertSame(['lama.jpg', 'kedua.jpg', 'ketiga.png'], $items->pluck('media.original_name')->all());
+        $this->assertSame($items->first()->media_id, $gallery->fresh()->cover_media_id);
+        $this->get('/admin/galleries/'.$gallery->id.'/edit')
+            ->assertOk()
+            ->assertSee('data-gallery-manager', false)
+            ->assertSee('name="gallery_item_uploads[]"', false)
+            ->assertDontSee('Foto Galeri');
+    }
+
     public function test_village_identity_and_profile_are_managed_in_one_form_and_shown_publicly(): void
     {
         $admin = $this->user('super_admin');

@@ -2190,7 +2190,7 @@ Laravel mendukung Pest maupun PHPUnit dan seluruh test dapat dijalankan dengan `
 ## **16.1 Struktur ideal**
 
 /home/account/apps/sukomulyo/  
-├── app/  
+├── app/    
 ├── bootstrap/  
 ├── config/  
 ├── database/  
