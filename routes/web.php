@@ -78,6 +78,9 @@ Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(fun
 });
 
 Route::controller(SiteController::class)->group(function () {
+    Route::get('/sitemap.xml', 'sitemap')->name('sitemap');
+    Route::get('/robots.txt', 'robots')->name('robots');
+
     // Menu utama
     Route::get('/', 'home')->name('beranda');
     Route::get('/profile-desa', 'profile')->name('profile-desa');

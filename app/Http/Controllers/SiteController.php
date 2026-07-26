@@ -28,6 +28,50 @@ class SiteController extends Controller
 {
     public function __construct(private readonly SiteCache $cache) {}
 
+    public function sitemap(): Response
+    {
+        $urls = $this->cache->remember(SiteCache::SEO_SITEMAP, SiteCache::ONE_HOUR, function (): array {
+            $staticRoutes = [
+                'beranda', 'profile-desa', 'pemerintahan-desa', 'potensi-desa',
+                'data-desa-statistik', 'informasi-publik-desa', 'peta-desa',
+                'galeri-desa', 'berita-desa.index', 'kontak.index',
+            ];
+            $urls = collect($staticRoutes)->map(fn (string $route) => [
+                'loc' => route($route),
+                'lastmod' => now()->toDateString(),
+            ]);
+
+            if (Schema::hasTable('news')) {
+                $urls = $urls->concat(
+                    News::published()->get(['slug', 'updated_at'])->map(fn (News $news) => [
+                        'loc' => route('berita-desa.show', $news->slug),
+                        'lastmod' => $news->updated_at->toDateString(),
+                    ])
+                );
+            }
+
+            return $urls->values()->all();
+        });
+
+        return response()
+            ->view('seo.sitemap', compact('urls'))
+            ->header('Content-Type', 'application/xml; charset=UTF-8');
+    }
+
+    public function robots(): Response
+    {
+        $body = implode("\n", [
+            'User-agent: *',
+            'Disallow: /admin/',
+            'Disallow: /preview/',
+            'Disallow: /storage/private/',
+            'Sitemap: '.route('sitemap'),
+            '',
+        ]);
+
+        return response($body)->header('Content-Type', 'text/plain; charset=UTF-8');
+    }
+
     public function home(PopulationStatisticsService $populationStatistics): View
     {
         $populationSummary = $this->cache->remember(
@@ -960,6 +1004,12 @@ class SiteController extends Controller
                 'alt' => $article->featuredImage->alt_text ?: $article->title,
             ] : null,
             'excerpt' => $article->excerpt ?? strip_tags($htmlContent),
+            'seo_title' => $article->seo_title ?: $article->title,
+            'seo_description' => $article->seo_description ?: ($article->excerpt ?? strip_tags($htmlContent)),
+            'seo_keywords' => $article->seo_keywords,
+            'status' => $article->status,
+            'published_at' => $publishedAt->toIso8601String(),
+            'updated_at' => $article->updated_at->toIso8601String(),
             'content' => [strip_tags($htmlContent)],
             'html_content' => $htmlContent,
             'tags' => [],

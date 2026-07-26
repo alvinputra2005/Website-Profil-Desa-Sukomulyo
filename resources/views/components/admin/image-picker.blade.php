@@ -20,22 +20,17 @@
     <div class="image-picker-preview" data-image-preview>
         @if($selectedMedia)
             <img src="{{ $selectedMedia->url }}" alt="{{ $alt }}">
+            <button type="button" class="image-picker-remove" data-image-clear data-toggle="tooltip" title="Hapus gambar" aria-label="Hapus gambar">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+            </button>
         @else
             <i class="fa fa-picture-o" aria-hidden="true"></i>
             <span>Belum ada gambar</span>
         @endif
     </div>
+    <input type="hidden" id="{{ $name }}" name="{{ $name }}" value="{{ $selectedId }}" data-image-select>
     <div class="form-group image-picker-control">
-        <label for="{{ $name }}">Pilih dari Media Library</label>
-        <select id="{{ $name }}" name="{{ $name }}" class="form-control select2" data-image-select>
-            <option value="" data-url="" data-alt="">-- Tidak dipilih --</option>
-            @foreach($media as $image)
-                <option value="{{ $image->id }}" data-url="{{ $image->url }}" data-alt="{{ $image->alt_text }}" @selected((string) $selectedId === (string) $image->id)>{{ $image->original_name }}</option>
-            @endforeach
-        </select>
-    </div>
-    <div class="form-group image-picker-control">
-        <label for="{{ $uploadBase }}_upload">Atau upload gambar baru</label>
+        <label for="{{ $uploadBase }}_upload">Upload gambar baru</label>
         <input type="file" id="{{ $uploadBase }}_upload" name="{{ $uploadBase }}_upload" class="form-control" accept="image/jpeg,image/png,image/webp" data-image-upload>
         <span class="help-block">JPG, PNG, atau WebP, maksimal 5 MB. Gambar otomatis dioptimalkan.</span>
     </div>
@@ -44,7 +39,6 @@
         <input id="{{ $uploadBase }}_alt" name="{{ $uploadBase }}_alt" class="form-control" maxlength="255" value="{{ $alt }}" placeholder="Contoh: Kegiatan warga Desa Sukomulyo" data-image-alt>
     </div>
     <input type="hidden" name="remove_{{ $uploadBase }}" value="0" data-image-remove>
-    <button type="button" class="btn btn-default btn-sm" data-image-clear><i class="fa fa-times"></i> Hapus gambar</button>
     @if($showFieldError)
         @error($name)<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
     @endif

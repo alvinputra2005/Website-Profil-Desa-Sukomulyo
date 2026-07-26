@@ -280,4 +280,22 @@ class SitePagesTest extends TestCase
             ->assertRedirect(route('kontak.index'))
             ->assertSessionHasErrors(['name', 'email', 'message']);
     }
+
+    public function test_seo_support_routes_and_search_robots_are_available(): void
+    {
+        $this->get(route('sitemap'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
+            ->assertSee('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', false)
+            ->assertSee(route('beranda'), false);
+
+        $this->get(route('robots'))
+            ->assertOk()
+            ->assertSee('Disallow: /admin/')
+            ->assertSee('Sitemap: '.route('sitemap'));
+
+        $this->get(route('berita-desa.search'))
+            ->assertOk()
+            ->assertSee('<meta name="robots" content="noindex, nofollow">', false);
+    }
 }

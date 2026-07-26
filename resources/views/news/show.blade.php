@@ -1,4 +1,28 @@
-<x-layouts.app :title="$article['title']" :description="$article['excerpt']">
+@php
+    $canonicalUrl = route('berita-desa.show', $article['slug']);
+    $newsStructuredData = [
+        '@context' => 'https://schema.org',
+        '@type' => 'NewsArticle',
+        'headline' => $article['title'],
+        'description' => $article['seo_description'] ?? $article['excerpt'],
+        'datePublished' => $article['published_at'] ?? null,
+        'dateModified' => $article['updated_at'] ?? null,
+        'author' => ['@type' => 'Organization', 'name' => $site['name']],
+        'publisher' => ['@type' => 'GovernmentOrganization', 'name' => $site['name']],
+        'image' => $article['image'] ?? null,
+        'mainEntityOfPage' => $canonicalUrl,
+    ];
+@endphp
+<x-layouts.app
+    :title="$article['seo_title'] ?? $article['title']"
+    :description="$article['seo_description'] ?? $article['excerpt']"
+    :keywords="$article['seo_keywords'] ?? null"
+    :canonical="$canonicalUrl"
+    :robots="($article['status'] ?? 'published') === 'published' ? 'index, follow' : 'noindex, nofollow'"
+    :og-image="$article['image'] ?? null"
+    og-type="article"
+    :structured-data="$newsStructuredData"
+>
     <x-page-header title="Detail Berita" :breadcrumbs="[
         ['label' => 'Berita Desa', 'url' => route('berita-desa.index')],
         ['label' => $article['title']],

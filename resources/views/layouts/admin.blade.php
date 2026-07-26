@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="robots" content="noindex, nofollow">
     <title>@yield('title','Admin') | Desa Sukomulyo</title>
     <link rel="stylesheet" href="{{ asset('admin-assets/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/bootstrap/css/font-awesome.min.css') }}">

@@ -139,7 +139,76 @@
     </div>
 </div>
 @else
-@if($page==='vision-mission')
+@if($page==='history')
+@php($selectedMediaId=old('image_id',$section?->image_id))
+@php($selectedMedia=$media->firstWhere('id',(int)$selectedMediaId) ?? $section?->image)
+<div class="row">
+    <div class="col-md-8">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                @if($section?->status === 'published')
+                    <a class="btn btn-success btn-sm" target="_blank" href="{{ route('profile-desa.detail','sejarah') }}">
+                        <i class="fa fa-eye"></i> Lihat Halaman
+                    </a>
+                @endif
+            </div>
+            <div class="box-body">
+                <x-admin.village-input
+                    name="title"
+                    label="Judul Halaman"
+                    :value="$section?->title ?? 'Sejarah Desa'"
+                    required
+                />
+                <x-admin.village-input
+                    name="content"
+                    label="Isi Sejarah Desa"
+                    type="editor"
+                    :value="$section?->content ?? ''"
+                    required
+                />
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <button type="submit" class="btn btn-social btn-info btn-block" style="margin-bottom: 15px">
+            <i class="fa fa-save"></i> Simpan Sejarah Desa
+        </button>
+
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-image"></i> Gambar Utama</h3>
+            </div>
+            <div class="box-body">
+                <x-admin.image-picker
+                    name="image_id"
+                    label="Gambar Sejarah Desa"
+                    :media="$media"
+                    :selected="$selectedMedia"
+                    :show-label="false"
+                />
+            </div>
+        </div>
+
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-send"></i> Publikasi</h3>
+            </div>
+            <div class="box-body">
+                <div class="form-group {{ $errors->has('status')?'has-error':'' }}">
+                    <label class="control-label required" for="status">Status Halaman</label>
+                    <select id="status" name="status" class="form-control select2" required>
+                        <option value="draft" @selected(old('status',$section?->status)==='draft')>Draf</option>
+                        <option value="published" @selected(old('status',$section?->status ?? 'published')==='published')>Terbit</option>
+                    </select>
+                    @error('status')<span class="field-error">{{ $message }}</span>@enderror
+                </div>
+                <p class="help-block">Halaman hanya tampil kepada pengunjung saat berstatus Terbit.</p>
+            </div>
+        </div>
+    </div>
+</div>
+@elseif($page==='vision-mission')
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title">Visi Desa</h3>

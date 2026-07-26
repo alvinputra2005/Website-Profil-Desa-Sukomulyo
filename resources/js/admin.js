@@ -78,18 +78,29 @@ const initAdminPage = () => {
       image.src=url;
       image.alt=alt.value;
       preview.appendChild(image);
+      const clear=document.createElement('button');
+      clear.type='button';
+      clear.className='image-picker-remove';
+      clear.dataset.imageClear='';
+      clear.dataset.toggle='tooltip';
+      clear.title='Hapus gambar';
+      clear.setAttribute('aria-label','Hapus gambar');
+      clear.innerHTML='<i class="fa fa-trash" aria-hidden="true"></i>';
+      preview.appendChild(clear);
+      clear.addEventListener('click',clearImage);
+      if(window.jQuery)window.jQuery(clear).tooltip();
     };
-    select?.addEventListener('change',()=>{
-      const option=select.options[select.selectedIndex];
-      remove.value='0';
+    const clearImage=()=>{
+      select.value='';
       upload.value='';
-      if(option?.dataset.url){show(option.dataset.url);alt.value=option.dataset.alt||''}else empty();
-    });
+      alt.value='';
+      remove.value='1';
+      empty();
+    };
      upload?.addEventListener('change',async()=>{
        const file=upload.files?.[0];
        if(!file)return;
        select.value='';
-       if(window.jQuery)window.jQuery(select).trigger('change.select2');
        remove.value='0';
        show(URL.createObjectURL(file));
        if(!alt.value)alt.value=file.name.replace(/\.[^/.]+$/,'');
@@ -99,14 +110,7 @@ const initAdminPage = () => {
       const image=preview.querySelector('img');
       if(image)image.alt=alt.value;
     });
-    picker.querySelector('[data-image-clear]')?.addEventListener('click',()=>{
-      select.value='';
-      if(window.jQuery)window.jQuery(select).trigger('change.select2');
-      upload.value='';
-      alt.value='';
-      remove.value='1';
-       empty();
-     });
+    picker.querySelector('[data-image-clear]')?.addEventListener('click',clearImage);
      bindImagePreparation(upload?.form);
    });
   const officialForm=document.getElementById('official-form');
@@ -184,6 +188,7 @@ const initAdminPage = () => {
       placeholder: fields[0].dataset.placeholder || 'Mulai tulis konten di sini...',
       branding: false,
       promotion: false,
+      statusbar: false,
       plugins: 'advlist autolink anchor charmap code fullscreen image link lists media preview searchreplace table visualblocks wordcount',
       toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright | bullist numlist blockquote | link image media table | removeformat code fullscreen preview',
       toolbar_mode: 'sliding',
@@ -200,7 +205,8 @@ const initAdminPage = () => {
       relative_urls: false,
       remove_script_host: false,
       content_style: `
-        body { font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.65; }
+        body { font-family: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.65; }
+        body.mce-content-body[data-mce-placeholder]::before { font-family: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif; }
         figure.image, figure.article-image { width: 70%; margin: 18px auto; }
         figure.image.align-left, figure.article-image.align-left { float: left; width: 45%; margin: 8px 18px 12px 0; }
         figure.image.align-right, figure.article-image.align-right { float: right; width: 45%; margin: 8px 0 12px 18px; }

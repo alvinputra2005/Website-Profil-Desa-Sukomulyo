@@ -67,6 +67,7 @@ class AdminCmsTest extends TestCase
         $response=$this->actingAs($admin)->post('/admin/news',[
             'category_id'=>$category->id,'title'=>'Berita Aman','slug'=>'berita-aman','excerpt'=>'Ringkasan',
             'content'=>'<p>Konten <strong>aman</strong></p><script>alert(1)</script><a href="javascript:alert(1)">tautan</a>',
+            'seo_keywords'=>'desa aman, Sukomulyo',
             'status'=>'published','published_at'=>now()->format('Y-m-d H:i:s'),
         ]);
         $response->assertSessionHasNoErrors();
@@ -75,7 +76,14 @@ class AdminCmsTest extends TestCase
         $response->assertRedirect(route('admin.resources.edit',['news',$news]));
         $this->assertStringNotContainsString('<script',$news->content);
         $this->assertStringNotContainsString('javascript:',$news->content);
-        $this->get('/berita/berita-aman')->assertOk()->assertSee('Berita Aman');
+        $this->assertSame('desa aman, Sukomulyo', $news->seo_keywords);
+        $this->get('/berita/berita-aman')
+            ->assertOk()
+            ->assertSee('<meta name="keywords" content="desa aman, Sukomulyo">', false)
+            ->assertSee('<meta name="robots" content="index, follow">', false)
+            ->assertSee('<link rel="canonical" href="'.route('berita-desa.show', 'berita-aman').'">', false)
+            ->assertSee('"@type":"NewsArticle"', false)
+            ->assertSee('Berita Aman');
     }
 
     public function test_inactive_user_cannot_login(): void
@@ -121,7 +129,10 @@ class AdminCmsTest extends TestCase
         $admin=$this->user('super_admin');
         $category=NewsCategory::create(['name'=>'Kegiatan','slug'=>'kegiatan']);
         $draft=News::create(['category_id'=>$category->id,'title'=>'Draf Tunggal','slug'=>'draf-tunggal','content'=>'<p>Draf</p>','status'=>'draft','author_id'=>$admin->id]);
-        $this->actingAs($admin)->get('/berita-desa/'.$draft->slug)->assertOk()->assertSee('Draf Tunggal');
+        $this->actingAs($admin)->get('/berita-desa/'.$draft->slug)
+            ->assertOk()
+            ->assertSee('<meta name="robots" content="noindex, nofollow">', false)
+            ->assertSee('Draf Tunggal');
         $this->from('/admin/news/create')->post('/admin/news',['title'=>'Pendek','content'=>'<img src=x onerror=alert(1)><script>alert(2)</script>'])->assertRedirect('/admin/news/create');
         $this->withSession(['_old_input'=>['content'=>'<img src=x onerror=alert(1)><script>alert(2)</script>']])->get('/admin/news/create')->assertOk()->assertDontSee('<img src=x onerror=',false)->assertDontSee('<script>alert(2)',false);
     }
@@ -220,6 +231,10 @@ class AdminCmsTest extends TestCase
         $this->get('/admin/info-desa/history')
             ->assertOk()
             ->assertSee('name="image_upload"', false)
+            ->assertSee('Simpan Sejarah Desa')
+            ->assertSee('Gambar Utama')
+            ->assertSee('Status Halaman')
+            ->assertSee(route('profile-desa.detail', 'sejarah'), false)
             ->assertSee('Dokumentasi sejarah desa');
     }
 
