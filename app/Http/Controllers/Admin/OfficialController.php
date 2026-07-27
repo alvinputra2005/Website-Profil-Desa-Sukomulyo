@@ -11,6 +11,7 @@ use App\Services\ImageProcessor;
 use App\Support\ImageUploadRules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -158,6 +159,14 @@ class OfficialController extends Controller
         }
 
         return back()->with('success', 'Urutan perangkat desa berhasil diperbarui.');
+    }
+
+    public function organization(): View
+    {
+        $this->authorizeModule();
+        $officials = Official::with('photo')->where('is_active', true)->orderBy('display_order')->get();
+
+        return view('admin.officials.organization', ['nodes' => $this->organizationTree($officials)]);
     }
 
     public function print(Request $request): View
@@ -376,4 +385,27 @@ class OfficialController extends Controller
         return $ids;
     }
 
+    private function organizationTree(Collection $officials): array
+    {
+        $byParent = $officials->groupBy(fn (Official $official) => (int) ($official->superior_id ?? 0));
+        $visited = [];
+        $build = function (int $parentId) use (&$build, &$visited, $byParent): array {
+            return collect($byParent->get($parentId, collect()))
+                ->reject(fn (Official $official) => isset($visited[$official->id]))
+                ->map(function (Official $official) use (&$build, &$visited) {
+                    $visited[$official->id] = true;
+
+                    return ['official' => $official, 'children' => $build($official->id)];
+                })->all();
+        };
+        $nodes = $build(0);
+        foreach ($officials as $official) {
+            if (! isset($visited[$official->id])) {
+                $visited[$official->id] = true;
+                $nodes[] = ['official' => $official, 'children' => $build($official->id)];
+            }
+        }
+
+        return $nodes;
+    }
 }
