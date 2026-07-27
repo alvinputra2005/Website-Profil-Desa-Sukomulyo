@@ -38,6 +38,14 @@ class AdminCmsTest extends TestCase
     {
         $admin = $this->user('super_admin');
 
+        ActivityLog::create([
+            'user_id' => $admin->id,
+            'action' => 'test',
+            'module' => 'dashboard',
+            'description' => 'Aktivitas Kemarin',
+            'created_at' => now()->subDay(),
+        ]);
+
         foreach (range(1, 4) as $number) {
             ActivityLog::create([
                 'user_id' => $admin->id,
@@ -54,11 +62,13 @@ class AdminCmsTest extends TestCase
             ->assertSee('Aktivitas 4')
             ->assertSee('Aktivitas 2')
             ->assertDontSee('Aktivitas 1')
+            ->assertDontSee('Aktivitas Kemarin')
             ->assertSee('activities_page=2', false);
 
         $this->get('/admin?activities_page=2')
             ->assertOk()
             ->assertSee('Aktivitas 1')
+            ->assertDontSee('Aktivitas Kemarin')
             ->assertDontSee('Aktivitas 4');
     }
 

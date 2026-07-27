@@ -67,20 +67,15 @@
         </div>
     </div>
     <div class="col-md-4">
-        <div class="box box-success">
-            <div class="box-header with-border">
-                <h3 class="box-title">Akses Cepat</h3>
-            </div>
-            <div class="box-body quick-actions"><a class="btn btn-app" href="{{ route('admin.resources.create','news') }}"><i class="fa fa-plus"></i> Artikel</a><a class="btn btn-app" href="{{ route('admin.resources.create','publications') }}"><i class="fa fa-file-text"></i> Publikasi</a></div>
-        </div>
+
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title"><i class="fa fa-history"></i> Aktivitas Terbaru</h3>
+                <h3 class="box-title"><i class="fa fa-history"></i> Aktivitas Hari Ini</h3>
             </div>
             <div class="box-body">@forelse($activities as $activity)<div class="post">
                     <div class="user-block"><span class="img-circle img-bordered-sm bg-maroon" style="float:left;width:40px;height:40px;line-height:40px;text-align:center;color:#fff">{{ strtoupper(substr($activity->user?->name??'S',0,1)) }}</span><span class="username">{{ $activity->user?->name??'Sistem' }}</span><span class="description">{{ $activity->created_at->diffForHumans() }}</span></div>
                     <p>{{ $activity->description }}</p>
-                </div>@empty<p class="text-muted">Belum ada aktivitas.</p>@endforelse</div>@if($activities->hasPages())<div class="box-footer clearfix">{{ $activities->onEachSide(1)->links() }}</div>@endif
+                </div>@empty<p class="text-muted">Belum ada aktivitas hari ini.</p>@endforelse</div>@if($activities->hasPages())<div class="box-footer clearfix">{{ $activities->onEachSide(1)->links() }}</div>@endif
         </div>
         
     </div>

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\ContactMessage;
 use App\Models\News;
-use App\Models\Setting;
+use App\Models\SiteVisit;
 use App\Models\StatisticDataset;
 use App\Services\PopulationStatistics;
 use Illuminate\Support\Facades\Schema;
@@ -25,7 +25,7 @@ class DashboardController extends Controller
             ? collect($populationStatistics->distribution('occupation'))->map(fn (array $row) => ['label' => $row['label'], 'value' => $row['total']])->all()
             : [];
 
-        $visitorCount = (int) (Setting::where('key', 'analytics.visitors')->value('value') ?? 0);
+        $visitorCount = Schema::hasTable('site_visits') ? SiteVisit::count() : 0;
 
         $datasetValues = function (array $slugs, array $fallback): array {
             $dataset = StatisticDataset::with('values')
@@ -52,6 +52,7 @@ class DashboardController extends Controller
             ],
             'messages' => ContactMessage::latest()->limit(5)->get(),
             'activities' => ActivityLog::with('user')
+                ->whereDate('created_at', today())
                 ->latest('created_at')
                 ->paginate(3, ['*'], 'activities_page')
                 ->withQueryString(),
