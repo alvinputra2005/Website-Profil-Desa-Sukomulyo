@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class PasswordController extends Controller
 {
@@ -17,10 +18,8 @@ class PasswordController extends Controller
         return view('auth.forgot-password');
     }
 
-    public function email(Request $request)
+    public function email(ForgotPasswordRequest $request)
     {
-        $request->validate(['email' => ['required', 'email']]);
-
         $status = Password::sendResetLink($request->only('email'));
 
         return $status === Password::RESET_LINK_SENT
@@ -36,17 +35,9 @@ class PasswordController extends Controller
         ]);
     }
 
-    public function update(Request $request)
+    public function update(ResetPasswordRequest $request)
     {
-        $data = $request->validate([
-            'token' => ['required'],
-            'email' => ['required', 'email'],
-            'password' => [
-                'required',
-                'confirmed',
-                PasswordRule::min(12)->letters()->numbers(),
-            ],
-        ]);
+        $data = $request->validated();
 
         $status = Password::reset($data, function (User $user, string $password) {
             $user->forceFill([

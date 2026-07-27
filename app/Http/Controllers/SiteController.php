@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Web\StoreContactMessageRequest;
 use App\Models\ContactMessage;
 use App\Models\Gallery;
 use App\Models\IdmScore;
@@ -676,16 +677,9 @@ class SiteController extends Controller
         return $this->render('pages.contact');
     }
 
-    public function sendContact(Request $request): RedirectResponse
+    public function sendContact(StoreContactMessageRequest $request): RedirectResponse
     {
-        $message = $request->validate([
-            'name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:150'],
-            'phone' => ['nullable', 'string', 'max:25'],
-            'message' => ['required', 'string', 'max:2000'],
-        ]);
-
-        ContactMessage::create($message);
+        ContactMessage::create($request->validated());
 
         return back()->with('success', 'Pesan Anda sudah diterima. Pemerintah desa akan segera menindaklanjuti.');
     }

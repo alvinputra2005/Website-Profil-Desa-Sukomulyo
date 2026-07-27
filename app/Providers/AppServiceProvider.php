@@ -23,6 +23,9 @@ use App\Models\StatisticValue;
 use App\Models\User;
 use App\Models\VillageProfileSection;
 use App\Observers\PublicContentCacheObserver;
+use App\Policies\CmsResourcePolicy;
+use App\Policies\DataResourcePolicy;
+use App\Policies\AdminResourcePolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
@@ -82,5 +85,14 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-data', fn (User $user) => $user->hasRole('admin_data'));
         Gate::define('manage-media', fn (User $user) => $user->hasRole('admin_konten', 'admin_data'));
         Gate::define('manage-users', fn (User $user) => false);
+
+        foreach (config('admin.resources', []) as $resource) {
+            $policy = match ($resource['ability']) {
+                'manage-data' => DataResourcePolicy::class,
+                'manage-users' => AdminResourcePolicy::class,
+                default => CmsResourcePolicy::class,
+            };
+            Gate::policy($resource['model'], $policy);
+        }
     }
 }

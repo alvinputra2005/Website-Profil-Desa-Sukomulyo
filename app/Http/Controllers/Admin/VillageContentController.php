@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\UpdateVillageContentRequest;
 use App\Models\Media;
 use App\Models\Official;
 use App\Models\Setting;
@@ -88,7 +89,7 @@ class VillageContentController extends Controller
         return view('admin.village-content.form', compact('page', 'sections', 'settings', 'media', 'villageHead'));
     }
 
-    public function update(Request $request, string $page): RedirectResponse
+    public function update(UpdateVillageContentRequest $request, string $page): RedirectResponse
     {
         abort_unless(in_array($page, self::PAGES, true), 404);
         $this->authorize('manage-content');
@@ -96,28 +97,7 @@ class VillageContentController extends Controller
             ->get()->keyBy('section_key');
 
         if ($page === 'profile') {
-            $data = $request->validate(array_merge([
-                'site_name' => 'required|string|max:255',
-                'tagline' => 'nullable|string|max:255',
-                'village_code' => ['required', 'string', 'regex:/^[0-9]{2}\.[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/'],
-                'village_bps_code' => ['nullable', 'string', 'max:20', 'regex:/^[0-9.\-\s]+$/'],
-                'postal_code' => ['nullable', 'regex:/^[0-9]{5}$/'],
-                'address' => 'nullable|string|max:1000',
-                'email' => 'nullable|email|max:255',
-                'phone' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+().\-\s]+$/'],
-                'mobile' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+().\-\s]+$/'],
-                'website' => 'nullable|url:http,https|max:255',
-                'district_name' => 'required|string|max:100',
-                'district_code' => ['required', 'string', 'regex:/^[0-9]{2}\.[0-9]{2}\.[0-9]{2}$/'],
-                'district_head_name' => 'nullable|string|max:255',
-                'district_head_nip' => 'nullable|string|max:30',
-                'regency_name' => 'required|string|max:100',
-                'regency_code' => ['required', 'string', 'regex:/^[0-9]{2}\.[0-9]{2}$/'],
-                'province_name' => 'required|string|max:100',
-                'province_code' => ['required', 'string', 'regex:/^[0-9]{2}$/'],
-                'profile_content' => 'required|string|max:100000',
-                'status' => ['required', Rule::in(['draft', 'published'])],
-            ], $this->imageRules('profile_image_id')));
+            $data = $request->validated();
             $profileImageId = $this->resolveImageId(
                 $request,
                 'profile_image_id',
@@ -137,11 +117,7 @@ class VillageContentController extends Controller
                 $this->saveSection('profile', 'Profil Desa', $data['profile_content'], $data['status'], 0, $profileImageId);
             });
         } elseif ($page === 'vision-mission') {
-            $data = $request->validate([
-                'vision' => 'required|string|max:100000',
-                'mission' => 'required|string|max:100000',
-                'status' => ['required', Rule::in(['draft', 'published'])],
-            ]);
+            $data = $request->validated();
             DB::transaction(function () use ($data) {
                 $this->saveSection('vision', 'Visi Desa', $data['vision'], $data['status'], 10);
                 $this->saveSection('mission', 'Misi Desa', $data['mission'], $data['status'], 20);
@@ -149,11 +125,7 @@ class VillageContentController extends Controller
         } else {
             $key = $page === 'history' ? 'history' : 'potential';
             $defaultTitle = $page === 'history' ? 'Sejarah Desa' : 'Potensi Desa';
-            $data = $request->validate(array_merge([
-                'title' => 'required|string|max:255',
-                'content' => 'required|string|max:100000',
-                'status' => ['required', Rule::in(['draft', 'published'])],
-            ], $this->imageRules('image_id')));
+            $data = $request->validated();
             $imageId = $this->resolveImageId($request, 'image_id', $sections->get($key)?->image_id, $data['title']);
             $this->saveSection($key, $data['title'] ?: $defaultTitle, $data['content'], $data['status'], $page === 'history' ? 5 : 30, $imageId);
         }
