@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Middleware\EnsureActiveUser;
+use App\Http\Middleware\HandleCmsRedirects;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\TrackSiteVisit;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\{EnsureActiveUser, HandleCmsRedirects, TrackSiteVisit};
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,8 +15,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias(['active'=>EnsureActiveUser::class]);
-        $middleware->web(append:[HandleCmsRedirects::class, TrackSiteVisit::class]);
+        $middleware->alias(['active' => EnsureActiveUser::class]);
+        $middleware->web(prepend: [
+            SecurityHeaders::class,
+        ]);
+        $middleware->web(append: [
+            HandleCmsRedirects::class,
+            TrackSiteVisit::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
