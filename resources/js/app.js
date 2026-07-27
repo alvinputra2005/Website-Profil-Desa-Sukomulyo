@@ -10,7 +10,16 @@ const initPublicPage = () => {
         menuButton.setAttribute('aria-expanded', String(open));
     });
 
-    const revealSections = document.querySelectorAll('main section:not(.hero-slider), .footer-wrapper .footer-widget');
+    const disableScrollReveal = Boolean(document.querySelector('[data-disable-scroll-reveal]'));
+    const revealSections = disableScrollReveal
+        ? []
+        : document.querySelectorAll('main section:not(.hero-slider), .footer-wrapper .footer-widget');
+
+    if (disableScrollReveal) {
+        document.querySelectorAll('.scroll-reveal').forEach((section) => {
+            section.classList.remove('scroll-reveal', 'is-revealed');
+        });
+    }
 
     if (revealSections.length && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         const observer = new IntersectionObserver((entries) => {

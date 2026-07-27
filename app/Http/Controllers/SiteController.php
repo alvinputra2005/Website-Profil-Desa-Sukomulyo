@@ -114,7 +114,7 @@ class SiteController extends Controller
         $profile['villageLeader'] ??= $this->villageLeader();
         $profile['villageRegulations'] ??= $this->villageRegulations();
         $profile['latestComments'] = Schema::hasTable('village_comments')
-            ? VillageComment::query()->where('is_visible', true)->latest()->limit(4)->get()
+            ? VillageComment::query()->where('is_visible', true)->latest()->limit(3)->get()
             : collect();
 
         return $this->render('pages.profile', $profile);
@@ -142,6 +142,24 @@ class SiteController extends Controller
         return redirect()
             ->to(route('profile-desa').'#komentar')
             ->with('comment_success', 'Terima kasih. Komentar Anda sudah berhasil dikirim.');
+    }
+
+    public function profileComments(): View
+    {
+        $comments = Schema::hasTable('village_comments')
+            ? VillageComment::query()->where('is_visible', true)->latest()->paginate(12)
+            : new LengthAwarePaginator([], 0, 12);
+
+        return $this->render('pages.profile-comments', compact('comments'));
+    }
+
+    public function likeProfileComment(VillageComment $comment): RedirectResponse
+    {
+        abort_unless($comment->is_visible, 404);
+
+        $comment->increment('like_count');
+
+        return redirect()->back();
     }
 
     public function profileDetail(string $section): View

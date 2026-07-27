@@ -118,8 +118,8 @@ class SitePagesTest extends TestCase
         $this->get(route('profile-desa'))
             ->assertOk()
             ->assertDontSee('page-banner-heading', false)
-            ->assertSee('Nama Desa')
-            ->assertSee('Alamat Kantor Desa');
+            ->assertSee('Gambaran Umum Desa')
+            ->assertDontSee('Data Identitas Desa');
     }
 
     public function test_village_identity_uses_article_layout_and_dedicated_sidebar(): void

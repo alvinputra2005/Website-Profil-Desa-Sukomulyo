@@ -16,10 +16,9 @@
     @endphp
 
     <div class="container news-detail-container profile-detail-container">
-        <div id="sc_innerpage_wrap" class="news-detail-layout profile-article-layout" data-hide-back-to-top>
+        <div id="sc_innerpage_wrap" class="news-detail-layout profile-article-layout" data-hide-back-to-top data-disable-scroll-reveal>
             <article class="sc_innerpage_contentbx single-article village-profile-article">
                 <header class="entry-header">
-                    <span class="article-category">Profil Desa</span>
                     <h1 class="entry-title">Identitas Desa Sukomulyo</h1>
                     <div class="postmeta" aria-label="Informasi artikel">
                         <span class="post-date"><i class="far fa-calendar-alt" aria-hidden="true"></i>Diperbarui {{ now()->translatedFormat('d F Y') }}</span>
@@ -49,62 +48,6 @@
                             Pemerintahan desa dipimpin oleh {{ $villageHead ?: 'Kepala Desa Sukomulyo' }} bersama perangkat desa. Pelayanan diarahkan agar warga memperoleh informasi, administrasi, dan pendampingan secara ramah, terbuka, serta dapat dipertanggungjawabkan.
                         </p>
 
-                        <section class="village-identity" aria-labelledby="identity-table-title">
-                            <h2 id="identity-table-title">Data Identitas Desa</h2>
-                            <p>Data berikut memuat identitas administratif desa, kecamatan, kabupaten, dan provinsi.</p>
-                            <div class="info-table-wrap">
-                                <table class="info-table identity-table">
-                                    <tbody>
-                                        @foreach($identityGroups as $group)
-                                            <tr class="identity-group">
-                                                <th colspan="2">{{ $group['title'] }}</th>
-                                            </tr>
-                                            @foreach($group['rows'] as $row)
-                                                <tr>
-                                                    <th scope="row">{{ $row['label'] }}</th>
-                                                    <td>
-                                                        @if(($row['type'] ?? null) === 'email' && $row['value'])
-                                                            <a href="mailto:{{ $row['value'] }}">{{ $row['value'] }}</a>
-                                                        @elseif(($row['type'] ?? null) === 'url' && filter_var($row['value'], FILTER_VALIDATE_URL) && in_array(parse_url($row['value'], PHP_URL_SCHEME), ['http', 'https'], true))
-                                                            <a href="{{ $row['value'] }}" target="_blank" rel="noopener noreferrer">{{ $row['value'] }}</a>
-                                                        @else
-                                                            {{ $row['value'] ?: '-' }}
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </section>
-
-                        @if($profileSections->isNotEmpty())
-                            @php($sectionAnchors = ['history' => 'sejarah-desa', 'vision' => 'visi-dan-misi', 'mission' => 'misi-desa', 'profile' => 'profil-desa'])
-                            @foreach($profileSections as $section)
-                                <section id="{{ $sectionAnchors[$section->section_key] ?? $section->section_key }}" class="profile-article-section">
-                                    <h2>{{ $section->title }}</h2>
-                                    @if($section->image && !in_array($section->section_key, ['vision', 'mission'], true))
-                                        <img class="profile-section-image" src="{{ $section->image->url }}" alt="{{ $section->image->alt_text ?: $section->title }}">
-                                    @endif
-                                    <div>{!! $section->content !!}</div>
-                                </section>
-                            @endforeach
-                        @else
-                            <section id="profil-desa" class="profile-article-section">
-                                <h2>Karakter dan Kehidupan Masyarakat</h2>
-                                <p>Masyarakat Desa Sukomulyo menjunjung nilai kekeluargaan, musyawarah, dan gotong royong. Kehidupan desa ditopang oleh aktivitas pertanian, usaha warga, pelayanan sosial, pendidikan, keagamaan, serta kegiatan budaya yang melibatkan berbagai kelompok masyarakat.</p>
-                            </section>
-                            <section id="sejarah-desa" class="profile-article-section">
-                                <h2>Arah Pelayanan Desa</h2>
-                                <p>Pemerintah Desa Sukomulyo terus mendorong pelayanan administrasi yang mudah diakses, penyampaian informasi yang terbuka, pembangunan berdasarkan kebutuhan warga, dan pengembangan potensi desa secara berkelanjutan.</p>
-                            </section>
-                        @endif
-
-                        <section class="profile-article-section">
-                            <h2>Fungsi Identitas Desa</h2>
-                            <p>Identitas desa digunakan sebagai rujukan untuk surat-menyurat, pelayanan administrasi, pendataan wilayah, penyusunan program pembangunan, serta penyampaian informasi publik. Apabila terdapat data yang perlu diperbarui, masyarakat dapat menyampaikan tanggapan melalui formulir komentar di bawah.</p>
-                        </section>
                     </div>
 
                     <footer class="article-footer">
@@ -117,7 +60,6 @@
 
                 <section id="komentar" class="profile-comment-section" aria-labelledby="comment-form-title">
                     <div class="profile-comment-heading">
-                        <span class="section-kicker">Tanggapan Warga</span>
                         <h2 id="comment-form-title">Tulis Komentar</h2>
                         <p>Berikan saran, koreksi data, atau tanggapan mengenai Identitas Desa Sukomulyo.</p>
                     </div>

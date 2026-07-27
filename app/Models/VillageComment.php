@@ -11,6 +11,7 @@ class VillageComment extends Model
         'address',
         'phone',
         'comment',
+        'like_count',
         'is_visible',
     ];
 
@@ -18,6 +19,7 @@ class VillageComment extends Model
     {
         return [
             'is_visible' => 'boolean',
+            'like_count' => 'integer',
         ];
     }
 }
