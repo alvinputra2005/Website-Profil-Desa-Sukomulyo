@@ -11,6 +11,7 @@ use App\Models\NewsCategory;
 use App\Models\Official;
 use App\Models\Publication;
 use App\Models\Setting;
+use App\Models\VillageComment;
 use App\Models\VillageProfileSection;
 use App\Services\PopulationStatistics as PopulationStatisticsService;
 use App\Services\SiteCache;
@@ -104,10 +105,43 @@ class SiteController extends Controller
                     ? VillageProfileSection::with('image')->whereIn('section_key', ['profile', 'history', 'vision', 'mission'])->where('status', 'published')->orderBy('display_order')->get()
                     : collect(),
                 'identityGroups' => $this->villageIdentity(),
+                'villageLeader' => $this->villageLeader(),
+                'villageRegulations' => $this->villageRegulations(),
             ]
         );
 
+        // Older cached profile payloads may not yet contain the sidebar data.
+        $profile['villageLeader'] ??= $this->villageLeader();
+        $profile['villageRegulations'] ??= $this->villageRegulations();
+        $profile['latestComments'] = Schema::hasTable('village_comments')
+            ? VillageComment::query()->where('is_visible', true)->latest()->limit(4)->get()
+            : collect();
+
         return $this->render('pages.profile', $profile);
+    }
+
+    public function sendProfileComment(Request $request): RedirectResponse
+    {
+        $comment = $request->validate([
+            'comment' => ['required', 'string', 'max:1500'],
+            'name' => ['required', 'string', 'max:100'],
+            'address' => ['required', 'string', 'max:300'],
+            'phone' => ['required', 'string', 'max:25', 'regex:/^[0-9+().\s-]{8,25}$/'],
+            'website' => ['nullable', 'max:0'],
+        ], [
+            'comment.required' => 'Isi komentar wajib dituliskan.',
+            'name.required' => 'Nama wajib diisi.',
+            'address.required' => 'Alamat wajib diisi.',
+            'phone.required' => 'Nomor HP wajib diisi.',
+            'phone.regex' => 'Format nomor HP belum sesuai.',
+        ]);
+
+        unset($comment['website']);
+        VillageComment::create($comment);
+
+        return redirect()
+            ->to(route('profile-desa').'#komentar')
+            ->with('comment_success', 'Terima kasih. Komentar Anda sudah berhasil dikirim.');
     }
 
     public function profileDetail(string $section): View
@@ -560,7 +594,7 @@ class SiteController extends Controller
             SiteCache::GALLERY,
             SiteCache::TEN_MINUTES,
             function (): array {
-                $image = asset('assets/village-rice-fields.jpg');
+                $image = '/assets/village-rice-fields.jpg';
 
                 if (Schema::hasTable('galleries')) {
                     $photos = Gallery::where('status', 'published')->with(['items.media', 'cover'])->latest('event_date')->get()->flatMap(function ($gallery) use ($image) {
@@ -597,6 +631,12 @@ class SiteController extends Controller
                 ];
             }
         );
+
+        $photos = array_map(function (array $photo): array {
+            $photo['src'] = $this->normalizeFallbackImage($photo['src'] ?? null);
+
+            return $photo;
+        }, $photos);
 
         $photoCollection = collect($photos);
         $perPage = 6;
@@ -693,6 +733,9 @@ class SiteController extends Controller
             }
         );
 
+        $layout['articles'] = $this->normalizeArticleImages($layout['articles'] ?? []);
+        $layout['popularArticles'] = $this->normalizeArticleImages($layout['popularArticles'] ?? []);
+
         return array_merge($layout, ['navigation' => $this->navigation()]);
     }
 
@@ -712,6 +755,7 @@ class SiteController extends Controller
         return [
                 ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
                 ['label' => 'Profile Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
+                    ['label' => 'Identitas Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
                     ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
                     ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
                     ['label' => 'Struktur Pemerintahan', 'route' => 'pemerintahan-desa', 'active' => 'pemerintahan-desa'],
@@ -809,6 +853,7 @@ class SiteController extends Controller
             SiteCache::TEN_MINUTES,
             fn () => $this->loadArticles()
         );
+        $articles = $this->normalizeArticleImages($articles);
 
         request()->attributes->set('site.published_articles', $articles);
 
@@ -970,7 +1015,7 @@ class SiteController extends Controller
 
     private function mapArticle(News $article): array
     {
-        $image = asset('assets/village-rice-fields.jpg');
+        $image = '/assets/village-rice-fields.jpg';
         $htmlContent = preg_replace('~https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(/storage/)~i', '$1', $article->content);
         preg_match('~<img[^>]+src=["\']([^"\']+)["\']~i', $htmlContent, $inlineImage);
 
@@ -982,7 +1027,7 @@ class SiteController extends Controller
 
     private function fallbackArticles(): array
     {
-        $image = asset('assets/village-rice-fields.jpg');
+        $image = '/assets/village-rice-fields.jpg';
 
         return [
             [
@@ -1052,9 +1097,33 @@ class SiteController extends Controller
         ];
     }
 
+    private function normalizeArticleImages(array $articles): array
+    {
+        return array_map(function (array $article): array {
+            foreach (['image', 'detail_image'] as $key) {
+                if (array_key_exists($key, $article)) {
+                    $article[$key] = $this->normalizeFallbackImage($article[$key]);
+                }
+            }
+
+            return $article;
+        }, $articles);
+    }
+
+    private function normalizeFallbackImage(?string $url): ?string
+    {
+        if ($url === null || $url === '') {
+            return $url;
+        }
+
+        return parse_url($url, PHP_URL_PATH) === '/assets/village-rice-fields.jpg'
+            ? '/assets/village-rice-fields.jpg'
+            : $url;
+    }
+
     private function galleryPhotos(): array
     {
-        $image = asset('assets/village-rice-fields.jpg');
+        $image = '/assets/village-rice-fields.jpg';
 
         return [
             ['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa. Pertemuan ini menjadi ruang untuk menyerap aspirasi dan menentukan prioritas pembangunan bersama.'],
@@ -1090,7 +1159,7 @@ class SiteController extends Controller
 
     private function potentialsData(): array
     {
-        $image = asset('assets/village-rice-fields.jpg');
+        $image = '/assets/village-rice-fields.jpg';
 
         return [
             ['title' => 'Pertanian Produktif', 'description' => 'Lahan pertanian menjadi penggerak ekonomi dan sumber pangan masyarakat.', 'image' => $image, 'icon' => 'fas fa-seedling'],
@@ -1098,5 +1167,80 @@ class SiteController extends Controller
             ['title' => 'Seni dan Budaya', 'description' => 'Tradisi lokal terus dirawat melalui kegiatan dan partisipasi lintas generasi.', 'image' => $image, 'icon' => 'fas fa-drum'],
             ['title' => 'Wisata Desa', 'description' => 'Lingkungan dan kehidupan desa menawarkan pengalaman wisata berbasis masyarakat.', 'image' => $image, 'icon' => 'fas fa-map-marked-alt'],
         ];
+    }
+
+    private function villageLeader(): array
+    {
+        $leader = Schema::hasTable('officials')
+            ? Official::with('photo')->where('position', 'Kepala Desa')->where('is_active', true)->orderBy('display_order')->first()
+            : null;
+
+        return [
+            'name' => $leader?->full_name ?: 'Kepala Desa Sukomulyo',
+            'role' => $leader?->position_label ?: 'Kepala Desa',
+            'photo' => $leader?->photo?->url,
+            'photo_alt' => $leader?->photo?->alt_text ?: ($leader?->full_name ?: 'Kepala Desa Sukomulyo'),
+            'greeting' => trim(strip_tags((string) $leader?->biography))
+                ?: 'Assalamu’alaikum Warahmatullahi Wabarakatuh. Selamat datang di website resmi Desa Sukomulyo. Semoga layanan informasi ini mendekatkan pemerintah desa dengan seluruh masyarakat.',
+        ];
+    }
+
+    private function villageRegulations(): array
+    {
+        $fallbacks = collect([
+            [
+                'title' => 'Peraturan Desa tentang Rencana Kerja Pemerintah Desa',
+                'number' => 'Perdes No. 1',
+                'year' => '2026',
+                'url' => null,
+            ],
+            [
+                'title' => 'Peraturan Desa tentang Anggaran Pendapatan dan Belanja Desa',
+                'number' => 'Perdes No. 2',
+                'year' => '2026',
+                'url' => null,
+            ],
+            [
+                'title' => 'Peraturan Desa tentang Lingkungan dan Gotong Royong',
+                'number' => 'Perdes No. 3',
+                'year' => '2026',
+                'url' => null,
+            ],
+        ]);
+
+        if (! Schema::hasTable('publications')) {
+            return $fallbacks->all();
+        }
+
+        $published = Publication::query()
+            ->published()
+            ->with(['attachments.media'])
+            ->where(function ($query) {
+                $query->where('type', 'regulation')
+                    ->orWhere(function ($documentQuery) {
+                        $documentQuery->where('type', 'document')->where('title', 'like', '%Peraturan%');
+                    });
+            })
+            ->latest('published_at')
+            ->limit(3)
+            ->get()
+            ->map(function (Publication $publication): array {
+                $attachment = $publication->attachments
+                    ->first(fn ($item) => $item->media && $item->media->mime_type === 'application/pdf');
+
+                return [
+                    'title' => $publication->title,
+                    'number' => 'Peraturan Desa',
+                    'year' => (string) ($publication->published_at?->year ?? $publication->start_date?->year ?? now()->year),
+                    'url' => $attachment?->media?->url,
+                ];
+            });
+
+        return $published
+            ->concat($fallbacks)
+            ->unique('title')
+            ->take(3)
+            ->values()
+            ->all();
     }
 }

@@ -13,7 +13,7 @@ class SitePagesTest extends TestCase
     {
         $pages = [
             route('beranda') => 'Desa Sukomulyo',
-            route('profile-desa') => 'Profil Desa',
+            route('profile-desa') => 'Identitas Desa',
             route('profile-desa.detail', ['section' => 'sejarah']) => 'Sejarah Desa',
             route('profile-desa.detail', ['section' => 'visi-misi']) => 'Visi dan Misi',
             route('pemerintahan-desa') => 'Pemerintahan Desa',
@@ -63,12 +63,13 @@ class SitePagesTest extends TestCase
 
         $this->assertSame(4, substr_count($navigation, '<ul class="sub-menu">'));
         $this->assertSame(4, substr_count($navigation, 'class="nav-dropdown-toggle"'));
-        foreach (['Profile Desa', 'Data Statistik', 'Kependudukan', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Pendidikan', 'Layanan Administrasi', 'APBDes'] as $label) {
+        foreach (['Profile Desa', 'Identitas Desa', 'Data Statistik', 'Kependudukan', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Pendidikan', 'Layanan Administrasi', 'APBDes'] as $label) {
             $this->assertStringContainsString($label, $navigation);
         }
-        foreach (['profile-desa', 'data-desa-statistik', 'kependudukan', 'informasi-publik-desa'] as $route) {
+        foreach (['data-desa-statistik', 'kependudukan', 'informasi-publik-desa'] as $route) {
             $this->assertDoesNotMatchRegularExpression('/<a href="'.preg_quote(route($route), '/').'"/', $navigation);
         }
+        $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('profile-desa'), '/').'".*?>\s*<span>Identitas Desa<\/span>/s', $navigation);
         $this->assertStringNotContainsString('>Peta Desa</a>', $navigation);
         $this->assertStringNotContainsString('#', $navigation);
         $this->assertGreaterThan(strpos($navigation, 'Berita Desa'), strpos($navigation, 'Galeri Desa'));
@@ -105,6 +106,64 @@ class SitePagesTest extends TestCase
             ->assertSee('Total Pendapatan APBDes 2026')
             ->assertSee('Total Penggunaan Belanja APBDes 2026')
             ->assertSee('Total Realisasi APBDes 2026');
+    }
+
+    public function test_homepage_identity_link_opens_the_village_identity_page(): void
+    {
+        $this->get(route('beranda'))
+            ->assertOk()
+            ->assertSee('Lihat Identitas Desa')
+            ->assertSee('href="'.route('profile-desa').'"', false);
+
+        $this->get(route('profile-desa'))
+            ->assertOk()
+            ->assertDontSee('page-banner-heading', false)
+            ->assertSee('Nama Desa')
+            ->assertSee('Alamat Kantor Desa');
+    }
+
+    public function test_village_identity_uses_article_layout_and_dedicated_sidebar(): void
+    {
+        $response = $this->get(route('profile-desa'))
+            ->assertOk()
+            ->assertSee('news-detail-layout', false)
+            ->assertSee('Identitas Desa Sukomulyo')
+            ->assertSee('Cetak Artikel')
+            ->assertSee('data-print-article', false)
+            ->assertSee('Profil Pimpinan')
+            ->assertSee('Peraturan Desa')
+            ->assertSee('Komentar Terbaru')
+            ->assertSee('Kirim Komentar')
+            ->assertSee('data-share-native', false)
+            ->assertDontSee('Cari berita')
+            ->assertDontSee('Berita Populer');
+
+        $this->assertSame(3, substr_count($response->getContent(), 'class="regulation-card'));
+    }
+
+    public function test_resident_can_submit_a_profile_comment_without_exposing_private_fields(): void
+    {
+        $this->post(route('profile-desa.comment'), [
+            'name' => 'Warga Sukomulyo',
+            'address' => 'Dusun Sukomakmur RT 02',
+            'phone' => '081234567890',
+            'comment' => 'Mohon data kode pos desa diperbarui.',
+            'website' => '',
+        ])->assertRedirect(route('profile-desa').'#komentar')
+            ->assertSessionHas('comment_success');
+
+        $this->assertDatabaseHas('village_comments', [
+            'name' => 'Warga Sukomulyo',
+            'phone' => '081234567890',
+            'comment' => 'Mohon data kode pos desa diperbarui.',
+        ]);
+
+        $this->get(route('profile-desa'))
+            ->assertOk()
+            ->assertSee('Warga Sukomulyo')
+            ->assertSee('Mohon data kode pos desa diperbarui.')
+            ->assertDontSee('Dusun Sukomakmur RT 02')
+            ->assertDontSee('081234567890');
     }
 
     public function test_homepage_shows_four_news_five_gallery_items_and_village_map(): void

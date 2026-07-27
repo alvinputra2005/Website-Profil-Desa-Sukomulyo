@@ -81,6 +81,7 @@ Route::controller(SiteController::class)->group(function () {
     // Menu utama
     Route::get('/', 'home')->name('beranda');
     Route::get('/profile-desa', 'profile')->name('profile-desa');
+    Route::post('/profile-desa/komentar', 'sendProfileComment')->middleware('throttle:5,1')->name('profile-desa.comment');
     Route::get('/profile-desa/{section}', 'profileDetail')->where('section', 'sejarah|visi-misi')->name('profile-desa.detail');
     Route::get('/pemerintahan-desa', 'government')->name('pemerintahan-desa');
     Route::get('/potensi-desa', 'potentials')->name('potensi-desa');

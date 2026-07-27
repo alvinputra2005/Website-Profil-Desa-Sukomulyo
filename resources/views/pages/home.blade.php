@@ -43,7 +43,7 @@
             <div class="aboutus_contentcol">
                 <h2>Mengenal Desa Sukomulyo</h2>
                 <p>Desa Sukomulyo tumbuh melalui semangat gotong royong yang kuat, pelayanan publik yang terbuka dan responsif, serta pengembangan potensi masyarakat secara berkelanjutan. Dengan dukungan warga dan pemerintah desa, Sukomulyo terus berupaya mewujudkan lingkungan yang maju, mandiri, nyaman, dan sejahtera bagi seluruh masyarakat.</p>
-                <a class="learnmore" href="{{ route('profile-desa') }}">Lihat Profile Desa <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                <a class="learnmore" href="{{ route('profile-desa') }}">Lihat Identitas Desa <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </div>
             <div class="aboutus_thumbox">
                 <img src="{{ asset('assets/village-rice-fields.jpg') }}" alt="Hamparan persawahan hijau dengan latar pegunungan saat matahari terbenam">

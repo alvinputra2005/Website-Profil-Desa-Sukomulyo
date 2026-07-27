@@ -342,6 +342,13 @@ const initPublicPage = () => {
         setShareStatus(copied ? 'Tautan disalin' : 'Salin tautan artikel');
     });
 
+    document.querySelectorAll('[data-print-article]').forEach((button) => {
+        if (button.dataset.bound === 'true') return;
+
+        button.dataset.bound = 'true';
+        button.addEventListener('click', () => window.print());
+    });
+
     document.querySelectorAll('[data-gallery-carousel]').forEach((carousel) => {
         const items = [...carousel.querySelectorAll('[data-carousel-item]')];
         const stage = carousel.querySelector('.home-gallery-stage');
@@ -500,7 +507,6 @@ const initPublicPage = () => {
         const main = galleryDialog.querySelector('.gallery-dialog-main');
         const title = galleryDialog.querySelector('[data-gallery-title]');
         const caption = galleryDialog.querySelector('[data-gallery-caption]');
-        const captionBlock = caption?.closest('.dialog-caption');
         const thumbnails = [...galleryDialog.querySelectorAll('[data-gallery-thumb]')];
         const galleryItems = [...document.querySelectorAll('[data-gallery-item]')];
         const slides = thumbnails.length ? thumbnails : galleryItems;
@@ -535,38 +541,44 @@ const initPublicPage = () => {
             return `${text.replace(/[.!?]+$/, '') || 'Dokumentasi kegiatan warga Desa Sukomulyo'}. ${context}`;
         };
 
-        const updateGalleryContent = (item) => {
+        const updateGalleryContent = (item, updateDetails = true) => {
             image.src = item.dataset.image;
             image.alt = item.dataset.title;
-            title.textContent = item.dataset.title;
-            caption.textContent = contextualCaption(item);
+
+            // The dialog represents one gallery card. Its photo can change
+            // while browsing, but the card's title and caption stay tied to
+            // the item that opened the dialog.
+            if (updateDetails) {
+                title.textContent = item.dataset.title;
+                caption.textContent = contextualCaption(item);
+            }
         };
 
         const animateGalleryChange = (item, direction = 'next') => {
             if (!main || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                updateGalleryContent(item);
+                updateGalleryContent(item, false);
                 return;
             }
 
             window.clearTimeout(changeTimer);
             window.clearTimeout(settleTimer);
-            [main, captionBlock].filter(Boolean).forEach((part) => {
+            [main].filter(Boolean).forEach((part) => {
                 part.classList.remove('is-leaving', 'is-entering', 'is-next', 'is-prev');
             });
             void main.offsetWidth;
-            [main, captionBlock].filter(Boolean).forEach((part) => {
+            [main].filter(Boolean).forEach((part) => {
                 part.classList.add('is-leaving', direction === 'prev' ? 'is-prev' : 'is-next');
             });
 
             changeTimer = window.setTimeout(() => {
-                updateGalleryContent(item);
-                [main, captionBlock].filter(Boolean).forEach((part) => {
+                updateGalleryContent(item, false);
+                [main].filter(Boolean).forEach((part) => {
                     part.classList.remove('is-leaving');
                     part.classList.add('is-entering');
                 });
 
                 settleTimer = window.setTimeout(() => {
-                    [main, captionBlock].filter(Boolean).forEach((part) => {
+                    [main].filter(Boolean).forEach((part) => {
                         part.classList.remove('is-entering', 'is-next', 'is-prev');
                     });
                 }, 320);
@@ -588,6 +600,9 @@ const initPublicPage = () => {
             if (animate) {
                 animateGalleryChange(item, direction);
             } else {
+                window.clearTimeout(changeTimer);
+                window.clearTimeout(settleTimer);
+                main?.classList.remove('is-leaving', 'is-entering', 'is-next', 'is-prev');
                 updateGalleryContent(item);
             }
         };
