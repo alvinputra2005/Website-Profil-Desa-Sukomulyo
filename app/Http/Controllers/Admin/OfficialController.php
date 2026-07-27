@@ -29,7 +29,7 @@ class OfficialController extends Controller
 
     public function index(Request $request): View
     {
-        $this->authorizeModule();
+        $this->authorize('viewAny', Official::class);
         $query = Official::with(['photo', 'resident', 'superior']);
 
         if ($search = trim((string) $request->query('q'))) {
@@ -58,7 +58,7 @@ class OfficialController extends Controller
 
     public function create(): View
     {
-        $this->authorizeModule();
+        $this->authorize('create', Official::class);
 
         return view('admin.officials.form', $this->formData(new Official([
             'display_order' => (int) Official::max('display_order') + 1,
@@ -70,7 +70,7 @@ class OfficialController extends Controller
 
     public function store(SaveOfficialRequest $request): RedirectResponse
     {
-        $this->authorizeModule();
+        $this->authorize('create', Official::class);
         $data = $request->validated();
         $data['is_active'] = array_key_exists('is_active', $data) ? $data['is_active'] : true;
         $official = DB::transaction(function () use ($request, $data) {
@@ -88,7 +88,7 @@ class OfficialController extends Controller
 
     public function edit(Official $official): View
     {
-        $this->authorizeModule();
+        $this->authorize('update', $official);
         $official->load(['photo', 'resident']);
 
         return view('admin.officials.form', $this->formData($official));
@@ -96,7 +96,7 @@ class OfficialController extends Controller
 
     public function update(SaveOfficialRequest $request, Official $official): RedirectResponse
     {
-        $this->authorizeModule();
+        $this->authorize('update', $official);
         $data = $request->validated();
         DB::transaction(function () use ($request, $data, $official) {
             $old = $official->toArray();
@@ -111,7 +111,7 @@ class OfficialController extends Controller
 
     public function destroy(Official $official): RedirectResponse
     {
-        $this->authorizeModule();
+        $this->authorize('delete', $official);
         $this->logger->log('deleted', 'perangkat-desa', $official, $official->toArray());
         $official->delete();
 
@@ -120,7 +120,7 @@ class OfficialController extends Controller
 
     public function bulkDestroy(BulkDeleteOfficialsRequest $request): RedirectResponse
     {
-        $this->authorizeModule();
+        $this->authorize('deleteAny', Official::class);
         $data = $request->validated();
         DB::transaction(function () use ($data) {
             Official::whereKey($data['ids'])->get()->each(function (Official $official) {
@@ -134,7 +134,7 @@ class OfficialController extends Controller
 
     public function toggleStatus(Official $official): RedirectResponse
     {
-        $this->authorizeModule();
+        $this->authorize('update', $official);
         $old = $official->toArray();
         $official->update(['is_active' => ! $official->is_active]);
         $this->logger->log('status_changed', 'perangkat-desa', $official, $old, $official->fresh()->toArray());
@@ -144,7 +144,7 @@ class OfficialController extends Controller
 
     public function move(Official $official, string $direction): RedirectResponse
     {
-        $this->authorizeModule();
+        $this->authorize('update', $official);
         abort_unless(in_array($direction, ['up', 'down'], true), 404);
         $operator = $direction === 'up' ? '<' : '>';
         $order = $direction === 'up' ? 'desc' : 'asc';
@@ -165,7 +165,7 @@ class OfficialController extends Controller
 
     public function organization(): View
     {
-        $this->authorizeModule();
+        $this->authorize('viewAny', Official::class);
         $officials = Official::with('photo')->where('is_active', true)->orderBy('display_order')->get();
 
         return view('admin.officials.organization', ['nodes' => $this->organizationTree($officials)]);
@@ -173,7 +173,7 @@ class OfficialController extends Controller
 
     public function print(Request $request): View
     {
-        $this->authorizeModule();
+        $this->authorize('viewAny', Official::class);
         $query = Official::with('photo')->orderBy('display_order')->orderBy('name');
         if ($request->query('status') !== 'all') {
             $query->where('is_active', true);
@@ -184,7 +184,7 @@ class OfficialController extends Controller
 
     public function export(): StreamedResponse
     {
-        $this->authorizeModule();
+        $this->authorize('viewAny', Official::class);
         $filename = 'buku-pemerintah-desa-'.now()->format('Y-m-d').'.csv';
 
         return response()->streamDownload(function () {
@@ -223,11 +223,6 @@ class OfficialController extends Controller
             });
             fclose($handle);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
-    }
-
-    private function authorizeModule(): void
-    {
-        abort_unless(auth()->user()?->can('manage-content'), 403);
     }
 
     private function normalized(array $data): array

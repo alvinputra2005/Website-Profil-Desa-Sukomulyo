@@ -19,6 +19,7 @@ class PopulationGroupController extends PopulationController
 
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', PopulationGroup::class);
         $query = PopulationGroup::with('chairperson')->withCount('memberships');
         if ($search = trim((string) $request->query('q'))) {
             $query->where(fn ($builder) => $builder->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%"));
@@ -35,11 +36,13 @@ class PopulationGroupController extends PopulationController
 
     public function create(): View
     {
+        $this->authorize('create', PopulationGroup::class);
         return view('admin.population.groups.form', $this->formData(new PopulationGroup));
     }
 
     public function store(SavePopulationGroupRequest $request): RedirectResponse
     {
+        $this->authorize('create', PopulationGroup::class);
         $data = $request->validated();
         $group = DB::transaction(function () use ($data) {
             $group = PopulationGroup::create($this->groupData($data));
@@ -54,6 +57,7 @@ class PopulationGroupController extends PopulationController
 
     public function show(PopulationGroup $group): View
     {
+        $this->authorize('view', $group);
         $group->load(['chairperson', 'memberships.resident']);
 
         return view('admin.population.groups.show', compact('group'));
@@ -61,11 +65,13 @@ class PopulationGroupController extends PopulationController
 
     public function edit(PopulationGroup $group): View
     {
+        $this->authorize('update', $group);
         return view('admin.population.groups.form', $this->formData($group));
     }
 
     public function update(SavePopulationGroupRequest $request, PopulationGroup $group): RedirectResponse
     {
+        $this->authorize('update', $group);
         $data = $request->validated();
         DB::transaction(function () use ($data, $group) {
             $oldChairperson = $group->chairperson_id;
@@ -79,6 +85,7 @@ class PopulationGroupController extends PopulationController
 
     public function destroy(PopulationGroup $group): RedirectResponse
     {
+        $this->authorize('delete', $group);
         $this->logger->log('archived', 'kelompok', $group);
         $group->delete();
 

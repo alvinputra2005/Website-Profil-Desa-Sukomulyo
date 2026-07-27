@@ -13,6 +13,8 @@ use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Official;
 use App\Models\PopulationArea;
+use App\Models\PopulationGroup;
+use App\Models\PopulationGroupMember;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
 use App\Models\Resident;
@@ -26,6 +28,12 @@ use App\Observers\PublicContentCacheObserver;
 use App\Policies\CmsResourcePolicy;
 use App\Policies\DataResourcePolicy;
 use App\Policies\AdminResourcePolicy;
+use App\Policies\FamilyCardPolicy;
+use App\Policies\HouseholdPolicy;
+use App\Policies\OfficialPolicy;
+use App\Policies\PopulationGroupMemberPolicy;
+use App\Policies\PopulationGroupPolicy;
+use App\Policies\ResidentPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
@@ -94,5 +102,12 @@ class AppServiceProvider extends ServiceProvider
             };
             Gate::policy($resource['model'], $policy);
         }
+
+        Gate::policy(Official::class, OfficialPolicy::class);
+        Gate::policy(Resident::class, ResidentPolicy::class);
+        Gate::policy(FamilyCard::class, FamilyCardPolicy::class);
+        Gate::policy(Household::class, HouseholdPolicy::class);
+        Gate::policy(PopulationGroup::class, PopulationGroupPolicy::class);
+        Gate::policy(PopulationGroupMember::class, PopulationGroupMemberPolicy::class);
     }
 }

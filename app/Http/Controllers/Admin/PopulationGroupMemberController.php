@@ -18,6 +18,8 @@ class PopulationGroupMemberController extends PopulationController
 
     public function create(PopulationGroup $group): View
     {
+        $this->authorize('view', $group);
+        $this->authorize('create', PopulationGroupMember::class);
         return view('admin.population.groups.member-form', [
             'group' => $group,
             'membership' => new PopulationGroupMember,
@@ -29,6 +31,8 @@ class PopulationGroupMemberController extends PopulationController
 
     public function store(SavePopulationGroupMemberRequest $request, PopulationGroup $group): RedirectResponse
     {
+        $this->authorize('update', $group);
+        $this->authorize('create', PopulationGroupMember::class);
         $data = $request->validated();
         $membership = $group->memberships()->create($data);
         $this->logger->log('created', 'anggota_kelompok', $membership);
@@ -39,6 +43,8 @@ class PopulationGroupMemberController extends PopulationController
     public function edit(PopulationGroup $group, PopulationGroupMember $membership): View
     {
         abort_unless($membership->group_id === $group->id, 404);
+        $this->authorize('view', $group);
+        $this->authorize('update', $membership);
 
         return view('admin.population.groups.member-form', [
             'group' => $group,
@@ -53,6 +59,8 @@ class PopulationGroupMemberController extends PopulationController
     public function update(SavePopulationGroupMemberRequest $request, PopulationGroup $group, PopulationGroupMember $membership): RedirectResponse
     {
         abort_unless($membership->group_id === $group->id, 404);
+        $this->authorize('update', $group);
+        $this->authorize('update', $membership);
         $membership->update($request->validated());
         if ($membership->position === 'Ketua') {
             $group->update(['chairperson_id' => $membership->resident_id]);
@@ -66,6 +74,8 @@ class PopulationGroupMemberController extends PopulationController
     public function destroy(PopulationGroup $group, PopulationGroupMember $membership): RedirectResponse
     {
         abort_unless($membership->group_id === $group->id, 404);
+        $this->authorize('update', $group);
+        $this->authorize('delete', $membership);
         if ($membership->resident_id === $group->chairperson_id) {
             return back()->withErrors(['membership' => 'Ketua kelompok tidak dapat dihapus. Pilih ketua baru terlebih dahulu.']);
         }

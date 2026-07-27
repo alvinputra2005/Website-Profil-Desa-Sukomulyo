@@ -18,6 +18,7 @@ class HouseholdController extends PopulationController
 
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', Household::class);
         $query = Household::with(['head', 'area', 'members' => fn ($builder) => $builder->where('status', 'active')->select(['id', 'household_id', 'family_id'])])
             ->withCount(['members' => fn ($builder) => $builder->where('status', 'active')]);
         if ($search = trim((string) $request->query('q'))) {
@@ -31,11 +32,13 @@ class HouseholdController extends PopulationController
 
     public function create(): View
     {
+        $this->authorize('create', Household::class);
         return view('admin.population.households.form', $this->formData(new Household));
     }
 
     public function store(SaveHouseholdRequest $request): RedirectResponse
     {
+        $this->authorize('create', Household::class);
         $data = $request->validated();
         $household = DB::transaction(function () use ($data) {
             $area = $this->resolveArea($data);
@@ -51,6 +54,7 @@ class HouseholdController extends PopulationController
 
     public function edit(Household $household): View
     {
+        $this->authorize('update', $household);
         $household->load(['area', 'members']);
 
         return view('admin.population.households.form', $this->formData($household));
@@ -58,6 +62,7 @@ class HouseholdController extends PopulationController
 
     public function update(SaveHouseholdRequest $request, Household $household): RedirectResponse
     {
+        $this->authorize('update', $household);
         $data = $request->validated();
         DB::transaction(function () use ($data, $household) {
             $oldHead = $household->head_resident_id;
@@ -72,6 +77,7 @@ class HouseholdController extends PopulationController
 
     public function destroy(Household $household): RedirectResponse
     {
+        $this->authorize('delete', $household);
         if ($household->members()->exists()) {
             return back()->withErrors(['household' => 'Rumah tangga masih memiliki anggota. Pindahkan anggota terlebih dahulu.']);
         }

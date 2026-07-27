@@ -18,6 +18,7 @@ class FamilyController extends PopulationController
 
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', FamilyCard::class);
         $query = FamilyCard::with(['head', 'area'])->withCount(['members' => fn ($builder) => $builder->where('status', 'active')]);
         if ($search = trim((string) $request->query('q'))) {
             $query->where(fn ($builder) => $builder
@@ -33,11 +34,13 @@ class FamilyController extends PopulationController
 
     public function create(): View
     {
+        $this->authorize('create', FamilyCard::class);
         return view('admin.population.families.form', $this->formData(new FamilyCard));
     }
 
     public function store(SaveFamilyRequest $request): RedirectResponse
     {
+        $this->authorize('create', FamilyCard::class);
         $data = $request->validated();
         $family = DB::transaction(function () use ($data) {
             $area = $this->resolveArea($data);
@@ -53,6 +56,7 @@ class FamilyController extends PopulationController
 
     public function edit(FamilyCard $family): View
     {
+        $this->authorize('update', $family);
         $family->load(['area', 'members']);
 
         return view('admin.population.families.form', $this->formData($family));
@@ -60,6 +64,7 @@ class FamilyController extends PopulationController
 
     public function update(SaveFamilyRequest $request, FamilyCard $family): RedirectResponse
     {
+        $this->authorize('update', $family);
         $data = $request->validated();
         DB::transaction(function () use ($data, $family) {
             $oldHead = $family->head_resident_id;
@@ -74,6 +79,7 @@ class FamilyController extends PopulationController
 
     public function destroy(FamilyCard $family): RedirectResponse
     {
+        $this->authorize('delete', $family);
         if ($family->members()->exists()) {
             return back()->withErrors(['family' => 'Keluarga masih memiliki anggota. Pindahkan anggota terlebih dahulu.']);
         }

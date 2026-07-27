@@ -28,6 +28,7 @@ class ResidentController extends PopulationController
 
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', Resident::class);
         $query = Resident::with(['family.head', 'household.head', 'area']);
         if ($search = trim((string) $request->query('q'))) {
             $query->where(fn ($builder) => $builder
@@ -50,11 +51,13 @@ class ResidentController extends PopulationController
 
     public function create(): View
     {
+        $this->authorize('create', Resident::class);
         return view('admin.population.residents.form', $this->formData(new Resident));
     }
 
     public function import(ImportResidentsRequest $request, ResidentExcelImportService $importer): RedirectResponse
     {
+        $this->authorize('create', Resident::class);
         $validated = $request->validated();
         $result = $importer->import($validated['file']);
 
@@ -72,6 +75,7 @@ class ResidentController extends PopulationController
 
     public function downloadImportTemplate(): StreamedResponse
     {
+        $this->authorize('create', Resident::class);
         $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Penduduk');
@@ -99,6 +103,7 @@ class ResidentController extends PopulationController
 
     public function store(SaveResidentRequest $request): RedirectResponse
     {
+        $this->authorize('create', Resident::class);
         $data = $request->validated();
         $resident = DB::transaction(function () use ($data) {
             $area = $this->resolveArea($data);
@@ -118,6 +123,7 @@ class ResidentController extends PopulationController
 
     public function show(Resident $resident): View
     {
+        $this->authorize('view', $resident);
         $resident->load(['area', 'family.head', 'household.head', 'events.recorder', 'groupMemberships.group']);
 
         return view('admin.population.residents.show', compact('resident'));
@@ -125,11 +131,13 @@ class ResidentController extends PopulationController
 
     public function edit(Resident $resident): View
     {
+        $this->authorize('update', $resident);
         return view('admin.population.residents.form', $this->formData($resident));
     }
 
     public function update(SaveResidentRequest $request, Resident $resident): RedirectResponse
     {
+        $this->authorize('update', $resident);
         $data = $request->validated();
 
         DB::transaction(function () use ($data, $resident) {
@@ -156,6 +164,7 @@ class ResidentController extends PopulationController
 
     public function destroy(Resident $resident): RedirectResponse
     {
+        $this->authorize('delete', $resident);
         if ($resident->headedFamilies()->exists() || $resident->headedHouseholds()->exists() || $resident->chairedGroups()->exists()) {
             return back()->withErrors(['resident' => 'Penduduk masih tercatat sebagai kepala keluarga, kepala rumah tangga, atau ketua kelompok. Ganti penanggung jawab terlebih dahulu.']);
         }
