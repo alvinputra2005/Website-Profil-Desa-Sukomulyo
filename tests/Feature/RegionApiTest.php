@@ -61,7 +61,7 @@ class RegionApiTest extends TestCase
         $this->getJson(route('admin.regions.provinces'))->assertOk();
         $this->getJson(route('admin.regions.provinces'))->assertOk();
         Http::assertSentCount(1);
-
+    
         $this->getJson(route('admin.regions.regencies', '35'))
             ->assertStatus(503)
             ->assertJsonPath('data', [])

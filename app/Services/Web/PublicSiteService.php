@@ -13,6 +13,7 @@ use App\Models\NewsCategory;
 use App\Models\Official;
 use App\Models\Publication;
 use App\Models\Setting;
+use App\Models\VillageComment;
 use App\Models\VillageProfileSection;
 use App\Services\PopulationStatistics as PopulationStatisticsService;
 use App\Services\SiteCache;
@@ -23,6 +24,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -150,10 +152,83 @@ class PublicSiteService
                     ? VillageProfileSection::with('image')->whereIn('section_key', ['profile', 'history', 'vision', 'mission'])->where('status', 'published')->orderBy('display_order')->get()
                     : collect(),
                 'identityGroups' => $this->villageIdentity(),
+                'villageLeader' => $this->villageLeader(),
+                'villageRegulations' => $this->villageRegulations(),
             ]
         );
 
+        // Older cached profile payloads may not yet contain the sidebar data.
+        $profile['villageLeader'] ??= $this->villageLeader();
+        $profile['villageRegulations'] ??= $this->villageRegulations();
+        $profile = array_merge($profile, $this->profilePageData('identitas'));
+
         return $this->render('pages.profile', $profile);
+    }
+
+    public function sendProfileComment(Request $request): RedirectResponse
+    {
+        $request->merge([
+            'page_key' => $request->input('page_key', 'identitas'),
+        ]);
+
+        $comment = $request->validate([
+            'page_key' => ['required', Rule::in(array_keys($this->profilePages()))],
+            'comment' => ['required', 'string', 'max:1500'],
+            'name' => ['required', 'string', 'max:100'],
+            'address' => ['required', 'string', 'max:300'],
+            'phone' => ['required', 'string', 'max:25', 'regex:/^[0-9+().\s-]{8,25}$/'],
+            'website' => ['nullable', 'max:0'],
+        ], [
+            'comment.required' => 'Isi komentar wajib dituliskan.',
+            'name.required' => 'Nama wajib diisi.',
+            'address.required' => 'Alamat wajib diisi.',
+            'phone.required' => 'Nomor HP wajib diisi.',
+            'phone.regex' => 'Format nomor HP belum sesuai.',
+        ]);
+
+        unset($comment['website']);
+        VillageComment::create($comment);
+
+        $page = $this->profilePages()[$comment['page_key']];
+
+        return redirect()
+            ->to($page['url'].'#komentar')
+            ->with('comment_success', 'Terima kasih. Komentar Anda sudah berhasil dikirim.');
+    }
+
+    public function profileComments(): View
+    {
+        return $this->renderProfileComments('identitas');
+    }
+
+    public function profileSectionComments(string $section): View
+    {
+        abort_unless(isset($this->profilePages()[$section]), 404);
+
+        return $this->renderProfileComments($section);
+    }
+
+    private function renderProfileComments(string $pageKey): View
+    {
+        $page = $this->profilePages()[$pageKey];
+        $comments = Schema::hasTable('village_comments')
+            ? VillageComment::query()
+                ->where('page_key', $pageKey)
+                ->where('is_visible', true)
+                ->latest()
+                ->paginate(12)
+            : new LengthAwarePaginator([], 0, 12);
+
+        return $this->render('pages.profile-comments', compact('comments', 'page'));
+    }
+
+    public function likeProfileComment(VillageComment $comment): RedirectResponse
+    {
+        abort_unless($comment->is_visible, 404);
+
+        $comment->increment('like_count');
+
+        return redirect()->back();
     }
 
     public function profileDetail(string $section): View
@@ -181,7 +256,10 @@ class PublicSiteService
             ? VillageProfileSection::with('image')->whereIn('section_key', $page['keys'])->where('status', 'published')->orderBy('display_order')->get()
             : collect();
 
-        return $this->render('pages.profile-detail', compact('page', 'sections'));
+        return $this->render('pages.profile-detail', array_merge(
+            compact('page', 'sections'),
+            $this->profilePageData($section)
+        ));
     }
 
     public function statistics(PopulationStatisticsService $populationStatistics): View
@@ -382,7 +460,7 @@ class PublicSiteService
 
     public function map(): View
     {
-        return $this->render('pages.map');
+        return $this->render('pages.map', $this->profilePageData('wilayah-desa'));
     }
 
     public function mapGeoJson(): JsonResponse
@@ -439,25 +517,43 @@ class PublicSiteService
             SiteCache::OFFICIALS,
             SiteCache::ONE_HOUR,
             fn () => Schema::hasTable('officials') && Official::where('is_active', true)->exists()
-                ? Official::with('photo')->where('is_active', true)->orderBy('display_order')->get()->map(fn ($o) => ['role' => $o->position_label, 'name' => $o->full_name, 'photo' => $o->photo?->url, 'photo_alt' => $o->photo?->alt_text])->all()
-                : [
-                    ['role' => 'Kepala Desa', 'name' => 'Nama Kepala Desa', 'photo' => null],
-                    ['role' => 'Sekretaris Desa', 'name' => 'Nama Sekretaris Desa', 'photo' => null],
-                    ['role' => 'Kaur Tata Usaha dan Umum', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-                    ['role' => 'Kaur Keuangan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-                    ['role' => 'Kasi Pemerintahan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-                    ['role' => 'Kasi Kesejahteraan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-                ]
+                ? Official::with('photo')
+                    ->where('is_active', true)
+                    ->orderBy('display_order')
+                    ->orderBy('name')
+                    ->get()
+                    ->map(function (Official $official): array {
+                        $name = $official->full_name;
+
+                        return [
+                            'id' => $official->id,
+                            'role' => $official->position_label,
+                            'position' => $official->position,
+                            'name' => $name,
+                            'photo' => $official->photo?->url ?: $this->officialAssetPhoto($name),
+                            'photo_alt' => $official->photo?->alt_text ?: "{$name} - {$official->position_label}",
+                            'initials' => $this->officialInitials($name),
+                            'superior_id' => $official->superior_id,
+                            'display_order' => $official->display_order,
+                        ];
+                    })
+                    ->values()
+                    ->all()
+                : $this->fallbackGovernmentOfficials()
         );
 
-        return $this->render('pages.government', [
-            'officials' => $officials,
-        ]);
+        return $this->render('pages.government', array_merge(
+            ['organization' => $this->governmentOrganization($officials)],
+            $this->profilePageData('struktur-pemerintahan')
+        ));
     }
 
     public function potentials(): View
     {
-        return $this->render('pages.potentials', ['potentials' => $this->potentialsData()]);
+        return $this->render('pages.potentials', array_merge(
+            ['potentials' => $this->potentialsData()],
+            $this->profilePageData('potensi-desa')
+        ));
     }
 
     public function news(Request $request): View
@@ -603,7 +699,7 @@ class PublicSiteService
             SiteCache::GALLERY,
             SiteCache::TEN_MINUTES,
             function (): array {
-                $image = asset('assets/village-rice-fields.jpg');
+                $image = '/assets/village-rice-fields.jpg';
 
                 if (Schema::hasTable('galleries')) {
                     $photos = Gallery::where('status', 'published')->with(['items.media', 'cover'])->latest('event_date')->get()->map(function ($gallery) use ($image) {
@@ -646,6 +742,12 @@ class PublicSiteService
                 ];
             }
         );
+
+        $photos = array_map(function (array $photo): array {
+            $photo['src'] = $this->normalizeFallbackImage($photo['src'] ?? null);
+
+            return $photo;
+        }, $photos);
 
         $photoCollection = collect($photos);
         $perPage = 6;
@@ -735,6 +837,9 @@ class PublicSiteService
             }
         );
 
+        $layout['articles'] = $this->normalizeArticleImages($layout['articles'] ?? []);
+        $layout['popularArticles'] = $this->normalizeArticleImages($layout['popularArticles'] ?? []);
+
         return array_merge($layout, ['navigation' => $this->navigation()]);
     }
 
@@ -753,7 +858,8 @@ class PublicSiteService
     {
         return [
             ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
-            ['label' => 'Profile Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
+            ['label' => 'Profil Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
+                ['label' => 'Identitas Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
                 ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
                 ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
                 ['label' => 'Struktur Pemerintahan', 'route' => 'pemerintahan-desa', 'active' => 'pemerintahan-desa'],
@@ -851,6 +957,7 @@ class PublicSiteService
             SiteCache::TEN_MINUTES,
             fn () => $this->loadArticles()
         );
+        $articles = $this->normalizeArticleImages($articles);
 
         $articles = $this->sortArticlesByDate($articles);
         request()->attributes->set('site.published_articles', $articles);
@@ -1029,7 +1136,7 @@ class PublicSiteService
 
     private function mapArticle(News $article): array
     {
-        $image = asset('assets/village-rice-fields.jpg');
+        $image = '/assets/village-rice-fields.jpg';
         $htmlContent = preg_replace('~https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(/storage/)~i', '$1', $article->content);
         $htmlContent = $this->removeDuplicateLeadingTitle($htmlContent, $article->title);
         preg_match('~<img[^>]+src=["\']([^"\']+)["\']~i', $htmlContent, $inlineImage);
@@ -1085,7 +1192,7 @@ class PublicSiteService
 
     private function fallbackArticles(): array
     {
-        $image = asset('assets/village-rice-fields.jpg');
+        $image = '/assets/village-rice-fields.jpg';
 
         return [
             [
@@ -1155,9 +1262,33 @@ class PublicSiteService
         ];
     }
 
+    private function normalizeArticleImages(array $articles): array
+    {
+        return array_map(function (array $article): array {
+            foreach (['image', 'detail_image'] as $key) {
+                if (array_key_exists($key, $article)) {
+                    $article[$key] = $this->normalizeFallbackImage($article[$key]);
+                }
+            }
+
+            return $article;
+        }, $articles);
+    }
+
+    private function normalizeFallbackImage(?string $url): ?string
+    {
+        if ($url === null || $url === '') {
+            return $url;
+        }
+
+        return parse_url($url, PHP_URL_PATH) === '/assets/village-rice-fields.jpg'
+            ? '/assets/village-rice-fields.jpg'
+            : $url;
+    }
+
     private function galleryPhotos(): array
     {
-        $image = asset('assets/village-rice-fields.jpg');
+        $image = '/assets/village-rice-fields.jpg';
 
         return [
             ['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa. Pertemuan ini menjadi ruang untuk menyerap aspirasi dan menentukan prioritas pembangunan bersama.'],
@@ -1174,12 +1305,26 @@ class PublicSiteService
         $caption = trim((string) $caption);
         $title = trim((string) $title);
 
-        return $caption !== '' ? $caption : "Dokumentasi {$title} di Desa Sukomulyo.";
+        if ($caption === '' || mb_strlen($caption) >= 110) {
+            return $caption !== '' ? $caption : "Dokumentasi {$title} di Desa Sukomulyo.";
+        }
+
+        $context = match (true) {
+            str_contains(strtolower($title), 'musyawarah') => 'Warga berdiskusi terbuka untuk menyepakati langkah yang bermanfaat bagi kemajuan desa.',
+            str_contains(strtolower($title), 'kerja bakti') => 'Kegiatan ini memperkuat semangat gotong royong dan kepedulian warga terhadap lingkungan.',
+            str_contains(strtolower($title), 'umkm') => 'Pembekalan ini diharapkan membantu usaha warga tumbuh lebih kreatif dan berdaya saing.',
+            str_contains(strtolower($title), 'posyandu') => 'Pelayanan dilakukan secara berkala agar keluarga mendapat pendampingan kesehatan yang mudah dijangkau.',
+            str_contains(strtolower($title), 'panen') => 'Hasil kegiatan menunjukkan potensi pertanian lokal yang terus dijaga dan dikembangkan bersama.',
+            str_contains(strtolower($title), 'seni') || str_contains(strtolower($title), 'festival') => 'Kegiatan ini menjadi ruang untuk merawat budaya sekaligus mempererat kebersamaan masyarakat.',
+            default => 'Kegiatan ini menjadi bagian dari aktivitas warga yang mendukung kemajuan dan kebersamaan Desa Sukomulyo.',
+        };
+
+        return rtrim($caption, '.!?').'. '.$context;
     }
 
     private function potentialsData(): array
     {
-        $image = asset('assets/village-rice-fields.jpg');
+        $image = '/assets/village-rice-fields.jpg';
 
         return [
             ['title' => 'Pertanian Produktif', 'description' => 'Lahan pertanian menjadi penggerak ekonomi dan sumber pangan masyarakat.', 'image' => $image, 'icon' => 'fas fa-seedling'],
@@ -1187,5 +1332,249 @@ class PublicSiteService
             ['title' => 'Seni dan Budaya', 'description' => 'Tradisi lokal terus dirawat melalui kegiatan dan partisipasi lintas generasi.', 'image' => $image, 'icon' => 'fas fa-drum'],
             ['title' => 'Wisata Desa', 'description' => 'Lingkungan dan kehidupan desa menawarkan pengalaman wisata berbasis masyarakat.', 'image' => $image, 'icon' => 'fas fa-map-marked-alt'],
         ];
+    }
+
+    private function governmentOrganization(array $officials): array
+    {
+        $officials = collect($officials);
+        $normalizedPosition = static fn (array $official): string => mb_strtolower(trim($official['position'] ?? $official['role']));
+        $matches = static function (array $official, array $prefixes) use ($normalizedPosition): bool {
+            $position = $normalizedPosition($official);
+
+            foreach ($prefixes as $prefix) {
+                if ($position === $prefix || str_starts_with($position, $prefix.' ')) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        $leader = $officials->first(fn (array $official): bool => $matches($official, ['kepala desa']));
+        $secretary = $officials->first(fn (array $official): bool => $matches($official, ['sekretaris desa']));
+        $technicalExecutors = $officials
+            ->filter(fn (array $official): bool => $matches($official, ['kasi']))
+            ->values();
+        $secretariatStaff = $officials
+            ->filter(fn (array $official): bool => $matches($official, ['kaur']))
+            ->sortBy(fn (array $official): array => [
+                $secretary && (int) $official['superior_id'] === (int) $secretary['id'] ? 0 : 1,
+                $official['display_order'],
+            ])
+            ->values();
+        $hamletHeads = $officials
+            ->filter(fn (array $official): bool => $matches($official, ['kasun', 'kepala dusun']))
+            ->values();
+
+        $groupedIds = collect([$leader, $secretary])
+            ->filter()
+            ->concat($technicalExecutors)
+            ->concat($secretariatStaff)
+            ->concat($hamletHeads)
+            ->pluck('id')
+            ->all();
+
+        return [
+            'leader' => $leader,
+            'technicalExecutors' => $technicalExecutors->all(),
+            'secretary' => $secretary,
+            'secretariatStaff' => $secretariatStaff->all(),
+            'hamletHeads' => $hamletHeads->all(),
+            'others' => $officials->reject(fn (array $official): bool => in_array($official['id'], $groupedIds, true))->values()->all(),
+        ];
+    }
+
+    private function fallbackGovernmentOfficials(): array
+    {
+        $officials = [
+            ['name' => 'Safiul Anwar, ST', 'position' => 'Kepala Desa', 'superior_id' => null],
+            ['name' => 'Angga Saputra', 'position' => 'Kasi Pemerintahan', 'superior_id' => 1],
+            ['name' => 'Wike Priharti Y', 'position' => 'Kasi Pelayanan', 'superior_id' => 1],
+            ['name' => 'Mohamad Sholeh', 'position' => 'Kasi Kesejahteraan', 'superior_id' => 1],
+            ['name' => 'Baktiyar Kufain', 'position' => 'Sekretaris Desa', 'superior_id' => 1],
+            ['name' => 'Suwarno', 'position' => 'Kaur Keuangan', 'superior_id' => 5],
+            ['name' => 'Reza Tri Purnomo', 'position' => 'Kaur Perencanaan', 'superior_id' => 5],
+            ['name' => 'Catur Yulianto', 'position' => 'Kaur Tata Usaha dan Umum', 'superior_id' => 5],
+            ['name' => 'Bambang S', 'position' => 'Kasun Bakir', 'superior_id' => 1],
+            ['name' => 'Sispanaji', 'position' => 'Kasun Biyan', 'superior_id' => 1],
+            ['name' => 'Nikita F Z', 'position' => 'Kasun Cumul', 'superior_id' => 1],
+            ['name' => 'Fendi Priyo S', 'position' => 'Kasun Kedungrejo', 'superior_id' => 1],
+            ['name' => 'Cahyo Utomo', 'position' => 'Kasun Talasan', 'superior_id' => 1],
+        ];
+
+        return collect($officials)->map(function (array $official, int $index): array {
+            $id = $index + 1;
+            $name = $official['name'];
+
+            return [
+                'id' => $id,
+                'role' => $official['position'],
+                'position' => $official['position'],
+                'name' => $name,
+                'photo' => $this->officialAssetPhoto($name),
+                'photo_alt' => "{$name} - {$official['position']}",
+                'initials' => $this->officialInitials($name),
+                'superior_id' => $official['superior_id'],
+                'display_order' => $id,
+            ];
+        })->all();
+    }
+
+    private function officialAssetPhoto(string $name): ?string
+    {
+        return [
+            'safiul anwar, st' => '/assets/safiul-anwar.jpeg',
+            'angga saputra' => '/assets/angga-saputra.jpeg',
+            'wike priharti y' => '/assets/wike-priharti-y.jpeg',
+            'mohamad sholeh' => '/assets/muhammad-sholeh.jpeg',
+            'suwarno' => '/assets/suwarno.jpeg',
+            'reza tri purnomo' => '/assets/reza-tri.jpeg',
+            'catur yulianto' => '/assets/catur-yulianto.jpeg',
+            'bambang s' => '/assets/bambang.jpeg',
+            'sispanaji' => '/assets/sispanaji.jpeg',
+            'nikita f z' => '/assets/nikita.jpeg',
+            'fendi priyo s' => '/assets/fendi-priyo.jpeg',
+        ][mb_strtolower(trim($name))] ?? null;
+    }
+
+    private function officialInitials(string $name): string
+    {
+        return collect(preg_split('/[\s,]+/u', trim($name)) ?: [])
+            ->filter()
+            ->take(2)
+            ->map(fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))
+            ->implode('');
+    }
+
+    private function profilePages(): array
+    {
+        return [
+            'identitas' => [
+                'title' => 'Identitas Desa',
+                'url' => route('profile-desa'),
+                'comments_url' => route('profile-desa.comments'),
+            ],
+            'sejarah' => [
+                'title' => 'Sejarah Desa',
+                'url' => route('profile-desa.detail', ['section' => 'sejarah']),
+                'comments_url' => route('profile-desa.section-comments', ['section' => 'sejarah']),
+            ],
+            'visi-misi' => [
+                'title' => 'Visi dan Misi',
+                'url' => route('profile-desa.detail', ['section' => 'visi-misi']),
+                'comments_url' => route('profile-desa.section-comments', ['section' => 'visi-misi']),
+            ],
+            'struktur-pemerintahan' => [
+                'title' => 'Struktur Pemerintahan',
+                'url' => route('pemerintahan-desa'),
+                'comments_url' => route('profile-desa.section-comments', ['section' => 'struktur-pemerintahan']),
+            ],
+            'wilayah-desa' => [
+                'title' => 'Wilayah Desa',
+                'url' => route('peta-desa'),
+                'comments_url' => route('profile-desa.section-comments', ['section' => 'wilayah-desa']),
+            ],
+            'potensi-desa' => [
+                'title' => 'Potensi Desa',
+                'url' => route('potensi-desa'),
+                'comments_url' => route('profile-desa.section-comments', ['section' => 'potensi-desa']),
+            ],
+        ];
+    }
+
+    private function profilePageData(string $pageKey): array
+    {
+        $page = $this->profilePages()[$pageKey];
+        $commentsQuery = Schema::hasTable('village_comments')
+            ? VillageComment::query()->where('page_key', $pageKey)->where('is_visible', true)
+            : null;
+
+        return [
+            'villageLeader' => $this->villageLeader(),
+            'villageRegulations' => $this->villageRegulations(),
+            'latestComments' => $commentsQuery ? (clone $commentsQuery)->latest()->limit(3)->get() : collect(),
+            'commentContext' => [
+                'page_key' => $pageKey,
+                'title' => $page['title'],
+                'url' => $page['url'],
+                'comments_url' => $page['comments_url'],
+                'count' => $commentsQuery ? (clone $commentsQuery)->count() : 0,
+            ],
+        ];
+    }
+
+    private function villageLeader(): array
+    {
+        $leader = Schema::hasTable('officials')
+            ? Official::with('photo')->where('position', 'Kepala Desa')->where('is_active', true)->orderBy('display_order')->first()
+            : null;
+
+        return [
+            'name' => $leader?->full_name ?: 'Kepala Desa Sukomulyo',
+            'role' => $leader?->position_label ?: 'Kepala Desa',
+            'photo' => $leader?->photo?->url,
+            'photo_alt' => $leader?->photo?->alt_text ?: ($leader?->full_name ?: 'Kepala Desa Sukomulyo'),
+            'greeting' => trim(strip_tags((string) $leader?->biography))
+                ?: 'Assalamu’alaikum Warahmatullahi Wabarakatuh. Selamat datang di website resmi Desa Sukomulyo. Semoga layanan informasi ini mendekatkan pemerintah desa dengan seluruh masyarakat.',
+        ];
+    }
+
+    private function villageRegulations(): array
+    {
+        $fallbacks = collect([
+            [
+                'title' => 'Peraturan Desa tentang Rencana Kerja Pemerintah Desa',
+                'number' => 'Perdes No. 1',
+                'year' => '2026',
+                'url' => null,
+            ],
+            [
+                'title' => 'Peraturan Desa tentang Anggaran Pendapatan dan Belanja Desa',
+                'number' => 'Perdes No. 2',
+                'year' => '2026',
+                'url' => null,
+            ],
+            [
+                'title' => 'Peraturan Desa tentang Lingkungan dan Gotong Royong',
+                'number' => 'Perdes No. 3',
+                'year' => '2026',
+                'url' => null,
+            ],
+        ]);
+
+        if (! Schema::hasTable('publications')) {
+            return $fallbacks->all();
+        }
+
+        $published = Publication::query()
+            ->published()
+            ->with(['attachments.media'])
+            ->where(function ($query) {
+                $query->where('type', 'regulation')
+                    ->orWhere(function ($documentQuery) {
+                        $documentQuery->where('type', 'document')->where('title', 'like', '%Peraturan%');
+                    });
+            })
+            ->latest('published_at')
+            ->limit(3)
+            ->get()
+            ->map(function (Publication $publication): array {
+                $attachment = $publication->attachments
+                    ->first(fn ($item) => $item->media && $item->media->mime_type === 'application/pdf');
+
+                return [
+                    'title' => $publication->title,
+                    'number' => 'Peraturan Desa',
+                    'year' => (string) ($publication->published_at?->year ?? $publication->start_date?->year ?? now()->year),
+                    'url' => $attachment?->media?->url,
+                ];
+            });
+
+        return $published
+            ->concat($fallbacks)
+            ->unique('title')
+            ->take(3)
+            ->values()
+            ->all();
     }
 }

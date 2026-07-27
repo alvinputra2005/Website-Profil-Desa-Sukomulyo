@@ -120,6 +120,12 @@ Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
 Route::get('/', HomeController::class)->name('beranda');
 Route::get('/profile-desa', [VillageProfileController::class, 'index'])->name('profile-desa');
+Route::post('/profile-desa/komentar', [VillageProfileController::class, 'storeComment'])->middleware('throttle:5,1')->name('profile-desa.comment');
+Route::get('/profile-desa/komentar-identitas-desa', [VillageProfileController::class, 'comments'])->name('profile-desa.comments');
+Route::post('/profile-desa/komentar-identitas-desa/{comment}/suka', [VillageProfileController::class, 'likeComment'])->middleware('throttle:30,1')->name('profile-desa.comments.like');
+Route::get('/profile-desa/{section}/komentar', [VillageProfileController::class, 'sectionComments'])
+    ->where('section', 'sejarah|visi-misi|struktur-pemerintahan|wilayah-desa|potensi-desa')
+    ->name('profile-desa.section-comments');
 Route::get('/profile-desa/{section}', [VillageProfileController::class, 'show'])->where('section', 'sejarah|visi-misi')->name('profile-desa.detail');
 Route::get('/pemerintahan-desa', [VillageProfileController::class, 'government'])->name('pemerintahan-desa');
 Route::get('/potensi-desa', [VillageProfileController::class, 'potentials'])->name('potensi-desa');

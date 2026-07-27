@@ -1,76 +1,57 @@
-<x-layouts.app title="Profil Desa">
-    <x-page-header title="Profil Desa" :description="'Mengenal sejarah, visi, misi, dan identitas '.$site['name'].'.'" />
+<x-layouts.app
+    title="Identitas Desa"
+    :description="'Informasi lengkap identitas, wilayah, pemerintahan, dan karakter '.$site['name'].'.'">
+    <x-page-header title="Identitas Desa" :breadcrumbs="[
+        ['label' => 'Profile Desa'],
+        ['label' => 'Identitas Desa'],
+    ]" />
 
-    <div class="container">
-        <div id="sc_innerpage_wrap">
-            <article class="sc_innerpage_contentbx profile-content">
-                <section class="village-identity">
-                    <h2>Identitas Desa</h2>
-                    <div class="info-table-wrap">
-                        <table class="info-table identity-table">
-                            <tbody>
-                                @foreach($identityGroups as $group)
-                                    <tr class="identity-group">
-                                        <th colspan="2">{{ $group['title'] }}</th>
-                                    </tr>
-                                    @foreach($group['rows'] as $row)
-                                        <tr>
-                                            <th>{{ $row['label'] }}</th>
-                                            <td>
-                                                @if(($row['type'] ?? null) === 'email' && $row['value'])
-                                                    <a href="mailto:{{ $row['value'] }}">{{ $row['value'] }}</a>
-                                                @elseif(($row['type'] ?? null) === 'url' && filter_var($row['value'], FILTER_VALIDATE_URL) && in_array(parse_url($row['value'], PHP_URL_SCHEME), ['http', 'https'], true))
-                                                    <a href="{{ $row['value'] }}" target="_blank" rel="noopener noreferrer">{{ $row['value'] }}</a>
-                                                @else
-                                                    {{ $row['value'] ?: '-' }}
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @endforeach
-                            </tbody>
-                        </table>
+    @php
+        $shareUrl = route('profile-desa');
+        $shareText = 'Identitas Desa Sukomulyo - '.$site['name'];
+        $villageRows = collect($identityGroups)->flatMap(fn ($group) => $group['rows'])->keyBy('label');
+        $villageAddress = $villageRows->get('Alamat Kantor Desa')['value'] ?? $site['address'];
+        $villageHead = $villageRows->get('Nama Kepala Desa')['value'] ?? $villageLeader['name'];
+    @endphp
+
+    <div class="container news-detail-container profile-detail-container">
+        <div id="sc_innerpage_wrap" class="news-detail-layout profile-article-layout" data-hide-back-to-top data-disable-scroll-reveal>
+            <article class="sc_innerpage_contentbx single-article village-profile-article">
+                <header class="entry-header">
+                    <h1 class="entry-title">Identitas Desa Sukomulyo</h1>
+                    <div class="postmeta" aria-label="Informasi artikel">
+                        <span class="post-date"><i class="far fa-calendar-alt" aria-hidden="true"></i>Diperbarui {{ now()->translatedFormat('d F Y') }}</span>
+                        <span class="post-author"><i class="far fa-user" aria-hidden="true"></i>Pemerintah Desa Sukomulyo</span>
+                        <button class="profile-print-button" type="button" data-print-article>
+                            <i class="fas fa-print" aria-hidden="true"></i>Cetak Artikel
+                        </button>
                     </div>
-                </section>
+                </header>
 
-                @if($profileSections->isNotEmpty())
-                    @php($sectionAnchors = ['history' => 'sejarah-desa', 'vision' => 'visi-dan-misi', 'mission' => 'misi-desa', 'profile' => 'profil-desa'])
-                    @foreach($profileSections as $section)
-                        <section id="{{ $sectionAnchors[$section->section_key] ?? $section->section_key }}">
-                            <h2>{{ $section->title }}</h2>
-                            @if($section->image && !in_array($section->section_key, ['vision', 'mission'], true))
-                                <img class="profile-section-image" src="{{ $section->image->url }}" alt="{{ $section->image->alt_text ?: $section->title }}">
-                            @endif
-                            <div>{!! $section->content !!}</div>
-                        </section>
-                    @endforeach
-                @else
-                <section id="sejarah-desa">
-                    <h2>Sejarah Singkat</h2>
-                    <p>Desa Sukomulyo berkembang dari kehidupan masyarakat yang menjunjung kebersamaan, kerja keras, dan gotong royong. Nilai tersebut menjadi dasar dalam setiap kegiatan sosial maupun pembangunan desa.</p>
-                    <p>Informasi sejarah pada halaman ini disiapkan sebagai struktur awal dan dapat disesuaikan dengan data resmi serta cerita para tokoh masyarakat.</p>
-                </section>
+                <figure class="news-detail-hero profile-detail-hero">
+                    <img src="{{ asset('assets/village-rice-fields.jpg') }}" alt="Pemandangan wilayah Desa Sukomulyo">
+                    <figcaption>Gambaran wilayah dan kehidupan masyarakat Desa Sukomulyo.</figcaption>
+                </figure>
 
-                <section id="visi-dan-misi" class="vision-box">
-                    <span class="section-kicker">Visi</span>
-                    <blockquote>Terwujudnya Desa Sukomulyo yang maju, mandiri, sejahtera, dan berkarakter melalui tata kelola pemerintahan yang melayani.</blockquote>
-                </section>
+                <div class="article-reading-body">
+                    <div class="entry-content">
+                        <h2>Gambaran Umum Desa</h2>
+                        <p>
+                            Desa Sukomulyo adalah kesatuan masyarakat hukum yang memiliki batas wilayah dan berwenang mengatur kepentingan masyarakat setempat berdasarkan prakarsa masyarakat serta ketentuan peraturan perundang-undangan. Pusat pelayanan pemerintahan desa beralamat di {{ $villageAddress ?: 'Kantor Desa Sukomulyo' }}.
+                        </p>
+                        <p>
+                            Pemerintahan desa dipimpin oleh {{ $villageHead ?: 'Kepala Desa Sukomulyo' }} bersama perangkat desa. Pelayanan diarahkan agar warga memperoleh informasi, administrasi, dan pendampingan secara ramah, terbuka, serta dapat dipertanggungjawabkan.
+                        </p>
 
-                <section id="misi-desa">
-                    <h2>Misi Desa</h2>
-                    <ol class="mission-list">
-                        <li>Meningkatkan kualitas pelayanan publik yang cepat, terbuka, dan bertanggung jawab.</li>
-                        <li>Mendorong pembangunan desa berdasarkan kebutuhan serta partisipasi masyarakat.</li>
-                        <li>Mengembangkan potensi pertanian, UMKM, sosial, seni, dan budaya lokal.</li>
-                        <li>Meningkatkan kualitas lingkungan, kesehatan, pendidikan, dan kesejahteraan warga.</li>
-                    </ol>
-                </section>
+                    </div>
+                </div>
 
-                @endif
+                <x-profile-comment-section :context="$commentContext" />
             </article>
 
-            <x-sidebar :categories="$categories" :archive-years="$archiveYears" />
-            <div class="clear"></div>
+            <x-profile-share :url="$shareUrl" :text="$shareText" label="artikel Identitas Desa" />
+
+            <x-profile-sidebar :leader="$villageLeader" :regulations="$villageRegulations" :latest-comments="$latestComments" />
         </div>
     </div>
 </x-layouts.app>

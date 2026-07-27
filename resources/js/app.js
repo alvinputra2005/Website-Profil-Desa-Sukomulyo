@@ -1,7 +1,91 @@
 import './bootstrap';
 import { initAjaxNavigation } from './ajax';
 
+const initGovernmentOrganization = () => {
+    const tree = document.querySelector('[data-org-tree]');
+
+    if (!tree || tree.dataset.bound === 'true') return;
+
+    tree.dataset.bound = 'true';
+
+    const chart = tree.querySelector('[data-org-chart]');
+    const nodes = [...tree.querySelectorAll('[data-org-node]')];
+    const controller = new AbortController();
+    const { signal } = controller;
+    let observer;
+
+    const setNodeActive = (node, active) => {
+        node.classList.toggle('is-active', active);
+        node.setAttribute('aria-pressed', String(active));
+    };
+
+    const closeNodes = (except = null) => {
+        nodes.forEach((node) => {
+            if (node !== except) setNodeActive(node, false);
+        });
+    };
+
+    nodes.forEach((node) => {
+        node.addEventListener('click', (event) => {
+            event.stopPropagation();
+
+            const willOpen = !node.classList.contains('is-active');
+            closeNodes(node);
+            setNodeActive(node, willOpen);
+        }, { signal });
+
+        node.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+
+            event.preventDefault();
+            setNodeActive(node, false);
+            node.focus();
+        }, { signal });
+    });
+
+    tree.querySelectorAll('[data-org-image]').forEach((image) => {
+        const showFallback = () => {
+            image.closest('[data-org-portrait]')?.classList.add('has-image-error');
+            image.remove();
+        };
+
+        image.addEventListener('error', showFallback, { once: true, signal });
+        if (image.complete && image.naturalWidth === 0) showFallback();
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!event.target.closest?.('[data-org-node]')) closeNodes();
+    }, { signal });
+
+    if (chart) {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (reduceMotion || !('IntersectionObserver' in window)) {
+            chart.classList.add('is-visible');
+        } else {
+            chart.classList.add('is-animated');
+            observer = new IntersectionObserver(([entry]) => {
+                if (!entry.isIntersecting) return;
+
+                chart.classList.add('is-visible');
+                observer.disconnect();
+            }, {
+                threshold: 0.14,
+                rootMargin: '0px 0px -8% 0px',
+            });
+            observer.observe(chart);
+        }
+    }
+
+    window.addEventListener('ajax:before-render', () => {
+        observer?.disconnect();
+        controller.abort();
+    }, { once: true, signal });
+};
+
 const initPublicPage = () => {
+    initGovernmentOrganization();
+
     const menuButton = document.querySelector('.menu-toggle');
     const menu = document.querySelector('#primary-menu');
 
@@ -10,7 +94,16 @@ const initPublicPage = () => {
         menuButton.setAttribute('aria-expanded', String(open));
     });
 
-    const revealSections = document.querySelectorAll('main section:not(.hero-slider), .footer-wrapper .footer-widget');
+    const disableScrollReveal = Boolean(document.querySelector('[data-disable-scroll-reveal]'));
+    const revealSections = disableScrollReveal
+        ? []
+        : document.querySelectorAll('main section:not(.hero-slider), .footer-wrapper .footer-widget');
+
+    if (disableScrollReveal) {
+        document.querySelectorAll('.scroll-reveal').forEach((section) => {
+            section.classList.remove('scroll-reveal', 'is-revealed');
+        });
+    }
 
     if (revealSections.length && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         const observer = new IntersectionObserver((entries) => {
@@ -256,9 +349,40 @@ const initPublicPage = () => {
         toggle.addEventListener('click', () => {
             const expanded = toggle.getAttribute('aria-expanded') === 'true';
 
+            if (!expanded && toggle.hasAttribute('data-profile-widget-toggle')) {
+                const accordion = toggle.closest('[data-profile-accordion]');
+
+                accordion?.querySelectorAll('[data-profile-widget-toggle][aria-expanded="true"]').forEach((openToggle) => {
+                    if (openToggle === toggle) return;
+
+                    openToggle.setAttribute('aria-expanded', 'false');
+                    const openPanel = document.getElementById(openToggle.getAttribute('aria-controls'));
+                    if (openPanel) openPanel.hidden = true;
+                });
+            }
+
             setExpanded(!expanded);
         });
     });
+
+    const streetViewDialog = document.querySelector('[data-streetview-dialog]');
+
+    if (streetViewDialog && streetViewDialog.dataset.bound !== 'true') {
+        const frame = streetViewDialog.querySelector('[data-streetview-frame]');
+        const close = () => streetViewDialog.close();
+
+        streetViewDialog.dataset.bound = 'true';
+        document.querySelectorAll('[data-streetview-open]').forEach((button) => {
+            button.addEventListener('click', () => {
+                if (frame && !frame.getAttribute('src')) frame.src = frame.dataset.src;
+                streetViewDialog.showModal();
+            });
+        });
+        streetViewDialog.querySelector('[data-streetview-close]')?.addEventListener('click', close);
+        streetViewDialog.addEventListener('click', (event) => {
+            if (event.target === streetViewDialog) close();
+        });
+    }
 
     const shareStatus = document.querySelector('[data-share-status]');
     const setShareStatus = (message) => {
@@ -340,6 +464,13 @@ const initPublicPage = () => {
         const link = event.currentTarget;
         const copied = await copyShareText(`${link.dataset.shareText} ${link.dataset.shareUrl}`).catch(() => false);
         setShareStatus(copied ? 'Tautan disalin' : 'Salin tautan artikel');
+    });
+
+    document.querySelectorAll('[data-print-article]').forEach((button) => {
+        if (button.dataset.bound === 'true') return;
+
+        button.dataset.bound = 'true';
+        button.addEventListener('click', () => window.print());
     });
 
     document.querySelectorAll('[data-gallery-carousel]').forEach((carousel) => {
@@ -517,10 +648,14 @@ const initPublicPage = () => {
             return text || `Dokumentasi ${item.dataset.title || 'kegiatan desa'}.`;
         };
 
-        const updateGalleryContent = (item, updateDescription = true) => {
+        const updateGalleryContent = (item, updateDetails = true) => {
             image.src = item.dataset.image;
             image.alt = item.dataset.title;
-            if (updateDescription) {
+
+            // The dialog represents one gallery card. Its photo can change
+            // while browsing, but the card's title and caption stay tied to
+            // the item that opened the dialog.
+            if (updateDetails) {
                 title.textContent = item.dataset.title;
                 caption.textContent = contextualCaption(item);
             }
@@ -564,6 +699,9 @@ const initPublicPage = () => {
             if (animate) {
                 animateGalleryChange(item, direction);
             } else {
+                window.clearTimeout(changeTimer);
+                window.clearTimeout(settleTimer);
+                main?.classList.remove('is-leaving', 'is-entering', 'is-next', 'is-prev');
                 updateGalleryContent(item);
             }
         };
