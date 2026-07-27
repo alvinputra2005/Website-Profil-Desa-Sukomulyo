@@ -5,46 +5,52 @@
 ])
 
 @php
-    $dummyComments = collect([
-        [
-            'name' => 'Siti Aminah',
-            'comment' => 'Informasi identitas desa sudah jelas dan sangat membantu warga.',
-            'created_at' => now()->subHours(2),
-            'likes' => 12,
-        ],
-        [
-            'name' => 'Budi Santoso',
-            'comment' => 'Semoga data dan layanan desa terus diperbarui seperti ini.',
-            'created_at' => now()->subDays(1),
-            'likes' => 8,
-        ],
-        [
-            'name' => 'Rina Wulandari',
-            'comment' => 'Tampilan informasinya rapi, jadi mudah dicari dari ponsel.',
-            'created_at' => now()->subDays(2),
-            'likes' => 5,
-        ],
-    ]);
     $comments = collect($latestComments)->take(3);
-    $comments = $comments->concat($dummyComments->take(3 - $comments->count()));
 @endphp
 
-<aside id="sidebar" class="profile-article-sidebar" aria-label="Informasi profil desa">
+<aside id="sidebar" class="profile-article-sidebar" aria-label="Informasi profil desa" data-profile-accordion>
     <section class="profile-side-widget leader-profile-card">
-        <h2 class="profile-side-title">Profil Pimpinan</h2>
-        <div class="leader-card-copy">
-            <p class="leader-role">{{ $leader['role'] }}</p>
-            <h3>{{ $leader['name'] }}</h3>
-            <p class="leader-greeting">{{ $leader['greeting'] }}</p>
-            <a class="leader-read-more" href="{{ route('pemerintahan-desa') }}">
-                Baca Profil <i class="fas fa-arrow-right" aria-hidden="true"></i>
-            </a>
+        <h2 class="profile-side-title profile-widget-heading">
+            <button
+                class="profile-widget-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="profile-leader-panel"
+                data-sidebar-toggle
+                data-profile-widget-toggle
+            >
+                <span>Profil Pimpinan</span>
+                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
+        </h2>
+        <div id="profile-leader-panel" class="profile-widget-panel" hidden>
+            <div class="leader-card-copy">
+                <p class="leader-role">{{ $leader['role'] }}</p>
+                <h3>{{ $leader['name'] }}</h3>
+                <p class="leader-greeting">{{ $leader['greeting'] }}</p>
+                <a class="leader-read-more" href="{{ route('pemerintahan-desa') }}">
+                    Baca Profil <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
         </div>
     </section>
 
     <section class="profile-side-widget regulation-widget">
-        <h2 class="profile-side-title">Peraturan Desa</h2>
-        <div class="regulation-grid">
+        <h2 class="profile-side-title profile-widget-heading">
+            <button
+                class="profile-widget-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="profile-regulations-panel"
+                data-sidebar-toggle
+                data-profile-widget-toggle
+            >
+                <span>Peraturan Desa</span>
+                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
+        </h2>
+        <div id="profile-regulations-panel" class="profile-widget-panel" hidden>
+            <div class="regulation-grid">
             @foreach ($regulations as $regulation)
                 @if ($regulation['url'])
                     <a class="regulation-card" href="{{ $regulation['url'] }}" target="_blank" rel="noopener noreferrer">
@@ -62,18 +68,64 @@
                     </div>
                 @endif
             @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="profile-side-widget village-office-widget">
+        <h2 class="profile-side-title profile-widget-heading">
+            <button
+                class="profile-widget-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="profile-office-panel"
+                data-sidebar-toggle
+                data-profile-widget-toggle
+            >
+                <span>Kantor Desa</span>
+                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
+        </h2>
+        <div id="profile-office-panel" class="profile-widget-panel" hidden>
+            <div class="village-office-map">
+            <iframe
+                title="Peta 3D Kantor Desa Sukomulyo"
+                src="https://www.google.com/maps?q=Kantor%20Desa%20Sukomulyo%2C%20Kecamatan%20Pujon%2C%20Kabupaten%20Malang&amp;t=k&amp;z=18&amp;output=embed"
+                loading="lazy"
+                allowfullscreen
+                referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+        </div>
+            <div class="village-office-copy">
+                <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Sukomulyo, Kecamatan Pujon, Kabupaten Malang</p>
+                <a
+                    href="https://www.google.com/maps/search/?api=1&amp;query=Kantor+Desa+Sukomulyo+Kecamatan+Pujon+Kabupaten+Malang"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Lihat Street View &amp; Rute <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                </a>
+            </div>
         </div>
     </section>
 
     <section class="profile-side-widget latest-comments-widget">
-        <h2 class="profile-side-title">
-            <span>Komentar Terbaru</span>
-            <a class="profile-comments-link" href="{{ route('profile-desa.comments') }}" aria-label="Lihat seluruh komentar identitas desa" title="Lihat semua komentar">
-                <i class="fas fa-bars" aria-hidden="true"></i>
-            </a>
+        <h2 class="profile-side-title profile-widget-heading">
+            <button
+                class="profile-widget-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="profile-comments-panel"
+                data-sidebar-toggle
+                data-profile-widget-toggle
+            >
+                <span>Komentar Terbaru</span>
+                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
         </h2>
-        <div class="latest-comment-list">
-            @foreach ($comments as $comment)
+        <div id="profile-comments-panel" class="profile-widget-panel" hidden>
+            <div class="latest-comment-list">
+            @forelse ($comments as $comment)
                 @php
                     $name = data_get($comment, 'name');
                     $commentId = data_get($comment, 'id');
@@ -100,7 +152,10 @@
                         </div>
                     </div>
                 </article>
-            @endforeach
+            @empty
+                <p class="latest-comment-empty">Belum ada komentar pada halaman ini.</p>
+            @endforelse
+            </div>
         </div>
     </section>
 </aside>

@@ -1,16 +1,16 @@
-<x-layouts.app title="Komentar Identitas Desa">
-    <x-page-header title="Komentar Identitas Desa" :breadcrumbs="[
+<x-layouts.app :title="'Komentar '.$page['title']">
+    <x-page-header :title="'Komentar '.$page['title']" :breadcrumbs="[
         ['label' => 'Profile Desa', 'url' => route('profile-desa')],
-        ['label' => 'Identitas Desa', 'url' => route('profile-desa')],
-        ['label' => 'Komentar Identitas Desa'],
+        ['label' => $page['title'], 'url' => $page['url']],
+        ['label' => 'Komentar'],
     ]" />
 
     <div class="container">
         <div id="sc_innerpage_wrap" class="profile-comments-layout">
             <section class="sc_innerpage_contentbx fullwidth profile-comments-page" aria-labelledby="profile-comments-title">
                 <header class="profile-comments-heading">
-                    <h1 id="profile-comments-title">Komentar Identitas Desa</h1>
-                    <p>Berikut tanggapan warga mengenai Identitas Desa Sukomulyo.</p>
+                    <h1 id="profile-comments-title">Komentar {{ $page['title'] }}</h1>
+                    <p>{{ number_format($comments->total(), 0, ',', '.') }} tanggapan warga mengenai {{ $page['title'] }}.</p>
                 </header>
 
                 <div class="profile-comments-list">
@@ -34,7 +34,7 @@
                             </div>
                         </article>
                     @empty
-                        <p class="profile-comments-empty">Belum ada komentar untuk Identitas Desa.</p>
+                        <p class="profile-comments-empty">Belum ada komentar untuk {{ $page['title'] }}.</p>
                     @endforelse
                 </div>
 
@@ -43,6 +43,10 @@
                         {{ $comments->links() }}
                     </div>
                 @endif
+
+                <a class="profile-comments-back" href="{{ $page['url'] }}#komentar">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali ke {{ $page['title'] }}
+                </a>
             </section>
         </div>
     </div>

@@ -22,6 +22,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -113,16 +114,19 @@ class SiteController extends Controller
         // Older cached profile payloads may not yet contain the sidebar data.
         $profile['villageLeader'] ??= $this->villageLeader();
         $profile['villageRegulations'] ??= $this->villageRegulations();
-        $profile['latestComments'] = Schema::hasTable('village_comments')
-            ? VillageComment::query()->where('is_visible', true)->latest()->limit(3)->get()
-            : collect();
+        $profile = array_merge($profile, $this->profilePageData('identitas'));
 
         return $this->render('pages.profile', $profile);
     }
 
     public function sendProfileComment(Request $request): RedirectResponse
     {
+        $request->merge([
+            'page_key' => $request->input('page_key', 'identitas'),
+        ]);
+
         $comment = $request->validate([
+            'page_key' => ['required', Rule::in(array_keys($this->profilePages()))],
             'comment' => ['required', 'string', 'max:1500'],
             'name' => ['required', 'string', 'max:100'],
             'address' => ['required', 'string', 'max:300'],
@@ -139,18 +143,37 @@ class SiteController extends Controller
         unset($comment['website']);
         VillageComment::create($comment);
 
+        $page = $this->profilePages()[$comment['page_key']];
+
         return redirect()
-            ->to(route('profile-desa').'#komentar')
+            ->to($page['url'].'#komentar')
             ->with('comment_success', 'Terima kasih. Komentar Anda sudah berhasil dikirim.');
     }
 
     public function profileComments(): View
     {
+        return $this->renderProfileComments('identitas');
+    }
+
+    public function profileSectionComments(string $section): View
+    {
+        abort_unless(isset($this->profilePages()[$section]), 404);
+
+        return $this->renderProfileComments($section);
+    }
+
+    private function renderProfileComments(string $pageKey): View
+    {
+        $page = $this->profilePages()[$pageKey];
         $comments = Schema::hasTable('village_comments')
-            ? VillageComment::query()->where('is_visible', true)->latest()->paginate(12)
+            ? VillageComment::query()
+                ->where('page_key', $pageKey)
+                ->where('is_visible', true)
+                ->latest()
+                ->paginate(12)
             : new LengthAwarePaginator([], 0, 12);
 
-        return $this->render('pages.profile-comments', compact('comments'));
+        return $this->render('pages.profile-comments', compact('comments', 'page'));
     }
 
     public function likeProfileComment(VillageComment $comment): RedirectResponse
@@ -187,7 +210,10 @@ class SiteController extends Controller
             ? VillageProfileSection::with('image')->whereIn('section_key', $page['keys'])->where('status', 'published')->orderBy('display_order')->get()
             : collect();
 
-        return $this->render('pages.profile-detail', compact('page', 'sections'));
+        return $this->render('pages.profile-detail', array_merge(
+            compact('page', 'sections'),
+            $this->profilePageData($section)
+        ));
     }
 
     public function statistics(PopulationStatisticsService $populationStatistics): View
@@ -391,7 +417,7 @@ class SiteController extends Controller
 
     public function map(): View
     {
-        return $this->render('pages.map');
+        return $this->render('pages.map', $this->profilePageData('wilayah-desa'));
     }
 
     public function mapGeoJson(): JsonResponse
@@ -459,14 +485,18 @@ class SiteController extends Controller
                 ]
         );
 
-        return $this->render('pages.government', [
-            'officials' => $officials,
-        ]);
+        return $this->render('pages.government', array_merge(
+            ['officials' => $officials],
+            $this->profilePageData('struktur-pemerintahan')
+        ));
     }
 
     public function potentials(): View
     {
-        return $this->render('pages.potentials', ['potentials' => $this->potentialsData()]);
+        return $this->render('pages.potentials', array_merge(
+            ['potentials' => $this->potentialsData()],
+            $this->profilePageData('potensi-desa')
+        ));
     }
 
     public function news(Request $request): View
@@ -772,7 +802,7 @@ class SiteController extends Controller
     {
         return [
                 ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
-                ['label' => 'Profile Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
+                ['label' => 'Profil Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
                     ['label' => 'Identitas Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
                     ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
                     ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
@@ -1184,6 +1214,63 @@ class SiteController extends Controller
             ['title' => 'UMKM Lokal', 'description' => 'Produk olahan dan kerajinan warga memiliki peluang pasar yang terus berkembang.', 'image' => $image, 'icon' => 'fas fa-store'],
             ['title' => 'Seni dan Budaya', 'description' => 'Tradisi lokal terus dirawat melalui kegiatan dan partisipasi lintas generasi.', 'image' => $image, 'icon' => 'fas fa-drum'],
             ['title' => 'Wisata Desa', 'description' => 'Lingkungan dan kehidupan desa menawarkan pengalaman wisata berbasis masyarakat.', 'image' => $image, 'icon' => 'fas fa-map-marked-alt'],
+        ];
+    }
+
+    private function profilePages(): array
+    {
+        return [
+            'identitas' => [
+                'title' => 'Identitas Desa',
+                'url' => route('profile-desa'),
+                'comments_url' => route('profile-desa.comments'),
+            ],
+            'sejarah' => [
+                'title' => 'Sejarah Desa',
+                'url' => route('profile-desa.detail', ['section' => 'sejarah']),
+                'comments_url' => route('profile-desa.section-comments', ['section' => 'sejarah']),
+            ],
+            'visi-misi' => [
+                'title' => 'Visi dan Misi',
+                'url' => route('profile-desa.detail', ['section' => 'visi-misi']),
+                'comments_url' => route('profile-desa.section-comments', ['section' => 'visi-misi']),
+            ],
+            'struktur-pemerintahan' => [
+                'title' => 'Struktur Pemerintahan',
+                'url' => route('pemerintahan-desa'),
+                'comments_url' => route('profile-desa.section-comments', ['section' => 'struktur-pemerintahan']),
+            ],
+            'wilayah-desa' => [
+                'title' => 'Wilayah Desa',
+                'url' => route('peta-desa'),
+                'comments_url' => route('profile-desa.section-comments', ['section' => 'wilayah-desa']),
+            ],
+            'potensi-desa' => [
+                'title' => 'Potensi Desa',
+                'url' => route('potensi-desa'),
+                'comments_url' => route('profile-desa.section-comments', ['section' => 'potensi-desa']),
+            ],
+        ];
+    }
+
+    private function profilePageData(string $pageKey): array
+    {
+        $page = $this->profilePages()[$pageKey];
+        $commentsQuery = Schema::hasTable('village_comments')
+            ? VillageComment::query()->where('page_key', $pageKey)->where('is_visible', true)
+            : null;
+
+        return [
+            'villageLeader' => $this->villageLeader(),
+            'villageRegulations' => $this->villageRegulations(),
+            'latestComments' => $commentsQuery ? (clone $commentsQuery)->latest()->limit(3)->get() : collect(),
+            'commentContext' => [
+                'page_key' => $pageKey,
+                'title' => $page['title'],
+                'url' => $page['url'],
+                'comments_url' => $page['comments_url'],
+                'count' => $commentsQuery ? (clone $commentsQuery)->count() : 0,
+            ],
         ];
     }
 

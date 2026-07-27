@@ -265,6 +265,18 @@ const initPublicPage = () => {
         toggle.addEventListener('click', () => {
             const expanded = toggle.getAttribute('aria-expanded') === 'true';
 
+            if (!expanded && toggle.hasAttribute('data-profile-widget-toggle')) {
+                const accordion = toggle.closest('[data-profile-accordion]');
+
+                accordion?.querySelectorAll('[data-profile-widget-toggle][aria-expanded="true"]').forEach((openToggle) => {
+                    if (openToggle === toggle) return;
+
+                    openToggle.setAttribute('aria-expanded', 'false');
+                    const openPanel = document.getElementById(openToggle.getAttribute('aria-controls'));
+                    if (openPanel) openPanel.hidden = true;
+                });
+            }
+
             setExpanded(!expanded);
         });
     });

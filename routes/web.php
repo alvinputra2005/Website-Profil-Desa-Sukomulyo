@@ -84,6 +84,9 @@ Route::controller(SiteController::class)->group(function () {
     Route::post('/profile-desa/komentar', 'sendProfileComment')->middleware('throttle:5,1')->name('profile-desa.comment');
     Route::get('/profile-desa/komentar-identitas-desa', 'profileComments')->name('profile-desa.comments');
     Route::post('/profile-desa/komentar-identitas-desa/{comment}/suka', 'likeProfileComment')->middleware('throttle:30,1')->name('profile-desa.comments.like');
+    Route::get('/profile-desa/{section}/komentar', 'profileSectionComments')
+        ->where('section', 'sejarah|visi-misi|struktur-pemerintahan|wilayah-desa|potensi-desa')
+        ->name('profile-desa.section-comments');
     Route::get('/profile-desa/{section}', 'profileDetail')->where('section', 'sejarah|visi-misi')->name('profile-desa.detail');
     Route::get('/pemerintahan-desa', 'government')->name('pemerintahan-desa');
     Route::get('/potensi-desa', 'potentials')->name('potensi-desa');

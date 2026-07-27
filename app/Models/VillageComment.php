@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class VillageComment extends Model
 {
     protected $fillable = [
+        'page_key',
         'name',
         'address',
         'phone',

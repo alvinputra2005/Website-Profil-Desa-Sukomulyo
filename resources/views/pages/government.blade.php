@@ -1,15 +1,20 @@
-<x-layouts.app title="Pemerintahan Desa">
-    <x-page-header title="Pemerintahan Desa" description="Struktur organisasi dan prinsip pelayanan Pemerintah Desa Sukomulyo." :breadcrumbs="[
+<x-layouts.app title="Struktur Pemerintahan" description="Struktur organisasi dan prinsip pelayanan Pemerintah Desa Sukomulyo.">
+    <x-page-header title="Struktur Pemerintahan" description="Struktur organisasi dan prinsip pelayanan Pemerintah Desa Sukomulyo." :breadcrumbs="[
         ['label' => 'Profile Desa', 'url' => route('profile-desa')],
-        ['label' => 'Pemerintahan Desa'],
+        ['label' => 'Struktur Pemerintahan'],
     ]" />
 
-    <div class="container">
-        <div id="sc_innerpage_wrap">
-            <section class="sc_innerpage_contentbx fullwidth">
+    @php
+        $shareUrl = route('pemerintahan-desa');
+        $shareText = 'Struktur Pemerintahan Desa Sukomulyo - '.$site['name'];
+    @endphp
+
+    <div class="container news-detail-container profile-detail-container">
+        <div id="sc_innerpage_wrap" class="news-detail-layout profile-article-layout" data-hide-back-to-top data-disable-scroll-reveal>
+            <section class="sc_innerpage_contentbx single-article village-profile-article village-government-content">
                 <div class="content-intro">
                     <span class="section-kicker">Struktur Organisasi</span>
-                    <h2>Perangkat Desa Sukomulyo</h2>
+                    <h1>Perangkat Desa Sukomulyo</h1>
                     <p>Pemerintah desa menjalankan pelayanan, administrasi, pembangunan, dan pemberdayaan masyarakat sesuai tugas masing-masing.</p>
                 </div>
 
@@ -25,7 +30,7 @@
                             </div>
                             <div>
                                 <p>{{ $official['role'] }}</p>
-                                <h3>{{ $official['name'] }}</h3>
+                                <h2>{{ $official['name'] }}</h2>
                             </div>
                         </article>
                     @endforeach
@@ -39,7 +44,12 @@
                         <article><i class="fas fa-balance-scale" aria-hidden="true"></i><h3>Akuntabel</h3><p>Menjalankan tugas dengan tertib dan dapat dipertanggungjawabkan.</p></article>
                     </div>
                 </section>
+
+                <x-profile-comment-section :context="$commentContext" />
             </section>
+
+            <x-profile-share :url="$shareUrl" :text="$shareText" label="Struktur Pemerintahan" />
+            <x-profile-sidebar :leader="$villageLeader" :regulations="$villageRegulations" :latest-comments="$latestComments" />
         </div>
     </div>
 </x-layouts.app>

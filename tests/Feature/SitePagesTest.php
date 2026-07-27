@@ -14,6 +14,7 @@ class SitePagesTest extends TestCase
         $pages = [
             route('beranda') => 'Desa Sukomulyo',
             route('profile-desa') => 'Identitas Desa',
+            route('profile-desa.comments') => 'Komentar Identitas Desa',
             route('profile-desa.detail', ['section' => 'sejarah']) => 'Sejarah Desa',
             route('profile-desa.detail', ['section' => 'visi-misi']) => 'Visi dan Misi',
             route('pemerintahan-desa') => 'Pemerintahan Desa',
@@ -63,7 +64,7 @@ class SitePagesTest extends TestCase
 
         $this->assertSame(4, substr_count($navigation, '<ul class="sub-menu">'));
         $this->assertSame(4, substr_count($navigation, 'class="nav-dropdown-toggle"'));
-        foreach (['Profile Desa', 'Identitas Desa', 'Data Statistik', 'Kependudukan', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Pendidikan', 'Layanan Administrasi', 'APBDes'] as $label) {
+        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Kependudukan', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Pendidikan', 'Layanan Administrasi', 'APBDes'] as $label) {
             $this->assertStringContainsString($label, $navigation);
         }
         foreach (['data-desa-statistik', 'kependudukan', 'informasi-publik-desa'] as $route) {
@@ -132,6 +133,9 @@ class SitePagesTest extends TestCase
             ->assertSee('data-print-article', false)
             ->assertSee('Profil Pimpinan')
             ->assertSee('Peraturan Desa')
+            ->assertSee('Kantor Desa')
+            ->assertSee('Peta 3D Kantor Desa Sukomulyo')
+            ->assertSee('Lihat Street View &amp; Rute', false)
             ->assertSee('Komentar Terbaru')
             ->assertSee('Kirim Komentar')
             ->assertSee('data-share-native', false)
@@ -139,6 +143,9 @@ class SitePagesTest extends TestCase
             ->assertDontSee('Berita Populer');
 
         $this->assertSame(3, substr_count($response->getContent(), 'class="regulation-card'));
+        $this->assertStringContainsString('data-profile-accordion', $response->getContent());
+        $this->assertSame(4, substr_count($response->getContent(), 'data-profile-widget-toggle'));
+        $this->assertSame(4, substr_count($response->getContent(), 'class="profile-widget-panel" hidden'));
     }
 
     public function test_resident_can_submit_a_profile_comment_without_exposing_private_fields(): void
@@ -164,6 +171,23 @@ class SitePagesTest extends TestCase
             ->assertSee('Mohon data kode pos desa diperbarui.')
             ->assertDontSee('Dusun Sukomakmur RT 02')
             ->assertDontSee('081234567890');
+    }
+
+    public function test_profile_comments_can_be_viewed_and_liked(): void
+    {
+        $this->get(route('profile-desa.comments'))
+            ->assertOk()
+            ->assertSee('Komentar Identitas Desa')
+            ->assertSee('Siti Aminah');
+
+        $comment = \App\Models\VillageComment::query()->where('name', 'Siti Aminah')->firstOrFail();
+
+        $this->post(route('profile-desa.comments.like', $comment));
+
+        $this->assertDatabaseHas('village_comments', [
+            'id' => $comment->id,
+            'like_count' => 13,
+        ]);
     }
 
     public function test_homepage_shows_four_news_five_gallery_items_and_village_map(): void
