@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Services\Web;
 
-use App\Http\Requests\Web\StoreContactMessageRequest;
 use App\Http\Requests\Web\PopulationPeriodRequest;
+use App\Http\Requests\Web\StoreContactMessageRequest;
 use App\Models\ContactMessage;
 use App\Models\Gallery;
 use App\Models\IdmScore;
@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
-class SiteController extends Controller
+class PublicSiteService
 {
     public function __construct(private readonly SiteCache $cache) {}
 
@@ -752,42 +752,42 @@ class SiteController extends Controller
     private function navigation(): array
     {
         return [
-                ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
-                ['label' => 'Profile Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
-                    ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
-                    ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
-                    ['label' => 'Struktur Pemerintahan', 'route' => 'pemerintahan-desa', 'active' => 'pemerintahan-desa'],
-                    ['label' => 'Wilayah Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
-                    ['label' => 'Potensi Desa', 'route' => 'potensi-desa', 'active' => 'potensi-desa'],
-                ]],
-                ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => [
-                    ['label' => 'Statistik Penduduk', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'penduduk']],
-                    ['label' => 'Statistik Pendidikan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pendidikan']],
-                    ['label' => 'Statistik Pekerjaan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pekerjaan']],
-                    ['label' => 'Statistik Ekonomi', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'ekonomi']],
-                    ['label' => 'IDM (Indeks Desa Membangun)', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'idm']],
-                    ['label' => 'Visualisasi Data', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'visualisasi']],
-                ]],
-                ['label' => 'Kependudukan', 'route' => 'kependudukan', 'active' => 'kependudukan*', 'children' => [
-                    ['label' => 'Ringkasan Penduduk', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'ringkasan']],
-                    ['label' => 'Jenis Kelamin', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'jenis-kelamin']],
-                    ['label' => 'Kelompok Umur', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'kelompok-umur']],
-                    ['label' => 'Pendidikan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pendidikan']],
-                    ['label' => 'Pekerjaan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pekerjaan']],
-                    ['label' => 'Agama', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'agama']],
-                    ['label' => 'Status Perkawinan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'status-perkawinan']],
-                    ['label' => 'Laporan Penduduk', 'route' => 'laporan-penduduk', 'active' => 'laporan-penduduk'],
-                ]],
-                ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
-                    ['label' => 'Pengumuman Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'pengumuman']],
-                    ['label' => 'Layanan Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
-                    ['label' => 'Agenda Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'agenda']],
-                    ['label' => 'Informasi Bantuan Sosial', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'bantuan-sosial']],
-                    ['label' => 'Informasi Publik', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'informasi-publik']],
-                    ['label' => 'APBDes', 'route' => 'transparansi-apbdes', 'active' => 'transparansi-apbdes'],
-                ]],
-                ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
-                ['label' => 'Galeri Desa', 'route' => 'galeri-desa', 'active' => 'galeri-desa'],
+            ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
+            ['label' => 'Profile Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
+                ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
+                ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
+                ['label' => 'Struktur Pemerintahan', 'route' => 'pemerintahan-desa', 'active' => 'pemerintahan-desa'],
+                ['label' => 'Wilayah Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
+                ['label' => 'Potensi Desa', 'route' => 'potensi-desa', 'active' => 'potensi-desa'],
+            ]],
+            ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => [
+                ['label' => 'Statistik Penduduk', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'penduduk']],
+                ['label' => 'Statistik Pendidikan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pendidikan']],
+                ['label' => 'Statistik Pekerjaan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pekerjaan']],
+                ['label' => 'Statistik Ekonomi', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'ekonomi']],
+                ['label' => 'IDM (Indeks Desa Membangun)', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'idm']],
+                ['label' => 'Visualisasi Data', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'visualisasi']],
+            ]],
+            ['label' => 'Kependudukan', 'route' => 'kependudukan', 'active' => 'kependudukan*', 'children' => [
+                ['label' => 'Ringkasan Penduduk', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'ringkasan']],
+                ['label' => 'Jenis Kelamin', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'jenis-kelamin']],
+                ['label' => 'Kelompok Umur', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'kelompok-umur']],
+                ['label' => 'Pendidikan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pendidikan']],
+                ['label' => 'Pekerjaan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pekerjaan']],
+                ['label' => 'Agama', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'agama']],
+                ['label' => 'Status Perkawinan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'status-perkawinan']],
+                ['label' => 'Laporan Penduduk', 'route' => 'laporan-penduduk', 'active' => 'laporan-penduduk'],
+            ]],
+            ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
+                ['label' => 'Pengumuman Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'pengumuman']],
+                ['label' => 'Layanan Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
+                ['label' => 'Agenda Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'agenda']],
+                ['label' => 'Informasi Bantuan Sosial', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'bantuan-sosial']],
+                ['label' => 'Informasi Publik', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'informasi-publik']],
+                ['label' => 'APBDes', 'route' => 'transparansi-apbdes', 'active' => 'transparansi-apbdes'],
+            ]],
+            ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
+            ['label' => 'Galeri Desa', 'route' => 'galeri-desa', 'active' => 'galeri-desa'],
         ];
     }
 
@@ -1015,8 +1015,8 @@ class SiteController extends Controller
             ->orderByDesc('id')
             ->get()
             ->map(
-            fn (News $article) => $this->mapArticle($article)
-        )->all();
+                fn (News $article) => $this->mapArticle($article)
+            )->all();
 
         if ($articles !== []) {
             return $articles;
