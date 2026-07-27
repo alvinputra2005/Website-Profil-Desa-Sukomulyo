@@ -474,19 +474,33 @@ class SiteController extends Controller
             SiteCache::OFFICIALS,
             SiteCache::ONE_HOUR,
             fn () => Schema::hasTable('officials') && Official::where('is_active', true)->exists()
-                ? Official::with('photo')->where('is_active', true)->orderBy('display_order')->get()->map(fn ($o) => ['role' => $o->position_label, 'name' => $o->full_name, 'photo' => $o->photo?->url, 'photo_alt' => $o->photo?->alt_text])->all()
-                : [
-                    ['role' => 'Kepala Desa', 'name' => 'Nama Kepala Desa', 'photo' => null],
-                    ['role' => 'Sekretaris Desa', 'name' => 'Nama Sekretaris Desa', 'photo' => null],
-                    ['role' => 'Kaur Tata Usaha dan Umum', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-                    ['role' => 'Kaur Keuangan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-                    ['role' => 'Kasi Pemerintahan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-                    ['role' => 'Kasi Kesejahteraan', 'name' => 'Nama Perangkat Desa', 'photo' => null],
-                ]
+                ? Official::with('photo')
+                    ->where('is_active', true)
+                    ->orderBy('display_order')
+                    ->orderBy('name')
+                    ->get()
+                    ->map(function (Official $official): array {
+                        $name = $official->full_name;
+
+                        return [
+                            'id' => $official->id,
+                            'role' => $official->position_label,
+                            'position' => $official->position,
+                            'name' => $name,
+                            'photo' => $official->photo?->url ?: $this->officialAssetPhoto($name),
+                            'photo_alt' => $official->photo?->alt_text ?: "{$name} - {$official->position_label}",
+                            'initials' => $this->officialInitials($name),
+                            'superior_id' => $official->superior_id,
+                            'display_order' => $official->display_order,
+                        ];
+                    })
+                    ->values()
+                    ->all()
+                : $this->fallbackGovernmentOfficials()
         );
 
         return $this->render('pages.government', array_merge(
-            ['officials' => $officials],
+            ['organization' => $this->governmentOrganization($officials)],
             $this->profilePageData('struktur-pemerintahan')
         ));
     }
@@ -801,43 +815,43 @@ class SiteController extends Controller
     private function navigation(): array
     {
         return [
-                ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
-                ['label' => 'Profil Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
-                    ['label' => 'Identitas Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
-                    ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
-                    ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
-                    ['label' => 'Struktur Pemerintahan', 'route' => 'pemerintahan-desa', 'active' => 'pemerintahan-desa'],
-                    ['label' => 'Wilayah Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
-                    ['label' => 'Potensi Desa', 'route' => 'potensi-desa', 'active' => 'potensi-desa'],
-                ]],
-                ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => [
-                    ['label' => 'Statistik Penduduk', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'penduduk']],
-                    ['label' => 'Statistik Pendidikan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pendidikan']],
-                    ['label' => 'Statistik Pekerjaan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pekerjaan']],
-                    ['label' => 'Statistik Ekonomi', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'ekonomi']],
-                    ['label' => 'IDM (Indeks Desa Membangun)', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'idm']],
-                    ['label' => 'Visualisasi Data', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'visualisasi']],
-                ]],
-                ['label' => 'Kependudukan', 'route' => 'kependudukan', 'active' => 'kependudukan*', 'children' => [
-                    ['label' => 'Ringkasan Penduduk', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'ringkasan']],
-                    ['label' => 'Jenis Kelamin', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'jenis-kelamin']],
-                    ['label' => 'Kelompok Umur', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'kelompok-umur']],
-                    ['label' => 'Pendidikan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pendidikan']],
-                    ['label' => 'Pekerjaan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pekerjaan']],
-                    ['label' => 'Agama', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'agama']],
-                    ['label' => 'Status Perkawinan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'status-perkawinan']],
-                    ['label' => 'Laporan Penduduk', 'route' => 'laporan-penduduk', 'active' => 'laporan-penduduk'],
-                ]],
-                ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
-                    ['label' => 'Pengumuman Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'pengumuman']],
-                    ['label' => 'Layanan Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
-                    ['label' => 'Agenda Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'agenda']],
-                    ['label' => 'Informasi Bantuan Sosial', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'bantuan-sosial']],
-                    ['label' => 'Informasi Publik', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'informasi-publik']],
-                    ['label' => 'APBDes', 'route' => 'transparansi-apbdes', 'active' => 'transparansi-apbdes'],
-                ]],
-                ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
-                ['label' => 'Galeri Desa', 'route' => 'galeri-desa', 'active' => 'galeri-desa'],
+            ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
+            ['label' => 'Profil Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
+                ['label' => 'Identitas Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
+                ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
+                ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
+                ['label' => 'Struktur Pemerintahan', 'route' => 'pemerintahan-desa', 'active' => 'pemerintahan-desa'],
+                ['label' => 'Wilayah Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
+                ['label' => 'Potensi Desa', 'route' => 'potensi-desa', 'active' => 'potensi-desa'],
+            ]],
+            ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => [
+                ['label' => 'Statistik Penduduk', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'penduduk']],
+                ['label' => 'Statistik Pendidikan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pendidikan']],
+                ['label' => 'Statistik Pekerjaan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pekerjaan']],
+                ['label' => 'Statistik Ekonomi', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'ekonomi']],
+                ['label' => 'IDM (Indeks Desa Membangun)', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'idm']],
+                ['label' => 'Visualisasi Data', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'visualisasi']],
+            ]],
+            ['label' => 'Kependudukan', 'route' => 'kependudukan', 'active' => 'kependudukan*', 'children' => [
+                ['label' => 'Ringkasan Penduduk', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'ringkasan']],
+                ['label' => 'Jenis Kelamin', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'jenis-kelamin']],
+                ['label' => 'Kelompok Umur', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'kelompok-umur']],
+                ['label' => 'Pendidikan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pendidikan']],
+                ['label' => 'Pekerjaan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pekerjaan']],
+                ['label' => 'Agama', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'agama']],
+                ['label' => 'Status Perkawinan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'status-perkawinan']],
+                ['label' => 'Laporan Penduduk', 'route' => 'laporan-penduduk', 'active' => 'laporan-penduduk'],
+            ]],
+            ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
+                ['label' => 'Pengumuman Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'pengumuman']],
+                ['label' => 'Layanan Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
+                ['label' => 'Agenda Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'agenda']],
+                ['label' => 'Informasi Bantuan Sosial', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'bantuan-sosial']],
+                ['label' => 'Informasi Publik', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'informasi-publik']],
+                ['label' => 'APBDes', 'route' => 'transparansi-apbdes', 'active' => 'transparansi-apbdes'],
+            ]],
+            ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
+            ['label' => 'Galeri Desa', 'route' => 'galeri-desa', 'active' => 'galeri-desa'],
         ];
     }
 
@@ -1202,7 +1216,7 @@ class SiteController extends Controller
             default => 'Kegiatan ini menjadi bagian dari aktivitas warga yang mendukung kemajuan dan kebersamaan Desa Sukomulyo.',
         };
 
-        return rtrim($caption, ".!?").'. '.$context;
+        return rtrim($caption, '.!?').'. '.$context;
     }
 
     private function potentialsData(): array
@@ -1215,6 +1229,118 @@ class SiteController extends Controller
             ['title' => 'Seni dan Budaya', 'description' => 'Tradisi lokal terus dirawat melalui kegiatan dan partisipasi lintas generasi.', 'image' => $image, 'icon' => 'fas fa-drum'],
             ['title' => 'Wisata Desa', 'description' => 'Lingkungan dan kehidupan desa menawarkan pengalaman wisata berbasis masyarakat.', 'image' => $image, 'icon' => 'fas fa-map-marked-alt'],
         ];
+    }
+
+    private function governmentOrganization(array $officials): array
+    {
+        $officials = collect($officials);
+        $normalizedPosition = static fn (array $official): string => mb_strtolower(trim($official['position'] ?? $official['role']));
+        $matches = static function (array $official, array $prefixes) use ($normalizedPosition): bool {
+            $position = $normalizedPosition($official);
+
+            foreach ($prefixes as $prefix) {
+                if ($position === $prefix || str_starts_with($position, $prefix.' ')) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        $leader = $officials->first(fn (array $official): bool => $matches($official, ['kepala desa']));
+        $secretary = $officials->first(fn (array $official): bool => $matches($official, ['sekretaris desa']));
+        $technicalExecutors = $officials
+            ->filter(fn (array $official): bool => $matches($official, ['kasi']))
+            ->values();
+        $secretariatStaff = $officials
+            ->filter(fn (array $official): bool => $matches($official, ['kaur']))
+            ->sortBy(fn (array $official): array => [
+                $secretary && (int) $official['superior_id'] === (int) $secretary['id'] ? 0 : 1,
+                $official['display_order'],
+            ])
+            ->values();
+        $hamletHeads = $officials
+            ->filter(fn (array $official): bool => $matches($official, ['kasun', 'kepala dusun']))
+            ->values();
+
+        $groupedIds = collect([$leader, $secretary])
+            ->filter()
+            ->concat($technicalExecutors)
+            ->concat($secretariatStaff)
+            ->concat($hamletHeads)
+            ->pluck('id')
+            ->all();
+
+        return [
+            'leader' => $leader,
+            'technicalExecutors' => $technicalExecutors->all(),
+            'secretary' => $secretary,
+            'secretariatStaff' => $secretariatStaff->all(),
+            'hamletHeads' => $hamletHeads->all(),
+            'others' => $officials->reject(fn (array $official): bool => in_array($official['id'], $groupedIds, true))->values()->all(),
+        ];
+    }
+
+    private function fallbackGovernmentOfficials(): array
+    {
+        $officials = [
+            ['name' => 'Safiul Anwar, ST', 'position' => 'Kepala Desa', 'superior_id' => null],
+            ['name' => 'Angga Saputra', 'position' => 'Kasi Pemerintahan', 'superior_id' => 1],
+            ['name' => 'Wike Priharti Y', 'position' => 'Kasi Pelayanan', 'superior_id' => 1],
+            ['name' => 'Mohamad Sholeh', 'position' => 'Kasi Kesejahteraan', 'superior_id' => 1],
+            ['name' => 'Baktiyar Kufain', 'position' => 'Sekretaris Desa', 'superior_id' => 1],
+            ['name' => 'Suwarno', 'position' => 'Kaur Keuangan', 'superior_id' => 5],
+            ['name' => 'Reza Tri Purnomo', 'position' => 'Kaur Perencanaan', 'superior_id' => 5],
+            ['name' => 'Catur Yulianto', 'position' => 'Kaur Tata Usaha dan Umum', 'superior_id' => 5],
+            ['name' => 'Bambang S', 'position' => 'Kasun Bakir', 'superior_id' => 1],
+            ['name' => 'Sispanaji', 'position' => 'Kasun Biyan', 'superior_id' => 1],
+            ['name' => 'Nikita F Z', 'position' => 'Kasun Cumul', 'superior_id' => 1],
+            ['name' => 'Fendi Priyo S', 'position' => 'Kasun Kedungrejo', 'superior_id' => 1],
+            ['name' => 'Cahyo Utomo', 'position' => 'Kasun Talasan', 'superior_id' => 1],
+        ];
+
+        return collect($officials)->map(function (array $official, int $index): array {
+            $id = $index + 1;
+            $name = $official['name'];
+
+            return [
+                'id' => $id,
+                'role' => $official['position'],
+                'position' => $official['position'],
+                'name' => $name,
+                'photo' => $this->officialAssetPhoto($name),
+                'photo_alt' => "{$name} - {$official['position']}",
+                'initials' => $this->officialInitials($name),
+                'superior_id' => $official['superior_id'],
+                'display_order' => $id,
+            ];
+        })->all();
+    }
+
+    private function officialAssetPhoto(string $name): ?string
+    {
+        return [
+            'safiul anwar, st' => '/assets/safiul-anwar.jpeg',
+            'angga saputra' => '/assets/angga-saputra.jpeg',
+            'wike priharti y' => '/assets/wike-priharti-y.jpeg',
+            'mohamad sholeh' => '/assets/muhammad-sholeh.jpeg',
+            'suwarno' => '/assets/suwarno.jpeg',
+            'reza tri purnomo' => '/assets/reza-tri.jpeg',
+            'catur yulianto' => '/assets/catur-yulianto.jpeg',
+            'bambang s' => '/assets/bambang.jpeg',
+            'sispanaji' => '/assets/sispanaji.jpeg',
+            'nikita f z' => '/assets/nikita.jpeg',
+            'fendi priyo s' => '/assets/fendi-priyo.jpeg',
+        ][mb_strtolower(trim($name))] ?? null;
+    }
+
+    private function officialInitials(string $name): string
+    {
+        return collect(preg_split('/[\s,]+/u', trim($name)) ?: [])
+            ->filter()
+            ->take(2)
+            ->map(fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))
+            ->implode('');
     }
 
     private function profilePages(): array

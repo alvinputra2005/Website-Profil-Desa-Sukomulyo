@@ -9,13 +9,12 @@ class ProfilePageLayoutTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_all_profile_pages_share_the_sidebar_and_comment_layout(): void
+    public function test_article_profile_pages_share_the_sidebar_and_comment_layout(): void
     {
         $pages = [
             route('profile-desa') => true,
             route('profile-desa.detail', 'sejarah') => true,
             route('profile-desa.detail', 'visi-misi') => true,
-            route('pemerintahan-desa') => false,
             route('peta-desa') => true,
             route('potensi-desa') => true,
         ];
@@ -41,6 +40,20 @@ class ProfilePageLayoutTest extends TestCase
                 $this->assertStringNotContainsString('data-print-article', $html);
             }
         }
+    }
+
+    public function test_government_page_focuses_on_the_chart_without_profile_sidebar(): void
+    {
+        $response = $this->get(route('pemerintahan-desa'))
+            ->assertOk()
+            ->assertSee('data-org-tree', false)
+            ->assertSee('Kirim Komentar')
+            ->assertDontSee('Profil Pimpinan')
+            ->assertDontSee('Peraturan Desa')
+            ->assertDontSee('Komentar Terbaru')
+            ->assertDontSee('data-share-native', false);
+
+        $this->assertSame(0, substr_count($response->getContent(), 'data-profile-widget-toggle'));
     }
 
     public function test_comments_are_counted_and_listed_per_profile_page(): void

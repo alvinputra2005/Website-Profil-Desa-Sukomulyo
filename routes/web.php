@@ -4,7 +4,7 @@ use App\Http\Controllers\SiteController;
 use App\Http\Controllers\MediaFileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{LoginController,PasswordController};
-use App\Http\Controllers\Admin\{ActivityController,ContactMessageController,CrudController,DashboardController,MediaController,OfficialController,RegionController,UserController,VillageContentController};
+use App\Http\Controllers\Admin\{ActivityController,ContactMessageController,CrudController,DashboardController,MediaController,OfficialController,OfficialOrganizationController,RegionController,UserController,VillageContentController};
 use App\Http\Controllers\Admin\{
     FamilyController, HouseholdController, PopulationGroupController, PopulationGroupMemberController,
     PopulationReportController, PopulationStatisticsController, ResidentController
@@ -43,7 +43,7 @@ Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/villages/{district}', [RegionController::class, 'villages'])->where('district', '[0-9]{2}\.[0-9]{2}\.[0-9]{2}')->name('villages');
     });
     Route::middleware('can:manage-content')->group(function () {
-        Route::get('/officials/organization', [OfficialController::class, 'organization'])->name('officials.organization');
+        Route::get('/officials/organization', OfficialOrganizationController::class)->name('officials.organization');
         Route::get('/officials/print', [OfficialController::class, 'print'])->name('officials.print');
         Route::get('/officials/export', [OfficialController::class, 'export'])->name('officials.export');
         Route::delete('/officials/bulk', [OfficialController::class, 'bulkDestroy'])->name('officials.bulk-destroy');

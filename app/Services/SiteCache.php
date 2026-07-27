@@ -29,7 +29,7 @@ class SiteCache
 
     public const NEWS_DETAIL_VERSION = 'news.detail.version';
 
-    public const OFFICIALS = 'government.officials';
+    public const OFFICIALS = 'government.officials.v2';
 
     public const GALLERY = 'gallery.public';
 
