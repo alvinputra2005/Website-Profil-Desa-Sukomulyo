@@ -19,7 +19,7 @@
                             class="gallery-item gallery-collage-card"
                             type="button"
                             data-gallery-item
-                            data-gallery-index="{{ $loop->index }}"
+                            data-gallery-group="{{ $photo['id'] }}"
                             data-image="{{ $photo['src'] }}"
                             data-title="{{ $photo['title'] }}"
                             data-caption="{{ $photo['caption'] }}"
@@ -29,6 +29,7 @@
                             <span class="gallery-collage-overlay">
                                 <strong>{{ $photo['title'] }}</strong>
                                 <span><i class="far fa-calendar-alt" aria-hidden="true"></i>{{ $photo['date'] }}</span>
+                                <span><i class="far fa-images" aria-hidden="true"></i>{{ count($photo['photos']) }} foto</span>
                             </span>
                         </button>
                     @endforeach
@@ -61,19 +62,22 @@
                     </button>
                 </div>
                 <div class="gallery-dialog-thumbs" aria-label="Pilih foto galeri">
-                    @foreach ($photos as $photo)
-                        <button
-                            class="gallery-dialog-thumb"
-                            type="button"
-                            data-gallery-thumb
-                            data-gallery-index="{{ $loop->index }}"
-                            data-image="{{ $photo['src'] }}"
-                            data-title="{{ $photo['title'] }}"
-                            data-caption="{{ $photo['caption'] }}"
-                            aria-label="Tampilkan {{ $photo['title'] }}"
-                        >
-                            <img src="{{ $photo['src'] }}" alt="" loading="lazy">
-                        </button>
+                    @foreach ($photos as $gallery)
+                        @foreach ($gallery['photos'] as $photo)
+                            <button
+                                class="gallery-dialog-thumb"
+                                type="button"
+                                data-gallery-thumb
+                                data-gallery-group="{{ $gallery['id'] }}"
+                                data-image="{{ $photo['src'] }}"
+                                data-title="{{ $gallery['title'] }}"
+                                data-caption="{{ $gallery['caption'] }}"
+                                aria-label="Tampilkan foto {{ $loop->iteration }} dari {{ $gallery['title'] }}"
+                                hidden
+                            >
+                                <img src="{{ $photo['src'] }}" alt="" loading="lazy">
+                            </button>
+                        @endforeach
                     @endforeach
                 </div>
             </div>

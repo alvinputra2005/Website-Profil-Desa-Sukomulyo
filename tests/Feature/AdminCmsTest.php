@@ -344,6 +344,41 @@ class AdminCmsTest extends TestCase
             ->assertDontSee('Foto Galeri');
     }
 
+    public function test_gallery_actions_match_article_management_actions(): void
+    {
+        $admin = $this->user('super_admin');
+        $gallery = Gallery::create([
+            'title' => 'Galeri Kerja Bakti',
+            'slug' => 'galeri-kerja-bakti',
+            'description' => 'Dokumentasi kerja bakti warga.',
+            'status' => 'published',
+            'created_by' => $admin->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/galleries')
+            ->assertOk()
+            ->assertSee(route('galeri-desa'), false)
+            ->assertSee(route('admin.resources.edit', ['galleries', $gallery]), false)
+            ->assertSee(route('admin.galleries.archive', $gallery), false)
+            ->assertSee(route('admin.resources.destroy', ['galleries', $gallery]), false)
+            ->assertSee('data-confirm-title="Arsipkan Galeri"', false)
+            ->assertSee('data-confirm-tone="warning"', false)
+            ->assertSee('data-confirm-title="Hapus Galeri"', false)
+            ->assertSee('data-confirm-tone="danger"', false)
+            ->assertSee('data-confirm-button="Ya, hapus"', false);
+
+        $this->patch(route('admin.galleries.archive', $gallery))
+            ->assertRedirect();
+
+        $this->assertSame('archived', $gallery->fresh()->status);
+        $this->assertDatabaseHas('activity_logs', [
+            'action' => 'archived',
+            'module' => 'galleries',
+            'record_id' => $gallery->id,
+        ]);
+    }
+
     public function test_village_identity_and_profile_are_managed_in_one_form_and_shown_publicly(): void
     {
         $admin = $this->user('super_admin');

@@ -31,7 +31,7 @@ class SiteCache
 
     public const OFFICIALS = 'government.officials';
 
-    public const GALLERY = 'gallery.public';
+    public const GALLERY = 'gallery.public.v3';
 
     public const PUBLICATIONS = 'publications.public';
 

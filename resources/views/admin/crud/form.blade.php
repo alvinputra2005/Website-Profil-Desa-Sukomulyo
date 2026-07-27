@@ -20,7 +20,7 @@
 @elseif($type==='toggle')
 <label class="checkbox-inline"><input type="checkbox" id="{{ $name }}" name="{{ $name }}" value="1" @checked((bool)$value)> Ya / Aktif</label>
 @elseif($type==='textarea')
-<textarea id="{{ $name }}" name="{{ $name }}" class="form-control" rows="5">{{ $value }}</textarea>
+<textarea id="{{ $name }}" name="{{ $name }}" class="form-control" rows="5" @required(str_contains($field['rules']??'','required'))>{{ $value }}</textarea>
 @elseif($type==='editor')
 <x-admin.rich-editor :name="$name" :value="$value" />
 @elseif($type==='image')

@@ -500,10 +500,9 @@ const initPublicPage = () => {
         const main = galleryDialog.querySelector('.gallery-dialog-main');
         const title = galleryDialog.querySelector('[data-gallery-title]');
         const caption = galleryDialog.querySelector('[data-gallery-caption]');
-        const captionBlock = caption?.closest('.dialog-caption');
         const thumbnails = [...galleryDialog.querySelectorAll('[data-gallery-thumb]')];
         const galleryItems = [...document.querySelectorAll('[data-gallery-item]')];
-        const slides = thumbnails.length ? thumbnails : galleryItems;
+        let slides = thumbnails.length ? thumbnails : galleryItems;
         const previousButton = galleryDialog.querySelector('[data-gallery-prev]');
         const nextButton = galleryDialog.querySelector('[data-gallery-next]');
         let selectedIndex = -1;
@@ -515,60 +514,37 @@ const initPublicPage = () => {
 
         const contextualCaption = (item) => {
             const text = item.dataset.caption?.trim() || '';
-            if (text.length >= 110) return text;
-
-            const titleText = (item.dataset.title || '').toLowerCase();
-            const context = titleText.includes('musyawarah')
-                ? 'Warga berdiskusi terbuka untuk menyepakati langkah yang bermanfaat bagi kemajuan desa.'
-                : titleText.includes('kerja bakti')
-                    ? 'Kegiatan ini memperkuat semangat gotong royong dan kepedulian warga terhadap lingkungan.'
-                    : titleText.includes('umkm')
-                        ? 'Pembekalan ini diharapkan membantu usaha warga tumbuh lebih kreatif dan berdaya saing.'
-                        : titleText.includes('posyandu')
-                            ? 'Pelayanan dilakukan secara berkala agar keluarga mendapat pendampingan kesehatan yang mudah dijangkau.'
-                            : titleText.includes('panen')
-                                ? 'Hasil kegiatan menunjukkan potensi pertanian lokal yang terus dijaga dan dikembangkan bersama.'
-                                : titleText.includes('seni') || titleText.includes('festival')
-                                    ? 'Kegiatan ini menjadi ruang untuk merawat budaya sekaligus mempererat kebersamaan masyarakat.'
-                                    : 'Kegiatan ini menjadi bagian dari aktivitas warga yang mendukung kemajuan dan kebersamaan Desa Sukomulyo.';
-
-            return `${text.replace(/[.!?]+$/, '') || 'Dokumentasi kegiatan warga Desa Sukomulyo'}. ${context}`;
+            return text || `Dokumentasi ${item.dataset.title || 'kegiatan desa'}.`;
         };
 
-        const updateGalleryContent = (item) => {
+        const updateGalleryContent = (item, updateDescription = true) => {
             image.src = item.dataset.image;
             image.alt = item.dataset.title;
-            title.textContent = item.dataset.title;
-            caption.textContent = contextualCaption(item);
+            if (updateDescription) {
+                title.textContent = item.dataset.title;
+                caption.textContent = contextualCaption(item);
+            }
         };
 
         const animateGalleryChange = (item, direction = 'next') => {
             if (!main || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                updateGalleryContent(item);
+                updateGalleryContent(item, false);
                 return;
             }
 
             window.clearTimeout(changeTimer);
             window.clearTimeout(settleTimer);
-            [main, captionBlock].filter(Boolean).forEach((part) => {
-                part.classList.remove('is-leaving', 'is-entering', 'is-next', 'is-prev');
-            });
+            main.classList.remove('is-leaving', 'is-entering', 'is-next', 'is-prev');
             void main.offsetWidth;
-            [main, captionBlock].filter(Boolean).forEach((part) => {
-                part.classList.add('is-leaving', direction === 'prev' ? 'is-prev' : 'is-next');
-            });
+            main.classList.add('is-leaving', direction === 'prev' ? 'is-prev' : 'is-next');
 
             changeTimer = window.setTimeout(() => {
-                updateGalleryContent(item);
-                [main, captionBlock].filter(Boolean).forEach((part) => {
-                    part.classList.remove('is-leaving');
-                    part.classList.add('is-entering');
-                });
+                updateGalleryContent(item, false);
+                main.classList.remove('is-leaving');
+                main.classList.add('is-entering');
 
                 settleTimer = window.setTimeout(() => {
-                    [main, captionBlock].filter(Boolean).forEach((part) => {
-                        part.classList.remove('is-entering', 'is-next', 'is-prev');
-                    });
+                    main.classList.remove('is-entering', 'is-next', 'is-prev');
                 }, 320);
             }, 140);
         };
@@ -613,7 +589,12 @@ const initPublicPage = () => {
 
         galleryItems.forEach((item) => {
             item.addEventListener('click', () => {
-                selectGalleryItem(item);
+                const group = item.dataset.galleryGroup;
+                slides = thumbnails.filter((thumbnail) => thumbnail.dataset.galleryGroup === group);
+                thumbnails.forEach((thumbnail) => {
+                    thumbnail.hidden = thumbnail.dataset.galleryGroup !== group;
+                });
+                selectGalleryItem(slides[0] || item);
                 galleryDialog.showModal();
             });
         });

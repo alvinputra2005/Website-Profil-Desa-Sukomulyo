@@ -607,24 +607,30 @@ class SiteController extends Controller
                 $image = asset('assets/village-rice-fields.jpg');
 
                 if (Schema::hasTable('galleries')) {
-                    $photos = Gallery::where('status', 'published')->with(['items.media', 'cover'])->latest('event_date')->get()->flatMap(function ($gallery) use ($image) {
+                    $photos = Gallery::where('status', 'published')->with(['items.media', 'cover'])->latest('event_date')->get()->map(function ($gallery) use ($image) {
                         $date = $gallery->event_date?->translatedFormat('d F Y') ?? 'Tanggal belum ditentukan';
+                        $galleryPhotos = $gallery->items->map(fn ($item) => [
+                            'src' => $item->media->url,
+                            'title' => $gallery->title,
+                            'caption' => $this->contextualGalleryCaption($item->caption ?? $gallery->description, $item->media->alt_text ?: $gallery->title),
+                        ])->values()->all();
 
-                        if ($gallery->items->isEmpty()) {
-                            return [[
+                        if ($galleryPhotos === []) {
+                            $galleryPhotos[] = [
                                 'src' => $gallery->cover?->url ?? $image,
                                 'title' => $gallery->title,
                                 'caption' => $this->contextualGalleryCaption($gallery->description, $gallery->title),
-                                'date' => $date,
-                            ]];
+                            ];
                         }
 
-                        return $gallery->items->map(fn ($item) => [
-                            'src' => $item->media->url,
-                            'title' => $item->media->alt_text ?: $gallery->title,
-                            'caption' => $this->contextualGalleryCaption($item->caption ?? $gallery->description, $item->media->alt_text ?: $gallery->title),
+                        return [
+                            'id' => $gallery->id,
+                            'src' => $gallery->cover?->url ?? $galleryPhotos[0]['src'],
+                            'title' => $gallery->title,
+                            'caption' => $this->contextualGalleryCaption($gallery->description, $gallery->title),
                             'date' => $date,
-                        ]);
+                            'photos' => $galleryPhotos,
+                        ];
                     })->all();
                     if ($photos !== []) {
                         return $photos;
@@ -632,12 +638,12 @@ class SiteController extends Controller
                 }
 
                 return [
-                    ['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa. Pertemuan ini menjadi ruang untuk menyerap aspirasi dan menentukan prioritas pembangunan bersama.', 'date' => now()->translatedFormat('d F Y')],
-                    ['src' => $image, 'title' => 'Kerja Bakti Warga', 'caption' => 'Gotong royong menjaga lingkungan tetap bersih. Warga bekerja bersama merawat fasilitas umum dan memperkuat kepedulian terhadap lingkungan sekitar.', 'date' => now()->translatedFormat('d F Y')],
-                    ['src' => $image, 'title' => 'Pelatihan UMKM', 'caption' => 'Peningkatan kapasitas pelaku usaha lokal. Peserta belajar mengembangkan produk dan promosi agar usaha warga semakin siap menjangkau pasar.', 'date' => now()->translatedFormat('d F Y')],
-                    ['src' => $image, 'title' => 'Kegiatan Posyandu', 'caption' => 'Pelayanan kesehatan rutin untuk ibu dan anak. Kegiatan ini membantu keluarga memantau tumbuh kembang dan menjaga kesehatan secara berkala.', 'date' => now()->translatedFormat('d F Y')],
-                    ['src' => $image, 'title' => 'Panen Bersama', 'caption' => 'Dokumentasi potensi pertanian Desa Sukomulyo. Hasil panen menjadi gambaran kerja keras petani sekaligus potensi ekonomi desa yang terus dikembangkan.', 'date' => now()->translatedFormat('d F Y')],
-                    ['src' => $image, 'title' => 'Pentas Seni Desa', 'caption' => 'Ruang ekspresi seni dan budaya masyarakat. Warga menampilkan kreativitas lokal dalam suasana yang meriah dan penuh kebersamaan.', 'date' => now()->translatedFormat('d F Y')],
+                    ['id' => 'fallback-1', 'src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa. Pertemuan ini menjadi ruang untuk menyerap aspirasi dan menentukan prioritas pembangunan bersama.', 'date' => now()->translatedFormat('d F Y'), 'photos' => [['src' => $image, 'title' => 'Musyawarah Desa', 'caption' => 'Warga bermusyawarah untuk menyusun program desa.']]],
+                    ['id' => 'fallback-2', 'src' => $image, 'title' => 'Kerja Bakti Warga', 'caption' => 'Gotong royong menjaga lingkungan tetap bersih. Warga bekerja bersama merawat fasilitas umum dan memperkuat kepedulian terhadap lingkungan sekitar.', 'date' => now()->translatedFormat('d F Y'), 'photos' => [['src' => $image, 'title' => 'Kerja Bakti Warga', 'caption' => 'Gotong royong menjaga lingkungan tetap bersih.']]],
+                    ['id' => 'fallback-3', 'src' => $image, 'title' => 'Pelatihan UMKM', 'caption' => 'Peningkatan kapasitas pelaku usaha lokal. Peserta belajar mengembangkan produk dan promosi agar usaha warga semakin siap menjangkau pasar.', 'date' => now()->translatedFormat('d F Y'), 'photos' => [['src' => $image, 'title' => 'Pelatihan UMKM', 'caption' => 'Peningkatan kapasitas pelaku usaha lokal.']]],
+                    ['id' => 'fallback-4', 'src' => $image, 'title' => 'Kegiatan Posyandu', 'caption' => 'Pelayanan kesehatan rutin untuk ibu dan anak. Kegiatan ini membantu keluarga memantau tumbuh kembang dan menjaga kesehatan secara berkala.', 'date' => now()->translatedFormat('d F Y'), 'photos' => [['src' => $image, 'title' => 'Kegiatan Posyandu', 'caption' => 'Pelayanan kesehatan rutin untuk ibu dan anak.']]],
+                    ['id' => 'fallback-5', 'src' => $image, 'title' => 'Panen Bersama', 'caption' => 'Dokumentasi potensi pertanian Desa Sukomulyo. Hasil panen menjadi gambaran kerja keras petani sekaligus potensi ekonomi desa yang terus dikembangkan.', 'date' => now()->translatedFormat('d F Y'), 'photos' => [['src' => $image, 'title' => 'Panen Bersama', 'caption' => 'Dokumentasi potensi pertanian Desa Sukomulyo.']]],
+                    ['id' => 'fallback-6', 'src' => $image, 'title' => 'Pentas Seni Desa', 'caption' => 'Ruang ekspresi seni dan budaya masyarakat. Warga menampilkan kreativitas lokal dalam suasana yang meriah dan penuh kebersamaan.', 'date' => now()->translatedFormat('d F Y'), 'photos' => [['src' => $image, 'title' => 'Pentas Seni Desa', 'caption' => 'Ruang ekspresi seni dan budaya masyarakat.']]],
                 ];
             }
         );
@@ -1176,21 +1182,7 @@ class SiteController extends Controller
         $caption = trim((string) $caption);
         $title = trim((string) $title);
 
-        if ($caption === '' || mb_strlen($caption) >= 110) {
-            return $caption !== '' ? $caption : "Dokumentasi {$title} di Desa Sukomulyo.";
-        }
-
-        $context = match (true) {
-            str_contains(strtolower($title), 'musyawarah') => 'Warga berdiskusi terbuka untuk menyepakati langkah yang bermanfaat bagi kemajuan desa.',
-            str_contains(strtolower($title), 'kerja bakti') => 'Kegiatan ini memperkuat semangat gotong royong dan kepedulian warga terhadap lingkungan.',
-            str_contains(strtolower($title), 'umkm') => 'Pembekalan ini diharapkan membantu usaha warga tumbuh lebih kreatif dan berdaya saing.',
-            str_contains(strtolower($title), 'posyandu') => 'Pelayanan dilakukan secara berkala agar keluarga mendapat pendampingan kesehatan yang mudah dijangkau.',
-            str_contains(strtolower($title), 'panen') => 'Hasil kegiatan menunjukkan potensi pertanian lokal yang terus dijaga dan dikembangkan bersama.',
-            str_contains(strtolower($title), 'seni') || str_contains(strtolower($title), 'festival') => 'Kegiatan ini menjadi ruang untuk merawat budaya sekaligus mempererat kebersamaan masyarakat.',
-            default => 'Kegiatan ini menjadi bagian dari aktivitas warga yang mendukung kemajuan dan kebersamaan Desa Sukomulyo.',
-        };
-
-        return rtrim($caption, ".!?").'. '.$context;
+        return $caption !== '' ? $caption : "Dokumentasi {$title} di Desa Sukomulyo.";
     }
 
     private function potentialsData(): array
