@@ -42,6 +42,43 @@ class SecurityHeadersTest extends TestCase
             ->assertHeader('Content-Security-Policy');
     }
 
+    public function test_local_csp_allows_the_active_vite_development_server(): void
+    {
+        $hotFile = public_path('hot');
+        $originalContents = is_file($hotFile) ? file_get_contents($hotFile) : null;
+        $originalEnvironment = app()->environment();
+
+        file_put_contents($hotFile, 'http://192.168.137.1:5173');
+        app()->detectEnvironment(fn () => 'local');
+
+        try {
+            $policy = (string) $this->get(route('beranda'))
+                ->assertOk()
+                ->headers->get('Content-Security-Policy');
+
+            $this->assertStringContainsString(
+                "script-src 'self' 'unsafe-inline' http://192.168.137.1:5173",
+                $policy
+            );
+            $this->assertStringContainsString(
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com http://192.168.137.1:5173",
+                $policy
+            );
+            $this->assertStringContainsString(
+                "connect-src 'self' http://192.168.137.1:5173 ws://192.168.137.1:5173",
+                $policy
+            );
+        } finally {
+            app()->detectEnvironment(fn () => $originalEnvironment);
+
+            if ($originalContents === null) {
+                @unlink($hotFile);
+            } else {
+                file_put_contents($hotFile, $originalContents);
+            }
+        }
+    }
+
     public function test_admin_responses_send_an_http_noindex_header(): void
     {
         $this->get(route('login'))
