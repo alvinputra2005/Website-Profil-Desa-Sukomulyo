@@ -1,22 +1,34 @@
 <?php
 
-use App\Http\Controllers\SiteController;
+use App\Http\Controllers\Admin\ActivityController;
+use App\Http\Controllers\Admin\ContactMessageController;
+use App\Http\Controllers\Admin\CrudController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FamilyController;
+use App\Http\Controllers\Admin\HouseholdController;
+use App\Http\Controllers\Admin\MediaController;
+use App\Http\Controllers\Admin\OfficialController;
+use App\Http\Controllers\Admin\PopulationGroupController;
+use App\Http\Controllers\Admin\PopulationGroupMemberController;
+use App\Http\Controllers\Admin\PopulationReportController;
+use App\Http\Controllers\Admin\PopulationStatisticsController;
+use App\Http\Controllers\Admin\RegionController;
+use App\Http\Controllers\Admin\ResidentController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VillageContentController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\MediaFileController;
+use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\{LoginController,PasswordController};
-use App\Http\Controllers\Admin\{ActivityController,ContactMessageController,CrudController,DashboardController,MediaController,OfficialController,RegionController,UserController,VillageContentController};
-use App\Http\Controllers\Admin\{
-    FamilyController, HouseholdController, PopulationGroupController, PopulationGroupMemberController,
-    PopulationReportController, PopulationStatisticsController, ResidentController
-};
 
-Route::middleware('guest')->group(function(){
-    Route::get('/admin/login',[LoginController::class,'create'])->name('login');
-    Route::post('/admin/login',[LoginController::class,'store'])->middleware('throttle:admin-login')->name('login.store');
-    Route::get('/admin/lupa-password',[PasswordController::class,'request'])->name('password.request');
-    Route::post('/admin/lupa-password',[PasswordController::class,'email'])->middleware('throttle:3,1')->name('password.email');
-    Route::get('/admin/reset-password/{token}',[PasswordController::class,'reset'])->name('password.reset');
-    Route::post('/admin/reset-password',[PasswordController::class,'update'])->name('password.update');
+Route::middleware('guest')->group(function () {
+    Route::get('/admin/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/admin/login', [LoginController::class, 'store'])->middleware('throttle:admin-login')->name('login.store');
+    Route::get('/admin/lupa-password', [PasswordController::class, 'request'])->name('password.request');
+    Route::post('/admin/lupa-password', [PasswordController::class, 'email'])->middleware('throttle:3,1')->name('password.email');
+    Route::get('/admin/reset-password/{token}', [PasswordController::class, 'reset'])->name('password.reset');
+    Route::post('/admin/reset-password', [PasswordController::class, 'update'])->name('password.update');
 });
 
 Route::get('/media-file/{media}/{variant?}', MediaFileController::class)
@@ -24,18 +36,20 @@ Route::get('/media-file/{media}/{variant?}', MediaFileController::class)
     ->middleware('throttle:120,1')
     ->name('media.file');
 
-Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(function(){
-    Route::post('/logout',[LoginController::class,'destroy'])->name('logout');
-    Route::get('/',DashboardController::class)->name('dashboard');
-    Route::get('/media',[MediaController::class,'index'])->name('media.index'); Route::post('/media',[MediaController::class,'store'])->name('media.store'); Route::delete('/media/{media}',[MediaController::class,'destroy'])->name('media.destroy');
-    Route::post('/media/editor-upload',[MediaController::class,'editorUpload'])->name('media.editor-upload');
-    Route::resource('messages',ContactMessageController::class)->only(['index','show','destroy']);
-    Route::resource('users',UserController::class)->except(['show','destroy']);
-    Route::get('/activities',ActivityController::class)->name('activities.index');
-    Route::get('/info-desa/profile',[VillageContentController::class,'showProfile'])->name('village-content.profile');
-    Route::get('/info-desa/profile/edit',[VillageContentController::class,'editProfile'])->name('village-content.profile-edit');
-    Route::get('/info-desa/{page}',[VillageContentController::class,'edit'])->name('village-content.edit');
-    Route::put('/info-desa/{page}',[VillageContentController::class,'update'])->name('village-content.update');
+Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(function () {
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+    Route::get('/', DashboardController::class)->name('dashboard');
+    Route::get('/media', [MediaController::class, 'index'])->name('media.index');
+    Route::post('/media', [MediaController::class, 'store'])->name('media.store');
+    Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
+    Route::post('/media/editor-upload', [MediaController::class, 'editorUpload'])->name('media.editor-upload');
+    Route::resource('messages', ContactMessageController::class)->only(['index', 'show', 'destroy']);
+    Route::resource('users', UserController::class)->except(['show', 'destroy']);
+    Route::get('/activities', ActivityController::class)->name('activities.index');
+    Route::get('/info-desa/profile', [VillageContentController::class, 'showProfile'])->name('village-content.profile');
+    Route::get('/info-desa/profile/edit', [VillageContentController::class, 'editProfile'])->name('village-content.profile-edit');
+    Route::get('/info-desa/{page}', [VillageContentController::class, 'edit'])->name('village-content.edit');
+    Route::put('/info-desa/{page}', [VillageContentController::class, 'update'])->name('village-content.update');
     Route::prefix('wilayah')->name('regions.')->group(function () {
         Route::get('/provinces', [RegionController::class, 'provinces'])->name('provinces');
         Route::get('/regencies/{province}', [RegionController::class, 'regencies'])->where('province', '[0-9]{2}')->name('regencies');
@@ -52,6 +66,8 @@ Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(fun
         Route::resource('officials', OfficialController::class)->except('show');
     });
     Route::middleware('can:manage-data')->prefix('kependudukan')->name('population.')->group(function () {
+        Route::get('penduduk/template-import', [ResidentController::class, 'downloadImportTemplate'])->name('residents.import-template');
+        Route::post('penduduk/import', [ResidentController::class, 'import'])->name('residents.import');
         Route::resource('penduduk', ResidentController::class)->parameters(['penduduk' => 'resident'])->names('residents');
         Route::resource('keluarga', FamilyController::class)->parameters(['keluarga' => 'family'])->except('show')->names('families');
         Route::resource('rumah-tangga', HouseholdController::class)->parameters(['rumah-tangga' => 'household'])->except('show')->names('households');
@@ -65,18 +81,18 @@ Route::middleware(['auth','active'])->prefix('admin')->name('admin.')->group(fun
         Route::get('laporan-penduduk', [PopulationReportController::class, 'index'])->name('report');
         Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
     });
-    Route::get('/news-trash',[CrudController::class,'trash'])->name('news.trash');
-    Route::patch('/news-trash/{id}/restore',[CrudController::class,'restore'])->name('news.restore');
-    Route::delete('/news-trash/{id}/force',[CrudController::class,'forceDelete'])->name('news.force-delete');
-    Route::delete('/news-trash',[CrudController::class,'emptyTrash'])->name('news.empty-trash');
-    Route::patch('/news/{id}/archive',[CrudController::class,'archive'])->name('news.archive');
-    Route::patch('/galleries/{id}/archive',[CrudController::class,'archiveGallery'])->name('galleries.archive');
-    Route::get('/{resource}',[CrudController::class,'index'])->name('resources.index');
-    Route::get('/{resource}/create',[CrudController::class,'create'])->name('resources.create');
-    Route::post('/{resource}',[CrudController::class,'store'])->name('resources.store');
-    Route::get('/{resource}/{id}/edit',[CrudController::class,'edit'])->name('resources.edit');
-    Route::put('/{resource}/{id}',[CrudController::class,'update'])->name('resources.update');
-    Route::delete('/{resource}/{id}',[CrudController::class,'destroy'])->name('resources.destroy');
+    Route::get('/news-trash', [CrudController::class, 'trash'])->name('news.trash');
+    Route::patch('/news-trash/{id}/restore', [CrudController::class, 'restore'])->name('news.restore');
+    Route::delete('/news-trash/{id}/force', [CrudController::class, 'forceDelete'])->name('news.force-delete');
+    Route::delete('/news-trash', [CrudController::class, 'emptyTrash'])->name('news.empty-trash');
+    Route::patch('/news/{id}/archive', [CrudController::class, 'archive'])->name('news.archive');
+    Route::patch('/galleries/{id}/archive', [CrudController::class, 'archiveGallery'])->name('galleries.archive');
+    Route::get('/{resource}', [CrudController::class, 'index'])->name('resources.index');
+    Route::get('/{resource}/create', [CrudController::class, 'create'])->name('resources.create');
+    Route::post('/{resource}', [CrudController::class, 'store'])->name('resources.store');
+    Route::get('/{resource}/{id}/edit', [CrudController::class, 'edit'])->name('resources.edit');
+    Route::put('/{resource}/{id}', [CrudController::class, 'update'])->name('resources.update');
+    Route::delete('/{resource}/{id}', [CrudController::class, 'destroy'])->name('resources.destroy');
 });
 
 Route::controller(SiteController::class)->group(function () {

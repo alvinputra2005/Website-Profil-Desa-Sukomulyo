@@ -7,6 +7,9 @@ use App\Models\Resident;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Tests\TestCase;
 
 class PopulationTest extends TestCase
@@ -91,5 +94,57 @@ class PopulationTest extends TestCase
             ->assertDontSee('Wilayah Administratif')
             ->assertDontSee('Luas Wilayah');
         $this->get(route('laporan-penduduk'))->assertOk()->assertSee('Laporan Penduduk');
+    }
+
+    public function test_admin_can_import_and_update_residents_from_excel(): void
+    {
+        $role = Role::create(['name' => 'Admin Data', 'code' => 'admin_data']);
+        $admin = User::factory()->create(['role_id' => $role->id, 'is_active' => true]);
+        $this->actingAs($admin);
+
+        $spreadsheet = new Spreadsheet;
+        $spreadsheet->getActiveSheet()->fromArray([
+            ['nik', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'pendidikan', 'pekerjaan', 'dusun', 'rw', 'rt'],
+            ['3300000000000001', 'Siti Sukomulyo', 'Perempuan', '1990-01-01', 'SLTA', 'Petani', 'Sukomulyo', '1', '2'],
+            ['123', 'Data Tidak Valid', 'L', null, null, null, null, null, null],
+        ]);
+        $path = tempnam(sys_get_temp_dir(), 'resident-import-').'.xlsx';
+        (new Xlsx($spreadsheet))->save($path);
+
+        $this->post(route('admin.population.residents.import'), [
+            'file' => new UploadedFile($path, 'penduduk.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true),
+        ])->assertRedirect()
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success')
+            ->assertSessionHas('import_errors');
+
+        $this->assertDatabaseHas('residents', [
+            'nik' => '3300000000000001',
+            'name' => 'Siti Sukomulyo',
+            'sex' => 'P',
+            'education' => 'SLTA',
+        ]);
+        $this->assertDatabaseHas('population_areas', ['hamlet' => 'Sukomulyo', 'rw' => '01', 'rt' => '02']);
+        $this->assertDatabaseCount('residents', 1);
+
+        $spreadsheet->getActiveSheet()->setCellValue('B2', 'Siti Diperbarui');
+        (new Xlsx($spreadsheet))->save($path);
+        $this->post(route('admin.population.residents.import'), [
+            'file' => new UploadedFile($path, 'penduduk.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true),
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('residents', ['nik' => '3300000000000001', 'name' => 'Siti Diperbarui']);
+        $this->assertDatabaseCount('residents', 1);
+    }
+
+    public function test_import_template_can_be_downloaded(): void
+    {
+        $role = Role::create(['name' => 'Admin Data', 'code' => 'admin_data']);
+        $admin = User::factory()->create(['role_id' => $role->id, 'is_active' => true]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.population.residents.import-template'))
+            ->assertOk()
+            ->assertDownload('template-import-penduduk.xlsx');
     }
 }

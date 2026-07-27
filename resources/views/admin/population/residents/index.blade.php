@@ -6,6 +6,7 @@
     <div class="box-header with-border">
         <h3 class="box-title"><i class="fa fa-users"></i> Daftar Penduduk</h3>
         <div class="box-tools">
+            <button type="button" class="btn btn-social btn-success btn-sm" data-toggle="modal" data-target="#import-residents"><i class="fa fa-file-excel-o"></i> Impor Excel</button>
             <a href="{{ route('admin.population.residents.create') }}" class="btn btn-social btn-info btn-sm"><i class="fa fa-plus"></i> Tambah Penduduk</a>
         </div>
     </div>
@@ -46,4 +47,35 @@
         {{ $residents->links() }}
     </div>
 </div>
+<div class="modal fade" id="import-residents" tabindex="-1" role="dialog" aria-labelledby="import-residents-title">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="post" action="{{ route('admin.population.residents.import') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="import-residents-title"><i class="fa fa-file-excel-o"></i> Impor Data Penduduk</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Unggah file Excel/CSV maksimal 10 MB. NIK baru akan ditambahkan; NIK yang sudah ada akan diperbarui. Baris tidak valid dilewati.</p>
+                    <div class="form-group">
+                        <label class="required" for="resident-import-file">File data</label>
+                        <input id="resident-import-file" type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv" required>
+                    </div>
+                    <a href="{{ route('admin.population.residents.import-template') }}" class="btn btn-default" data-no-ajax><i class="fa fa-download"></i> Unduh Template Excel</a>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <button class="btn btn-success"><i class="fa fa-upload"></i> Impor Sekarang</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@if(session('import_errors'))
+<div class="box box-warning">
+    <div class="box-header with-border"><h3 class="box-title">Baris yang gagal diimpor</h3></div>
+    <div class="box-body"><ul>@foreach(session('import_errors') as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+</div>
+@endif
 @endsection
