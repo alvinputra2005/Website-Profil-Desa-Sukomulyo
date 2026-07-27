@@ -511,39 +511,10 @@ class PublicSiteService
             ->header('Cache-Control', 'public, max-age='.SiteCache::THIRTY_MINUTES);
     }
 
-    public function government(): View
+    public function government(array $nodes): View
     {
-        $officials = $this->cache->remember(
-            SiteCache::OFFICIALS,
-            SiteCache::ONE_HOUR,
-            fn () => Schema::hasTable('officials') && Official::where('is_active', true)->exists()
-                ? Official::with('photo')
-                    ->where('is_active', true)
-                    ->orderBy('display_order')
-                    ->orderBy('name')
-                    ->get()
-                    ->map(function (Official $official): array {
-                        $name = $official->full_name;
-
-                        return [
-                            'id' => $official->id,
-                            'role' => $official->position_label,
-                            'position' => $official->position,
-                            'name' => $name,
-                            'photo' => $official->photo?->url ?: $this->officialAssetPhoto($name),
-                            'photo_alt' => $official->photo?->alt_text ?: "{$name} - {$official->position_label}",
-                            'initials' => $this->officialInitials($name),
-                            'superior_id' => $official->superior_id,
-                            'display_order' => $official->display_order,
-                        ];
-                    })
-                    ->values()
-                    ->all()
-                : $this->fallbackGovernmentOfficials()
-        );
-
         return $this->render('pages.government', array_merge(
-            ['organization' => $this->governmentOrganization($officials)],
+            ['nodes' => $nodes],
             $this->profilePageData('struktur-pemerintahan')
         ));
     }

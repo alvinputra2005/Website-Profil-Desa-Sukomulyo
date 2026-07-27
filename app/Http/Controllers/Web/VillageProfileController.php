@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\VillageComment;
+use App\Queries\Officials\OfficialOrganizationQuery;
 use App\Services\Web\PublicSiteService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,9 +42,9 @@ class VillageProfileController extends Controller
         return $site->profileDetail($section);
     }
 
-    public function government(PublicSiteService $site): View
+    public function government(PublicSiteService $site, OfficialOrganizationQuery $organization): View
     {
-        return $site->government();
+        return $site->government($organization->tree());
     }
 
     public function potentials(PublicSiteService $site): View

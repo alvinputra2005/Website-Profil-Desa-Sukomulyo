@@ -10,7 +10,7 @@ class GovernmentPageTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_government_page_renders_active_officials_in_their_visual_groups(): void
+    public function test_government_page_renders_active_officials_in_a_superior_tree(): void
     {
         $leader = Official::create([
             'name' => 'Kepala Utama',
@@ -56,21 +56,17 @@ class GovernmentPageTest extends TestCase
 
         $response = $this->get(route('pemerintahan-desa'))
             ->assertOk()
-            ->assertSee('data-org-tree', false)
-            ->assertSee('data-org-chart', false)
-            ->assertSee('Pelaksana Teknis')
-            ->assertSee('Sekretariat Desa')
-            ->assertSee('Kepala Dusun')
+            ->assertSee('public-organization-chart', false)
+            ->assertSee('public-organization-children', false)
             ->assertSee('Kepala Utama')
             ->assertSee('Sekretaris Aktif')
             ->assertSee('Kasi Aktif')
             ->assertSee('Kaur Aktif')
             ->assertSee('Kasun Aktif')
             ->assertDontSee('Perangkat Nonaktif')
-            ->assertSee('org-node__fallback', false)
-            ->assertSee('aria-pressed="false"', false);
+            ->assertSee('public-organization-card__initial', false);
 
-        $this->assertSame(5, substr_count($response->getContent(), 'data-org-node'));
+        $this->assertSame(5, substr_count($response->getContent(), 'class="public-organization-card"'));
     }
 
     public function test_missing_known_photos_use_initial_placeholders(): void
@@ -97,6 +93,6 @@ class GovernmentPageTest extends TestCase
             ->assertDontSee('baktiyar-kufain.jpeg', false)
             ->assertDontSee('cahyo-utomo.jpeg', false);
 
-        $this->assertSame(0, substr_count($response->getContent(), 'data-org-image'));
+        $this->assertSame(2, substr_count($response->getContent(), 'public-organization-card__initial'));
     }
 }

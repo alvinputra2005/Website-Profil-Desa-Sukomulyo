@@ -2802,6 +2802,124 @@ a.regulation-card:focus-visible .regulation-cover {
     max-width: 960px;
     margin: 68px auto 0;
 }
+.public-organization-scroll {
+    overflow-x: auto;
+    padding: 28px;
+    border: 1px solid #e3e9df;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 20px 55px rgba(41, 54, 34, .09);
+    overscroll-behavior-inline: contain;
+    scrollbar-color: rgba(82, 107, 66, .38) transparent;
+    scrollbar-width: thin;
+}
+.public-organization-scroll:focus-visible {
+    outline: 3px solid rgba(82, 107, 66, .28);
+    outline-offset: 4px;
+}
+.public-organization-chart,
+.public-organization-children {
+    display: flex;
+    width: max-content;
+    min-width: 100%;
+    align-items: flex-start;
+    justify-content: center;
+}
+.public-organization-chart {
+    gap: 28px;
+}
+.public-organization-branch {
+    position: relative;
+    display: flex;
+    min-width: 190px;
+    align-items: center;
+    flex-direction: column;
+}
+.public-organization-card {
+    display: flex;
+    width: 190px;
+    min-height: 84px;
+    padding: 12px;
+    align-items: center;
+    gap: 11px;
+    border: 1px solid #dce5d7;
+    border-top: 4px solid var(--organization-color);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(41, 54, 34, .09);
+    transform: translateX(var(--organization-offset));
+}
+.public-organization-card img,
+.public-organization-card__initial {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    flex: 0 0 54px;
+    overflow: hidden;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--organization-color);
+    object-fit: cover;
+    font: 700 20px/1 'Open Sans', sans-serif;
+}
+.public-organization-card strong,
+.public-organization-card small {
+    display: block;
+}
+.public-organization-card strong {
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.35;
+}
+.public-organization-card small {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+.public-organization-children {
+    position: relative;
+    gap: 24px;
+    padding-top: 38px;
+}
+.public-organization-children::before {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 38px;
+    background: var(--org-line-color);
+    content: '';
+}
+.public-organization-children > .public-organization-branch::before {
+    position: absolute;
+    top: -19px;
+    left: 50%;
+    width: calc(100% + 24px);
+    height: 19px;
+    border-top: 2px solid var(--org-line-color);
+    border-left: 2px solid var(--org-line-color);
+    content: '';
+}
+.public-organization-children > .public-organization-branch:last-child::before {
+    width: 50%;
+    border-right: 2px solid var(--org-line-color);
+    border-left: 0;
+    transform: translateX(-100%);
+}
+.public-organization-children > .public-organization-branch:only-child::before {
+    width: 2px;
+    border-top: 0;
+    border-left: 2px solid var(--org-line-color);
+    transform: none;
+}
+.public-organization-empty {
+    margin: 0;
+    padding: 28px;
+    color: var(--muted);
+    font-style: italic;
+}
 .org-chart.is-animated .org-node {
     opacity: 0;
     transform: translateY(13px) scale(.97);
@@ -2870,6 +2988,32 @@ a.regulation-card:focus-visible .regulation-cover {
         overflow: hidden;
         padding: 8px 8px 24px;
         border-radius: 14px;
+    }
+    .public-organization-scroll {
+        padding: 18px 14px 24px;
+        border-radius: 14px;
+    }
+    .public-organization-chart,
+    .public-organization-children {
+        justify-content: flex-start;
+    }
+    .public-organization-branch {
+        min-width: 168px;
+    }
+    .public-organization-card {
+        width: 168px;
+        min-height: 76px;
+        padding: 10px;
+    }
+    .public-organization-card img,
+    .public-organization-card__initial {
+        width: 46px;
+        height: 46px;
+        flex-basis: 46px;
+        font-size: 17px;
+    }
+    .public-organization-card strong {
+        font-size: 13px;
     }
     .org-chart {
         min-width: 0;
