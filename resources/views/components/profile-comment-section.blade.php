@@ -2,7 +2,14 @@
 
 <section id="komentar" class="profile-comment-section" aria-labelledby="comment-form-title">
     <div class="profile-comment-heading">
-        <h2 id="comment-form-title">Tulis Komentar</h2>
+        <div class="profile-comment-heading-top">
+            <h2 id="comment-form-title">Tulis Komentar</h2>
+            <a class="profile-comments-button" href="{{ $context['comments_url'] }}">
+                <i class="far fa-comments" aria-hidden="true"></i>
+                <span>Lihat Komentar</span>
+                <strong>{{ number_format($context['count'], 0, ',', '.') }}</strong>
+            </a>
+        </div>
         <p>Berikan saran, koreksi data, atau tanggapan mengenai {{ $context['title'] }}.</p>
     </div>
 

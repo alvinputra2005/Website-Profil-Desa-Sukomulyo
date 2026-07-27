@@ -134,7 +134,7 @@ class SitePagesTest extends TestCase
             ->assertSee('Profil Pimpinan')
             ->assertSee('Peraturan Desa')
             ->assertSee('Kantor Desa')
-            ->assertSee('Peta 3D Kantor Desa Sukomulyo')
+            ->assertSee('Street View 360 derajat Kantor Desa Sukomulyo')
             ->assertSee('Lihat Street View &amp; Rute', false)
             ->assertSee('Komentar Terbaru')
             ->assertSee('Kirim Komentar')

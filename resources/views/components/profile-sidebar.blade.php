@@ -88,18 +88,19 @@
         </h2>
         <div id="profile-office-panel" class="profile-widget-panel" hidden>
             <div class="village-office-map">
-            <iframe
-                title="Peta 3D Kantor Desa Sukomulyo"
-                src="https://www.google.com/maps?q=Kantor%20Desa%20Sukomulyo%2C%20Kecamatan%20Pujon%2C%20Kabupaten%20Malang&amp;t=k&amp;z=18&amp;output=embed"
-                loading="lazy"
-                allowfullscreen
-                referrerpolicy="no-referrer-when-downgrade"
-            ></iframe>
-        </div>
+                <button class="village-office-map-preview" type="button" data-streetview-open aria-haspopup="dialog" aria-controls="village-streetview-dialog">
+                    <img
+                        src="https://streetviewpixels-pa.googleapis.com/v1/thumbnail?cb_client=maps_sv.tactile&amp;w=900&amp;h=600&amp;pitch=0&amp;panoid=Y-35hbv_lCuAzBEo5ThHsg&amp;yaw=344.88394"
+                        alt="Tampilan depan Kantor Desa Sukomulyo"
+                        loading="lazy"
+                    >
+                    <span><i class="fas fa-street-view" aria-hidden="true"></i>Buka Kamera 360°</span>
+                </button>
+            </div>
             <div class="village-office-copy">
                 <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Sukomulyo, Kecamatan Pujon, Kabupaten Malang</p>
                 <a
-                    href="https://www.google.com/maps/search/?api=1&amp;query=Kantor+Desa+Sukomulyo+Kecamatan+Pujon+Kabupaten+Malang"
+                    href="https://maps.app.goo.gl/uefh2BNpF7VGxTEh7"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -108,6 +109,21 @@
             </div>
         </div>
     </section>
+
+    <dialog id="village-streetview-dialog" class="village-streetview-dialog" aria-label="Kamera 360 derajat Kantor Desa Sukomulyo" data-streetview-dialog>
+        <div class="village-streetview-dialog-header">
+            <strong>Kamera 360° Kantor Desa</strong>
+            <button type="button" aria-label="Tutup kamera 360 derajat" data-streetview-close><i class="fas fa-times" aria-hidden="true"></i></button>
+        </div>
+        <iframe
+            title="Street View 360 derajat Kantor Desa Sukomulyo"
+            data-streetview-frame
+            data-src="https://www.google.com/maps?q=Balai%20Desa%20Sukomulyo&amp;layer=c&amp;cbll=-7.8670608,112.4408184&amp;cbp=12,344.88,0,0,0&amp;output=svembed"
+            loading="lazy"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+    </dialog>
 
     <section class="profile-side-widget latest-comments-widget">
         <h2 class="profile-side-title profile-widget-heading">

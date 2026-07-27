@@ -29,7 +29,7 @@ class ProfilePageLayoutTest extends TestCase
                 ->assertSee('Peraturan Desa')
                 ->assertSee('Kantor Desa')
                 ->assertSee('Komentar Terbaru')
-                ->assertDontSee('Lihat Komentar')
+                ->assertSee('Lihat Komentar')
                 ->assertSee('Kirim Komentar');
 
             $this->assertSame(4, substr_count($html, 'data-profile-widget-toggle'));
@@ -63,7 +63,7 @@ class ProfilePageLayoutTest extends TestCase
             ->assertOk()
             ->assertSee('Warga Potensi')
             ->assertSee('Mohon potensi UMKM terus diperbarui.')
-            ->assertDontSee('profile-comments-overview', false);
+            ->assertSee('<strong>1</strong>', false);
 
         $this->get(route('profile-desa.section-comments', 'potensi-desa'))
             ->assertOk()

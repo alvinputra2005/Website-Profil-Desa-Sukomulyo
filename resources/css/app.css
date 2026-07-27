@@ -2028,10 +2028,84 @@ a.regulation-card:focus-visible .regulation-cover {
     border: 1px solid rgba(255,255,255,.14);
     background: #dfe4db;
 }
-.profile-article-sidebar .village-office-map iframe {
+.profile-article-sidebar .village-office-map-preview {
     display: block;
     width: 100%;
     height: 100%;
+    border: 0;
+    padding: 0;
+    overflow: hidden;
+    color: #fff;
+    background: #dfe4db;
+    cursor: pointer;
+}
+.profile-article-sidebar .village-office-map-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.profile-article-sidebar .village-office-map-preview span {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    display: inline-flex;
+    padding: 7px 9px;
+    align-items: center;
+    gap: 6px;
+    border-radius: 3px;
+    background: rgba(20, 29, 24, .86);
+    font: 700 10px/1.2 'Open Sans', sans-serif;
+    letter-spacing: .2px;
+    text-transform: uppercase;
+}
+.profile-article-sidebar .village-office-map-preview:hover span,
+.profile-article-sidebar .village-office-map-preview:focus-visible span {
+    color: var(--ink);
+    background: var(--accent);
+}
+.village-streetview-dialog {
+    width: min(1080px, calc(100vw - 32px));
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    background: #1d252d;
+    box-shadow: 0 18px 56px rgba(0,0,0,.42);
+}
+.village-streetview-dialog::backdrop {
+    background: rgba(8, 13, 10, .78);
+}
+.village-streetview-dialog-header {
+    display: flex;
+    min-height: 50px;
+    padding: 0 16px;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+    font: 700 14px/1.3 'Open Sans', sans-serif;
+}
+.village-streetview-dialog-header button {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    color: #fff;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+}
+.village-streetview-dialog-header button:hover,
+.village-streetview-dialog-header button:focus-visible {
+    background: rgba(255,255,255,.15);
+}
+.village-streetview-dialog iframe {
+    display: block;
+    width: 100%;
+    height: min(70vh, 680px);
     border: 0;
 }
 .profile-article-sidebar .village-office-copy {
@@ -2111,18 +2185,45 @@ a.regulation-card:focus-visible .regulation-cover {
 }
 .profile-comment-section {
     margin-top: 6px;
-    padding: 42px 0 56px;
+    padding: 24px 0 56px;
     border-top: 1px solid var(--border);
+}
+.profile-comments-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 0;
+    color: var(--primary-dark);
+    background: transparent;
+    font: 700 13px/1.4 'Open Sans', sans-serif;
+    text-decoration: none;
+}
+.profile-comments-button strong {
+    color: var(--primary);
+    font-size: 12px;
+}
+.profile-comments-button:hover,
+.profile-comments-button:focus-visible {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
 }
 .profile-comment-heading {
     margin-bottom: 16px;
+}
+.profile-comment-heading-top {
+    display: flex;
+    margin-bottom: 8px;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
 }
 .profile-comment-heading .section-kicker {
     margin-bottom: 5px;
     text-align: left;
 }
 .profile-comment-heading h2 {
-    margin: 0 0 8px;
+    margin: 0;
     color: #111;
     font: 700 27px/1.25 'Open Sans', sans-serif;
 }
@@ -2426,7 +2527,11 @@ a.regulation-card:focus-visible .regulation-cover {
         height: 225px;
     }
     .profile-comment-section {
-        padding-top: 34px;
+        padding-top: 24px;
+    }
+    .profile-comment-heading-top {
+        align-items: flex-start;
+        flex-wrap: wrap;
     }
     .profile-comment-fields {
         grid-template-columns: 1fr;

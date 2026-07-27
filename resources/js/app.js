@@ -281,6 +281,25 @@ const initPublicPage = () => {
         });
     });
 
+    const streetViewDialog = document.querySelector('[data-streetview-dialog]');
+
+    if (streetViewDialog && streetViewDialog.dataset.bound !== 'true') {
+        const frame = streetViewDialog.querySelector('[data-streetview-frame]');
+        const close = () => streetViewDialog.close();
+
+        streetViewDialog.dataset.bound = 'true';
+        document.querySelectorAll('[data-streetview-open]').forEach((button) => {
+            button.addEventListener('click', () => {
+                if (frame && !frame.getAttribute('src')) frame.src = frame.dataset.src;
+                streetViewDialog.showModal();
+            });
+        });
+        streetViewDialog.querySelector('[data-streetview-close]')?.addEventListener('click', close);
+        streetViewDialog.addEventListener('click', (event) => {
+            if (event.target === streetViewDialog) close();
+        });
+    }
+
     const shareStatus = document.querySelector('[data-share-status]');
     const setShareStatus = (message) => {
         if (!shareStatus) return;
