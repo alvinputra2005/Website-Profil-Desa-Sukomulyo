@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         foreach([['history','Sejarah Desa','Desa Sukomulyo tumbuh melalui semangat gotong royong masyarakat.'],['vision','Visi Desa','Terwujudnya desa yang maju, mandiri, transparan, dan sejahtera.'],['mission','Misi Desa','Meningkatkan pelayanan publik, ekonomi warga, dan pembangunan berkelanjutan.']] as [$key,$title,$content]) VillageProfileSection::firstOrCreate(['section_key'=>$key],['title'=>$title,'content'=>'<p>'.$content.'</p>','status'=>'published','display_order'=>0,'updated_by'=>$admin->id]);
         foreach([['Kepala Desa','Nama Kepala Desa'],['Sekretaris Desa','Nama Sekretaris Desa'],['Kaur Keuangan','Nama Perangkat Desa']] as $i=>[$position,$name]) Official::firstOrCreate(['position'=>$position],['name'=>$name,'display_order'=>$i,'is_active'=>true]);
         $this->call(NewsSeeder::class);
+        $this->call(GallerySeeder::class);
         Gallery::firstOrCreate(['slug'=>'kegiatan-desa'],['title'=>'Kegiatan Desa','description'=>'Dokumentasi kegiatan warga Desa Sukomulyo.','status'=>'published','created_by'=>$admin->id]);
         StatisticDataset::firstOrCreate(['slug'=>'jumlah-penduduk'],['category'=>'penduduk','title'=>'Jumlah Penduduk','description'=>'Statistik jumlah penduduk desa.','year'=>now()->year,'unit'=>'jiwa','visualization_type'=>'bar','status'=>'published','display_order'=>0,'created_by'=>$admin->id]);
         IdmScore::firstOrCreate(['year'=>now()->year],['idm_score'=>0.7500,'iks_score'=>0.7600,'ike_score'=>0.7300,'ikl_score'=>0.7600,'status_label'=>'Maju','source'=>'Data awal desa']);
