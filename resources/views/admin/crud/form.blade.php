@@ -27,7 +27,8 @@
 @if($resource==='galleries' && $name==='cover_media_id')
 <div class="gallery-manager" data-gallery-manager>
     <input type="file" name="gallery_item_uploads[]" class="form-control" accept="image/jpeg,image/png,image/webp" multiple data-gallery-files>
-    <p class="help-block">Pilih beberapa gambar sekaligus. Foto pertama menjadi sampul. Seret untuk mengurutkan atau tekan bintang untuk menjadikannya sampul.</p>
+    <p class="help-block">Maksimal 5 gambar per sekali simpan · JPG, PNG, atau WebP · maksimal 5 MB per gambar. Foto pertama menjadi sampul; seret untuk mengurutkan atau tekan bintang untuk menjadikannya sampul.</p>
+    <p class="help-block" data-gallery-upload-status role="status" aria-live="polite" hidden></p>
     @error('gallery_item_uploads')<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
     @error('gallery_item_uploads.*')<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
     <div class="gallery-photo-grid" data-gallery-photo-grid>

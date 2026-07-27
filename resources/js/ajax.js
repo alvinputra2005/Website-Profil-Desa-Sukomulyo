@@ -247,24 +247,26 @@ const submitForm = async (form, state) => {
     }
 };
 
-export const initAjaxNavigation = ({ rootSelector, onRender } = {}) => {
+export const initAjaxNavigation = ({ rootSelector, onRender, explicitOnly = false } = {}) => {
     if (!rootSelector) return;
 
     const existing = window[AJAX_STATE_KEY];
     if (existing) {
         existing.rootSelector = rootSelector;
         existing.onRender = onRender;
+        existing.explicitOnly = explicitOnly;
         document.querySelector(rootSelector)?.setAttribute('data-ajax-root', '');
         return existing;
     }
 
-    const state = { rootSelector, onRender, controller: null };
+    const state = { rootSelector, onRender, explicitOnly, controller: null };
     window[AJAX_STATE_KEY] = state;
     document.querySelector(rootSelector)?.setAttribute('data-ajax-root', '');
 
     document.addEventListener('click', (event) => {
         const link = event.target.closest?.('a');
         if (!link || shouldSkipLink(link, event)) return;
+        if (state.explicitOnly && link.dataset.ajax === undefined) return;
 
         const url = new URL(link.href, window.location.href);
         event.preventDefault();
@@ -276,6 +278,7 @@ export const initAjaxNavigation = ({ rootSelector, onRender } = {}) => {
     document.addEventListener('submit', (event) => {
         const form = event.target.closest?.('form');
         if (!form || form.dataset.noAjax !== undefined || form.target) return;
+        if (state.explicitOnly && form.dataset.ajax === undefined) return;
         if (!isSameOrigin(new URL(form.action || window.location.href, window.location.href))) return;
 
         event.preventDefault();

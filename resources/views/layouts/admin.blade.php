@@ -7,6 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
     <title>@yield('title','Admin') | Desa Sukomulyo</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/logo-brighter-sukomulyo.svg') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/bootstrap/css/font-awesome.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/bootstrap/css/ionicons.min.css') }}">
@@ -67,10 +68,10 @@
                 ['label'=>'Beranda','icon'=>'fa-dashboard','ability'=>null,'items'=>[['Dashboard','admin.dashboard',null]]],
                 ['label'=>'Info Desa','icon'=>'fa-home','ability'=>'manage-content','items'=>[['Identitas Desa','admin.village-content.profile',null],['Visi Misi','admin.village-content.edit','vision-mission'],['Sejarah Desa','admin.village-content.edit','history'],['Struktur Pemerintahan','admin.officials.index',null],['Potensi Desa','admin.village-content.edit','potential']]],
                 ['label'=>'Kependudukan','icon'=>'fa-users','ability'=>'manage-data','items'=>[['Penduduk','admin.population.residents.index',null],['Keluarga','admin.population.families.index',null],['Rumah Tangga','admin.population.households.index',null],['Statistik Kependudukan','admin.population.statistics',null],['Laporan Penduduk','admin.population.report',null]]],
-                ['label'=>'Admin Web','icon'=>'fa-desktop','ability'=>'manage-content','items'=>[['Artikel','admin.resources.index','news'],['Kategori Artikel','admin.resources.index','categories'],['Galeri','admin.resources.index','galleries'],['Media Sosial/Library','admin.media.index',null]]],
+                ['label'=>'Admin Web','icon'=>'fa-desktop','ability'=>'manage-content','items'=>[['Artikel','admin.resources.index','news'],['Kategori Artikel','admin.resources.index','categories'],['Galeri','admin.resources.index','galleries']]],
                 ['label'=>'Informasi Publik','icon'=>'fa-file-text','ability'=>'manage-content','items'=>[['Dokumen & Pengumuman','admin.resources.index','publications'],['Lampiran Publikasi','admin.resources.index','publication-attachments']]],
                 ['label'=>'Data Desa','icon'=>'fa-bar-chart','ability'=>'manage-data','items'=>[['Statistik','admin.resources.index','statistics'],['Nilai Statistik','admin.resources.index','statistic-values'],['Indeks Desa Membangun','admin.resources.index','idm']]],
-                ['label'=>'Pemetaan','icon'=>'fa-map','ability'=>'manage-data','items'=>[['Layer Peta','admin.resources.index','map-layers'],['Fitur Peta','admin.resources.index','map-features'],['Media Peta','admin.media.index',null]]],
+                ['label'=>'Pemetaan','icon'=>'fa-map','ability'=>'manage-data','items'=>[['Layer Peta','admin.resources.index','map-layers'],['Fitur Peta','admin.resources.index','map-features']]],
                 ['label'=>'Layanan Masyarakat','icon'=>'fa-envelope','ability'=>'manage-content','items'=>[['Pesan Masuk','admin.messages.index',null]]],
                 ['label'=>'Pengaturan','icon'=>'fa-cogs','ability'=>'manage-users','items'=>[['Pengguna','admin.users.index',null],['Pengaturan Aplikasi','admin.resources.index','settings'],['Redirect URL','admin.resources.index','redirects'],['Log Aktivitas','admin.activities.index',null]]],
                 ])

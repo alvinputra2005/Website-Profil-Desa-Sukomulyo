@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#1f59d8">
+    <meta name="theme-color" content="#526b42">
     <title>@yield('title') | Desa Sukomulyo</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/logo-brighter-sukomulyo.svg') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/bootstrap/css/font-awesome.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/css/login-style.css') }}">
 </head>
@@ -26,10 +27,6 @@
             </a>
 
             <div class="auth-welcome">
-                <span class="auth-welcome-label">
-                    <i class="fa fa-lock" aria-hidden="true"></i>
-                    Area pengelola desa
-                </span>
                 <h1 id="welcome-title">
                     Selamat Datang
                     <span>di Panel Admin</span>
@@ -46,7 +43,6 @@
                 </a>
 
                 <header class="auth-header">
-                    <p class="auth-eyebrow">@yield('eyebrow', 'Panel Administrasi')</p>
                     <h2 id="auth-heading">@yield('heading')</h2>
                     <p>@yield('description')</p>
                 </header>
@@ -66,11 +62,6 @@
                 @endif
 
                 @yield('content')
-
-                <footer class="auth-panel-footer">
-                    <i class="fa fa-shield" aria-hidden="true"></i>
-                    <span>Akses terbatas untuk perangkat desa yang terdaftar.</span>
-                </footer>
             </div>
         </section>
     </main>

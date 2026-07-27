@@ -1,15 +1,15 @@
 :root {
-    --auth-blue: #2459db;
-    --auth-blue-dark: #1745be;
-    --auth-blue-soft: #eaf1ff;
-    --auth-navy: #0c1c3a;
-    --auth-text: #24314d;
-    --auth-muted: #69758d;
-    --auth-border: #d8dfeb;
+    --auth-blue: #526b42;
+    --auth-blue-dark: #3d5032;
+    --auth-blue-soft: #f0f4ed;
+    --auth-navy: #303030;
+    --auth-text: #3f4939;
+    --auth-muted: #72786e;
+    --auth-border: #d9ded5;
     --auth-surface: #ffffff;
     --auth-error: #d93845;
     --auth-success: #16834b;
-    --auth-focus: rgba(36, 89, 219, .18);
+    --auth-focus: rgba(82, 107, 66, .18);
 }
 
 * {
@@ -18,13 +18,17 @@
 
 html,
 body {
+    height: 100%;
     min-height: 100%;
 }
 
 body.auth-page {
     min-width: 320px;
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
     margin: 0;
+    overflow: hidden;
     background: var(--auth-surface);
     color: var(--auth-text);
     font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -52,21 +56,22 @@ input {
 .auth-shell {
     display: grid;
     grid-template-columns: minmax(520px, 54%) minmax(520px, 46%);
-    min-height: 100vh;
+    height: 100%;
+    min-height: 0;
 }
 
 .auth-visual {
     position: relative;
     display: flex;
-    min-height: 100vh;
+    min-height: 0;
     flex-direction: column;
     justify-content: space-between;
     overflow: hidden;
-    padding: clamp(34px, 4vw, 72px);
+    padding: clamp(28px, 3.5vw, 56px);
     isolation: isolate;
     color: #fff;
     background:
-        linear-gradient(135deg, rgba(8, 26, 66, .9) 0%, rgba(24, 72, 185, .76) 56%, rgba(38, 95, 220, .72) 100%),
+        linear-gradient(135deg, rgba(38, 48, 31, .92) 0%, rgba(61, 80, 50, .82) 55%, rgba(82, 107, 66, .76) 100%),
         url("../../assets/village-rice-fields.jpg") center / cover no-repeat;
 }
 
@@ -119,7 +124,7 @@ input {
 .auth-form a:focus-visible,
 .auth-password-toggle:focus-visible,
 .auth-submit:focus-visible {
-    outline: 3px solid rgba(128, 183, 255, .7);
+    outline: 3px solid rgba(239, 198, 44, .72);
     outline-offset: 3px;
 }
 
@@ -152,7 +157,7 @@ input {
 
 .auth-brand-kicker {
     margin-bottom: 5px;
-    color: #b9d7ff;
+    color: #f3d76d;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: .16em;
@@ -175,59 +180,42 @@ input {
 .auth-welcome {
     position: relative;
     max-width: 760px;
-    padding-bottom: clamp(8px, 2vh, 28px);
-}
-
-.auth-welcome-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 22px;
-    padding: 8px 13px;
-    border: 1px solid rgba(255, 255, 255, .22);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, .1);
-    color: #d8e9ff;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    backdrop-filter: blur(8px);
+    padding-bottom: clamp(4px, 1vh, 14px);
 }
 
 .auth-welcome h1 {
     max-width: 720px;
     margin: 0;
     color: #fff;
-    font-size: clamp(47px, 5vw, 78px);
-    font-weight: 800;
-    letter-spacing: -.045em;
-    line-height: 1.02;
+    font-size: clamp(38px, 3.8vw, 58px);
+    font-weight: 700;
+    letter-spacing: -.025em;
+    line-height: 1.1;
     text-shadow: 0 4px 24px rgba(4, 20, 58, .32);
 }
 
 .auth-welcome h1 span {
     display: block;
-    color: #9dccff;
+    color: #efc62c;
 }
 
 .auth-welcome p {
     max-width: 720px;
     margin: 24px 0 0;
     color: rgba(255, 255, 255, .9);
-    font-size: clamp(16px, 1.22vw, 21px);
-    font-weight: 500;
-    line-height: 1.7;
+    font-size: clamp(15px, 1.08vw, 18px);
+    font-weight: 400;
+    line-height: 1.65;
     text-shadow: 0 2px 14px rgba(4, 20, 58, .3);
 }
 
 .auth-panel {
     display: grid;
-    min-height: 100vh;
+    min-height: 0;
     place-items: center;
-    padding: clamp(44px, 6vw, 90px);
+    padding: clamp(28px, 4vw, 64px);
     background:
-        radial-gradient(circle at 100% 0, rgba(36, 89, 219, .055), transparent 30%),
+        radial-gradient(circle at 100% 0, rgba(82, 107, 66, .07), transparent 30%),
         #fff;
 }
 
@@ -240,7 +228,7 @@ input {
 }
 
 .auth-header {
-    margin-bottom: 34px;
+    margin-bottom: 26px;
     text-align: center;
 }
 
@@ -256,9 +244,9 @@ input {
 .auth-header h2 {
     margin: 0;
     color: var(--auth-navy);
-    font-size: clamp(32px, 2.3vw, 42px);
-    font-weight: 800;
-    letter-spacing: -.035em;
+    font-size: clamp(28px, 2vw, 36px);
+    font-weight: 700;
+    letter-spacing: -.025em;
     line-height: 1.18;
 }
 
@@ -307,7 +295,7 @@ input {
 }
 
 .auth-field {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .auth-field label {
@@ -484,8 +472,8 @@ input {
     padding: 14px 24px;
     border: 0;
     border-radius: 10px;
-    background: linear-gradient(135deg, #2d66eb, #204fd3);
-    box-shadow: 0 10px 22px rgba(36, 89, 219, .25);
+    background: linear-gradient(135deg, #607a4e, #526b42);
+    box-shadow: 0 10px 22px rgba(61, 80, 50, .25);
     color: #fff;
     font-size: 16px;
     font-weight: 800;
@@ -493,13 +481,13 @@ input {
 }
 
 .auth-submit:hover {
-    background: linear-gradient(135deg, #245ce0, #1746c5);
-    box-shadow: 0 13px 28px rgba(36, 89, 219, .31);
+    background: linear-gradient(135deg, #526b42, #3d5032);
+    box-shadow: 0 13px 28px rgba(61, 80, 50, .31);
     transform: translateY(-1px);
 }
 
 .auth-submit:active {
-    box-shadow: 0 7px 17px rgba(36, 89, 219, .24);
+    box-shadow: 0 7px 17px rgba(61, 80, 50, .24);
     transform: translateY(1px);
 }
 
@@ -512,7 +500,7 @@ input {
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 15px;
-    margin-top: 34px;
+    margin-top: 26px;
     color: var(--auth-muted);
     font-size: 14px;
     text-align: center;
@@ -536,14 +524,14 @@ input {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-top: 25px;
+    margin-top: 18px;
     color: #8a96aa;
     font-size: 12px;
     text-align: center;
 }
 
 .auth-panel-footer i {
-    color: #6f88bd;
+    color: #718663;
 }
 
 @media (max-width: 1180px) {
@@ -556,7 +544,7 @@ input {
     }
 
     .auth-welcome h1 {
-        font-size: clamp(42px, 5vw, 62px);
+        font-size: clamp(36px, 4.5vw, 50px);
     }
 
     .auth-panel {
@@ -565,8 +553,17 @@ input {
 }
 
 @media (max-width: 900px) {
+    body.auth-page {
+        height: auto;
+        min-height: 100vh;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
     .auth-shell {
         display: block;
+        height: auto;
+        min-height: 100vh;
     }
 
     .auth-visual {
@@ -590,13 +587,12 @@ input {
         padding-bottom: 0;
     }
 
-    .auth-welcome-label,
     .auth-welcome p {
         display: none;
     }
 
     .auth-welcome h1 {
-        font-size: clamp(37px, 8vw, 54px);
+        font-size: clamp(32px, 7vw, 44px);
     }
 
     .auth-panel {
@@ -617,7 +613,7 @@ input {
     }
 
     .auth-welcome h1 {
-        font-size: clamp(34px, 11vw, 46px);
+        font-size: clamp(29px, 9vw, 38px);
     }
 
     .auth-panel {
@@ -663,7 +659,7 @@ input {
     }
 
     .auth-header h2 {
-        font-size: 31px;
+        font-size: 27px;
     }
 
     .auth-header > p:last-child {

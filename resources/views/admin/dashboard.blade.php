@@ -71,7 +71,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">Akses Cepat</h3>
             </div>
-            <div class="box-body quick-actions"><a class="btn btn-app" href="{{ route('admin.resources.create','news') }}"><i class="fa fa-plus"></i> Artikel</a><a class="btn btn-app" href="{{ route('admin.resources.create','publications') }}"><i class="fa fa-file-text"></i> Publikasi</a><a class="btn btn-app" href="{{ route('admin.media.index') }}"><i class="fa fa-image"></i> Media</a></div>
+            <div class="box-body quick-actions"><a class="btn btn-app" href="{{ route('admin.resources.create','news') }}"><i class="fa fa-plus"></i> Artikel</a><a class="btn btn-app" href="{{ route('admin.resources.create','publications') }}"><i class="fa fa-file-text"></i> Publikasi</a></div>
         </div>
         <div class="box box-danger">
             <div class="box-header with-border">

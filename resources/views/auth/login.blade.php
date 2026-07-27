@@ -1,7 +1,6 @@
 @extends('auth.layout')
 
 @section('title', 'Login Admin')
-@section('eyebrow', 'Akses Aman')
 @section('heading', 'Masuk ke Akun')
 @section('description', 'Masukkan kredensial Anda untuk mengakses panel admin.')
 

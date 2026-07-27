@@ -21,6 +21,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $metaTitle }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/logo-brighter-sukomulyo.svg') }}">
     <meta name="description" content="{{ $metaDescription }}">
     @if($keywords)<meta name="keywords" content="{{ $keywords }}">@endif
     <meta name="robots" content="{{ $robots }}">

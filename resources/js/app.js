@@ -445,6 +445,7 @@ const initPublicPage = () => {
 initAjaxNavigation({
     rootSelector: '#sitelayout_type',
     onRender: initPublicPage,
+    explicitOnly: true,
 });
 
 initPublicPage();

@@ -88,6 +88,7 @@ const initAdminPage = () => {
     if(picker.dataset.imagePickerBound)return;
     picker.dataset.imagePickerBound='true';
     const select=picker.querySelector('[data-image-select]'),upload=picker.querySelector('[data-image-upload]'),preview=picker.querySelector('[data-image-preview]'),alt=picker.querySelector('[data-image-alt]'),remove=picker.querySelector('[data-image-remove]');
+    const initialPreviewUrl=preview?.querySelector('img')?.getAttribute('src')||'';
     const empty=()=>{
       preview.innerHTML='<i class="fa fa-picture-o" aria-hidden="true"></i><span>Belum ada gambar</span>';
       preview.classList.add('is-empty');
@@ -144,6 +145,12 @@ const initAdminPage = () => {
       if(image)image.alt=alt.value;
     });
     picker.querySelector('[data-image-clear]')?.addEventListener('click',clearImage);
+    upload?.form?.addEventListener('reset',()=>{
+      window.setTimeout(()=>{
+        if(initialPreviewUrl)show(initialPreviewUrl);
+        else empty();
+      },0);
+    });
      bindImagePreparation(upload?.form);
    });
   const officialForm=document.getElementById('official-form');
@@ -189,9 +196,16 @@ const initAdminPage = () => {
          image.src=URL.createObjectURL(prepared);
        }
      });
-     bindImagePreparation(officialForm);
+    bindImagePreparation(officialForm);
     updateSource();
     updateFullName();
+    officialForm.addEventListener('reset',()=>{
+      window.setTimeout(()=>{
+        updateSource();
+        updateFullName();
+        if(colorPreview)colorPreview.style.background=color?.value||'#526b42';
+      },0);
+    });
   }
   const officialCheckAll=document.querySelector('[data-check-all-officials]');
   if(officialCheckAll&&!officialCheckAll.dataset.bulkBound){
@@ -215,11 +229,16 @@ const initAdminPage = () => {
     let selectedFiles=[];
     let dragged=null;
     const addButton=galleryGrid.querySelector('[data-gallery-add]');
+    const uploadStatus=galleryManager.querySelector('[data-gallery-upload-status]');
+    const initialCards=Array.from(galleryGrid.querySelectorAll('[data-gallery-photo-card]'));
     const cards=()=>Array.from(galleryGrid.querySelectorAll('[data-gallery-photo-card]:not(.is-removed)'));
     const syncFiles=()=>{
       const transfer=new DataTransfer();
       selectedFiles.forEach(file=>transfer.items.add(file));
       galleryFiles.files=transfer.files;
+      // The gallery prepares every file above; keep the generic single-file
+      // submit handler from replacing this multi-file selection with item one.
+      galleryFiles.dataset.imagePrepared='true';
     };
     const update=()=>{
       let uploadIndex=0;
@@ -253,9 +272,49 @@ const initAdminPage = () => {
       update();
     };
     addButton?.addEventListener('click',()=>galleryFiles.click());
-    galleryFiles.addEventListener('change',()=>{
-      selectedFiles=[...selectedFiles,...Array.from(galleryFiles.files)].slice(0,30);
+    galleryFiles.addEventListener('change',async()=>{
+      const incoming=Array.from(galleryFiles.files);
+      if(!incoming.length)return;
+      const remainingSlots=Math.max(0,5-selectedFiles.length);
+      const acceptedIncoming=incoming.slice(0,remainingSlots);
+      const rejectedCount=incoming.length-acceptedIncoming.length;
+      galleryFiles.disabled=true;
+      if(uploadStatus){
+        uploadStatus.hidden=false;
+        uploadStatus.classList.remove('text-danger');
+        uploadStatus.textContent=acceptedIncoming.length
+          ? `Menyiapkan ${acceptedIncoming.length} gambar...`
+          : 'Maksimal 5 gambar dapat diunggah per sekali simpan.';
+      }
+      const prepared=[];
+      const failures=[];
+      for(const file of acceptedIncoming){
+        try{
+          const result=await prepareImageFile(file);
+          if(result.size>5*1024*1024){
+            failures.push(`${file.name} (lebih dari 5 MB)`);
+          }else{
+            prepared.push(result);
+          }
+        }catch{
+          failures.push(`${file.name} (gambar tidak dapat dibaca)`);
+        }
+      }
+      selectedFiles=[...selectedFiles,...prepared].slice(0,5);
       renderNewCards();
+      galleryFiles.disabled=false;
+      if(uploadStatus){
+        if(failures.length||rejectedCount){
+          uploadStatus.classList.add('text-danger');
+          const messages=[];
+          if(rejectedCount)messages.push(`${rejectedCount} gambar tidak ditambahkan karena batas maksimal adalah 5 gambar`);
+          if(failures.length)messages.push(`Tidak dapat menambahkan: ${failures.join(', ')}`);
+          uploadStatus.textContent=`${messages.join('. ')}.`;
+        }else{
+          uploadStatus.hidden=true;
+          uploadStatus.textContent='';
+        }
+      }
     });
     galleryGrid.addEventListener('click',event=>{
       const card=event.target.closest('[data-gallery-photo-card]');
@@ -292,6 +351,22 @@ const initAdminPage = () => {
       const newOrder=cards().filter(card=>card.matches('[data-new-photo]')).map(card=>selectedFiles[Number(card.dataset.fileIndex)]);
       selectedFiles=newOrder;
       update();
+    });
+    galleryFiles.form?.addEventListener('reset',()=>{
+      window.setTimeout(()=>{
+        selectedFiles=[];
+        if(uploadStatus){
+          uploadStatus.hidden=true;
+          uploadStatus.classList.remove('text-danger');
+          uploadStatus.textContent='';
+        }
+        galleryGrid.querySelectorAll('[data-new-photo]').forEach(card=>card.remove());
+        initialCards.forEach(card=>{
+          card.classList.remove('is-removed','is-dragging');
+          galleryGrid.insertBefore(card,addButton);
+        });
+        update();
+      },0);
     });
     update();
   }
@@ -374,6 +449,24 @@ const initAdminPage = () => {
   initTinyMce();
   const title=document.querySelector('#title'),titleCount=document.querySelector('#title-count');if(title&&titleCount){const count=()=>titleCount.textContent=title.value.length;title.addEventListener('input',count);count()}
   initRegionSelectors();
+  document.querySelectorAll('form').forEach(form=>{
+    if(form.dataset.resetSyncBound)return;
+    form.dataset.resetSyncBound='true';
+    form.addEventListener('reset',()=>{
+      window.setTimeout(()=>{
+        delete form.dataset.dirty;
+        if(window.jQuery&&window.jQuery.fn.select2){
+          window.jQuery(form).find('.select2').trigger('change.select2');
+        }
+        tinymce.get().forEach(editor=>{
+          if(editor.targetElm?.form===form)editor.setContent(editor.targetElm.value||'');
+        });
+        const counter=form.querySelector('#title-count');
+        const titleField=form.querySelector('#title');
+        if(counter&&titleField)counter.textContent=titleField.value.length;
+      },0);
+    });
+  });
   document.querySelectorAll('form').forEach(bindImagePreparation);
 };
 

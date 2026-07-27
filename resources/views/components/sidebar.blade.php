@@ -19,7 +19,7 @@
 
 <aside id="sidebar" aria-label="Informasi berita">
     <div class="news-filter-panel">
-        <form class="search-form" action="{{ route('berita-desa.search') }}" method="GET" role="search">
+        <form class="search-form" action="{{ route('berita-desa.search') }}" method="GET" role="search" data-ajax>
             <label class="screen-reader-text" for="sidebar-search">Cari berita</label>
             <input id="sidebar-search" class="search-field" type="search" name="q" value="{{ request('q') }}" placeholder="Cari berita...">
             <button class="search-submit" type="submit" aria-label="Cari"><i class="fas fa-search" aria-hidden="true"></i></button>
@@ -44,6 +44,7 @@
                         <a
                             class="{{ $selectedCategory === '' ? 'is-active' : '' }}"
                             href="{{ $selectedYear !== '' ? route('berita-desa.archive', ['year' => $selectedYear]) : route('berita-desa.index') }}"
+                            data-ajax
                         >
                             <span>Semua Kategori</span>
                         </a>
@@ -53,6 +54,7 @@
                             <a
                                 class="{{ $selectedCategory === $category['category_slug'] ? 'is-active' : '' }}"
                                 href="{{ route('berita-desa.category', array_filter(['category' => $category['category_slug'], 'year' => $selectedYear])) }}"
+                                data-ajax
                             >
                                 <span>{{ $category['category'] }}</span>
                             </a>
@@ -82,6 +84,7 @@
                             <a
                                 class="{{ (string) $selectedYear === (string) $year ? 'is-active' : '' }}"
                                 href="{{ route('berita-desa.archive', array_filter(['year' => $year, 'category' => $selectedCategory])) }}"
+                                data-ajax
                             >
                                 <span>Tahun {{ $year }}</span>
                             </a>

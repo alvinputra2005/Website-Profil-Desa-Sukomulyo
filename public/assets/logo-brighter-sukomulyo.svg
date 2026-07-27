@@ -1,6 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" role="img" aria-labelledby="title">
   <title id="title">Brighter Sukomulyo</title>
-  <rect width="500" height="500" fill="#f5f5f3"/>
+  <defs>
+    <clipPath id="logo-circle">
+      <circle cx="250" cy="250" r="246"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#logo-circle)">
+  <circle cx="250" cy="250" r="246" fill="#f5f5f3"/>
   <g transform="translate(0 -18)">
     <g fill="#91a477">
       <g>
@@ -35,4 +41,6 @@
     </g>
   </g>
   <text x="250" y="458" fill="#b18b3d" font-family="Brush Script MT, Segoe Script, cursive" font-size="42" font-style="italic" font-weight="700" text-anchor="middle">Brighter Sukomulyo</text>
+  </g>
+  <circle cx="250" cy="250" r="244" fill="none" stroke="#526b42" stroke-width="8"/>
 </svg>

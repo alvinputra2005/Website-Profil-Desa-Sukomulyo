@@ -7,7 +7,7 @@
     <div class="container news-content-container">
         <div id="sc_innerpage_wrap" class="news-page-layout">
             <section class="sc_innerpage_contentbx" id="news-list" aria-labelledby="search-news-heading">
-                <form class="large-search-form" action="{{ route('berita-desa.search') }}" method="GET" role="search">
+                <form class="large-search-form" action="{{ route('berita-desa.search') }}" method="GET" role="search" data-ajax>
                     <label for="main-search">Kata kunci pencarian</label>
                     <div><input id="main-search" type="search" name="q" value="{{ $query }}" placeholder="Contoh: UMKM"><button type="submit"><i class="fas fa-search" aria-hidden="true"></i> Cari</button></div>
                 </form>
