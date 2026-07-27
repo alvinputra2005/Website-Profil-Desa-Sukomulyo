@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\Admin\PopulationPeriodRequest;
 use App\Services\PopulationStatistics;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -9,7 +10,7 @@ use Illuminate\View\View;
 
 class PopulationReportController extends PopulationController
 {
-    public function index(Request $request, PopulationStatistics $statistics): View
+    public function index(PopulationPeriodRequest $request, PopulationStatistics $statistics): View
     {
         [$year, $month] = $this->period($request);
 
@@ -19,7 +20,7 @@ class PopulationReportController extends PopulationController
         ));
     }
 
-    public function export(Request $request, PopulationStatistics $statistics): Response
+    public function export(PopulationPeriodRequest $request, PopulationStatistics $statistics): Response
     {
         [$year, $month] = $this->period($request);
         $report = $statistics->monthlyReport($year, $month);
@@ -51,13 +52,8 @@ class PopulationReportController extends PopulationController
         ]);
     }
 
-    private function period(Request $request): array
+    private function period(PopulationPeriodRequest $request): array
     {
-        $validated = validator($request->query(), [
-            'year' => ['nullable', 'integer', 'min:1900', 'max:'.now()->year],
-            'month' => ['nullable', 'integer', 'between:1,12'],
-        ])->validate();
-
-        return [(int) ($validated['year'] ?? now()->year), (int) ($validated['month'] ?? now()->month)];
+        return $request->period();
     }
 }

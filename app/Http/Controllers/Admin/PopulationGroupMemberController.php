@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\Admin\SavePopulationGroupMemberRequest;
 use App\Models\PopulationGroup;
 use App\Models\PopulationGroupMember;
 use App\Models\Resident;
@@ -26,9 +27,9 @@ class PopulationGroupMemberController extends PopulationController
         ]);
     }
 
-    public function store(Request $request, PopulationGroup $group): RedirectResponse
+    public function store(SavePopulationGroupMemberRequest $request, PopulationGroup $group): RedirectResponse
     {
-        $data = $this->validated($request, $group);
+        $data = $request->validated();
         $membership = $group->memberships()->create($data);
         $this->logger->log('created', 'anggota_kelompok', $membership);
 
@@ -49,10 +50,10 @@ class PopulationGroupMemberController extends PopulationController
         ]);
     }
 
-    public function update(Request $request, PopulationGroup $group, PopulationGroupMember $membership): RedirectResponse
+    public function update(SavePopulationGroupMemberRequest $request, PopulationGroup $group, PopulationGroupMember $membership): RedirectResponse
     {
         abort_unless($membership->group_id === $group->id, 404);
-        $membership->update($this->validated($request, $group, $membership));
+        $membership->update($request->validated());
         if ($membership->position === 'Ketua') {
             $group->update(['chairperson_id' => $membership->resident_id]);
             $group->memberships()->where('id', '!=', $membership->id)->where('position', 'Ketua')->update(['position' => 'Anggota']);
@@ -74,27 +75,4 @@ class PopulationGroupMemberController extends PopulationController
         return back()->with('success', 'Anggota kelompok berhasil dihapus.');
     }
 
-    private function validated(Request $request, PopulationGroup $group, ?PopulationGroupMember $membership = null): array
-    {
-        return $request->validate([
-            'resident_id' => [
-                'required',
-                'exists:residents,id',
-                Rule::unique('population_group_members')->where('group_id', $group->id)->ignore($membership?->id),
-            ],
-            'member_number' => [
-                'nullable',
-                'string',
-                'max:30',
-                Rule::unique('population_group_members')->where('group_id', $group->id)->ignore($membership?->id),
-            ],
-            'position' => ['required', 'string', 'max:50'],
-            'appointment_decree' => ['nullable', 'string', 'max:100'],
-            'appointment_date' => ['nullable', 'date'],
-            'dismissal_decree' => ['nullable', 'string', 'max:100'],
-            'dismissal_date' => ['nullable', 'date', 'after_or_equal:appointment_date'],
-            'period' => ['nullable', 'string', 'max:100'],
-            'notes' => ['nullable', 'string', 'max:2000'],
-        ]);
-    }
 }

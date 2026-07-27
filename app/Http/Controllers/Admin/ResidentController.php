@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\Admin\ImportResidentsRequest;
+use App\Http\Requests\Admin\SaveResidentRequest;
 use App\Models\FamilyCard;
 use App\Models\Household;
 use App\Models\PopulationArea;
@@ -51,11 +53,9 @@ class ResidentController extends PopulationController
         return view('admin.population.residents.form', $this->formData(new Resident));
     }
 
-    public function import(Request $request, ResidentExcelImportService $importer): RedirectResponse
+    public function import(ImportResidentsRequest $request, ResidentExcelImportService $importer): RedirectResponse
     {
-        $validated = $request->validate([
-            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
-        ]);
+        $validated = $request->validated();
         $result = $importer->import($validated['file']);
 
         if ($result['created'] || $result['updated']) {
@@ -97,9 +97,9 @@ class ResidentController extends PopulationController
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(SaveResidentRequest $request): RedirectResponse
     {
-        $data = $this->validateResident($request);
+        $data = $request->validated();
         $resident = DB::transaction(function () use ($data) {
             $area = $this->resolveArea($data);
             $resident = Resident::create(array_merge(
@@ -128,9 +128,9 @@ class ResidentController extends PopulationController
         return view('admin.population.residents.form', $this->formData($resident));
     }
 
-    public function update(Request $request, Resident $resident): RedirectResponse
+    public function update(SaveResidentRequest $request, Resident $resident): RedirectResponse
     {
-        $data = $this->validateResident($request, $resident);
+        $data = $request->validated();
 
         DB::transaction(function () use ($data, $resident) {
             $oldStatus = $resident->status;
@@ -164,45 +164,6 @@ class ResidentController extends PopulationController
         $resident->delete();
 
         return redirect()->route('admin.population.residents.index')->with('success', 'Data penduduk diarsipkan.');
-    }
-
-    private function validateResident(Request $request, ?Resident $resident = null): array
-    {
-        return $request->validate(array_merge([
-            'nik' => ['required', 'digits:16', Rule::unique('residents')->ignore($resident?->id)],
-            'name' => ['required', 'string', 'max:100'],
-            'sex' => ['required', Rule::in(['L', 'P'])],
-            'birth_place' => ['nullable', 'string', 'max:100'],
-            'birth_date' => ['nullable', 'date', 'before_or_equal:today'],
-            'religion' => ['nullable', 'string', 'max:30'],
-            'marital_status' => ['nullable', 'string', 'max:30'],
-            'citizenship' => ['required', Rule::in(['WNI', 'WNA'])],
-            'education' => ['nullable', 'string', 'max:100'],
-            'occupation' => ['nullable', 'string', 'max:100'],
-            'blood_type' => ['nullable', Rule::in(['A', 'B', 'AB', 'O', '-'])],
-            'father_nik' => ['nullable', 'digits:16'],
-            'father_name' => ['nullable', 'string', 'max:100'],
-            'mother_nik' => ['nullable', 'digits:16'],
-            'mother_name' => ['nullable', 'string', 'max:100'],
-            'phone' => ['nullable', 'string', 'max:25'],
-            'email' => ['nullable', 'email', 'max:150'],
-            'current_address' => ['nullable', 'string', 'max:255'],
-            'previous_address' => ['nullable', 'string', 'max:255'],
-            'family_id' => ['nullable', 'exists:families,id'],
-            'household_id' => ['nullable', 'exists:households,id'],
-            'family_relationship' => ['nullable', 'string', 'max:50'],
-            'household_relationship' => ['nullable', 'string', 'max:50'],
-            'resident_status' => ['required', Rule::in(['permanent', 'non_permanent'])],
-            'status' => ['required', Rule::in(['active', 'moved', 'deceased', 'missing'])],
-            'registered_at' => ['nullable', 'date'],
-            'notes' => ['nullable', 'string', 'max:2000'],
-            'initial_event_type' => [$resident ? 'nullable' : 'required', Rule::in(['birth', 'arrival'])],
-            'event_date' => [$resident ? 'nullable' : 'required', 'date'],
-            'reported_at' => ['nullable', 'date'],
-            'destination_address' => ['nullable', 'string', 'max:255'],
-            'event_cause' => ['nullable', 'string', 'max:100'],
-            'event_notes' => ['nullable', 'string', 'max:2000'],
-        ], $this->areaRules()));
     }
 
     private function residentData(array $data): array

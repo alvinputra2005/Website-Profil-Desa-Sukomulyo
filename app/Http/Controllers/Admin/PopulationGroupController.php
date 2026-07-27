@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\Admin\SavePopulationGroupRequest;
 use App\Models\PopulationGroup;
 use App\Models\PopulationGroupMember;
 use App\Models\Resident;
@@ -37,9 +38,9 @@ class PopulationGroupController extends PopulationController
         return view('admin.population.groups.form', $this->formData(new PopulationGroup));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(SavePopulationGroupRequest $request): RedirectResponse
     {
-        $data = $this->validated($request);
+        $data = $request->validated();
         $group = DB::transaction(function () use ($data) {
             $group = PopulationGroup::create($this->groupData($data));
             $this->syncChairperson($group, null);
@@ -63,9 +64,9 @@ class PopulationGroupController extends PopulationController
         return view('admin.population.groups.form', $this->formData($group));
     }
 
-    public function update(Request $request, PopulationGroup $group): RedirectResponse
+    public function update(SavePopulationGroupRequest $request, PopulationGroup $group): RedirectResponse
     {
-        $data = $this->validated($request, $group);
+        $data = $request->validated();
         DB::transaction(function () use ($data, $group) {
             $oldChairperson = $group->chairperson_id;
             $group->update($this->groupData($data));
@@ -82,19 +83,6 @@ class PopulationGroupController extends PopulationController
         $group->delete();
 
         return redirect()->route('admin.population.groups.index')->with('success', 'Kelompok diarsipkan.');
-    }
-
-    private function validated(Request $request, ?PopulationGroup $group = null): array
-    {
-        return $request->validate([
-            'code' => ['required', 'string', 'max:30', Rule::unique('population_groups')->ignore($group?->id)],
-            'name' => ['required', 'string', 'max:100'],
-            'category' => ['required', 'string', 'max:100'],
-            'establishment_decree' => ['nullable', 'string', 'max:100'],
-            'chairperson_id' => ['required', 'exists:residents,id'],
-            'description' => ['nullable', 'string', 'max:2000'],
-            'is_active' => ['nullable', 'boolean'],
-        ]);
     }
 
     private function groupData(array $data): array

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Web\StoreContactMessageRequest;
+use App\Http\Requests\Web\PopulationPeriodRequest;
 use App\Models\ContactMessage;
 use App\Models\Gallery;
 use App\Models\IdmScore;
@@ -275,12 +276,9 @@ class SiteController extends Controller
         return $this->render('pages.statistic-detail', compact('page', 'summary', 'panels', 'idm'));
     }
 
-    public function populationReport(Request $request, PopulationStatisticsService $populationStatistics): View
+    public function populationReport(PopulationPeriodRequest $request, PopulationStatisticsService $populationStatistics): View
     {
-        $validated = validator($request->query(), [
-            'year' => ['nullable', 'integer', 'min:1900', 'max:'.now()->year],
-            'month' => ['nullable', 'integer', 'between:1,12'],
-        ])->validate();
+        $validated = $request->validated();
         $year = (int) ($validated['year'] ?? now()->year);
         $month = (int) ($validated['month'] ?? now()->month);
 

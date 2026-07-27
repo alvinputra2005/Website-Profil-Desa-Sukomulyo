@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\Admin\BulkDeleteOfficialsRequest;
+use App\Http\Requests\Admin\SaveOfficialRequest;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Models\Official;
@@ -66,10 +68,10 @@ class OfficialController extends Controller
         ])));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(SaveOfficialRequest $request): RedirectResponse
     {
         $this->authorizeModule();
-        $data = $this->validated($request);
+        $data = $request->validated();
         $data['is_active'] = array_key_exists('is_active', $data) ? $data['is_active'] : true;
         $official = DB::transaction(function () use ($request, $data) {
             $data = $this->syncResidentData($data);
@@ -92,10 +94,10 @@ class OfficialController extends Controller
         return view('admin.officials.form', $this->formData($official));
     }
 
-    public function update(Request $request, Official $official): RedirectResponse
+    public function update(SaveOfficialRequest $request, Official $official): RedirectResponse
     {
         $this->authorizeModule();
-        $data = $this->validated($request, $official);
+        $data = $request->validated();
         DB::transaction(function () use ($request, $data, $official) {
             $old = $official->toArray();
             $data = $this->syncResidentData($data);
@@ -116,10 +118,10 @@ class OfficialController extends Controller
         return redirect()->route('admin.officials.index')->with('success', 'Data perangkat desa berhasil dihapus.');
     }
 
-    public function bulkDestroy(Request $request): RedirectResponse
+    public function bulkDestroy(BulkDeleteOfficialsRequest $request): RedirectResponse
     {
         $this->authorizeModule();
-        $data = $request->validate(['ids' => ['required', 'array', 'min:1'], 'ids.*' => ['integer', 'exists:officials,id']]);
+        $data = $request->validated();
         DB::transaction(function () use ($data) {
             Official::whereKey($data['ids'])->get()->each(function (Official $official) {
                 $this->logger->log('deleted', 'perangkat-desa', $official, $official->toArray());
@@ -226,61 +228,6 @@ class OfficialController extends Controller
     private function authorizeModule(): void
     {
         abort_unless(auth()->user()?->can('manage-content'), 403);
-    }
-
-    private function validated(Request $request, ?Official $official = null): array
-    {
-        if (! $request->has('source')) {
-            $request->merge(['source' => 'external']);
-        }
-        $excludedSuperiors = $official ? array_merge([$official->id], $this->descendantIds($official)) : [];
-
-        return $request->validate([
-            'source' => ['required', Rule::in(['resident', 'external'])],
-            'resident_id' => ['nullable', 'required_if:source,resident', 'exists:residents,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'title_prefix' => ['nullable', 'string', 'max:50'],
-            'title_suffix' => ['nullable', 'string', 'max:50'],
-            'nik' => ['nullable', 'digits:16'],
-            'village_employee_number' => ['nullable', 'string', 'max:25'],
-            'nip' => ['nullable', 'string', 'max:30'],
-            'id_card_tag' => ['nullable', 'string', 'max:50', Rule::unique('officials')->ignore($official?->id)],
-            'birth_place' => ['nullable', 'string', 'max:100'],
-            'birth_date' => ['nullable', 'date', 'before_or_equal:today'],
-            'sex' => ['nullable', Rule::in(['L', 'P'])],
-            'education' => ['nullable', 'string', 'max:100'],
-            'religion' => ['nullable', 'string', 'max:30'],
-            'rank_grade' => ['nullable', 'string', 'max:50'],
-            'position' => ['required', 'string', 'max:255'],
-            'appointment_decree' => ['nullable', 'string', 'max:100'],
-            'appointment_date' => ['nullable', 'date'],
-            'dismissal_decree' => ['nullable', 'string', 'max:100'],
-            'dismissal_date' => ['nullable', 'date', 'after_or_equal:appointment_date'],
-            'term' => ['nullable', 'string', 'max:150'],
-            'is_acting' => ['nullable', 'boolean'],
-            'superior_id' => ['nullable', 'exists:officials,id', Rule::notIn($excludedSuperiors)],
-            'organization_level' => ['nullable', 'integer', 'min:1', 'max:20'],
-            'organization_offset' => ['nullable', 'integer', 'between:-100,100'],
-            'organization_layout' => ['nullable', Rule::in(['hanging', 'horizontal'])],
-            'organization_color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'photo_id' => ['nullable', 'exists:media,id'],
-            'photo_upload' => ImageUploadRules::optional(),
-            'photo_camera' => ImageUploadRules::optional(),
-            'photo_alt' => ['nullable', 'string', 'max:255'],
-            'remove_photo' => ['nullable', 'boolean'],
-            'biography' => ['nullable', 'string', 'max:5000'],
-            'display_order' => ['required', 'integer', 'min:0'],
-            'is_active' => ['nullable', 'boolean'],
-            'can_sign_on_behalf' => ['nullable', 'boolean'],
-            'can_sign_for' => ['nullable', 'boolean'],
-            'phone' => ['nullable', 'string', 'max:25'],
-            'email' => ['nullable', 'email', 'max:150'],
-            'facebook' => ['nullable', 'url:http,https', 'max:500'],
-            'instagram' => ['nullable', 'url:http,https', 'max:500'],
-            'youtube' => ['nullable', 'url:http,https', 'max:500'],
-            'x' => ['nullable', 'url:http,https', 'max:500'],
-            'registered_at' => ['nullable', 'date'],
-        ]);
     }
 
     private function normalized(array $data): array

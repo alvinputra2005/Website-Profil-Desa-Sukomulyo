@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\Admin\SaveFamilyRequest;
 use App\Models\FamilyCard;
 use App\Models\Resident;
 use App\Services\ActivityLogger;
@@ -35,9 +36,9 @@ class FamilyController extends PopulationController
         return view('admin.population.families.form', $this->formData(new FamilyCard));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(SaveFamilyRequest $request): RedirectResponse
     {
-        $data = $this->validated($request);
+        $data = $request->validated();
         $family = DB::transaction(function () use ($data) {
             $area = $this->resolveArea($data);
             $family = FamilyCard::create(array_merge($this->familyData($data), ['area_id' => $area?->id]));
@@ -57,9 +58,9 @@ class FamilyController extends PopulationController
         return view('admin.population.families.form', $this->formData($family));
     }
 
-    public function update(Request $request, FamilyCard $family): RedirectResponse
+    public function update(SaveFamilyRequest $request, FamilyCard $family): RedirectResponse
     {
-        $data = $this->validated($request, $family);
+        $data = $request->validated();
         DB::transaction(function () use ($data, $family) {
             $oldHead = $family->head_resident_id;
             $area = $this->resolveArea($data);
@@ -80,19 +81,6 @@ class FamilyController extends PopulationController
         $family->delete();
 
         return back()->with('success', 'Data keluarga diarsipkan.');
-    }
-
-    private function validated(Request $request, ?FamilyCard $family = null): array
-    {
-        return $request->validate(array_merge([
-            'family_card_number' => ['required', 'digits:16', Rule::unique('families')->ignore($family?->id)],
-            'head_resident_id' => ['required', 'exists:residents,id', Rule::unique('families')->ignore($family?->id)],
-            'address' => ['nullable', 'string', 'max:255'],
-            'social_class' => ['nullable', 'string', 'max:50'],
-            'registered_at' => ['nullable', 'date'],
-            'issued_at' => ['nullable', 'date'],
-            'is_active' => ['nullable', 'boolean'],
-        ], $this->areaRules()));
     }
 
     private function familyData(array $data): array

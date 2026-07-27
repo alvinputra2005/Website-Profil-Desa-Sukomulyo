@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\Admin\SaveHouseholdRequest;
 use App\Models\Household;
 use App\Models\Resident;
 use App\Services\ActivityLogger;
@@ -33,9 +34,9 @@ class HouseholdController extends PopulationController
         return view('admin.population.households.form', $this->formData(new Household));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(SaveHouseholdRequest $request): RedirectResponse
     {
-        $data = $this->validated($request);
+        $data = $request->validated();
         $household = DB::transaction(function () use ($data) {
             $area = $this->resolveArea($data);
             $household = Household::create(array_merge($this->householdData($data), ['area_id' => $area?->id]));
@@ -55,9 +56,9 @@ class HouseholdController extends PopulationController
         return view('admin.population.households.form', $this->formData($household));
     }
 
-    public function update(Request $request, Household $household): RedirectResponse
+    public function update(SaveHouseholdRequest $request, Household $household): RedirectResponse
     {
-        $data = $this->validated($request, $household);
+        $data = $request->validated();
         DB::transaction(function () use ($data, $household) {
             $oldHead = $household->head_resident_id;
             $area = $this->resolveArea($data);
@@ -78,20 +79,6 @@ class HouseholdController extends PopulationController
         $household->delete();
 
         return back()->with('success', 'Rumah tangga diarsipkan.');
-    }
-
-    private function validated(Request $request, ?Household $household = null): array
-    {
-        return $request->validate(array_merge([
-            'household_number' => ['required', 'regex:/^(?=.*\d)[A-Za-z0-9-]{1,30}$/', Rule::unique('households')->ignore($household?->id)],
-            'head_resident_id' => ['required', 'exists:residents,id', Rule::unique('households')->ignore($household?->id)],
-            'address' => ['nullable', 'string', 'max:255'],
-            'social_class' => ['nullable', 'string', 'max:50'],
-            'is_dtks_registered' => ['nullable', 'boolean'],
-            'dtks_reference' => ['nullable', 'string', 'max:30'],
-            'registered_at' => ['nullable', 'date'],
-            'is_active' => ['nullable', 'boolean'],
-        ], $this->areaRules()));
     }
 
     private function householdData(array $data): array
