@@ -6,7 +6,7 @@
 
 <article class="article-card">
     <a class="article-image" href="{{ route('berita-desa.show', $article['slug']) }}">
-        <img src="{{ $article['image'] }}" alt="{{ $article['title'] }}">
+        <img src="{{ $article['thumbnail_image'] ?? $article['image'] }}" alt="{{ $article['title'] }}" loading="lazy">
     </a>
     <div class="article-body">
         <div class="postmeta">

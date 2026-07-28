@@ -1153,6 +1153,8 @@ class PublicSiteService
             'category' => $article->category->name,
             'category_slug' => $article->category->slug,
             'image' => $article->featuredImage?->url ?? ($inlineImage[1] ?? $image),
+            'medium_image' => $article->featuredImage?->medium_url ?? ($inlineImage[1] ?? $image),
+            'thumbnail_image' => $article->featuredImage?->thumbnail_url ?? ($inlineImage[1] ?? $image),
             'detail_image' => $detailImage,
             'featured_image' => $article->featuredImage ? [
                 'url' => $article->featuredImage->url,
@@ -1265,7 +1267,7 @@ class PublicSiteService
     private function normalizeArticleImages(array $articles): array
     {
         return array_map(function (array $article): array {
-            foreach (['image', 'detail_image'] as $key) {
+            foreach (['image', 'medium_image', 'thumbnail_image', 'detail_image'] as $key) {
                 if (array_key_exists($key, $article)) {
                     $article[$key] = $this->normalizeFallbackImage($article[$key]);
                 }
