@@ -21,6 +21,7 @@ class SitePagesTest extends TestCase
             route('potensi-desa') => 'Potensi Desa',
             route('data-desa-statistik') => 'Data Desa',
             route('data-statistik.detail', ['section' => 'penduduk']) => 'Statistik Penduduk',
+            route('data-statistik.detail', ['section' => 'keluarga']) => 'Statistik Keluarga',
             route('data-statistik.detail', ['section' => 'pendidikan']) => 'Statistik Pendidikan',
             route('data-statistik.detail', ['section' => 'pekerjaan']) => 'Statistik Pekerjaan',
             route('data-statistik.detail', ['section' => 'ekonomi']) => 'Statistik Ekonomi',
@@ -64,7 +65,7 @@ class SitePagesTest extends TestCase
 
         $this->assertSame(4, substr_count($navigation, '<ul class="sub-menu">'));
         $this->assertSame(4, substr_count($navigation, 'class="nav-dropdown-toggle"'));
-        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Kependudukan', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Pendidikan', 'Layanan Administrasi', 'APBDes'] as $label) {
+        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Kependudukan', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Keluarga', 'Statistik Pendidikan', 'Layanan Administrasi', 'APBDes'] as $label) {
             $this->assertStringContainsString($label, $navigation);
         }
         foreach (['data-desa-statistik', 'kependudukan', 'informasi-publik-desa'] as $route) {

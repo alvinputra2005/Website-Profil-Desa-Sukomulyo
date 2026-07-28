@@ -13,6 +13,7 @@ use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Official;
 use App\Models\PopulationArea;
+use App\Models\PopulationYearlySnapshot;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
 use App\Models\Resident;
@@ -59,6 +60,7 @@ class PublicContentCacheObserver
             $model instanceof FamilyCard,
             $model instanceof Household,
             $model instanceof PopulationArea,
+            $model instanceof PopulationYearlySnapshot,
             $model instanceof ResidentEvent,
             $model instanceof StatisticDataset,
             $model instanceof StatisticValue => $this->cache->invalidatePopulationStatistics(),

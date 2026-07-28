@@ -14,12 +14,14 @@
             <section class="sc_innerpage_contentbx fullwidth">
                 @if (!empty($page['summary']))
                     <div class="statistics-grid">
-                        @foreach ([
+                        @php($summaryCards = $page['summary_cards'] ?? [
                             ['Jumlah Penduduk', $summary['residents'], 'jiwa', 'fas fa-users'],
                             ['Kepala Keluarga', $summary['families'], 'KK', 'fas fa-home'],
                             ['Rumah Tangga', $summary['households'], 'rumah tangga', 'fas fa-building'],
                             ['Wilayah Dusun', $summary['areas'], 'dusun', 'fas fa-map-signs'],
-                        ] as [$label, $value, $unit, $icon])
+                        ])
+                        @foreach ($summaryCards as [$label, $value, $unit, $icon])
+                            @php($value = is_string($value) ? $summary[$value] : $value)
                             <article class="statistic-card">
                                 <i class="{{ $icon }}" aria-hidden="true"></i>
                                 <div><strong>{{ number_format($value, 0, ',', '.') }}</strong><span>{{ $unit }}</span></div>
@@ -29,7 +31,7 @@
                     </div>
                 @endif
 
-                @if (empty($page['categories']))
+                @if (!empty($page['is_idm']))
                     <section class="data-panel">
                         <span class="section-kicker">Indeks Desa Membangun</span>
                         @if ($idm)

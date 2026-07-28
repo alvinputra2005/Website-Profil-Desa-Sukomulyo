@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\PopulationPeriodRequest;
+use App\Http\Requests\Web\PopulationTrendRequest;
 use App\Services\PopulationStatistics;
 use App\Services\Web\PublicSiteService;
 use Illuminate\View\View;
@@ -18,6 +19,14 @@ class VillageStatisticController extends Controller
     public function show(PublicSiteService $site, PopulationStatistics $statistics, string $section): View
     {
         return $site->statisticDetail($section, $statistics);
+    }
+
+    public function population(
+        PopulationTrendRequest $request,
+        PublicSiteService $site,
+        PopulationStatistics $statistics,
+    ): View {
+        return $site->populationStatistics($statistics, $request->validated());
     }
 
     public function populationReport(

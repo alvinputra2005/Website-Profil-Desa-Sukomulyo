@@ -1,7 +1,10 @@
 import './bootstrap';
 import { initAjaxNavigation } from './ajax';
+import { initPopulationStatistics } from './population-statistics';
 
 const initPublicPage = () => {
+    initPopulationStatistics();
+
     const menuButton = document.querySelector('.menu-toggle');
     const menu = document.querySelector('#primary-menu');
 

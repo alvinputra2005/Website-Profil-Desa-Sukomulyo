@@ -15,6 +15,7 @@ use App\Models\Official;
 use App\Models\PopulationArea;
 use App\Models\PopulationGroup;
 use App\Models\PopulationGroupMember;
+use App\Models\PopulationYearlySnapshot;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
 use App\Models\Resident;
@@ -25,9 +26,9 @@ use App\Models\StatisticValue;
 use App\Models\User;
 use App\Models\VillageProfileSection;
 use App\Observers\PublicContentCacheObserver;
+use App\Policies\AdminResourcePolicy;
 use App\Policies\CmsResourcePolicy;
 use App\Policies\DataResourcePolicy;
-use App\Policies\AdminResourcePolicy;
 use App\Policies\FamilyCardPolicy;
 use App\Policies\HouseholdPolicy;
 use App\Policies\OfficialPolicy;
@@ -73,6 +74,7 @@ class AppServiceProvider extends ServiceProvider
             FamilyCard::class,
             Household::class,
             PopulationArea::class,
+            PopulationYearlySnapshot::class,
             ResidentEvent::class,
             StatisticDataset::class,
             StatisticValue::class,
@@ -109,5 +111,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Household::class, HouseholdPolicy::class);
         Gate::policy(PopulationGroup::class, PopulationGroupPolicy::class);
         Gate::policy(PopulationGroupMember::class, PopulationGroupMemberPolicy::class);
+        Gate::policy(PopulationYearlySnapshot::class, DataResourcePolicy::class);
     }
 }

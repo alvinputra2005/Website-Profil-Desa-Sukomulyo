@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\PopulationGroupController;
 use App\Http\Controllers\Admin\PopulationGroupMemberController;
 use App\Http\Controllers\Admin\PopulationReportController;
 use App\Http\Controllers\Admin\PopulationStatisticsController;
+use App\Http\Controllers\Admin\PopulationYearlySnapshotController;
 use App\Http\Controllers\Admin\RegionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\Village\VillageIdentityController;
@@ -98,6 +99,12 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::put('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'update'])->name('groups.members.update');
         Route::delete('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'destroy'])->name('groups.members.destroy');
         Route::get('statistik', PopulationStatisticsController::class)->name('statistics');
+        Route::patch('statistik-tahunan/{yearly_snapshot}/publikasi', [PopulationYearlySnapshotController::class, 'togglePublication'])
+            ->name('yearly-snapshots.toggle-publication');
+        Route::resource('statistik-tahunan', PopulationYearlySnapshotController::class)
+            ->parameters(['statistik-tahunan' => 'yearly_snapshot'])
+            ->except('show')
+            ->names('yearly-snapshots');
         Route::get('laporan-penduduk', [PopulationReportController::class, 'index'])->name('report');
         Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
     });
@@ -130,7 +137,8 @@ Route::get('/profile-desa/{section}', [VillageProfileController::class, 'show'])
 Route::get('/pemerintahan-desa', [VillageProfileController::class, 'government'])->name('pemerintahan-desa');
 Route::get('/potensi-desa', [VillageProfileController::class, 'potentials'])->name('potensi-desa');
 Route::get('/data-desa-statistik', [VillageStatisticController::class, 'index'])->name('data-desa-statistik');
-Route::get('/data-statistik/{section}', [VillageStatisticController::class, 'show'])->where('section', 'penduduk|pendidikan|pekerjaan|ekonomi|idm|visualisasi')->name('data-statistik.detail');
+Route::get('/data-statistik/penduduk', [VillageStatisticController::class, 'population'])->name('data-statistik.population');
+Route::get('/data-statistik/{section}', [VillageStatisticController::class, 'show'])->where('section', 'penduduk|keluarga|pendidikan|pekerjaan|ekonomi|idm|visualisasi')->name('data-statistik.detail');
 Route::get('/kependudukan', [VillageStatisticController::class, 'index'])->name('kependudukan');
 Route::get('/kependudukan/{section}', [VillageStatisticController::class, 'show'])->where('section', 'ringkasan|jenis-kelamin|kelompok-umur|pendidikan|pekerjaan|agama|status-perkawinan')->name('kependudukan.detail');
 Route::get('/laporan-penduduk', [VillageStatisticController::class, 'populationReport'])->name('laporan-penduduk');

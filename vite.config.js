@@ -17,6 +17,14 @@ const lanHost = Object.values(os.networkInterfaces())
 const devServerHost = process.env.VITE_DEV_SERVER_HOST || lanHost || 'localhost';
 
 export default defineConfig({
+    optimizeDeps: {
+        include: [
+            'echarts/core',
+            'echarts/charts',
+            'echarts/components',
+            'echarts/renderers',
+        ],
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js', 'resources/css/admin.css', 'resources/js/admin.js'],

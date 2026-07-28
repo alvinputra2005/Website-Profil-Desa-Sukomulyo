@@ -313,10 +313,16 @@ class PublicSiteService
     {
         $dataPages = [
             'penduduk' => ['title' => 'Statistik Penduduk', 'description' => 'Jumlah penduduk, jenis kelamin, usia, dan kepala keluarga.', 'categories' => ['sex'], 'summary' => true],
+            'keluarga' => ['title' => 'Statistik Keluarga', 'description' => 'Ringkasan jumlah keluarga, penduduk, rumah tangga, dan wilayah desa.', 'categories' => [], 'summary' => true, 'summary_cards' => [
+                ['Jumlah Keluarga', 'families', 'KK', 'fas fa-home'],
+                ['Jumlah Penduduk', 'residents', 'jiwa', 'fas fa-users'],
+                ['Rumah Tangga', 'households', 'rumah tangga', 'fas fa-building'],
+                ['Wilayah Dusun', 'areas', 'dusun', 'fas fa-map-signs'],
+            ]],
             'pendidikan' => ['title' => 'Statistik Pendidikan', 'description' => 'Jumlah penduduk berdasarkan jenjang pendidikan.', 'categories' => ['education']],
             'pekerjaan' => ['title' => 'Statistik Pekerjaan', 'description' => 'Sebaran pekerjaan dan mata pencaharian masyarakat.', 'categories' => ['occupation']],
             'ekonomi' => ['title' => 'Statistik Ekonomi', 'description' => 'Gambaran aktivitas dan potensi ekonomi masyarakat desa.', 'categories' => ['occupation']],
-            'idm' => ['title' => 'IDM (Indeks Desa Membangun)', 'description' => 'Indeks Ketahanan Sosial, Ekonomi, dan Lingkungan desa.', 'categories' => []],
+            'idm' => ['title' => 'IDM (Indeks Desa Membangun)', 'description' => 'Indeks Ketahanan Sosial, Ekonomi, dan Lingkungan desa.', 'categories' => [], 'is_idm' => true],
             'visualisasi' => ['title' => 'Visualisasi Data', 'description' => 'Ringkasan data desa dalam tabel, grafik, dan angka.', 'categories' => ['age', 'education', 'occupation'], 'summary' => true],
         ];
         $populationPages = [
@@ -352,6 +358,57 @@ class PublicSiteService
             : null;
 
         return $this->render('pages.statistic-detail', compact('page', 'summary', 'panels', 'idm'));
+    }
+
+    public function populationStatistics(
+        PopulationStatisticsService $populationStatistics,
+        array $filters = [],
+    ): View {
+        $genderSummary = $this->cache->remember(
+            SiteCache::PUBLIC_POPULATION_STATISTICS,
+            SiteCache::TEN_MINUTES,
+            fn (): array => $populationStatistics->genderSummary(),
+        );
+        $populationTrend = $this->cache->remember(
+            SiteCache::PUBLIC_POPULATION_TREND,
+            SiteCache::TEN_MINUTES,
+            fn (): array => $populationStatistics->yearlyTrend(),
+        );
+
+        $availableYears = collect($populationTrend)
+            ->pluck('year')
+            ->map(fn ($year): int => (int) $year)
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+        $currentYear = (int) config('village.population_year', now()->year);
+        $minimumYear = $availableYears[0] ?? $currentYear;
+        $defaultFromCandidate = max($minimumYear, $currentYear - 4);
+        $defaultFromYear = collect($availableYears)->first(
+            fn (int $year): bool => $year >= $defaultFromCandidate,
+            $minimumYear,
+        );
+        $defaultToYear = collect($availableYears)->last() ?? $currentYear;
+        $requestedFrom = isset($filters['from_year']) ? (int) $filters['from_year'] : null;
+        $requestedTo = isset($filters['to_year']) ? (int) $filters['to_year'] : null;
+
+        $defaultRange = [
+            'from' => in_array($requestedFrom, $availableYears, true) ? $requestedFrom : $defaultFromYear,
+            'to' => in_array($requestedTo, $availableYears, true) ? $requestedTo : $defaultToYear,
+        ];
+
+        return $this->render('pages.population-statistics', [
+            'page' => [
+                'title' => 'Statistik Penduduk',
+                'description' => 'Komposisi dan perkembangan jumlah penduduk Desa Sukomulyo berdasarkan data administrasi kependudukan yang telah dipublikasikan.',
+            ],
+            'genderSummary' => $genderSummary,
+            'populationTrend' => $populationTrend,
+            'availableYears' => $availableYears,
+            'defaultRange' => $defaultRange,
+            'tableSort' => $filters['sort'] ?? 'asc',
+        ]);
     }
 
     public function populationReport(PopulationPeriodRequest $request, PopulationStatisticsService $populationStatistics): View
@@ -837,7 +894,8 @@ class PublicSiteService
                 ['label' => 'Potensi Desa', 'route' => 'potensi-desa', 'active' => 'potensi-desa'],
             ]],
             ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => [
-                ['label' => 'Statistik Penduduk', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'penduduk']],
+                ['label' => 'Statistik Penduduk', 'route' => 'data-statistik.population', 'active' => 'data-statistik.population'],
+                ['label' => 'Statistik Keluarga', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'keluarga']],
                 ['label' => 'Statistik Pendidikan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pendidikan']],
                 ['label' => 'Statistik Pekerjaan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pekerjaan']],
                 ['label' => 'Statistik Ekonomi', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'ekonomi']],
