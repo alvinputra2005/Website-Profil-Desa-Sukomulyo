@@ -57,7 +57,7 @@ class SitePagesTest extends TestCase
 
         $this->assertSame(3, substr_count($navigation, '<ul class="sub-menu">'));
         $this->assertSame(3, substr_count($navigation, 'class="nav-dropdown-toggle"'));
-        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Keluarga', 'Statistik Pendidikan', 'Layanan Administrasi', 'APBDes'] as $label) {
+        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Keluarga', 'Layanan Administrasi', 'APBDes'] as $label) {
             $this->assertStringContainsString($label, $navigation);
         }
         foreach (['data-desa-statistik', 'informasi-publik-desa'] as $route) {
@@ -65,6 +65,8 @@ class SitePagesTest extends TestCase
         }
         $this->assertStringNotContainsString('Visualisasi Data', $navigation);
         $this->assertStringNotContainsString('Kependudukan', $navigation);
+        $this->assertStringNotContainsString('Statistik Pendidikan', $navigation);
+        $this->assertStringNotContainsString('Statistik Pekerjaan', $navigation);
         $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('profile-desa'), '/').'".*?>\s*<span>Identitas Desa<\/span>/s', $navigation);
         $this->assertStringNotContainsString('>Peta Desa</a>', $navigation);
         $this->assertStringNotContainsString('#', $navigation);

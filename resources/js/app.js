@@ -3,9 +3,81 @@ import { initAjaxNavigation } from './ajax';
 import { initGenericStatistics } from './generic-statistics';
 import { initPopulationStatistics } from './population-statistics';
 
+const initArticleCardWordClamps = () => {
+    window.__articleCardWordClampCleanup?.();
+
+    const elements = [...document.querySelectorAll('[data-word-clamp]')];
+    if (!elements.length) return;
+
+    const clampElement = (element) => {
+        const fullText = element.dataset.wordClampText
+            ?? element.textContent.replace(/\s+/g, ' ').trim();
+        const maximumLines = Number(element.dataset.wordClamp);
+
+        if (!fullText || !Number.isFinite(maximumLines) || maximumLines < 1) return;
+
+        element.dataset.wordClampText = fullText;
+        element.style.webkitLineClamp = 'unset';
+        element.textContent = fullText;
+
+        const lineHeight = Number.parseFloat(window.getComputedStyle(element).lineHeight);
+        const maximumHeight = lineHeight * maximumLines;
+        const exceedsLimit = () => element.scrollHeight > maximumHeight + 1;
+
+        if (!exceedsLimit()) {
+            element.style.removeProperty('-webkit-line-clamp');
+            element.removeAttribute('title');
+            return;
+        }
+
+        const words = fullText.split(' ');
+        let lowerBound = 0;
+        let upperBound = words.length;
+        let fittedText = '…';
+
+        while (lowerBound <= upperBound) {
+            const middle = Math.floor((lowerBound + upperBound) / 2);
+            const candidate = `${words.slice(0, middle).join(' ')}…`;
+            element.textContent = candidate;
+
+            if (exceedsLimit()) {
+                upperBound = middle - 1;
+            } else {
+                fittedText = candidate;
+                lowerBound = middle + 1;
+            }
+        }
+
+        element.textContent = fittedText;
+        element.style.removeProperty('-webkit-line-clamp');
+        element.title = fullText;
+    };
+
+    let frame;
+    const refresh = () => {
+        window.cancelAnimationFrame(frame);
+        frame = window.requestAnimationFrame(() => elements.forEach(clampElement));
+    };
+    const resizeObserver = 'ResizeObserver' in window
+        ? new ResizeObserver(refresh)
+        : null;
+
+    elements.forEach((element) => resizeObserver?.observe(element.parentElement));
+    window.addEventListener('resize', refresh, { passive: true });
+    document.fonts?.ready.then(refresh);
+    refresh();
+
+    window.__articleCardWordClampCleanup = () => {
+        window.cancelAnimationFrame(frame);
+        window.removeEventListener('resize', refresh);
+        resizeObserver?.disconnect();
+    };
+};
+
 const initPublicPage = () => {
     initPopulationStatistics();
     initGenericStatistics();
+    initArticleCardWordClamps();
 
     const menuButton = document.querySelector('.menu-toggle');
     const menu = document.querySelector('#primary-menu');

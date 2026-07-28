@@ -878,8 +878,6 @@ class PublicSiteService
             ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => [
                 ['label' => 'Statistik Penduduk', 'route' => 'data-statistik.population', 'active' => 'data-statistik.population'],
                 ['label' => 'Statistik Keluarga', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'keluarga']],
-                ['label' => 'Statistik Pendidikan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pendidikan']],
-                ['label' => 'Statistik Pekerjaan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pekerjaan']],
                 ['label' => 'Statistik Ekonomi', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'ekonomi']],
                 ['label' => 'IDM (Indeks Desa Membangun)', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'idm']],
             ]],
