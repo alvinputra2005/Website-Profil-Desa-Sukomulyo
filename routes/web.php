@@ -106,6 +106,10 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
     Route::delete('/news-trash/{id}/force', [CrudController::class, 'forceDelete'])->name('news.force-delete');
     Route::delete('/news-trash', [CrudController::class, 'emptyTrash'])->name('news.empty-trash');
     Route::patch('/news/{id}/archive', [CrudController::class, 'archive'])->name('news.archive');
+    Route::get('/gallery-trash', [CrudController::class, 'galleryTrash'])->name('galleries.trash');
+    Route::patch('/gallery-trash/{id}/restore', [CrudController::class, 'restoreGallery'])->name('galleries.restore');
+    Route::delete('/gallery-trash/{id}/force', [CrudController::class, 'forceDeleteGallery'])->name('galleries.force-delete');
+    Route::delete('/gallery-trash', [CrudController::class, 'emptyGalleryTrash'])->name('galleries.empty-trash');
     Route::patch('/galleries/{id}/archive', [CrudController::class, 'archiveGallery'])->name('galleries.archive');
     Route::get('/{resource}', [CrudController::class, 'index'])->name('resources.index');
     Route::get('/{resource}/create', [CrudController::class, 'create'])->name('resources.create');
