@@ -46,7 +46,7 @@ class ProfilePageLayoutTest extends TestCase
     {
         $response = $this->get(route('pemerintahan-desa'))
             ->assertOk()
-            ->assertSee('data-org-tree', false)
+            ->assertSee('government-structure-image', false)
             ->assertSee('Kirim Komentar')
             ->assertDontSee('Profil Pimpinan')
             ->assertDontSee('Peraturan Desa')

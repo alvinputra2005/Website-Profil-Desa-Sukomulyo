@@ -511,10 +511,9 @@ class PublicSiteService
             ->header('Cache-Control', 'public, max-age='.SiteCache::THIRTY_MINUTES);
     }
 
-    public function government(array $nodes): View
+    public function government(): View
     {
         return $this->render('pages.government', array_merge(
-            ['nodes' => $nodes],
             $this->profilePageData('struktur-pemerintahan')
         ));
     }

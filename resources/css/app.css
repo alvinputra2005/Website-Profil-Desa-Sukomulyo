@@ -2442,7 +2442,7 @@ a.regulation-card:focus-visible .regulation-cover {
         #fff;
 }
 .government-page__container {
-    width: min(1440px, calc(100% - 40px));
+    width: min(1200px, calc(100% - 40px));
 }
 .government-organization {
     --org-line-color: #718165;
@@ -2465,6 +2465,15 @@ a.regulation-card:focus-visible .regulation-cover {
     margin: 0 auto !important;
     color: var(--muted);
     font-size: 16px;
+}
+.government-structure-image {
+    width: 100%;
+    margin: 0;
+}
+.government-structure-image img {
+    display: block;
+    width: 100%;
+    height: auto;
 }
 .org-chart-scroll {
     overflow-x: auto;
@@ -2800,18 +2809,15 @@ a.regulation-card:focus-visible .regulation-cover {
 }
 .government-page .profile-comment-section {
     max-width: 960px;
-    margin: 68px auto 0;
+    margin: 68px auto 0 0;
 }
 .public-organization-scroll {
-    overflow-x: auto;
-    padding: 28px;
-    border: 1px solid #e3e9df;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, .94);
-    box-shadow: 0 20px 55px rgba(41, 54, 34, .09);
-    overscroll-behavior-inline: contain;
-    scrollbar-color: rgba(82, 107, 66, .38) transparent;
-    scrollbar-width: thin;
+    overflow: hidden;
+    padding: 12px 0 24px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
 }
 .public-organization-scroll:focus-visible {
     outline: 3px solid rgba(82, 107, 66, .28);
@@ -2826,42 +2832,87 @@ a.regulation-card:focus-visible .regulation-cover {
     justify-content: center;
 }
 .public-organization-chart {
-    gap: 28px;
+    --public-organization-card-width: clamp(92px, calc(9.09vw - 10.91px), 102px);
+    gap: 8px;
 }
 .public-organization-branch {
+    --organization-level-offset: 0px;
     position: relative;
     display: flex;
-    min-width: 190px;
+    min-width: var(--public-organization-card-width);
     align-items: center;
     flex-direction: column;
 }
 .public-organization-card {
     display: flex;
-    width: 190px;
-    min-height: 84px;
-    padding: 12px;
+    width: var(--public-organization-card-width);
+    min-height: 130px;
+    margin: 0;
+    padding: 9px 6px;
     align-items: center;
-    gap: 11px;
+    flex-direction: column;
+    gap: 7px;
     border: 1px solid #dce5d7;
     border-top: 4px solid var(--organization-color);
     border-radius: 10px;
+    color: inherit;
     background: #fff;
     box-shadow: 0 8px 20px rgba(41, 54, 34, .09);
-    transform: translateX(var(--organization-offset));
+    transform: translate(var(--organization-offset), var(--organization-level-offset));
+    cursor: pointer;
+    font: inherit;
+    text-align: center;
+    transition:
+        border-color .22s ease,
+        box-shadow .26s ease,
+        transform .26s cubic-bezier(.22, 1, .36, 1);
+}
+.public-organization-card:hover,
+.public-organization-card:focus-visible,
+.public-organization-card.is-active {
+    z-index: 5;
+    border-color: rgba(82, 107, 66, .48);
+    box-shadow: 0 15px 28px rgba(41, 54, 34, .18);
+    transform:
+        translate(var(--organization-offset), calc(var(--organization-level-offset) - 5px))
+        scale(1.035);
+}
+.public-organization-card:focus-visible {
+    outline: 3px solid rgba(82, 107, 66, .28);
+    outline-offset: 3px;
+}
+.public-organization-card__portrait {
+    position: relative;
+    display: grid;
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+    overflow: hidden;
+    place-items: center;
+    border-radius: 50%;
 }
 .public-organization-card img,
 .public-organization-card__initial {
+    position: absolute;
+    inset: 0;
     display: grid;
-    width: 54px;
-    height: 54px;
-    flex: 0 0 54px;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     place-items: center;
     border-radius: 50%;
     color: #fff;
     background: var(--organization-color);
     object-fit: cover;
-    font: 700 20px/1 'Open Sans', sans-serif;
+    font: 700 18px/1 'Open Sans', sans-serif;
+}
+.public-organization-card img {
+    z-index: 1;
+}
+.public-organization-card__copy {
+    display: block;
+    width: 100%;
+    min-width: 0;
 }
 .public-organization-card strong,
 .public-organization-card small {
@@ -2869,56 +2920,164 @@ a.regulation-card:focus-visible .regulation-cover {
 }
 .public-organization-card strong {
     color: var(--ink);
-    font-size: 14px;
-    line-height: 1.35;
+    font-size: 12px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
 }
 .public-organization-card small {
-    margin-top: 4px;
+    margin-top: 3px;
     color: var(--muted);
-    font-size: 12px;
-    line-height: 1.35;
+    font-size: 11px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
 }
 .public-organization-children {
     position: relative;
-    gap: 24px;
+    gap: 8px;
     padding-top: 38px;
 }
 .public-organization-children::before {
     position: absolute;
     top: 0;
-    left: 50%;
+    left: calc(var(--org-parent-connector-x, 50%) - 1px);
     width: 2px;
-    height: 38px;
+    height: 19px;
+    background: var(--org-line-color);
+    content: '';
+}
+.public-organization-children::after {
+    position: absolute;
+    top: 19px;
+    right: var(--org-connector-end, calc(var(--public-organization-card-width) / 2));
+    left: var(--org-connector-start, calc(var(--public-organization-card-width) / 2));
+    height: 2px;
     background: var(--org-line-color);
     content: '';
 }
 .public-organization-children > .public-organization-branch::before {
     position: absolute;
     top: -19px;
-    left: 50%;
-    width: calc(100% + 24px);
+    left: calc(var(--org-branch-connector-x, 50%) - 1px);
+    width: 2px;
     height: 19px;
-    border-top: 2px solid var(--org-line-color);
-    border-left: 2px solid var(--org-line-color);
+    background: var(--org-line-color);
     content: '';
 }
-.public-organization-children > .public-organization-branch:last-child::before {
-    width: 50%;
-    border-right: 2px solid var(--org-line-color);
-    border-left: 0;
-    transform: translateX(-100%);
+.public-organization-chart > .public-organization-branch > .public-organization-children > .public-organization-branch--align-with-kaur {
+    --organization-level-offset: 168px;
 }
-.public-organization-children > .public-organization-branch:only-child::before {
-    width: 2px;
-    border-top: 0;
-    border-left: 2px solid var(--org-line-color);
-    transform: none;
+.public-organization-chart > .public-organization-branch > .public-organization-children > .public-organization-branch--align-with-kaur::before {
+    height: calc(19px + var(--organization-level-offset));
+}
+.public-organization-chart > .public-organization-branch > .public-organization-card {
+    width: 144px;
+}
+.public-organization-chart > .public-organization-branch > .public-organization-card .public-organization-card__portrait {
+    width: 72px;
+    height: 72px;
+    flex-basis: 72px;
+}
+.public-organization-chart > .public-organization-branch > .public-organization-card strong {
+    font-size: 13px;
+}
+.public-organization-chart > .public-organization-branch > .public-organization-card small {
+    font-size: 12px;
 }
 .public-organization-empty {
     margin: 0;
     padding: 28px;
     color: var(--muted);
     font-style: italic;
+}
+@media (max-width: 1199px) {
+    .public-organization-scroll {
+        padding: 12px 0 24px;
+    }
+    .public-organization-chart,
+    .public-organization-children {
+        width: 100%;
+        min-width: 0;
+        align-items: stretch;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+    .public-organization-chart {
+        gap: 0;
+    }
+    .public-organization-branch {
+        width: 100%;
+        min-width: 0;
+        align-items: flex-start;
+    }
+    .public-organization-chart > .public-organization-branch {
+        align-items: center;
+    }
+    .public-organization-chart > .public-organization-branch > .public-organization-children > .public-organization-branch--align-with-kaur {
+        --organization-level-offset: 0px;
+    }
+    .public-organization-card,
+    .public-organization-chart > .public-organization-branch > .public-organization-card {
+        width: min(100%, 330px);
+        min-height: 82px;
+        padding: 10px 12px;
+        align-items: center;
+        flex-direction: row;
+        gap: 12px;
+        text-align: left;
+        transform: none;
+    }
+    .public-organization-chart > .public-organization-branch > .public-organization-card {
+        width: min(100%, 230px);
+        align-self: center;
+    }
+    .public-organization-card:hover,
+    .public-organization-card:focus-visible,
+    .public-organization-card.is-active {
+        transform: translateY(-4px) scale(1.018);
+    }
+    .public-organization-card__portrait,
+    .public-organization-chart > .public-organization-branch > .public-organization-card .public-organization-card__portrait {
+        width: 54px;
+        height: 54px;
+        flex-basis: 54px;
+    }
+    .public-organization-card__copy {
+        flex: 1;
+    }
+    .public-organization-card strong,
+    .public-organization-chart > .public-organization-branch > .public-organization-card strong {
+        font-size: 13px;
+        overflow-wrap: normal;
+    }
+    .public-organization-card small,
+    .public-organization-chart > .public-organization-branch > .public-organization-card small {
+        font-size: 11px;
+        overflow-wrap: normal;
+    }
+    .public-organization-children {
+        box-sizing: border-box;
+        gap: 14px;
+        padding: 24px 0 0 32px;
+    }
+    .public-organization-children::before {
+        top: 0;
+        bottom: 41px;
+        left: 14px;
+        width: 2px;
+        height: auto;
+    }
+    .public-organization-children::after {
+        display: none;
+    }
+    .public-organization-children > .public-organization-branch {
+        padding-left: 14px;
+    }
+    .public-organization-children > .public-organization-branch::before {
+        top: 40px;
+        left: -18px;
+        width: 32px;
+        height: 2px;
+    }
 }
 .org-chart.is-animated .org-node {
     opacity: 0;
@@ -2990,30 +3149,21 @@ a.regulation-card:focus-visible .regulation-cover {
         border-radius: 14px;
     }
     .public-organization-scroll {
-        padding: 18px 14px 24px;
-        border-radius: 14px;
+        padding: 10px 0 20px;
+        border-radius: 0;
     }
-    .public-organization-chart,
     .public-organization-children {
-        justify-content: flex-start;
+        padding-left: 25px;
     }
-    .public-organization-branch {
-        min-width: 168px;
+    .public-organization-children::before {
+        left: 9px;
     }
-    .public-organization-card {
-        width: 168px;
-        min-height: 76px;
-        padding: 10px;
+    .public-organization-children > .public-organization-branch {
+        padding-left: 10px;
     }
-    .public-organization-card img,
-    .public-organization-card__initial {
-        width: 46px;
-        height: 46px;
-        flex-basis: 46px;
-        font-size: 17px;
-    }
-    .public-organization-card strong {
-        font-size: 13px;
+    .public-organization-children > .public-organization-branch::before {
+        left: -16px;
+        width: 26px;
     }
     .org-chart {
         min-width: 0;
