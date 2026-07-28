@@ -11,7 +11,7 @@
 <section class="hero-slider" data-slider aria-label="Informasi unggulan">
     <div class="hero-slides">
         @foreach ($slides as $index => $article)
-            <article class="hero-slide {{ $index === 0 ? 'is-active' : '' }}" data-slide style="background-position: {{ ['35% 35%', '50% 50%', '65% 65%'][$index] }}; background-image: linear-gradient(90deg, rgba(20, 25, 31, .88), rgba(20, 25, 31, .28)), url('{{ $article['image'] }}')" aria-hidden="{{ $index === 0 ? 'false' : 'true' }}">
+            <article class="hero-slide {{ $index === 0 ? 'is-active' : '' }}" data-slide style="background-position: {{ ['35% 35%', '50% 50%', '65% 65%'][$index] }}; background-image: linear-gradient(90deg, rgba(20, 25, 31, .88), rgba(20, 25, 31, .28)), url('{{ $article['medium_image'] ?? $article['image'] }}')" aria-hidden="{{ $index === 0 ? 'false' : 'true' }}">
                 <div class="container hero-content">
                     <div class="hero-copy">
                         <h2>{{ $article['title'] }}</h2>

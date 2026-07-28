@@ -7,7 +7,7 @@
     $marital=['Belum Kawin','Kawin','Cerai Hidup','Cerai Mati'];
     $education=['Tidak/Belum Sekolah','Belum Tamat SD/Sederajat','Tamat SD/Sederajat','SLTP/Sederajat','SLTA/Sederajat','Diploma I/II','Akademi/Diploma III','Diploma IV/Strata I','Strata II','Strata III'];
 @endphp
-<form method="post" action="{{ $resident->exists?route('admin.population.residents.update',$resident):route('admin.population.residents.store') }}" data-dirty-form>
+<form class="population-resident-form" method="post" action="{{ $resident->exists?route('admin.population.residents.update',$resident):route('admin.population.residents.store') }}" data-dirty-form>
     @csrf @if($resident->exists)@method('put')@endif
     <div class="nav-tabs-custom population-form-tabs">
         <ul class="nav nav-tabs">
@@ -20,7 +20,7 @@
             <div class="tab-pane active" id="identity">
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="form-group"><label class="required">NIK</label><input class="form-control" name="nik" maxlength="16" inputmode="numeric" value="{{ old('nik',$resident->nik) }}" required><p class="help-block">16 digit Nomor Induk Kependudukan.</p></div>
+                        <div class="form-group"><label class="required">NIK</label><input class="form-control" name="nik" maxlength="16" inputmode="numeric" placeholder="16 digit Nomor Induk Kependudukan" value="{{ old('nik',$resident->nik) }}" required></div>
                         <div class="form-group"><label class="required">Nama Lengkap</label><input class="form-control" name="name" maxlength="100" value="{{ old('name',$resident->name) }}" required></div>
                         <div class="form-group"><label class="required">Jenis Kelamin</label><select name="sex" class="form-control" required><option value="">Pilih</option><option value="L" @selected(old('sex',$resident->sex)==='L')>Laki-laki</option><option value="P" @selected(old('sex',$resident->sex)==='P')>Perempuan</option></select></div>
                         <div class="row"><div class="col-sm-7"><div class="form-group"><label>Tempat Lahir</label><input class="form-control" name="birth_place" value="{{ old('birth_place',$resident->birth_place) }}"></div></div><div class="col-sm-5"><div class="form-group"><label>Tanggal Lahir</label><input type="date" class="form-control" name="birth_date" value="{{ old('birth_date',$resident->birth_date?->format('Y-m-d')) }}"></div></div></div>

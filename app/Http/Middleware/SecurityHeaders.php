@@ -41,12 +41,14 @@ final class SecurityHeaders
         $scriptSources = ["'self'", "'unsafe-inline'"];
         $styleSources = ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'];
         $connectSources = ["'self'"];
+        $imageSources = ["'self'", 'data:', 'https:'];
 
         if ($viteOrigin !== null) {
             $scriptSources[] = $viteOrigin;
             $styleSources[] = $viteOrigin;
             $connectSources[] = $viteOrigin;
             $connectSources[] = preg_replace('/^http/', 'ws', $viteOrigin);
+            $imageSources[] = $viteOrigin;
         }
 
         return implode('; ', [
@@ -58,7 +60,7 @@ final class SecurityHeaders
             'script-src '.implode(' ', $scriptSources),
             'style-src '.implode(' ', $styleSources),
             "font-src 'self' data: https://fonts.gstatic.com",
-            "img-src 'self' data: https:",
+            'img-src '.implode(' ', $imageSources),
             "frame-src 'self' https://www.google.com",
             'connect-src '.implode(' ', $connectSources),
             "media-src 'self'",

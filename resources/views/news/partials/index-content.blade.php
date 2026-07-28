@@ -15,7 +15,7 @@
                     @foreach ($featuredArticles as $article)
                         <article class="featured-news-card {{ $loop->first ? 'featured-news-card--main' : '' }}">
                             <a class="featured-news-link" href="{{ route('berita-desa.show', $article['slug']) }}">
-                                <img src="{{ $article['image'] }}" alt="{{ $article['title'] }}">
+                                <img src="{{ $article['medium_image'] ?? $article['image'] }}" alt="{{ $article['title'] }}">
                                 <span class="featured-news-overlay" aria-hidden="true"></span>
                                 <span class="featured-news-content">
                                     <strong>{{ $article['title'] }}</strong>

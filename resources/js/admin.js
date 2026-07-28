@@ -55,7 +55,8 @@ const initAdminPage = () => {
     const saved=localStorage.getItem('sidebar'); if(saved==='collapsed') document.body.classList.add('sidebar-collapse');
     $('.sidebar-toggle').on('click',()=>setTimeout(()=>localStorage.setItem('sidebar',document.body.classList.contains('sidebar-collapse')?'collapsed':'expanded'),0));
     $('#cari-menu').on('input',function(){const term=this.value.toLowerCase().trim();$('.sidebar-menu>li:not(.header)').each(function(){const $item=$(this),matches=$item.text().toLowerCase().includes(term);$item.toggle(matches);if(term&&matches)$item.addClass('menu-open').children('.treeview-menu').show();else if(!term&&!$item.hasClass('active'))$item.removeClass('menu-open').children('.treeview-menu').hide()})});
-    $('.select2').select2({width:'100%'}); $('[data-toggle="tooltip"]').tooltip();
+    $('select:not(.select2-hidden-accessible):not([data-select2-disabled])').select2({width:'100%'});
+    $('[data-toggle="tooltip"]').tooltip();
     if($.fn.tree)$('[data-widget="tree"]').tree();
     if($.fn.boxWidget)$('[data-widget="collapse"]').closest('.box').boxWidget();
     if($.fn.layout&&$('body').data('lte.layout'))$('body').layout('fix');

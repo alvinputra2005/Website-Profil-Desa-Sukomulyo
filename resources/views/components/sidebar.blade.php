@@ -101,7 +101,7 @@
                     <li>
                         <a href="{{ route('berita-desa.show', $article['slug']) }}">
                             <span class="news-popular-image">
-                                <img src="{{ $article['image'] }}" alt="" loading="lazy">
+                                <img src="{{ $article['thumbnail_image'] ?? $article['image'] }}" alt="" loading="lazy">
                             </span>
                             <span class="news-popular-content">
                                 <strong>{{ $article['title'] }}</strong>
