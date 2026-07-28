@@ -400,6 +400,11 @@ class PublicSiteService
         ]);
     }
 
+    public function genericStatistic(array $data): View
+    {
+        return $this->render('pages.generic-statistics', $data);
+    }
+
     public function budgetHistory(): View
     {
         return $this->render('pages.budget-history', [
@@ -877,7 +882,6 @@ class PublicSiteService
                 ['label' => 'Statistik Pekerjaan', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'pekerjaan']],
                 ['label' => 'Statistik Ekonomi', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'ekonomi']],
                 ['label' => 'IDM (Indeks Desa Membangun)', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'idm']],
-                ['label' => 'Visualisasi Data', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'visualisasi']],
             ]],
             ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
                 ['label' => 'Pengumuman Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'pengumuman']],

@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\PopulationTrendRequest;
 use App\Services\PopulationStatistics;
+use App\Services\StatisticPageData;
 use App\Services\Web\PublicSiteService;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class VillageStatisticController extends Controller
@@ -15,17 +17,43 @@ class VillageStatisticController extends Controller
         return $site->statistics($statistics);
     }
 
-    public function show(PublicSiteService $site, PopulationStatistics $statistics, string $section): View
-    {
-        return $site->statisticDetail($section, $statistics);
+    public function show(
+        Request $request,
+        PublicSiteService $site,
+        PopulationStatistics $statistics,
+        StatisticPageData $statisticPages,
+        string $section,
+    ): View {
+        if ($section === 'penduduk') {
+            return $site->populationStatistics($statistics, $request->only(['from_year', 'to_year', 'sort']));
+        }
+
+        $context = $statisticPages->sectionContext($section, $request->query('menu'));
+        abort_unless($context, 404);
+
+        return $site->genericStatistic($statisticPages->build(
+            $context,
+            $request->only(['from_year', 'to_year', 'sort']),
+        ));
     }
 
     public function population(
         PopulationTrendRequest $request,
         PublicSiteService $site,
         PopulationStatistics $statistics,
+        StatisticPageData $statisticPages,
     ): View {
-        return $site->populationStatistics($statistics, $request->validated());
+        $filters = $request->validated();
+        $menu = $filters['menu'] ?? null;
+
+        if ($menu) {
+            $context = $statisticPages->populationContext($menu);
+            abort_unless($context, 404);
+
+            return $site->genericStatistic($statisticPages->build($context, $filters));
+        }
+
+        return $site->populationStatistics($statistics, $filters);
     }
 
     public function budgetHistory(PublicSiteService $site): View

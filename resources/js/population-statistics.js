@@ -192,7 +192,7 @@ const tableToSvg = (table, title, subtitle) => {
     return { svg, width, height };
 };
 
-const downloadBlob = (blob, filename) => {
+export const downloadBlob = (blob, filename) => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -201,14 +201,14 @@ const downloadBlob = (blob, filename) => {
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
 };
 
-const downloadDataUrl = (dataUrl, filename) => {
+export const downloadDataUrl = (dataUrl, filename) => {
     const link = document.createElement('a');
     link.href = dataUrl;
     link.download = filename;
     link.click();
 };
 
-const svgToRaster = (svg, width, height, format = 'png') => new Promise((resolve, reject) => {
+export const svgToRaster = (svg, width, height, format = 'png') => new Promise((resolve, reject) => {
     const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const image = new Image();
@@ -265,7 +265,7 @@ const chartToSvgAsset = (chart, container) => {
     }
 };
 
-const combineChartAndTable = (chart, container, table, title, subtitle) => {
+export const combineChartAndTable = (chart, container, table, title, subtitle) => {
     const chartAsset = chartToSvgAsset(chart, container);
     const tableAsset = tableToSvg(table, title, subtitle);
     const gap = 24;
@@ -288,7 +288,7 @@ const combineChartAndTable = (chart, container, table, title, subtitle) => {
     return { svg, width, height };
 };
 
-const savePdf = async (dataUrl, sourceWidth, sourceHeight, filename) => {
+export const savePdf = async (dataUrl, sourceWidth, sourceHeight, filename) => {
     const { jsPDF } = await import('jspdf');
     const landscape = sourceWidth >= sourceHeight;
     const pdf = new jsPDF({

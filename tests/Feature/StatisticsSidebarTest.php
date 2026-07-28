@@ -18,16 +18,24 @@ class StatisticsSidebarTest extends TestCase
             ->assertSee('data-sidebar-accordion', false)
             ->assertSee('Statistik Penduduk')
             ->assertSee('Statistik Keluarga')
-            ->assertSee('Statistik Bantuan')
+            ->assertDontSee('Statistik Bantuan')
             ->assertSee('Rentang Umur')
+            ->assertSee('Pendidikan')
+            ->assertDontSee('Pendidikan Sedang Ditempuh')
+            ->assertDontSee('Penyakit Menahun')
             ->assertSee('Diperbarui 28 Juli 2026')
             ->assertSee('Pemerintah Desa Sukomulyo')
-            ->assertSee('data-population-download', false)
-            ->assertSee('Unduh Data');
+            ->assertSee('data-population-export-toggle="actual"', false)
+            ->assertSee('Unduh Data Aktual');
 
         $this->get(route('data-statistik.detail', ['section' => 'pendidikan']))
             ->assertOk()
-            ->assertSee('aria-label="Navigasi data statistik"', false);
+            ->assertSee('aria-label="Navigasi data statistik"', false)
+            ->assertSee('data-generic-statistics', false)
+            ->assertSee('data-generic-series', false)
+            ->assertSee('Unduh Data Aktual')
+            ->assertSee('Unduh Data Tahunan')
+            ->assertDontSee('Statistik Bantuan');
     }
 
     public function test_statistics_landing_page_stays_full_width_without_the_sidebar(): void

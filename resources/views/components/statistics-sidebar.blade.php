@@ -2,10 +2,9 @@
     $section = (string) request()->route('section', '');
     $activeMenu = (string) request('menu', '');
     $isFamilyPage = request()->routeIs('data-statistik.detail') && $section === 'keluarga';
+    $familyMenu = $isFamilyPage ? $activeMenu : '';
     $populationExpanded = ! $isFamilyPage;
     $familyExpanded = $isFamilyPage;
-    $ageExpanded = in_array($section, ['kelompok-umur'], true) || str_starts_with($activeMenu, 'rentang-umur');
-
     $populationUrl = fn (string $menu): string => route('data-statistik.population', ['menu' => $menu]);
 @endphp
 
@@ -46,12 +45,10 @@
                         </a>
                     </li>
                     <li>
-                        <a class="{{ request()->routeIs('data-statistik.detail') && $section === 'pendidikan' && $activeMenu !== 'pendidikan-ditempuh' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'pendidikan']) }}">
-                            Pendidikan Dalam KK
+                        <a class="{{ request()->routeIs('data-statistik.detail') && $section === 'pendidikan' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'pendidikan']) }}">
+                            Pendidikan
                         </a>
                     </li>
-                    <li><a class="{{ $activeMenu === 'pendidikan-ditempuh' ? 'is-active' : '' }}" href="{{ $populationUrl('pendidikan-ditempuh') }}">Pendidikan Sedang Ditempuh</a></li>
-                    <li><a class="{{ $activeMenu === 'penyakit-menahun' ? 'is-active' : '' }}" href="{{ $populationUrl('penyakit-menahun') }}">Penyakit Menahun</a></li>
                     <li>
                         <a class="{{ request()->routeIs('data-statistik.detail') && in_array($section, ['pekerjaan', 'ekonomi'], true) ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'pekerjaan']) }}">
                             Pekerjaan
@@ -63,24 +60,7 @@
                             Status Perkawinan
                         </a>
                     </li>
-                    <li class="statistics-sidebar__nested">
-                        <button
-                            class="statistics-sidebar__nested-toggle {{ $ageExpanded ? 'is-active' : '' }}"
-                            type="button"
-                            aria-expanded="{{ $ageExpanded ? 'true' : 'false' }}"
-                            aria-controls="statistics-age-panel"
-                            data-sidebar-toggle
-                        >
-                            <span>Rentang Umur</span>
-                            <i class="fas fa-caret-right" aria-hidden="true"></i>
-                        </button>
-                        <ul id="statistics-age-panel" class="statistics-sidebar__sublist" @if (! $ageExpanded) hidden @endif>
-                            <li><a href="{{ $populationUrl('rentang-umur-anak') }}">Anak (0–14 tahun)</a></li>
-                            <li><a href="{{ $populationUrl('rentang-umur-muda') }}">Usia Muda (15–24 tahun)</a></li>
-                            <li><a href="{{ $populationUrl('rentang-umur-dewasa') }}">Dewasa (25–64 tahun)</a></li>
-                            <li><a href="{{ $populationUrl('rentang-umur-lansia') }}">Lansia (65+ tahun)</a></li>
-                        </ul>
-                    </li>
+                    <li><a class="{{ $activeMenu === 'rentang-umur' ? 'is-active' : '' }}" href="{{ $populationUrl('rentang-umur') }}">Rentang Umur</a></li>
                     <li>
                         <a class="{{ $activeMenu === 'kategori-umur' ? 'is-active' : '' }}" href="{{ $populationUrl('kategori-umur') }}">
                             Kategori Umur
@@ -111,36 +91,10 @@
             </h2>
             <div id="statistics-family-panel" class="statistics-sidebar__panel" @if (! $familyExpanded) hidden @endif>
                 <ul class="statistics-sidebar__list">
-                    <li><a class="{{ $isFamilyPage ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga']) }}">Ringkasan Keluarga</a></li>
-                    <li><a href="{{ route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'kepala-keluarga']) }}">Kepala Keluarga</a></li>
-                    <li><a href="{{ route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'anggota-keluarga']) }}">Anggota Keluarga</a></li>
-                    <li><a href="{{ route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'rumah-tangga']) }}">Rumah Tangga</a></li>
-                </ul>
-            </div>
-        </section>
-
-        <section class="statistics-sidebar__group">
-            <h2 class="statistics-sidebar__heading">
-                <button
-                    class="statistics-sidebar__toggle"
-                    type="button"
-                    aria-expanded="false"
-                    aria-controls="statistics-assistance-panel"
-                    data-sidebar-toggle
-                    data-sidebar-accordion-toggle
-                >
-                    <span class="statistics-sidebar__icon statistics-sidebar__icon--assistance" aria-hidden="true">
-                        <i class="fas fa-hand-holding-heart"></i>
-                    </span>
-                    <span>Statistik Bantuan</span>
-                    <i class="fas fa-chevron-down statistics-sidebar__chevron" aria-hidden="true"></i>
-                </button>
-            </h2>
-            <div id="statistics-assistance-panel" class="statistics-sidebar__panel" hidden>
-                <ul class="statistics-sidebar__list">
-                    <li><a href="{{ route('informasi-desa.detail', ['section' => 'bantuan-sosial']) }}">Informasi Bantuan Sosial</a></li>
-                    <li><a href="{{ route('data-statistik.detail', ['section' => 'ekonomi', 'menu' => 'penerima-bantuan']) }}">Penerima Bantuan</a></li>
-                    <li><a href="{{ route('data-statistik.detail', ['section' => 'ekonomi', 'menu' => 'keluarga-penerima']) }}">Keluarga Penerima</a></li>
+                    <li><a class="{{ $isFamilyPage && $familyMenu === '' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga']) }}">Ringkasan Keluarga</a></li>
+                    <li><a class="{{ $familyMenu === 'kepala-keluarga' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'kepala-keluarga']) }}">Kepala Keluarga</a></li>
+                    <li><a class="{{ $familyMenu === 'anggota-keluarga' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'anggota-keluarga']) }}">Anggota Keluarga</a></li>
+                    <li><a class="{{ $familyMenu === 'rumah-tangga' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'rumah-tangga']) }}">Rumah Tangga</a></li>
                 </ul>
             </div>
         </section>

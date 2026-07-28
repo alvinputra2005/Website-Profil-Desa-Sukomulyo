@@ -63,6 +63,7 @@ class SitePagesTest extends TestCase
         foreach (['data-desa-statistik', 'informasi-publik-desa'] as $route) {
             $this->assertDoesNotMatchRegularExpression('/<a href="'.preg_quote(route($route), '/').'"/', $navigation);
         }
+        $this->assertStringNotContainsString('Visualisasi Data', $navigation);
         $this->assertStringNotContainsString('Kependudukan', $navigation);
         $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('profile-desa'), '/').'".*?>\s*<span>Identitas Desa<\/span>/s', $navigation);
         $this->assertStringNotContainsString('>Peta Desa</a>', $navigation);
