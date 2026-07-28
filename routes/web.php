@@ -49,7 +49,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::get('/media-file/{media}/{variant?}', MediaFileController::class)
-    ->where('variant', 'original|thumbnail')
+    ->where('variant', 'original|medium|thumbnail')
     ->middleware('throttle:120,1')
     ->name('media.file');
 

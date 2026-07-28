@@ -1,5 +1,4 @@
 const MAX_IMAGE_DIMENSION = 1920;
-const MAX_CLIENT_BYTES = 2.5 * 1024 * 1024;
 const WEBP_QUALITY = 0.92;
 
 const isProcessableImage = (file) => (
@@ -51,7 +50,7 @@ export const prepareImageFile = async (file) => {
   const width = bitmap.width;
   const height = bitmap.height;
   const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(width, height));
-  const needsResize = scale < 1 || file.size > MAX_CLIENT_BYTES;
+  const needsResize = scale < 1;
 
   if (!needsResize) {
     bitmap.close?.();

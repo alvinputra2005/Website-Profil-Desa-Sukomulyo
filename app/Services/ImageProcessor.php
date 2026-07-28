@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Media;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -11,16 +12,21 @@ use RuntimeException;
 class ImageProcessor
 {
     private const MAIN_MAX_DIMENSION = 1920;
+
+    private const MEDIUM_MAX_DIMENSION = 1200;
+
     private const THUMBNAIL_MAX_DIMENSION = 600;
 
     public function store(UploadedFile $file, string $directory, ?string $disk = null): array
     {
-        if (! extension_loaded('gd')) throw new RuntimeException('Ekstensi PHP GD diperlukan untuk memproses gambar.');
+        if (! extension_loaded('gd')) {
+            throw new RuntimeException('Ekstensi PHP GD diperlukan untuk memproses gambar.');
+        }
 
         $startedAt = hrtime(true);
         $disk ??= config('filesystems.media_disk', 'public');
         $timings = [];
-        $source = $main = $thumb = null;
+        $source = $main = $medium = $thumb = null;
 
         try {
             $stageStartedAt = hrtime(true);
@@ -41,13 +47,15 @@ class ImageProcessor
 
             $stageStartedAt = hrtime(true);
             $main = $this->resize($source, $width, $height, self::MAIN_MAX_DIMENSION, IMG_BICUBIC_FIXED);
+            $medium = $this->resize($main, imagesx($main), imagesy($main), self::MEDIUM_MAX_DIMENSION, IMG_BICUBIC_FIXED);
             // Resampling the thumbnail from the already bounded main image
             // avoids reading a very large source twice.
-            $thumb = $this->resize($main, imagesx($main), imagesy($main), self::THUMBNAIL_MAX_DIMENSION, IMG_BILINEAR_FIXED);
+            $thumb = $this->resize($medium, imagesx($medium), imagesy($medium), self::THUMBNAIL_MAX_DIMENSION, IMG_BILINEAR_FIXED);
             $timings['resize_ms'] = $this->elapsedMilliseconds($stageStartedAt);
 
             $name = Str::uuid().'.webp';
             $path = trim($directory, '/').'/'.$name;
+            $mediumPath = trim($directory, '/').'/medium/'.$name;
             $thumbnailPath = trim($directory, '/').'/thumbnails/'.$name;
 
             $stageStartedAt = hrtime(true);
@@ -55,17 +63,23 @@ class ImageProcessor
             $timings['encode_main_ms'] = $this->elapsedMilliseconds($stageStartedAt);
 
             $stageStartedAt = hrtime(true);
+            $mediumPayload = $this->encode($medium, 80);
+            $timings['encode_medium_ms'] = $this->elapsedMilliseconds($stageStartedAt);
+
+            $stageStartedAt = hrtime(true);
             $thumbnailPayload = $this->encode($thumb, 76);
             $timings['encode_thumbnail_ms'] = $this->elapsedMilliseconds($stageStartedAt);
 
             $stageStartedAt = hrtime(true);
             Storage::disk($disk)->put($path, $mainPayload);
+            Storage::disk($disk)->put($mediumPath, $mediumPayload);
             Storage::disk($disk)->put($thumbnailPath, $thumbnailPayload);
             $timings['storage_ms'] = $this->elapsedMilliseconds($stageStartedAt);
 
             $result = [
                 'stored_name' => $name,
                 'storage_path' => $path,
+                'medium_path' => $mediumPath,
                 'thumbnail_path' => $thumbnailPath,
                 'mime_type' => 'image/webp',
                 'extension' => 'webp',
@@ -79,7 +93,41 @@ class ImageProcessor
 
             return $result;
         } finally {
-            $this->destroyImages([$source, $main, $thumb]);
+            $this->destroyImages([$source, $main, $medium, $thumb]);
+        }
+    }
+
+    public function backfillMedium(Media $media): string
+    {
+        if (! extension_loaded('gd')) {
+            throw new RuntimeException('Ekstensi PHP GD diperlukan untuk memproses gambar.');
+        }
+
+        $disk = Storage::disk($media->disk);
+        $contents = $disk->get($media->storage_path);
+        $source = @imagecreatefromstring($contents);
+
+        if ($source === false) {
+            throw new RuntimeException('Gambar tidak dapat diproses.');
+        }
+
+        $medium = null;
+
+        try {
+            $medium = $this->resize(
+                $source,
+                imagesx($source),
+                imagesy($source),
+                self::MEDIUM_MAX_DIMENSION,
+                IMG_BICUBIC_FIXED,
+            );
+            $directory = trim(str_replace('\\', '/', dirname($media->storage_path)), './');
+            $mediumPath = ($directory !== '' ? $directory.'/' : '').'medium/'.pathinfo($media->stored_name, PATHINFO_FILENAME).'.webp';
+            $disk->put($mediumPath, $this->encode($medium, 80));
+
+            return $mediumPath;
+        } finally {
+            $this->destroyImages([$source, $medium]);
         }
     }
 
@@ -101,7 +149,10 @@ class ImageProcessor
             $image = $contents === false ? false : @imagecreatefromstring($contents);
         }
 
-        if ($image === false) throw new RuntimeException('Gambar tidak dapat diproses.');
+        if ($image === false) {
+            throw new RuntimeException('Gambar tidak dapat diproses.');
+        }
+
         return [$image, imagesx($image), imagesy($image)];
     }
 
@@ -125,10 +176,17 @@ class ImageProcessor
 
     private function orient($image, UploadedFile $file)
     {
-        if (!function_exists('exif_read_data') || !in_array($file->getMimeType(), ['image/jpeg', 'image/jpg'], true)) return $image;
+        if (! function_exists('exif_read_data') || ! in_array($file->getMimeType(), ['image/jpeg', 'image/jpg'], true)) {
+            return $image;
+        }
         $orientation = @exif_read_data($file->getRealPath())['Orientation'] ?? 1;
-        $rotated = match ($orientation) { 3 => imagerotate($image, 180, 0), 6 => imagerotate($image, -90, 0), 8 => imagerotate($image, 90, 0), default => $image };
-        if ($rotated !== $image) imagedestroy($image);
+        $rotated = match ($orientation) {
+            3 => imagerotate($image, 180, 0), 6 => imagerotate($image, -90, 0), 8 => imagerotate($image, 90, 0), default => $image
+        };
+        if ($rotated !== $image) {
+            imagedestroy($image);
+        }
+
         return $rotated;
     }
 
@@ -156,13 +214,14 @@ class ImageProcessor
         imagealphablending($target, false);
         imagesavealpha($target, true);
         imagecopyresampled($target, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
         return $target;
     }
 
     private function encode($image, int $quality): string
     {
         ob_start();
-        if (!imagewebp($image, null, $quality)) {
+        if (! imagewebp($image, null, $quality)) {
             ob_end_clean();
             throw new RuntimeException('Gambar WebP tidak dapat dibuat.');
         }
