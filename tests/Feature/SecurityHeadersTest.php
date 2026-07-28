@@ -65,6 +65,10 @@ class SecurityHeadersTest extends TestCase
                 $policy
             );
             $this->assertStringContainsString(
+                "img-src 'self' data: https: http://192.168.137.1:5173",
+                $policy
+            );
+            $this->assertStringContainsString(
                 "connect-src 'self' http://192.168.137.1:5173 ws://192.168.137.1:5173",
                 $policy
             );

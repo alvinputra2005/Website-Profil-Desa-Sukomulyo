@@ -1,6 +1,6 @@
 const MAX_IMAGE_DIMENSION = 1920;
 const MAX_CLIENT_BYTES = 2.5 * 1024 * 1024;
-const WEBP_QUALITY = 0.82;
+const WEBP_QUALITY = 0.92;
 
 const isProcessableImage = (file) => (
   file

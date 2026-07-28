@@ -158,6 +158,24 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .form-control { border-color: #ccd3c8; }
 .form-control:focus, .select2-container--default.select2-container--focus .select2-selection--multiple { border-color: var(--admin-primary); box-shadow: none; }
 
+/* Semua dropdown admin memakai jarak teks yang ringkas dan posisi vertikal seimbang. */
+.select2-container .select2-selection--single {
+    display: flex;
+    height: 34px;
+    align-items: center;
+}
+.select2-container .select2-selection--single .select2-selection__rendered {
+    padding-right: 28px;
+    padding-left: 6px;
+    font-size: 14px;
+    line-height: normal;
+}
+.select2-results__options { font-size: 12px; }
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    top: 0;
+    height: 32px;
+}
+
 /* Input teks pada form Identitas Desa mengikuti tinggi dropdown Select2. */
 .village-content-profile-form input.form-control:not([type="file"]) {
     height: 25px;
@@ -284,6 +302,19 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .population-table code { color: var(--admin-primary-dark); }
 .population-form-tabs { border-top: 3px solid var(--admin-primary); }
 .population-form-tabs > .box-footer { margin-top: 0; }
+.population-resident-form input.form-control:not([type="file"]),
+.population-resident-form select.form-control {
+    height: 34px;
+}
+.population-resident-form input.form-control:not([type="file"]),
+.population-resident-form select.form-control {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    line-height: 20px;
+}
+.population-resident-form .select2-container {
+    width: 100% !important;
+}
 .population-event-notes { margin-top: 8px; }
 .population-avatar { display: flex; width: 88px; height: 88px; margin: 5px auto 12px; align-items: center; justify-content: center; border-radius: 50%; background: var(--admin-primary); color: #fff; font-size: 38px; font-weight: 700; }
 .population-details dt { width: 145px; color: var(--admin-muted); font-weight: 600; }

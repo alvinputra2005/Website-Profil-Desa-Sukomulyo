@@ -164,7 +164,7 @@ export const initRegionSelectors = () => {
                 },
             ]));
 
-            retry.hidden = true;
+            if (retry) retry.hidden = true;
             setBusy(true);
             showStatus('Memuat daftar provinsi...', false, true);
 
@@ -196,7 +196,7 @@ export const initRegionSelectors = () => {
                 if (requestGeneration !== generation) return;
                 restoreSavedSelections();
                 showStatus(error.message || 'Data wilayah gagal dimuat. Silakan coba lagi.', true);
-                retry.hidden = false;
+                if (retry) retry.hidden = false;
             } finally {
                 if (requestGeneration === generation) setBusy(false);
             }
@@ -208,7 +208,7 @@ export const initRegionSelectors = () => {
                 setBusy(false);
                 rememberSelection(definition.key);
                 resetFrom(index + 1);
-                retry.hidden = true;
+                if (retry) retry.hidden = true;
 
                 if (!selects[definition.key].value) {
                     showStatus(`Pilih ${definition.label} untuk melanjutkan.`);
@@ -231,7 +231,7 @@ export const initRegionSelectors = () => {
                 } catch (error) {
                     if (requestGeneration !== generation) return;
                     showStatus(error.message || `Daftar ${next.label} gagal dimuat.`, true);
-                    retry.hidden = false;
+                    if (retry) retry.hidden = false;
                 } finally {
                     if (requestGeneration === generation) setBusy(false);
                 }

@@ -93,7 +93,7 @@
             <section class="content"><x-admin.alert />@yield('content')</section>
         </div>
         <footer class="main-footer">
-            <div class="pull-right hidden-xs"><b>Laravel CMS</b> 1.0</div><strong>OpenSID UI · Pemerintah Desa Sukomulyo</strong>
+            <div class="pull-right hidden-xs"><b>Laravel CMS</b> 1.0</div><strong>Pemerintah Desa Sukomulyo</strong>
         </footer>
         <aside class="control-sidebar control-sidebar-dark">
             <div class="tab-content">
