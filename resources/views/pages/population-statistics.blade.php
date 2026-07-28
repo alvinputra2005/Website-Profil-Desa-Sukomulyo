@@ -33,22 +33,46 @@
     />
 
     <div class="container">
-        <div id="sc_innerpage_wrap">
-            <section class="sc_innerpage_contentbx fullwidth population-statistics" data-population-statistics>
-                <div class="population-statistics__header" aria-label="Informasi data statistik">
-                    <span class="population-data-badge"><i class="far fa-calendar-alt" aria-hidden="true"></i> Tahun Data {{ $genderSummary['year'] }}</span>
-                    <span class="population-data-badge"><i class="fas fa-sync-alt" aria-hidden="true"></i> Data Terakhir Diperbarui: {{ $updatedLabel }}</span>
-                    <span class="population-data-badge"><i class="fas fa-database" aria-hidden="true"></i> {{ $genderSummary['source'] }}</span>
-                </div>
-
+        <div id="sc_innerpage_wrap" class="population-statistics-wrap statistics-page-layout">
+            <section class="sc_innerpage_contentbx population-statistics" data-population-statistics>
                 <section class="population-chart-card" aria-labelledby="population-composition-title">
-                    <div class="population-chart-card__heading">
-                        <div>
-                            <span class="section-kicker">Komposisi Penduduk</span>
-                            <h2 id="population-composition-title">Komposisi Penduduk Tahun {{ $genderSummary['year'] }}</h2>
-                            <p>Perbandingan jumlah penduduk laki-laki dan perempuan.</p>
+                    <header class="population-chart-card__heading population-statistics-heading">
+                        <div class="population-statistics-heading__content">
+                            <h1 id="population-composition-title" class="entry-title">Komposisi Penduduk Tahun {{ $genderSummary['year'] }}</h1>
+                            <div class="postmeta" aria-label="Informasi data statistik">
+                                <span class="post-date"><i class="far fa-calendar-alt" aria-hidden="true"></i>Diperbarui 28 Juli 2026</span>
+                                <span class="post-author"><i class="far fa-user" aria-hidden="true"></i>Pemerintah Desa Sukomulyo</span>
+                            </div>
                         </div>
-                    </div>
+                        <div class="population-download-control">
+                            <button
+                                class="profile-print-button population-download-button"
+                                type="button"
+                                aria-expanded="false"
+                                aria-controls="population-actual-download-menu"
+                                data-population-export-toggle="actual"
+                            >
+                                <i class="fas fa-download" aria-hidden="true"></i>
+                                Unduh Data Aktual
+                                <i class="fas fa-chevron-down population-download-button__chevron" aria-hidden="true"></i>
+                            </button>
+                            <div
+                                id="population-actual-download-menu"
+                                class="population-download-menu"
+                                role="menu"
+                                aria-label="Pilihan format unduhan data aktual"
+                                data-population-export-menu="actual"
+                                hidden
+                            >
+                                <strong class="population-download-menu__title">Pilih format file</strong>
+                                <div class="population-download-menu__formats">
+                                    @foreach (['svg' => 'SVG', 'pdf' => 'PDF', 'jpg' => 'JPG', 'png' => 'PNG'] as $format => $label)
+                                        <button type="button" role="menuitem" data-population-export-action data-export-scope="actual" data-export-format="{{ $format }}">{{ $label }}</button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </header>
 
                     <div class="population-composition-grid">
                         <div class="population-chart-card__canvas">
@@ -64,23 +88,9 @@
                             </p>
                         </div>
 
-                        <div class="population-composition-summary">
-                            <p class="population-composition-summary__label">Total penduduk terdata</p>
-                            <strong>{{ number_format($genderSummary['total'], 0, ',', '.') }} <span>jiwa</span></strong>
-                            <dl>
-                                <div>
-                                    <dt><span class="population-color-dot population-color-dot--male"></span> Laki-laki</dt>
-                                    <dd>{{ number_format($genderSummary['male'], 0, ',', '.') }} jiwa · {{ number_format($genderSummary['male_percentage'], 2, ',', '.') }}%</dd>
-                                </div>
-                                <div>
-                                    <dt><span class="population-color-dot population-color-dot--female"></span> Perempuan</dt>
-                                    <dd>{{ number_format($genderSummary['female'], 0, ',', '.') }} jiwa · {{ number_format($genderSummary['female_percentage'], 2, ',', '.') }}%</dd>
-                                </div>
-                            </dl>
-                        </div>
                     </div>
 
-                    <div class="population-table-scroll" tabindex="0" aria-label="Tabel komposisi dapat digulir secara horizontal">
+                    <div class="population-table-scroll population-summary-table-wrap">
                         <table class="population-summary-table">
                             <caption class="screen-reader-text">
                                 Komposisi penduduk Desa Sukomulyo tahun {{ $genderSummary['year'] }} berdasarkan jenis kelamin
@@ -109,44 +119,39 @@
                     </div>
                 </section>
 
-                <div class="population-analytics">
-                    <button class="population-primary-action" type="button" data-population-trend-toggle>
-                        <i class="fas fa-chart-line" aria-hidden="true"></i>
-                        Lihat Tren Penduduk
-                    </button>
-                    <div class="population-analytics__menu-wrap">
-                        <button
-                            class="population-secondary-action"
-                            type="button"
-                            data-population-analytics-toggle
-                            aria-expanded="false"
-                            aria-controls="population-analytics-menu"
-                            aria-haspopup="menu"
-                        >
-                            <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
-                            Analisis Data
-                        </button>
-                        <div id="population-analytics-menu" class="population-analytics-menu" role="menu" data-population-analytics-menu hidden>
-                            <button type="button" role="menuitem" data-population-action="five-years">Lihat pertumbuhan 5 tahun</button>
-                            <button type="button" role="menuitem" data-population-action="since-2020">Lihat data sejak 2020</button>
-                            <button type="button" role="menuitem" data-population-action="download-pie">Unduh grafik sebagai gambar</button>
-                        </div>
-                    </div>
-                </div>
-
                 <section id="population-trend-panel" class="population-trend-panel" data-population-trend-panel aria-labelledby="population-trend-title">
                     <div class="population-chart-card__heading">
                         <div>
-                            <span class="section-kicker">Perkembangan Tahunan</span>
-                            <h2 id="population-trend-title" tabindex="-1">Pertumbuhan Penduduk Tahunan</h2>
-                            <p>Perubahan jumlah penduduk berdasarkan data tahunan yang telah dipublikasikan.</p>
+                            <h2 id="population-trend-title" class="population-trend-title" tabindex="-1">Pertumbuhan Penduduk Tahunan</h2>
                         </div>
-                    </div>
-
-                    <div class="population-range-presets" aria-label="Preset rentang tahun">
-                        <button type="button" data-population-preset="five-years">5 Tahun Terakhir</button>
-                        <button type="button" data-population-preset="since-2020">Sejak 2020</button>
-                        <button type="button" data-population-preset="all">Semua Data</button>
+                        <div class="population-download-control population-download-control--annual">
+                            <button
+                                class="profile-print-button population-download-button"
+                                type="button"
+                                aria-expanded="false"
+                                aria-controls="population-annual-download-menu"
+                                data-population-export-toggle="annual"
+                            >
+                                <i class="fas fa-download" aria-hidden="true"></i>
+                                Unduh Data Tahunan
+                                <i class="fas fa-chevron-down population-download-button__chevron" aria-hidden="true"></i>
+                            </button>
+                            <div
+                                id="population-annual-download-menu"
+                                class="population-download-menu"
+                                role="menu"
+                                aria-label="Pilihan format unduhan data tahunan"
+                                data-population-export-menu="annual"
+                                hidden
+                            >
+                                <strong class="population-download-menu__title">Pilih format file</strong>
+                                <div class="population-download-menu__formats">
+                                    @foreach (['svg' => 'SVG', 'pdf' => 'PDF', 'jpg' => 'JPG', 'png' => 'PNG'] as $format => $label)
+                                        <button type="button" role="menuitem" data-population-export-action data-export-scope="annual" data-export-format="{{ $format }}">{{ $label }}</button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <form method="get" action="{{ route('data-statistik.population') }}" class="population-range-filter" data-population-year-filter>
@@ -190,7 +195,7 @@
                         </p>
                     </div>
 
-                    <div class="population-table-scroll" tabindex="0" aria-label="Tabel riwayat dapat digulir secara horizontal">
+                    <div class="population-table-scroll population-history-table-wrap" tabindex="0" aria-label="Tabel riwayat dapat digulir secara horizontal">
                         <table class="population-history-table">
                             <caption class="screen-reader-text">Riwayat jumlah penduduk Desa Sukomulyo berdasarkan tahun</caption>
                             <thead>
@@ -227,14 +232,6 @@
                         </table>
                     </div>
 
-                    <aside class="population-source-note">
-                        <i class="fas fa-info-circle" aria-hidden="true"></i>
-                        <div>
-                            <h3>Catatan sumber data</h3>
-                            <p>Data 2020 dapat menggunakan basis Sensus Penduduk 2020. Data tahunan setelahnya merupakan rekapitulasi administrasi kependudukan desa sesuai tanggal referensi masing-masing dan bukan sensus baru.</p>
-                            <p>Data komposisi tahun {{ $genderSummary['year'] }} diperbarui pada {{ $updatedLabel }}.</p>
-                        </div>
-                    </aside>
                 </section>
 
                 <script type="application/json" id="population-statistics-data">{!! \Illuminate\Support\Js::encode([
@@ -245,6 +242,8 @@
                     'sort' => $tableSort,
                 ]) !!}</script>
             </section>
+
+            <x-statistics-sidebar />
         </div>
     </div>
 </x-layouts.app>

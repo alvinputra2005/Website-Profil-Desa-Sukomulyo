@@ -2,7 +2,6 @@
 
 namespace App\Services\Web;
 
-use App\Http\Requests\Web\PopulationPeriodRequest;
 use App\Http\Requests\Web\StoreContactMessageRequest;
 use App\Models\ContactMessage;
 use App\Models\Gallery;
@@ -325,18 +324,8 @@ class PublicSiteService
             'idm' => ['title' => 'IDM (Indeks Desa Membangun)', 'description' => 'Indeks Ketahanan Sosial, Ekonomi, dan Lingkungan desa.', 'categories' => [], 'is_idm' => true],
             'visualisasi' => ['title' => 'Visualisasi Data', 'description' => 'Ringkasan data desa dalam tabel, grafik, dan angka.', 'categories' => ['age', 'education', 'occupation'], 'summary' => true],
         ];
-        $populationPages = [
-            'ringkasan' => ['title' => 'Ringkasan Penduduk', 'description' => 'Ringkasan jumlah penduduk, keluarga, rumah tangga, dan wilayah.', 'categories' => ['sex'], 'summary' => true],
-            'jenis-kelamin' => ['title' => 'Jenis Kelamin', 'description' => 'Komposisi penduduk laki-laki dan perempuan.', 'categories' => ['sex']],
-            'kelompok-umur' => ['title' => 'Kelompok Umur', 'description' => 'Sebaran penduduk berdasarkan kelompok usia.', 'categories' => ['age']],
-            'pendidikan' => ['title' => 'Pendidikan', 'description' => 'Sebaran penduduk berdasarkan jenjang pendidikan.', 'categories' => ['education']],
-            'pekerjaan' => ['title' => 'Pekerjaan', 'description' => 'Sebaran profesi dan mata pencaharian warga.', 'categories' => ['occupation']],
-            'agama' => ['title' => 'Agama', 'description' => 'Komposisi penduduk berdasarkan agama.', 'categories' => ['religion']],
-            'status-perkawinan' => ['title' => 'Status Perkawinan', 'description' => 'Komposisi status perkawinan penduduk.', 'categories' => ['marital_status']],
-        ];
-        $pages = request()->routeIs('kependudukan.detail') ? $populationPages : $dataPages;
-        abort_unless(isset($pages[$section]), 404);
-        $page = $pages[$section];
+        abort_unless(isset($dataPages[$section]), 404);
+        $page = $dataPages[$section];
         $hasResidents = Schema::hasTable('residents');
         $summary = $hasResidents
             ? $populationStatistics->summary()
@@ -409,18 +398,6 @@ class PublicSiteService
             'defaultRange' => $defaultRange,
             'tableSort' => $filters['sort'] ?? 'asc',
         ]);
-    }
-
-    public function populationReport(PopulationPeriodRequest $request, PopulationStatisticsService $populationStatistics): View
-    {
-        $validated = $request->validated();
-        $year = (int) ($validated['year'] ?? now()->year);
-        $month = (int) ($validated['month'] ?? now()->month);
-
-        return $this->render('pages.population-report', array_merge(
-            $populationStatistics->monthlyReport($year, $month),
-            compact('year', 'month')
-        ));
     }
 
     public function budgetHistory(): View
@@ -901,16 +878,6 @@ class PublicSiteService
                 ['label' => 'Statistik Ekonomi', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'ekonomi']],
                 ['label' => 'IDM (Indeks Desa Membangun)', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'idm']],
                 ['label' => 'Visualisasi Data', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'visualisasi']],
-            ]],
-            ['label' => 'Kependudukan', 'route' => 'kependudukan', 'active' => 'kependudukan*', 'children' => [
-                ['label' => 'Ringkasan Penduduk', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'ringkasan']],
-                ['label' => 'Jenis Kelamin', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'jenis-kelamin']],
-                ['label' => 'Kelompok Umur', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'kelompok-umur']],
-                ['label' => 'Pendidikan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pendidikan']],
-                ['label' => 'Pekerjaan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'pekerjaan']],
-                ['label' => 'Agama', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'agama']],
-                ['label' => 'Status Perkawinan', 'route' => 'kependudukan.detail', 'active' => 'kependudukan.detail', 'parameters' => ['section' => 'status-perkawinan']],
-                ['label' => 'Laporan Penduduk', 'route' => 'laporan-penduduk', 'active' => 'laporan-penduduk'],
             ]],
             ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
                 ['label' => 'Pengumuman Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'pengumuman']],

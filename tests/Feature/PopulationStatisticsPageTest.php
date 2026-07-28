@@ -30,7 +30,7 @@ class PopulationStatisticsPageTest extends TestCase
         $this->get(route('data-statistik.population'))
             ->assertOk()
             ->assertSee('Statistik Penduduk')
-            ->assertSee('Tahun Data 2026')
+            ->assertDontSee('Tahun Data 2026')
             ->assertSee('2 jiwa')
             ->assertSee('1 jiwa')
             ->assertSee('3 jiwa')

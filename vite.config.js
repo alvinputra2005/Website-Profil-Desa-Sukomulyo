@@ -1,20 +1,11 @@
-import os from 'node:os';
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 
-// Laravel's Vite plugin writes this address to `public/hot`.  If it is left
-// as localhost/::1, a browser on another device will try to connect to its
-// own loopback interface and all Vite assets will fail with ECONNREFUSED.
-const lanHost = Object.values(os.networkInterfaces())
-    .flat()
-    .find(({ address, family, internal }) => (
-        (family === 'IPv4' || family === 4)
-        && !internal
-        && !address.startsWith('169.254.')
-    ))
-    ?.address;
-const devServerHost = process.env.VITE_DEV_SERVER_HOST || lanHost || 'localhost';
+// Keep the generated `public/hot` URL stable when the active Wi-Fi network
+// changes. Set VITE_DEV_SERVER_HOST to the current LAN IP only when the site
+// must be opened from a different device.
+const devServerHost = process.env.VITE_DEV_SERVER_HOST || '127.0.0.1';
 
 export default defineConfig({
     optimizeDeps: {
@@ -33,8 +24,8 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
-        // Listen on the LAN so the PHP/Vite pair can be opened from another
-        // laptop. Set VITE_DEV_SERVER_HOST to override automatic detection.
+        // Accept local and LAN connections; HMR still advertises the stable
+        // address configured above.
         host: '0.0.0.0',
         hmr: {
             host: devServerHost,

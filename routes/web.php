@@ -143,9 +143,6 @@ Route::get('/potensi-desa', [VillageProfileController::class, 'potentials'])->na
 Route::get('/data-desa-statistik', [VillageStatisticController::class, 'index'])->name('data-desa-statistik');
 Route::get('/data-statistik/penduduk', [VillageStatisticController::class, 'population'])->name('data-statistik.population');
 Route::get('/data-statistik/{section}', [VillageStatisticController::class, 'show'])->where('section', 'penduduk|keluarga|pendidikan|pekerjaan|ekonomi|idm|visualisasi')->name('data-statistik.detail');
-Route::get('/kependudukan', [VillageStatisticController::class, 'index'])->name('kependudukan');
-Route::get('/kependudukan/{section}', [VillageStatisticController::class, 'show'])->where('section', 'ringkasan|jenis-kelamin|kelompok-umur|pendidikan|pekerjaan|agama|status-perkawinan')->name('kependudukan.detail');
-Route::get('/laporan-penduduk', [VillageStatisticController::class, 'populationReport'])->name('laporan-penduduk');
 Route::get('/transparansi-apbdes', [VillageStatisticController::class, 'budgetHistory'])->name('transparansi-apbdes');
 Route::get('/informasi-publik-desa', [PublicationController::class, 'index'])->name('informasi-publik-desa');
 Route::get('/informasi-desa/{section}', [PublicationController::class, 'show'])->where('section', 'pengumuman|layanan-administrasi|agenda|bantuan-sosial|informasi-publik')->name('informasi-desa.detail');

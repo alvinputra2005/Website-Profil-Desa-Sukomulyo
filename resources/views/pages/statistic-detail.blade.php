@@ -1,17 +1,12 @@
 <x-layouts.app :title="$page['title']">
-    <x-page-header :title="$page['title']" :description="$page['description']" :breadcrumbs="request()->routeIs('kependudukan.detail')
-        ? [
-            ['label' => 'Kependudukan', 'url' => route('kependudukan')],
-            ['label' => $page['title']],
-        ]
-        : [
-            ['label' => 'Data Statistik', 'url' => route('data-desa-statistik')],
-            ['label' => $page['title']],
-        ]" />
+    <x-page-header :title="$page['title']" :description="$page['description']" :breadcrumbs="[
+        ['label' => 'Data Statistik', 'url' => route('data-desa-statistik')],
+        ['label' => $page['title']],
+    ]" />
 
     <div class="container">
-        <div id="sc_innerpage_wrap">
-            <section class="sc_innerpage_contentbx fullwidth">
+        <div id="sc_innerpage_wrap" class="statistics-page-layout">
+            <section class="sc_innerpage_contentbx">
                 @if (!empty($page['summary']))
                     <div class="statistics-grid">
                         @php($summaryCards = $page['summary_cards'] ?? [
@@ -50,7 +45,7 @@
                         @endif
                     </section>
                 @else
-                    <div class="data-section-grid">
+                    <div @class(['data-section-grid', 'data-section-grid--single' => count($panels) === 1])>
                         @foreach ($panels as $panel)
                             <section class="data-panel">
                                 <span class="section-kicker">Kependudukan</span>
@@ -72,6 +67,8 @@
                     </div>
                 @endif
             </section>
+
+            <x-statistics-sidebar />
         </div>
     </div>
 </x-layouts.app>

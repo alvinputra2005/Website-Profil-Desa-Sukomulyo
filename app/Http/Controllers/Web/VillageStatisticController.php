@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Web\PopulationPeriodRequest;
 use App\Http\Requests\Web\PopulationTrendRequest;
 use App\Services\PopulationStatistics;
 use App\Services\Web\PublicSiteService;
@@ -27,14 +26,6 @@ class VillageStatisticController extends Controller
         PopulationStatistics $statistics,
     ): View {
         return $site->populationStatistics($statistics, $request->validated());
-    }
-
-    public function populationReport(
-        PopulationPeriodRequest $request,
-        PublicSiteService $site,
-        PopulationStatistics $statistics,
-    ): View {
-        return $site->populationReport($request, $statistics);
     }
 
     public function budgetHistory(PublicSiteService $site): View

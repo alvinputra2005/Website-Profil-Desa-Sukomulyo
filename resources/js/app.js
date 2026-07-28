@@ -16,7 +16,8 @@ const initPublicPage = () => {
     const disableScrollReveal = Boolean(document.querySelector('[data-disable-scroll-reveal]'));
     const revealSections = disableScrollReveal
         ? []
-        : document.querySelectorAll('main section:not(.hero-slider), .footer-wrapper .footer-widget');
+        : [...document.querySelectorAll('main section:not(.hero-slider), .footer-wrapper .footer-widget')]
+            .filter((section) => !section.closest('[data-no-scroll-reveal]'));
 
     if (disableScrollReveal) {
         document.querySelectorAll('.scroll-reveal').forEach((section) => {
@@ -268,10 +269,13 @@ const initPublicPage = () => {
         toggle.addEventListener('click', () => {
             const expanded = toggle.getAttribute('aria-expanded') === 'true';
 
-            if (!expanded && toggle.hasAttribute('data-profile-widget-toggle')) {
-                const accordion = toggle.closest('[data-profile-accordion]');
+            const isAccordionToggle = toggle.hasAttribute('data-profile-widget-toggle')
+                || toggle.hasAttribute('data-sidebar-accordion-toggle');
 
-                accordion?.querySelectorAll('[data-profile-widget-toggle][aria-expanded="true"]').forEach((openToggle) => {
+            if (!expanded && isAccordionToggle) {
+                const accordion = toggle.closest('[data-profile-accordion], [data-sidebar-accordion]');
+
+                accordion?.querySelectorAll('[data-profile-widget-toggle][aria-expanded="true"], [data-sidebar-accordion-toggle][aria-expanded="true"]').forEach((openToggle) => {
                     if (openToggle === toggle) return;
 
                     openToggle.setAttribute('aria-expanded', 'false');

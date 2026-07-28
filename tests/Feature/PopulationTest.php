@@ -93,7 +93,6 @@ class PopulationTest extends TestCase
             ->assertSee('fas fa-briefcase', false)
             ->assertDontSee('Wilayah Administratif')
             ->assertDontSee('Luas Wilayah');
-        $this->get(route('laporan-penduduk'))->assertOk()->assertSee('Laporan Penduduk');
     }
 
     public function test_admin_can_import_and_update_residents_from_excel(): void
