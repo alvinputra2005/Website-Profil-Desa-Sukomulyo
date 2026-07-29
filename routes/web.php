@@ -6,6 +6,10 @@ use App\Http\Controllers\Admin\CrudController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FamilyController;
 use App\Http\Controllers\Admin\HouseholdController;
+use App\Http\Controllers\Admin\LetterApplicationController as AdminLetterApplicationController;
+use App\Http\Controllers\Admin\LetterApplicationStatusController;
+use App\Http\Controllers\Admin\LetterApplicationWhatsAppController;
+use App\Http\Controllers\Admin\LetterServiceController as AdminLetterServiceController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\Officials\BulkDeleteOfficialController;
 use App\Http\Controllers\Admin\Officials\MoveOfficialController;
@@ -31,6 +35,10 @@ use App\Http\Controllers\Web\ContactController;
 use App\Http\Controllers\Web\ErrorController;
 use App\Http\Controllers\Web\GalleryController;
 use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\LetterApplicationController;
+use App\Http\Controllers\Web\LetterServiceController;
+use App\Http\Controllers\Web\LetterTrackingController;
+use App\Http\Controllers\Web\LetterWhatsAppConfirmationController;
 use App\Http\Controllers\Web\NewsController;
 use App\Http\Controllers\Web\PublicationController;
 use App\Http\Controllers\Web\SeoController;
@@ -101,6 +109,21 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::get('laporan-penduduk', [PopulationReportController::class, 'index'])->name('report');
         Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
     });
+    Route::middleware('can:manage-letter-applications')->prefix('permohonan-surat')->name('letter-applications.')->group(function () {
+        Route::get('/', [AdminLetterApplicationController::class, 'index'])->name('index');
+        Route::get('/{application:public_id}', [AdminLetterApplicationController::class, 'show'])->name('show');
+        Route::patch('/{application:public_id}/status', [LetterApplicationStatusController::class, 'update'])->name('status.update');
+        Route::patch('/{application:public_id}/hubungkan-penduduk', [AdminLetterApplicationController::class, 'linkResident'])->name('resident.link');
+        Route::post('/{application:public_id}/whatsapp', LetterApplicationWhatsAppController::class)->name('whatsapp.open');
+    });
+    Route::middleware('can:manage-letter-services')->prefix('layanan-surat')->name('letter-services.')->group(function () {
+        Route::get('/', [AdminLetterServiceController::class, 'index'])->name('index');
+        Route::get('/create', [AdminLetterServiceController::class, 'create'])->name('create');
+        Route::post('/', [AdminLetterServiceController::class, 'store'])->name('store');
+        Route::get('/{letterService:slug}/edit', [AdminLetterServiceController::class, 'edit'])->name('edit');
+        Route::put('/{letterService:slug}', [AdminLetterServiceController::class, 'update'])->name('update');
+        Route::delete('/{letterService:slug}', [AdminLetterServiceController::class, 'destroy'])->name('destroy');
+    });
     Route::get('/news-trash', [CrudController::class, 'trash'])->name('news.trash');
     Route::patch('/news-trash/{id}/restore', [CrudController::class, 'restore'])->name('news.restore');
     Route::delete('/news-trash/{id}/force', [CrudController::class, 'forceDelete'])->name('news.force-delete');
@@ -121,6 +144,21 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
 
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
+
+Route::prefix('layanan-surat')->name('letter-services.')->group(function () {
+    Route::get('/', [LetterServiceController::class, 'index'])->name('index');
+    Route::get('/lacak', [LetterTrackingController::class, 'create'])->name('track.form');
+    Route::post('/lacak', [LetterTrackingController::class, 'store'])->middleware('throttle:letter-tracking')->name('track.store');
+    Route::get('/lacak/{application:public_id}', [LetterTrackingController::class, 'showSession'])->name('track.session');
+    Route::get('/t/{token}', [LetterTrackingController::class, 'showToken'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:60,1')->name('track.token');
+    Route::post('/t/{token}/konfirmasi-whatsapp', LetterWhatsAppConfirmationController::class)->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:10,1')->name('whatsapp.confirm');
+    Route::get('/t/{token}/perbaiki', [LetterApplicationController::class, 'edit'])->where('token', '[A-Za-z0-9]{64}')->name('application.edit');
+    Route::put('/t/{token}/perbaiki', [LetterApplicationController::class, 'update'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:letter-application-update')->name('application.update');
+    Route::patch('/t/{token}/batalkan', [LetterApplicationController::class, 'cancel'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:5,1')->name('application.cancel');
+    Route::get('/{letterService:slug}/ajukan', [LetterApplicationController::class, 'create'])->name('application.create');
+    Route::post('/{letterService:slug}/ajukan', [LetterApplicationController::class, 'store'])->middleware('throttle:letter-application')->name('application.store');
+    Route::get('/{letterService:slug}', [LetterServiceController::class, 'show'])->name('show');
+});
 
 Route::get('/', HomeController::class)->name('beranda');
 Route::get('/profile-desa', [VillageProfileController::class, 'index'])->name('profile-desa');

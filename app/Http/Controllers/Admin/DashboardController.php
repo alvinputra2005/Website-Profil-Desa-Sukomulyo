@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\ContactMessage;
+use App\Models\LetterApplication;
 use App\Models\News;
 use App\Models\SiteVisit;
 use App\Models\StatisticDataset;
@@ -26,6 +27,21 @@ class DashboardController extends Controller
             : [];
 
         $visitorCount = Schema::hasTable('site_visits') ? SiteVisit::count() : 0;
+        $stats = [
+            ['label' => 'Jumlah Penduduk', 'value' => $populationSummary['residents'], 'icon' => 'fa-users', 'color' => 'bg-aqua'],
+            ['label' => 'Jumlah KK', 'value' => $populationSummary['families'], 'icon' => 'fa-home', 'color' => 'bg-green'],
+            ['label' => 'Statistik Pengunjung', 'value' => $visitorCount, 'icon' => 'fa-line-chart', 'color' => 'bg-yellow'],
+            ['label' => 'Berita', 'value' => News::count(), 'icon' => 'fa-newspaper-o', 'color' => 'bg-red'],
+        ];
+        if (Schema::hasTable('letter_applications') && auth()->user()->can('manage-letter-applications')) {
+            $counts = LetterApplication::query()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status');
+            $stats = array_merge($stats, [
+                ['label' => 'Permohonan Baru', 'value' => $counts->get('submitted', 0), 'icon' => 'fa-envelope-o', 'color' => 'bg-aqua'],
+                ['label' => 'Sedang Diverifikasi', 'value' => $counts->get('under_review', 0), 'icon' => 'fa-search', 'color' => 'bg-yellow'],
+                ['label' => 'Sedang Diproses', 'value' => $counts->get('processing', 0), 'icon' => 'fa-cogs', 'color' => 'bg-blue'],
+                ['label' => 'Siap Diambil', 'value' => $counts->get('ready_for_pickup', 0), 'icon' => 'fa-check', 'color' => 'bg-green'],
+            ]);
+        }
 
         $datasetValues = function (array $slugs, array $fallback): array {
             $dataset = StatisticDataset::with('values')
@@ -44,12 +60,7 @@ class DashboardController extends Controller
         };
 
         return view('admin.dashboard', [
-            'stats' => [
-                ['label' => 'Jumlah Penduduk', 'value' => $populationSummary['residents'], 'icon' => 'fa-users', 'color' => 'bg-aqua'],
-                ['label' => 'Jumlah KK', 'value' => $populationSummary['families'], 'icon' => 'fa-home', 'color' => 'bg-green'],
-                ['label' => 'Statistik Pengunjung', 'value' => $visitorCount, 'icon' => 'fa-line-chart', 'color' => 'bg-yellow'],
-                ['label' => 'Berita', 'value' => News::count(), 'icon' => 'fa-newspaper-o', 'color' => 'bg-red'],
-            ],
+            'stats' => $stats,
             'messages' => ContactMessage::latest()->limit(5)->get(),
             'activities' => ActivityLog::with('user')
                 ->whereDate('created_at', today())

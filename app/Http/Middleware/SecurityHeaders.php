@@ -25,6 +25,12 @@ final class SecurityHeaders
             $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
         }
 
+        if ($request->is('layanan-surat/lacak', 'layanan-surat/lacak/*', 'layanan-surat/t/*')) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+            $response->headers->set('Cache-Control', 'no-store, private');
+            $response->headers->set('Pragma', 'no-cache');
+        }
+
         if (config('app.env') === 'production' && $request->isSecure()) {
             $response->headers->set(
                 'Strict-Transport-Security',
