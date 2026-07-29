@@ -1,7 +1,7 @@
 <x-layouts.app title="Status Permohonan Surat" robots="noindex, nofollow">
-    <section class="letter-hero compact"><div class="container"><span class="letter-kicker">{{ $application->status->label() }}</span><h2>{{ $application->application_number }}</h2><p>{{ $application->service_snapshot_json['name'] }}</p></div></section>
-    <section class="letter-section"><div class="container letter-two-column"><div>
-        @if(session('new_application'))<div class="letter-notice success"><h3>Permohonan berhasil disimpan</h3><p>Simpan nomor permohonan dan PIN ini. PIN hanya ditampilkan sekarang.</p><p class="letter-pin">{{ session('tracking_pin') }}</p><p>Agar petugas segera mengetahui pengajuan Anda, buka WhatsApp Desa dan kirim pesan yang telah disiapkan.</p></div>@endif
+    <x-page-header title="Status Permohonan Surat" :description="$application->service_snapshot_json['name']" :show-heading="true" :breadcrumbs="[['label'=>'Pelayanan Surat','url'=>route('letter-services.index')],['label'=>'Status Permohonan']]" />
+    <div class="container"><div id="sc_innerpage_wrap"><section class="letter-section"><div class="letter-status-heading"><div><span class="section-kicker">Nomor Permohonan</span><h2>{{ $application->application_number }}</h2></div><span class="letter-status-badge">{{ $application->status->label() }}</span></div><div class="letter-two-column"><div>
+        @if(session('new_application'))<div class="letter-notice success"><i class="fas fa-check-circle"></i><div><h3>Permohonan berhasil disimpan</h3><p>Simpan nomor permohonan dan PIN ini. PIN hanya ditampilkan sekarang.</p><p class="letter-pin">{{ session('tracking_pin') }}</p><p>Agar petugas segera mengetahui pengajuan Anda, buka WhatsApp Desa dan kirim pesan yang telah disiapkan.</p></div></div>@endif
         @if(session('success'))<div class="letter-notice success">{{ session('success') }}</div>@endif
         @if($application->public_note)<div class="letter-notice warning"><strong>Catatan petugas</strong><p>{{ $application->public_note }}</p></div>@endif
         <div class="letter-card"><h3>Riwayat status</h3><ol class="letter-timeline">@foreach($application->statusHistories as $history)<li><span></span><div><strong>{{ $history->to_status->label() }}</strong><small>{{ $history->created_at->timezone('Asia/Jakarta')->translatedFormat('d F Y, H.i') }} WIB</small>@if($history->public_note)<p>{{ $history->public_note }}</p>@endif</div></li>@endforeach</ol></div>
@@ -11,5 +11,5 @@
         @if($token && $application->canBeEditedByApplicant())<a class="letter-button secondary" href="{{ route('letter-services.application.edit', $token) }}">Perbaiki Permohonan</a>@endif
         @if($token && $application->status->canTransitionTo(\App\Enums\LetterApplicationStatus::Cancelled))<form method="post" action="{{ route('letter-services.application.cancel',$token) }}" onsubmit="return confirm('Batalkan permohonan ini?')">@csrf @method('PATCH')<button class="letter-button secondary" type="submit">Batalkan Permohonan</button></form>@endif
         <p class="letter-no-download">Surat tidak tersedia dalam bentuk file dan tidak dapat diunduh.</p>
-    </aside></div></section>
+    </aside></div></section></div></div>
 </x-layouts.app>
