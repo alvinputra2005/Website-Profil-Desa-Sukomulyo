@@ -2918,6 +2918,11 @@ h3.widget-title { background: var(--primary); }
 .population-history-table thead th {
     background: var(--primary);
 }
+.population-summary-table thead th {
+    text-align: center;
+}
+.population-summary-table td.statistics-data-cell { text-align: center; }
+.population-summary-table td.statistics-area-name { text-align: left; }
 .population-summary-table,
 .population-history-table {
     width: 100%;

@@ -40,7 +40,7 @@
                                                     default => $row->values_json[$key] ?? null,
                                                 };
                                             @endphp
-                                            <td>
+                                            <td class="{{ $key === 'area_name' ? 'statistics-area-name' : 'statistics-data-cell' }}">
                                                 @if ($value === null || $value === '')
                                                     —
                                                 @elseif (($column['type'] ?? null) === 'percentage' && is_numeric($value))

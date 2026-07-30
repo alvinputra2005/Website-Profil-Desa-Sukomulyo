@@ -642,7 +642,7 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .statistics-dataset-description { color: #667064; }
 .statistics-dataset-table-wrap, .statistics-edit-table-wrap { overflow-x: auto; }
 .statistics-dataset-table, .statistics-edit-table { min-width: 860px; margin-bottom: 8px; }
-.statistics-dataset-table th, .statistics-edit-table th { background: #f4f6f4; color: #3b443b; white-space: nowrap; vertical-align: middle; }
+.statistics-dataset-table th, .statistics-edit-table th { background: #f4f6f4; color: #3b443b; text-align: center; white-space: nowrap; vertical-align: middle; }
 .statistics-dataset-table td, .statistics-dataset-table th { padding: 9px 10px; }
 .statistics-dataset-table tfoot th { background: #eef1ee; }
 .statistics-row-number { width: 52px; text-align: center; }
@@ -654,6 +654,11 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .statistics-edit-table td { min-width: 130px; vertical-align: top; }
 .statistics-edit-table td:first-child { min-width: 52px; }
 .statistics-edit-table .form-control { min-width: 112px; }
+.statistics-dataset-table td.statistics-data-cell,
+.statistics-edit-table td.statistics-data-cell { text-align: center; }
+.statistics-dataset-table td.statistics-area-name,
+.statistics-edit-table td.statistics-area-name { text-align: left; }
+.statistics-edit-table td.statistics-data-cell .form-control { text-align: center; }
 .statistics-edit-table .help-block { margin-bottom: 0; font-size: 11px; }
 .statistics-edit-form .box-tools .btn + .btn { margin-left: 5px; }
 

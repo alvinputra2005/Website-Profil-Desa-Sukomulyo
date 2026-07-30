@@ -44,7 +44,7 @@
                                     @php($key = $column['key']) @php($type = $column['type'] ?? 'string')
                                     @php($currentValue = match ($key) { 'area_code' => $row->area_code, 'area_name' => $row->area_name, default => data_get($row->values_json, $key) })
                                     @php($fieldName = "rows.$rowIndex.$key")
-                                    <td class="@error($fieldName) has-error @enderror"><input name="rows[{{ $rowIndex }}][{{ $key }}]" value="{{ old($fieldName, $currentValue) }}" class="form-control input-sm" type="{{ in_array($type, ['integer', 'percentage'], true) ? 'number' : 'text' }}" @if ($type === 'integer') step="1" @elseif ($type === 'percentage') step="0.01" @endif aria-label="{{ $column['label'] ?? $key }}, baris {{ $rowIndex + 1 }}">@error($fieldName)<span class="help-block">{{ $message }}</span>@enderror</td>
+                                    <td class="{{ $key === 'area_name' ? 'statistics-area-name' : 'statistics-data-cell' }} @error($fieldName) has-error @enderror"><input name="rows[{{ $rowIndex }}][{{ $key }}]" value="{{ old($fieldName, $currentValue) }}" class="form-control input-sm" type="{{ in_array($type, ['integer', 'percentage'], true) ? 'number' : 'text' }}" @if ($type === 'integer') step="1" @elseif ($type === 'percentage') step="0.01" @endif aria-label="{{ $column['label'] ?? $key }}, baris {{ $rowIndex + 1 }}">@error($fieldName)<span class="help-block">{{ $message }}</span>@enderror</td>
                                 @endforeach
                             </tr>
                         @empty

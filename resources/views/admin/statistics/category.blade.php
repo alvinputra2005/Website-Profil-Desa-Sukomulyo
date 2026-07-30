@@ -106,7 +106,7 @@
                                 @foreach ($dataset->columns_json ?? [] as $column)
                                     @php($key = $column['key'])
                                     @php($value = match ($key) { 'area_code' => $row->area_code, 'area_name' => $row->area_name, default => data_get($row->values_json, $key) })
-                                    <td class="{{ in_array($column['type'] ?? '', ['integer', 'percentage'], true) ? 'text-right' : '' }}">{{ $formatValue($value, $column['type'] ?? 'string') }}</td>
+                                    <td class="{{ $key === 'area_name' ? 'statistics-area-name' : 'statistics-data-cell' }}">{{ $formatValue($value, $column['type'] ?? 'string') }}</td>
                                 @endforeach
                                 <td class="text-center"><a href="{{ route('admin.statistics.categories.edit', ['category' => $category->slug, 'dataset' => $dataset->slug]).'#row-'.$row->id }}" class="btn btn-warning btn-xs" title="Edit baris {{ $loop->iteration }}"><i class="fa fa-pencil"></i></a></td>
                             </tr>
