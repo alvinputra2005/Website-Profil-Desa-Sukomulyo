@@ -68,7 +68,7 @@ return [
         [
             'id' => 'administrasi-nikah',
             'title' => 'Administrasi Nikah',
-            'icon' => 'fas fa-ring',
+            'icon' => 'fas fa-venus-mars',
             'keywords' => ['nikah', 'perkawinan', 'calon pengantin', 'wali'],
             'requirements' => [
                 'Surat pengantar RT/RW.',
@@ -104,7 +104,7 @@ return [
         [
             'id' => 'akta-kelahiran',
             'title' => 'Pengajuan Akta Kelahiran',
-            'icon' => 'fas fa-baby',
+            'icon' => 'fas fa-birthday-cake',
             'keywords' => ['akta', 'kelahiran', 'bayi', 'bidan'],
             'requirements' => [
                 'Surat pengantar RT/RW.',

@@ -8,18 +8,4 @@
             </li>
         @endforeach
     </ol>
-
-    @if (! empty($notes))
-        <div class="requirement-note">
-            <i class="fas fa-info-circle" aria-hidden="true"></i>
-            <div>
-                <strong>Catatan</strong>
-                <ul>
-                    @foreach ($notes as $note)
-                        <li>{{ $note }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-    @endif
 </div>

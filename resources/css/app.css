@@ -264,16 +264,27 @@
     padding: 10px 14px;
     justify-content: space-between;
     gap: 14px;
-    color: var(--administration-primary-dark);
-    background: #f8faf7;
+    color: #fff;
+    background: var(--administration-primary);
     font-size: 13px;
     font-weight: 700;
     line-height: 1.45;
+    transition: background .2s ease;
+}
+
+.service-child-toggle[aria-expanded="true"] {
+    color: #fff;
+    background: var(--administration-primary);
 }
 
 .service-child-toggle:hover,
-.service-child-toggle[aria-expanded="true"] {
-    background: var(--administration-soft);
+.service-child-toggle:focus-visible {
+    color: #fff;
+    background: var(--administration-primary-dark);
+}
+
+.service-child-toggle .service-child-chevron {
+    color: #fff;
 }
 
 .service-child-panel {
@@ -319,35 +330,6 @@
     font-size: 10px;
     font-weight: 800;
     line-height: 1;
-}
-
-.requirement-note {
-    display: flex;
-    margin-top: 17px;
-    padding: 13px 14px;
-    align-items: flex-start;
-    gap: 10px;
-    border-left: 3px solid #c99728;
-    color: #76551b;
-    background: #fff8e7;
-    font-size: 12px;
-    line-height: 1.6;
-}
-
-.requirement-note > i {
-    margin-top: 3px;
-    color: var(--administration-warning);
-}
-
-.requirement-note strong {
-    display: block;
-    margin-bottom: 3px;
-    color: #684910;
-}
-
-.requirement-note ul {
-    margin: 0;
-    padding-left: 17px;
 }
 
 .administration-empty-search {
@@ -497,18 +479,29 @@
     gap: 12px;
 }
 
+.administration-guide-widget .administration-sidebar-content {
+    padding-left: 16px;
+}
+
+.administration-guide-widget .submission-guide-list {
+    width: 100%;
+    box-sizing: border-box;
+    margin-left: 0;
+    padding-left: 0;
+}
+
 .submission-guide-list li {
     display: grid;
     grid-template-columns: 28px minmax(0, 1fr);
     align-items: start;
-    gap: 11px;
+    gap: 7px;
 }
 
 .submission-guide-list li > span {
     display: grid;
     width: 28px;
     height: 28px;
-    margin-left: 0;
+    margin-left: -16px;
     place-items: center;
     border: 1px solid var(--administration-primary);
     color: #fff;

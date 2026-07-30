@@ -29,10 +29,5 @@
                 </li>
             @endforeach
         </ol>
-
-        <p class="administration-guide-notice">
-            <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
-            <span>{{ $submissionNotice }}</span>
-        </p>
     </div>
 </section>
