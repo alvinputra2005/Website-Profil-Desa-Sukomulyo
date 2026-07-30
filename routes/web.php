@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\PopulationStatisticsController;
 use App\Http\Controllers\Admin\PopulationYearlySnapshotController;
 use App\Http\Controllers\Admin\RegionController;
 use App\Http\Controllers\Admin\StatisticImportController;
+use App\Http\Controllers\Admin\StatisticDatasetController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\Village\VillageIdentityController;
 use App\Http\Controllers\Admin\Village\VillageSectionController;
@@ -103,6 +104,12 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::post('/import', [StatisticImportController::class, 'store'])->name('import.store');
         Route::get('/import/{import:public_id}/preview', [StatisticImportController::class, 'preview'])->name('import.preview');
         Route::post('/import/{import:public_id}/process', [StatisticImportController::class, 'processImport'])->name('import.process');
+    });
+    Route::middleware('can:manage-data')->prefix('statistics')->name('statistics.categories.')->group(function () {
+        Route::get('/', [StatisticDatasetController::class, 'index'])->name('index');
+        Route::get('/{category:slug}', [StatisticDatasetController::class, 'show'])->name('show');
+        Route::get('/{category:slug}/{dataset:slug}/edit', [StatisticDatasetController::class, 'edit'])->name('edit');
+        Route::put('/{category:slug}/{dataset:slug}', [StatisticDatasetController::class, 'update'])->name('update');
     });
     Route::middleware('can:manage-data')->prefix('kependudukan')->name('population.')->group(function () {
         Route::get('penduduk/template-import', [ResidentImportController::class, 'template'])->name('residents.import-template');

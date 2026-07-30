@@ -587,6 +587,90 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
     gap: 4px;
 }
 
+/* Pengelolaan dataset statistik per kategori */
+.statistics-category-filters {
+    display: grid;
+    grid-template-columns: minmax(260px, 2fr) minmax(130px, .75fr) minmax(150px, .85fr) auto;
+    gap: 16px;
+    align-items: end;
+}
+.statistics-category-filters .form-group { margin-bottom: 0; }
+.statistics-category-filter-action { padding-bottom: 1px; white-space: nowrap; }
+.statistics-category-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+.statistics-summary-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 100px;
+    padding: 16px;
+    border: 1px solid #e4e8e1;
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.statistics-summary-icon {
+    display: inline-flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 22px;
+}
+.statistics-summary-card > div { min-width: 0; }
+.statistics-summary-card span:not(.statistics-summary-icon) { display: block; color: #727b70; font-size: 12px; }
+.statistics-summary-card strong { display: block; color: #202820; font-size: 24px; line-height: 1.2; }
+.statistics-summary-card small { color: #8b9289; }
+.statistics-summary-blue .statistics-summary-icon { background: #2d86c5; }
+.statistics-summary-green .statistics-summary-icon { background: #4caf50; }
+.statistics-summary-yellow .statistics-summary-icon { background: #e4aa16; }
+.statistics-summary-purple .statistics-summary-icon { background: #8651c6; }
+.statistics-dataset-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.statistics-dataset-heading .box-title { font-weight: 600; line-height: 1.45; }
+.statistics-dataset-heading .label { margin-left: 8px; vertical-align: middle; }
+.statistics-dataset-actions { display: flex; flex-wrap: wrap; gap: 8px; white-space: nowrap; }
+.statistics-dataset-meta { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 9px 0 0; color: #6b7469; font-size: 12px; }
+.statistics-dataset-meta div { display: flex; gap: 4px; }
+.statistics-dataset-meta dt { font-weight: 600; }
+.statistics-dataset-meta dd { margin: 0; }
+.statistics-dataset-description { color: #667064; }
+.statistics-dataset-table-wrap, .statistics-edit-table-wrap { overflow-x: auto; }
+.statistics-dataset-table, .statistics-edit-table { min-width: 860px; margin-bottom: 8px; }
+.statistics-dataset-table th, .statistics-edit-table th { background: #f4f6f4; color: #3b443b; white-space: nowrap; vertical-align: middle; }
+.statistics-dataset-table td, .statistics-dataset-table th { padding: 9px 10px; }
+.statistics-dataset-table tfoot th { background: #eef1ee; }
+.statistics-row-number { width: 52px; text-align: center; }
+.statistics-row-action { width: 58px; text-align: center; }
+.statistics-table-count { color: #7a8278; font-size: 12px; }
+.statistics-empty-state { padding: 48px 20px; text-align: center; }
+.statistics-empty-state > i { color: #b3bbb1; font-size: 36px; }
+.statistics-edit-table { min-width: 1100px; }
+.statistics-edit-table td { min-width: 130px; vertical-align: top; }
+.statistics-edit-table td:first-child { min-width: 52px; }
+.statistics-edit-table .form-control { min-width: 112px; }
+.statistics-edit-table .help-block { margin-bottom: 0; font-size: 11px; }
+.statistics-edit-form .box-tools .btn + .btn { margin-left: 5px; }
+
+@media (max-width: 991px) {
+    .statistics-category-filters { grid-template-columns: 1fr 1fr; }
+    .statistics-category-filter-action { grid-column: 1 / -1; }
+    .statistics-category-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+    .statistics-category-filters { display: block; }
+    .statistics-category-filters .form-group { margin-bottom: 12px; }
+    .statistics-category-filter-action .btn { width: 100%; }
+    .statistics-category-summary { grid-template-columns: 1fr; }
+    .statistics-dataset-heading { display: block; }
+    .statistics-dataset-actions { margin-top: 14px; }
+}
+
 @media (max-width: 767px) {
     .publication-attachment-row {
         grid-template-columns: 20px 28px minmax(0, 1fr);
