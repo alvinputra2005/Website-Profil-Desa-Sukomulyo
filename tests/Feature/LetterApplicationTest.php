@@ -62,6 +62,12 @@ class LetterApplicationTest extends TestCase
             ->assertOk()
             ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
             ->assertSee($application->application_number);
+
+        config(['app.url' => 'http://localhost']);
+        $this->post(route('letter-services.whatsapp.confirm', $token))
+            ->assertStatus(303)
+            ->assertRedirectContains('https://wa.me/');
+        $this->assertNotNull($application->refresh()->whatsapp_confirmation_opened_at);
     }
 
     private function user(string $roleCode): User

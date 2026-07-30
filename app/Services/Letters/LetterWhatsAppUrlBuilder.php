@@ -3,6 +3,7 @@
 namespace App\Services\Letters;
 
 use App\Models\LetterApplication;
+use Illuminate\Validation\ValidationException;
 
 class LetterWhatsAppUrlBuilder
 {
@@ -34,6 +35,13 @@ class LetterWhatsAppUrlBuilder
 
     public function url(string $phone, string $message): string
     {
-        return 'https://wa.me/'.$this->settings->normalizePhone($phone).'?text='.rawurlencode($message);
+        $phone = $this->settings->normalizePhone($phone);
+        if (! preg_match('/^62[0-9]{8,13}$/', $phone)) {
+            throw ValidationException::withMessages([
+                'whatsapp' => 'Nomor WhatsApp desa belum dikonfigurasi dengan benar.',
+            ]);
+        }
+
+        return 'https://wa.me/'.$phone.'?text='.rawurlencode($message);
     }
 }

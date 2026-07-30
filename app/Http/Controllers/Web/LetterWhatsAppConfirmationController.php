@@ -15,6 +15,6 @@ class LetterWhatsAppConfirmationController extends Controller
         abort_if($application->isTrackingExpired(), 410);
         $application->forceFill(['whatsapp_confirmation_opened_at' => now()])->save();
 
-        return redirect()->away($builder->villageConfirmation($application));
+        return redirect()->away($builder->villageConfirmation($application), 303);
     }
 }
