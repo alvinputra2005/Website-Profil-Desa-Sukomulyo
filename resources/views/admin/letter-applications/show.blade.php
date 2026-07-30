@@ -21,16 +21,11 @@
     .letter-application-detail .application-facts > div:last-child { padding-bottom: 0; border-bottom: 0; }
     .letter-application-detail .application-facts dt { margin: 0; color: var(--letter-detail-muted); font-size: 12px; font-weight: 600; }
     .letter-application-detail .application-facts dd { margin: 0; color: var(--admin-ink, #252a31); font-size: 14px; line-height: 1.45; }
-    .letter-application-detail .documents-table { width: 100%; min-width: 720px; margin-bottom: 0; table-layout: fixed; transition: min-width .15s ease; }
+    .letter-application-detail .documents-table { width: 100%; min-width: 720px; margin-bottom: 0; table-layout: fixed; }
     .letter-application-detail .documents-table__requirement { width: 22%; }
     .letter-application-detail .documents-table__file { width: 25%; }
     .letter-application-detail .documents-table__status { width: 15%; }
     .letter-application-detail .documents-table__review { width: 38%; }
-    .letter-application-detail .documents-table.has-rejected-review { min-width: 940px; }
-    .letter-application-detail .documents-table.has-rejected-review .documents-table__requirement { width: 19%; }
-    .letter-application-detail .documents-table.has-rejected-review .documents-table__file { width: 22%; }
-    .letter-application-detail .documents-table.has-rejected-review .documents-table__status { width: 13%; }
-    .letter-application-detail .documents-table.has-rejected-review .documents-table__review { width: 46%; }
     .letter-application-detail .documents-table > thead > tr > th { color: var(--admin-ink, #252a31); font-size: 11px; letter-spacing: .03em; text-transform: uppercase; }
     .letter-application-detail .documents-table > tbody > tr > td { vertical-align: top; font-size: 13px; }
     .letter-application-detail .document-name { display: block; margin-bottom: 2px; font-weight: 600; }
@@ -40,6 +35,7 @@
     .letter-application-detail .document-status .label { display: inline-block; margin-top: 2px; }
     .letter-application-detail .document-review { min-width: 0; }
     .letter-application-detail .document-review .form-control { height: 30px; margin-top: 7px; border-radius: 2px; font-size: 12px; }
+    .letter-application-detail .document-review.is-rejected [data-review-note] { height: 72px; resize: vertical; }
     .letter-application-detail .document-review .btn { margin-top: 6px; }
     .letter-application-detail .document-review__note-label { display: block; margin: 8px 0 -3px; color: var(--letter-detail-muted); font-size: 11px; font-weight: 600; }
     .letter-application-detail .document-review__note-label .required-mark { color: #b23b30; }
@@ -128,7 +124,7 @@
                                     <td>{{ $requirementLabels[$document->requirement_key] ?? $document->label }}</td>
                                     <td><button type="button" class="document-name btn btn-link" data-document-preview data-preview-url="{{ route('admin.letter-applications.document.preview-url', [$application, $document->id]) }}" data-download-url="{{ route('admin.letter-applications.document', [$application, $document->id]) }}" data-document-name="{{ $document->original_name }}" data-document-size="{{ number_format(($document->size_bytes ?: $document->file_size) / 1024, 0) }} KB">{{ $document->original_name }}</button><span class="document-meta">{{ number_format(($document->size_bytes ?: $document->file_size) / 1024, 0) }} KB · Klik untuk pratinjau</span></td>
                                     <td class="document-status"><span class="label label-{{ $document->review_status === 'approved' ? 'success' : ($document->review_status === 'rejected' ? 'danger' : 'warning') }}">{{ $document->review_status === 'approved' ? 'Sesuai' : ($document->review_status === 'rejected' ? 'Perlu diganti' : 'Menunggu review') }}</span></td>
-                                    <td class="document-review"><form method="post" action="{{ route('admin.letter-applications.document.review', [$application, $document->id]) }}" data-document-review-form>@csrf @method('PATCH')<label class="sr-only" for="document-status-{{ $document->id }}">Status dokumen</label><select id="document-status-{{ $document->id }}" name="review_status" class="form-control input-sm" data-review-status><option value="approved" @selected($document->review_status === 'approved')>Sesuai</option><option value="rejected" @selected($document->review_status === 'rejected')>Minta diganti</option></select><label class="document-review__note-label" for="document-note-{{ $document->id }}">Catatan perbaikan <span class="required-mark" data-review-required-mark hidden>*</span></label><input id="document-note-{{ $document->id }}" name="review_note" class="form-control input-sm" value="{{ $document->review_note }}" placeholder="Jelaskan dokumen yang perlu diperbaiki" data-review-note><p class="document-review__help" data-review-note-help hidden>Catatan wajib diisi agar pemohon mengetahui perbaikan yang diperlukan.</p><button class="btn btn-xs btn-success" type="submit">Simpan Review</button></form></td>
+                                    <td class="document-review"><form method="post" action="{{ route('admin.letter-applications.document.review', [$application, $document->id]) }}" data-document-review-form>@csrf @method('PATCH')<label class="sr-only" for="document-status-{{ $document->id }}">Status dokumen</label><select id="document-status-{{ $document->id }}" name="review_status" class="form-control input-sm" data-review-status><option value="approved" @selected($document->review_status === 'approved')>Sesuai</option><option value="rejected" @selected($document->review_status === 'rejected')>Minta diganti</option></select><label class="document-review__note-label" for="document-note-{{ $document->id }}">Catatan perbaikan <span class="required-mark" data-review-required-mark hidden>*</span></label><textarea id="document-note-{{ $document->id }}" name="review_note" class="form-control input-sm" rows="2" placeholder="Jelaskan dokumen yang perlu diperbaiki" data-review-note>{{ $document->review_note }}</textarea><p class="document-review__help" data-review-note-help hidden>Catatan wajib diisi agar pemohon mengetahui perbaikan yang diperlukan.</p><button class="btn btn-xs btn-success" type="submit">Simpan Review</button></form></td>
                                 </tr>
                             @empty
                                 <tr><td colspan="4" class="text-center text-muted">Belum ada dokumen yang diunggah.</td></tr>
@@ -290,10 +286,7 @@ document.addEventListener('DOMContentLoaded', function () {
             note.setAttribute('aria-required', needsNote ? 'true' : 'false');
             requiredMark.hidden = !needsNote;
             help.hidden = !needsNote;
-            const table = form.closest('.documents-table');
-            table.classList.toggle('has-rejected-review', Array.from(table.querySelectorAll('[data-review-status]')).some(function (select) {
-                return select.value === 'rejected';
-            }));
+            form.closest('.document-review').classList.toggle('is-rejected', needsNote);
         }
 
         status.addEventListener('change', syncReviewRequirement);
