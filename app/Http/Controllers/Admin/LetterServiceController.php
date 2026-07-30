@@ -65,7 +65,13 @@ class LetterServiceController extends Controller
             ...collect($validated)->only(['name', 'description', 'processing_days', 'fee_information', 'pickup_instructions', 'display_order'])->all(),
             'slug' => Str::slug($validated['slug']),
             'code' => Str::upper($validated['code']),
-            'requirements_json' => collect(preg_split('/\r\n|\r|\n/', $validated['requirements_text']))->filter()->values()->map(fn ($line, $index) => ['key' => 'requirement_'.($index + 1), 'label' => trim(strip_tags($line)), 'required' => true])->all(),
+            'requirements_json' => collect($validated['requirements'])->values()->map(fn (array $requirement, int $index) => [
+                'key' => Str::slug($requirement['code']),
+                'label' => trim(strip_tags($requirement['label'])),
+                'description' => trim(strip_tags($requirement['description'] ?? '')),
+                'required' => (bool) ($requirement['required'] ?? false),
+                'display_order' => $index,
+            ])->all(),
             'is_active' => $request->boolean('is_active'),
         ];
     }

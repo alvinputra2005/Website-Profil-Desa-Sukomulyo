@@ -9,26 +9,26 @@ class LetterServicePolicy
 {
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->hasRole('admin_data');
     }
 
     public function view(User $user, LetterService $service): bool
     {
-        return false;
+        return $user->hasRole('admin_data');
     }
 
     public function create(User $user): bool
     {
-        return false;
+        return $user->hasRole('admin_data');
     }
 
     public function update(User $user, LetterService $service): bool
     {
-        return false;
+        return $user->hasRole('admin_data');
     }
 
     public function delete(User $user, LetterService $service): bool
     {
-        return false;
+        return $user->hasRole('admin_data');
     }
 }

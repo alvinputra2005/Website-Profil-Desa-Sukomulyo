@@ -72,7 +72,7 @@
                 ['label'=>'Informasi Publik','icon'=>'fa-file-text','ability'=>'manage-content','items'=>[['Dokumen & Pengumuman','admin.resources.index','publications'],['Lampiran Publikasi','admin.resources.index','publication-attachments']]],
                 ['label'=>'Data Desa','icon'=>'fa-bar-chart','ability'=>'manage-data','items'=>[['Statistik','admin.resources.index','statistics'],['Nilai Statistik','admin.resources.index','statistic-values'],['Indeks Desa Membangun','admin.resources.index','idm']]],
                 ['label'=>'Pemetaan','icon'=>'fa-map','ability'=>'manage-data','items'=>[['Layer Peta','admin.resources.index','map-layers'],['Fitur Peta','admin.resources.index','map-features']]],
-                ['label'=>'Pelayanan','icon'=>'fa-file-text-o','ability'=>'manage-letter-applications','items'=>[['Permohonan Surat','admin.letter-applications.index',null]]],
+                ['label'=>'Pelayanan','icon'=>'fa-file-text-o','ability'=>'manage-letter-applications','items'=>[['Permohonan Surat','admin.letter-applications.index',null],['Jenis Surat & Persyaratan','admin.letter-services.index',null]]],
                 ['label'=>'Layanan Masyarakat','icon'=>'fa-envelope','ability'=>'manage-content','items'=>[['Pesan Masuk','admin.messages.index',null]]],
                 ['label'=>'Pengaturan','icon'=>'fa-cogs','ability'=>'manage-users','items'=>[['Pengguna','admin.users.index',null],['Pengaturan Aplikasi','admin.resources.index','settings'],['Redirect URL','admin.resources.index','redirects'],['Log Aktivitas','admin.activities.index',null]]],
                 ])

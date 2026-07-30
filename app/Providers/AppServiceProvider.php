@@ -109,7 +109,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-media', fn (User $user) => $user->hasRole('admin_konten', 'admin_data'));
         Gate::define('manage-users', fn (User $user) => false);
         Gate::define('manage-letter-applications', fn (User $user) => $user->hasRole('admin_data'));
-        Gate::define('manage-letter-services', fn (User $user) => false);
+        Gate::define('manage-letter-services', fn (User $user) => $user->hasRole('admin_data'));
 
         foreach (config('admin.resources', []) as $resource) {
             $policy = match ($resource['ability']) {

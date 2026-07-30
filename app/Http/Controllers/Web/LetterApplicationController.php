@@ -84,7 +84,7 @@ class LetterApplicationController extends Controller
         $application = $this->fromToken($token);
         $requirements = collect($application->service->requirements_json ?? []);
         foreach ($requirements as $index => $requirement) {
-            if (!$request->hasFile("documents.{$index}")) {
+            if (($requirement['required'] ?? true) && !$request->hasFile("documents.{$index}")) {
                 throw ValidationException::withMessages(["documents.{$index}" => 'Dokumen '.($requirement['label'] ?? 'persyaratan').' wajib diunggah.']);
             }
         }
@@ -109,6 +109,8 @@ class LetterApplicationController extends Controller
         $application = $this->fromToken($token);
         abort_unless($application->status === LetterApplicationStatus::Draft, 409);
         $data = $request->validate(['requirement_key' => ['required', 'string', 'max:100'], 'original_name' => ['required', 'string', 'max:255'], 'mime_type' => ['required', 'in:image/jpeg,image/png,application/pdf'], 'size_bytes' => ['required', 'integer', 'min:1', 'max:5242880']]);
+        $requirement = collect($application->service->requirements_json ?? [])->firstWhere('key', $data['requirement_key']);
+        abort_unless($requirement, 422, 'Persyaratan dokumen tidak valid.');
         $extension = $data['mime_type'] === 'application/pdf' ? 'pdf' : ($data['mime_type'] === 'image/png' ? 'png' : 'jpg');
         $path = 'layanan-surat/'.Str::slug($application->service->slug).'/'.$application->application_number.'/'.$data['requirement_key'].'/'.Str::ulid().'.'.$extension;
         $disk = config('filesystems.letter_documents_disk', 'local');
@@ -120,7 +122,7 @@ class LetterApplicationController extends Controller
         );
         $document = LetterApplicationDocument::updateOrCreate(
             ['letter_application_id' => $application->id, 'requirement_key' => $data['requirement_key']],
-            ['public_id' => (string) Str::ulid(), 'label' => $data['requirement_key'],
+            ['public_id' => (string) Str::ulid(), 'label' => $requirement['label'],
              'disk' => $disk, 'path' => $path, 'original_name' => basename($data['original_name']),
              'stored_extension' => $extension, 'mime_type' => $data['mime_type'], 'size_bytes' => $data['size_bytes'],
              'file_size' => $data['size_bytes'], 'upload_status' => 'pending_upload', 'review_status' => 'pending_review',
@@ -138,8 +140,11 @@ class LetterApplicationController extends Controller
         $actualSize = $disk->size($document->path);
         abort_unless($actualSize <= 5242880 && $actualSize > 0, 422, 'Ukuran file tidak valid.');
         $document->update(['upload_status' => 'uploaded', 'uploaded_at' => now(), 'file_size' => $actualSize, 'size_bytes' => $actualSize]);
-        $requiredKeys = collect($application->service->requirements_json ?? [])->pluck('key')->filter();
-        if ($requiredKeys->isNotEmpty() && $application->documents()->whereIn('requirement_key', $requiredKeys)->where('upload_status', 'uploaded')->distinct('requirement_key')->count('requirement_key') >= $requiredKeys->count()) {
+        $requiredKeys = collect($application->service->requirements_json ?? [])
+            ->filter(fn (array $requirement) => $requirement['required'] ?? true)
+            ->pluck('key')
+            ->filter();
+        if ($requiredKeys->isEmpty() || $application->documents()->whereIn('requirement_key', $requiredKeys)->where('upload_status', 'uploaded')->distinct('requirement_key')->count('requirement_key') >= $requiredKeys->count()) {
             $application->forceFill(['status' => LetterApplicationStatus::Submitted, 'submitted_at' => now()])->save();
         }
         return response()->json(['document' => ['id' => $document->public_id, 'name' => $document->original_name, 'size' => $actualSize, 'preview_url' => route('letter-services.application.documents.preview', [$token, $document->public_id])]]);

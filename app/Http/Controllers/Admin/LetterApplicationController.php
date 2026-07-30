@@ -29,7 +29,7 @@ class LetterApplicationController extends Controller
         $this->authorize('view', $application);
         $application->load(['service', 'assignee', 'resident', 'statusHistories.actor', 'documents']);
 
-        return view('admin.letter-applications.show', ['application' => $application, 'residents' => Resident::query()->orderBy('name')->limit(100)->get()]);
+        return view('admin.letter-applications.show', ['application' => $application, 'residents' => Resident::query()->orderBy('name')->limit(100)->get(), 'requirementLabels' => collect($application->service->requirements_json ?? [])->pluck('label', 'key')]);
     }
 
     public function document(LetterApplication $application, int $document)

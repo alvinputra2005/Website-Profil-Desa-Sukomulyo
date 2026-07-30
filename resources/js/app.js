@@ -88,11 +88,13 @@ const initPublicPage = () => {
 
     const documentForm = document.querySelector('[data-r2-documents]');
     if (documentForm && documentForm.dataset.presigned === 'true' && documentForm.dataset.bound !== 'true') {
-        const requiredInputs = [...documentForm.querySelectorAll('.letter-upload-row:not(.letter-upload-row--optional) input[type="file"]')];
-        const rows = [...documentForm.querySelectorAll('.letter-upload-row:not(.letter-upload-row--optional)')];
+        const rows = [...documentForm.querySelectorAll('.letter-upload-row[data-requirement-key]')];
+        const requiredRows = rows.filter((row) => row.dataset.requiredDocument === 'true');
+        const requiredInputs = requiredRows.map((row) => row.querySelector('input[type="file"]'));
         const complete = new Set();
         documentForm.dataset.bound = 'true';
-        requiredInputs.forEach((input, index) => {
+        rows.forEach((row) => {
+            const input = row.querySelector('input[type="file"]');
             input.required = false;
             input.addEventListener('change', async () => {
                 if (documentForm.dataset.fallback === 'true') return;
@@ -103,8 +105,7 @@ const initPublicPage = () => {
                     input.value = '';
                     return;
                 }
-                const key = `requirement_${index + 1}`;
-                const row = rows[index];
+                const key = row.dataset.requirementKey;
                 row.querySelector('.letter-file-picker span').textContent = file.name;
                 try {
                     const presign = await window.axios.post(documentForm.dataset.presignUrl, { requirement_key: key, original_name: file.name, mime_type: file.type, size_bytes: file.size });
@@ -120,7 +121,7 @@ const initPublicPage = () => {
                     await window.axios.post(documentForm.dataset.completeUrl, { document_id: presign.data.document_id });
                     complete.add(key);
                     row.classList.add('is-uploaded');
-                    if (complete.size === requiredInputs.length) window.location.assign(documentForm.dataset.finalUrl);
+                    if (requiredRows.every((requiredRow) => complete.has(requiredRow.dataset.requirementKey))) window.location.assign(documentForm.dataset.finalUrl);
                 } catch (error) {
                     documentForm.dataset.fallback = 'true';
                     requiredInputs.forEach((requiredInput) => { requiredInput.required = true; });
@@ -130,7 +131,7 @@ const initPublicPage = () => {
         });
         documentForm.addEventListener('submit', (event) => {
             if (documentForm.dataset.fallback === 'true') return;
-            if (complete.size !== requiredInputs.length) {
+            if (!requiredRows.every((requiredRow) => complete.has(requiredRow.dataset.requirementKey))) {
                 event.preventDefault();
                 window.alert('Unggah semua dokumen wajib terlebih dahulu.');
             }
