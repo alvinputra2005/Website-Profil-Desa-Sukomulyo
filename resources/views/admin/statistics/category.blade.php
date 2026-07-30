@@ -95,12 +95,11 @@
             @if ($dataset->description)<p class="statistics-dataset-description">{{ $dataset->description }}</p>@endif
             <div class="table-responsive statistics-dataset-table-wrap">
                 <table class="table table-bordered table-striped statistics-dataset-table">
-                    <thead><tr><th class="statistics-row-number">No</th>
-                        @foreach ($dataset->columns_json ?? [] as $column)
-                            <th>{{ $column['label'] ?? $column['key'] }} @if (($column['type'] ?? null) === 'percentage')<small>(%)</small>@endif</th>
-                        @endforeach
-                        <th class="statistics-row-action">Aksi</th>
-                    </tr></thead>
+                    <x-statistic-table-header
+                        :columns="$dataset->columns_json ?? []"
+                        :leading="[['label' => 'No', 'class' => 'statistics-row-number']]"
+                        :trailing="[['label' => 'Aksi', 'class' => 'statistics-row-action']]"
+                    />
                     <tbody>
                         @forelse ($dataset->rows as $row)
                             <tr><td class="text-center">{{ $loop->iteration }}</td>

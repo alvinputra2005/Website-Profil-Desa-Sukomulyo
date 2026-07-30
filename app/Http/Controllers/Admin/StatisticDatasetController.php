@@ -147,7 +147,7 @@ class StatisticDatasetController extends Controller
                 'source' => $validated['source'] ?? null,
                 'status' => $status,
                 'requires_manual_review' => $status === 'needs_review',
-                'totals_json' => $this->normalizedValues($validated['totals'] ?? [], $columns),
+                'totals_json' => $this->normalizedValues($validated['totals'] ?? [], $columns, true),
             ]);
 
             foreach ($validated['rows'] as $order => $rowData) {
@@ -206,21 +206,27 @@ class StatisticDatasetController extends Controller
      * @param  Collection<string, array<string, mixed>>  $columns
      * @return array<string, mixed>
      */
-    private function normalizedValues(array $input, Collection $columns): array
+    private function normalizedValues(array $input, Collection $columns, bool $skipAreaIdentifiers = false): array
     {
-        return $columns->mapWithKeys(function (array $column, string $key) use ($input): array {
-            $value = $input[$key] ?? null;
+        if ($skipAreaIdentifiers) {
+            $columns = $columns->except(['area_code', 'area_name']);
+        }
 
-            if ($value === '' || $value === null) {
-                return [$key => null];
-            }
+        return $columns
+            ->mapWithKeys(function (array $column, string $key) use ($input): array {
+                $value = $input[$key] ?? null;
 
-            return [$key => match ($column['type'] ?? 'string') {
-                'integer' => (int) $value,
-                'percentage' => (float) $value,
-                default => trim((string) $value),
-            }];
-        })->all();
+                if ($value === '' || $value === null) {
+                    return [$key => null];
+                }
+
+                return [$key => match ($column['type'] ?? 'string') {
+                    'integer' => (int) $value,
+                    'percentage' => (float) $value,
+                    default => trim((string) $value),
+                }];
+            })
+            ->all();
     }
 
     private function nullableString(mixed $value): ?string

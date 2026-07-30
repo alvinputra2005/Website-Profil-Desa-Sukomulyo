@@ -33,9 +33,10 @@
             @if ($errors->has('rows') || $errors->has('rows.*'))<div class="alert alert-danger">Periksa kembali nilai pada tabel data.</div>@endif
             <div class="table-responsive statistics-edit-table-wrap">
                 <table class="table table-bordered statistics-edit-table">
-                    <thead><tr><th class="statistics-row-number">No</th>
-                        @foreach ($dataset->columns_json ?? [] as $column)<th>{{ $column['label'] ?? $column['key'] }} @if (($column['type'] ?? null) === 'percentage')<small>(%)</small>@endif</th>@endforeach
-                    </tr></thead>
+                    <x-statistic-table-header
+                        :columns="$dataset->columns_json ?? []"
+                        :leading="[['label' => 'No', 'class' => 'statistics-row-number']]"
+                    />
                     <tbody>
                         @forelse ($dataset->rows as $rowIndex => $row)
                             <tr id="row-{{ $row->id }}"><td class="text-center">{{ $rowIndex + 1 }}<input type="hidden" name="rows[{{ $rowIndex }}][id]" value="{{ $row->id }}"></td>

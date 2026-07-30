@@ -27,13 +27,7 @@
                     <div class="population-table-scroll population-summary-table-wrap">
                         <table class="population-summary-table">
                             <caption class="screen-reader-text">{{ $dataset->title }}</caption>
-                            <thead>
-                                <tr>
-                                    @foreach ($dataset->columns_json ?? [] as $column)
-                                        <th scope="col">{{ $column['label'] }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
+                            <x-statistic-table-header :columns="$dataset->columns_json ?? []" />
                             <tbody>
                                 @forelse ($dataset->rows as $row)
                                     <tr>
