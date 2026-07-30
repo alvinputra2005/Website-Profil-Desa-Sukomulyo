@@ -28,6 +28,10 @@ class VillageStatisticController extends Controller
             return $site->populationStatistics($statistics, $request->only(['from_year', 'to_year', 'sort']));
         }
 
+        if ($category = $site->findPublishedStatisticCategory($section)) {
+            return $site->importedStatisticCategory($category);
+        }
+
         $context = $statisticPages->sectionContext($section, $request->query('menu'));
         abort_unless($context, 404);
 
@@ -35,6 +39,20 @@ class VillageStatisticController extends Controller
             $context,
             $request->only(['from_year', 'to_year', 'sort']),
         ));
+    }
+
+    public function importedDataset(
+        PublicSiteService $site,
+        string $category,
+        string $dataset,
+    ): View {
+        $category = $site->findPublishedStatisticCategory($category);
+        abort_unless($category, 404);
+
+        $dataset = $category->datasets->firstWhere('slug', $dataset);
+        abort_unless($dataset, 404);
+
+        return $site->importedStatisticDataset($category, $dataset);
     }
 
     public function population(

@@ -1,5 +1,9 @@
+@props(['importedCategories' => null])
 @php
     $section = (string) request()->route('section', '');
+    $importedCategory = (string) (request()->route('category') ?? $section);
+    $importedDataset = (string) request()->route('dataset', '');
+    $importedCategories ??= $importedStatisticCategories ?? collect();
     $activeMenu = (string) request('menu', '');
     $isFamilyPage = request()->routeIs('data-statistik.detail') && $section === 'keluarga';
     $familyMenu = $isFamilyPage ? $activeMenu : '';
@@ -98,5 +102,49 @@
                 </ul>
             </div>
         </section>
+
+        @foreach ($importedCategories as $category)
+            @php($categoryExpanded = $importedCategory === $category->slug)
+            <section class="statistics-sidebar__group">
+                <h2 class="statistics-sidebar__heading">
+                    <button
+                        class="statistics-sidebar__toggle"
+                        type="button"
+                        aria-expanded="{{ $categoryExpanded ? 'true' : 'false' }}"
+                        aria-controls="statistics-imported-category-{{ $category->id }}"
+                        data-sidebar-toggle
+                        data-sidebar-accordion-toggle
+                    >
+                        <span class="statistics-sidebar__icon" aria-hidden="true">
+                            <i class="fas {{ $category->icon ?: 'fa-table' }}"></i>
+                        </span>
+                        <span>{{ $category->name }}</span>
+                        <i class="fas fa-chevron-down statistics-sidebar__chevron" aria-hidden="true"></i>
+                    </button>
+                </h2>
+                <div id="statistics-imported-category-{{ $category->id }}" class="statistics-sidebar__panel" @if (! $categoryExpanded) hidden @endif>
+                    <ul class="statistics-sidebar__list">
+                        <li>
+                            <a
+                                class="{{ $categoryExpanded && $importedDataset === '' ? 'is-active' : '' }}"
+                                href="{{ route('data-statistik.detail', ['section' => $category->slug]) }}"
+                            >
+                                Semua Dataset
+                            </a>
+                        </li>
+                        @foreach ($category->datasets as $dataset)
+                            <li>
+                                <a
+                                    class="{{ $importedDataset === $dataset->slug ? 'is-active' : '' }}"
+                                    href="{{ route('data-statistik.imported.show', ['category' => $category->slug, 'dataset' => $dataset->slug]) }}"
+                                >
+                                    {{ $dataset->short_title ?: $dataset->title }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </section>
+        @endforeach
     </nav>
 </aside>

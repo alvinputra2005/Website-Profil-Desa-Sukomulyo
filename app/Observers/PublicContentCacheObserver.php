@@ -19,7 +19,10 @@ use App\Models\PublicationAttachment;
 use App\Models\Resident;
 use App\Models\ResidentEvent;
 use App\Models\Setting;
+use App\Models\StatisticCategory;
 use App\Models\StatisticDataset;
+use App\Models\StatisticImport;
+use App\Models\StatisticRow;
 use App\Models\StatisticValue;
 use App\Models\VillageProfileSection;
 use App\Services\SiteCache;
@@ -62,7 +65,10 @@ class PublicContentCacheObserver
             $model instanceof PopulationArea,
             $model instanceof PopulationYearlySnapshot,
             $model instanceof ResidentEvent,
+            $model instanceof StatisticCategory,
             $model instanceof StatisticDataset,
+            $model instanceof StatisticImport,
+            $model instanceof StatisticRow,
             $model instanceof StatisticValue => $this->cache->invalidatePopulationStatistics(),
             $model instanceof MapLayer, $model instanceof MapFeature => $this->cache->invalidateMap(),
             $model instanceof Gallery, $model instanceof GalleryItem => $this->cache->invalidateGallery(),

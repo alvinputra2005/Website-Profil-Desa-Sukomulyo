@@ -12,6 +12,8 @@ use App\Models\NewsCategory;
 use App\Models\Official;
 use App\Models\Publication;
 use App\Models\Setting;
+use App\Models\StatisticCategory;
+use App\Models\StatisticDataset;
 use App\Models\VillageComment;
 use App\Models\VillageProfileSection;
 use App\Services\PopulationStatistics as PopulationStatisticsService;
@@ -317,7 +319,9 @@ class PublicSiteService
             }
         );
 
-        return $this->render('pages.statistics', $statistics);
+        return $this->render('pages.statistics', $statistics + [
+            'importedStatisticCategories' => $this->publishedStatisticCategories(),
+        ]);
     }
 
     public function statisticDetail(string $section, PopulationStatisticsService $populationStatistics): View
@@ -415,6 +419,40 @@ class PublicSiteService
     public function genericStatistic(array $data): View
     {
         return $this->render('pages.generic-statistics', $data);
+    }
+
+    public function importedStatisticCategory(StatisticCategory $category): View
+    {
+        $categories = $this->publishedStatisticCategories();
+        $category = $categories->firstWhere('id', $category->id);
+        abort_unless($category, 404);
+
+        return $this->render('pages.imported-statistics-category', [
+            'category' => $category,
+            'statisticCategories' => $categories,
+        ]);
+    }
+
+    public function importedStatisticDataset(
+        StatisticCategory $category,
+        StatisticDataset $dataset,
+    ): View {
+        $categories = $this->publishedStatisticCategories();
+        $category = $categories->firstWhere('id', $category->id);
+        abort_unless($category && $dataset->statistic_category_id === $category->id, 404);
+
+        $dataset->load('rows');
+
+        return $this->render('pages.imported-statistics-show', [
+            'category' => $category,
+            'dataset' => $dataset,
+            'statisticCategories' => $categories,
+        ]);
+    }
+
+    public function findPublishedStatisticCategory(string $slug): ?StatisticCategory
+    {
+        return $this->publishedStatisticCategories()->firstWhere('slug', $slug);
     }
 
     public function budgetHistory(): View
@@ -863,7 +901,10 @@ class PublicSiteService
         $layout['articles'] = $this->normalizeArticleImages($layout['articles'] ?? []);
         $layout['popularArticles'] = $this->normalizeArticleImages($layout['popularArticles'] ?? []);
 
-        return array_merge($layout, ['navigation' => $this->navigation()]);
+        return array_merge($layout, [
+            'navigation' => $this->navigation(),
+            'importedStatisticCategories' => $this->publishedStatisticCategories(),
+        ]);
     }
 
     private function publicSettings(): Collection
@@ -875,6 +916,29 @@ class PublicSiteService
                 ? Setting::query()->where('is_public', true)->pluck('value', 'key')
                 : collect()
         );
+    }
+
+    /**
+     * @return Collection<int, StatisticCategory>
+     */
+    private function publishedStatisticCategories(): Collection
+    {
+        if (! Schema::hasTable('statistic_categories') || ! Schema::hasTable('statistic_datasets')) {
+            return collect();
+        }
+
+        return StatisticCategory::query()
+            ->where('is_active', true)
+            ->whereHas('datasets', fn ($query) => $query
+                ->whereNotNull('statistic_import_id')
+                ->where('status', 'published'))
+            ->with(['datasets' => fn ($query) => $query
+                ->whereNotNull('statistic_import_id')
+                ->where('status', 'published')
+                ->withCount('rows')
+                ->orderBy('display_order')])
+            ->orderBy('display_order')
+            ->get();
     }
 
     private function navigation(): array

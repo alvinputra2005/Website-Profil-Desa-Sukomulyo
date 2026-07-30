@@ -23,7 +23,10 @@ use App\Models\PublicationAttachment;
 use App\Models\Resident;
 use App\Models\ResidentEvent;
 use App\Models\Setting;
+use App\Models\StatisticCategory;
 use App\Models\StatisticDataset;
+use App\Models\StatisticImport;
+use App\Models\StatisticRow;
 use App\Models\StatisticValue;
 use App\Models\User;
 use App\Models\VillageProfileSection;
@@ -91,7 +94,10 @@ class AppServiceProvider extends ServiceProvider
             PopulationArea::class,
             PopulationYearlySnapshot::class,
             ResidentEvent::class,
+            StatisticCategory::class,
             StatisticDataset::class,
+            StatisticImport::class,
+            StatisticRow::class,
             StatisticValue::class,
             MapLayer::class,
             MapFeature::class,

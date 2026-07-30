@@ -198,7 +198,8 @@ Route::get('/pemerintahan-desa', [VillageProfileController::class, 'government']
 Route::get('/potensi-desa', [VillageProfileController::class, 'potentials'])->name('potensi-desa');
 Route::get('/data-desa-statistik', [VillageStatisticController::class, 'index'])->name('data-desa-statistik');
 Route::get('/data-statistik/penduduk', [VillageStatisticController::class, 'population'])->name('data-statistik.population');
-Route::get('/data-statistik/{section}', [VillageStatisticController::class, 'show'])->where('section', 'penduduk|keluarga|pendidikan|pekerjaan|ekonomi|idm|visualisasi')->name('data-statistik.detail');
+Route::get('/data-statistik/{category}/{dataset}', [VillageStatisticController::class, 'importedDataset'])->name('data-statistik.imported.show');
+Route::get('/data-statistik/{section}', [VillageStatisticController::class, 'show'])->name('data-statistik.detail');
 Route::get('/transparansi-apbdes', [VillageStatisticController::class, 'budgetHistory'])->name('transparansi-apbdes');
 Route::get('/informasi-publik-desa', [PublicationController::class, 'index'])->name('informasi-publik-desa');
 Route::prefix('informasi-desa/pengumuman')->name('announcements.')->group(function () {

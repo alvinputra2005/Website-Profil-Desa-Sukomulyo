@@ -89,6 +89,26 @@
                     @endif
                 </section>
 
+                @if ($importedStatisticCategories->isNotEmpty())
+                    <section class="data-panel" aria-labelledby="imported-statistics-title">
+                        <span class="section-kicker">Data Sensus</span>
+                        <h2 id="imported-statistics-title">Dataset Statistik Terpublikasi</h2>
+                        <div class="statistics-grid">
+                            @foreach ($importedStatisticCategories as $category)
+                                <article class="statistic-card">
+                                    <i class="fas {{ $category->icon ?: 'fa-table' }}" aria-hidden="true"></i>
+                                    <div><strong>{{ $category->datasets->count() }}</strong><span>dataset</span></div>
+                                    <p>
+                                        <a href="{{ route('data-statistik.detail', ['section' => $category->slug]) }}">
+                                            {{ $category->name }}
+                                        </a>
+                                    </p>
+                                </article>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+
                 <p class="data-note"><i class="fas fa-info-circle" aria-hidden="true"></i> Data pada halaman ini merupakan struktur awal dan dapat diperbarui sesuai data resmi desa terbaru.</p>
             </section>
         </div>
