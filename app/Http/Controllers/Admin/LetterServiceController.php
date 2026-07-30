@@ -63,7 +63,7 @@ class LetterServiceController extends Controller
 
         return [
             ...collect($validated)->only(['name', 'description', 'processing_days', 'fee_information', 'pickup_instructions', 'display_order'])->all(),
-            'slug' => Str::slug($validated['slug']),
+            'slug' => $request->route('letterService')?->slug ?: $this->uniqueSlug($validated['name']),
             'code' => Str::upper($validated['code']),
             'requirements_json' => collect($validated['requirements'])->values()->map(fn (array $requirement, int $index) => [
                 'key' => Str::slug($requirement['code']),
@@ -74,5 +74,18 @@ class LetterServiceController extends Controller
             ])->all(),
             'is_active' => $request->boolean('is_active'),
         ];
+    }
+
+    private function uniqueSlug(string $name): string
+    {
+        $base = Str::slug($name) ?: 'jenis-surat';
+        $slug = $base;
+        $suffix = 2;
+
+        while (LetterService::withTrashed()->where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$suffix++;
+        }
+
+        return $slug;
     }
 }

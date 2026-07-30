@@ -4,33 +4,33 @@
 
 @push('head')
 <style>
-    .letter-service-form { --letter-green: #08783f; --letter-green-soft: #edf8f1; --letter-border: #dfe8e3; }
-    .letter-service-form .form-section { border: 1px solid var(--letter-border); border-radius: 8px; margin-bottom: 22px; overflow: hidden; box-shadow: 0 1px 3px rgba(29, 62, 44, .04); }
-    .letter-service-form .form-section__heading { display: flex; align-items: flex-start; gap: 12px; padding: 17px 20px; background: #fbfdfc; border-bottom: 1px solid var(--letter-border); }
-    .letter-service-form .form-section__icon { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; color: var(--letter-green); background: var(--letter-green-soft); border-radius: 8px; font-size: 16px; }
-    .letter-service-form .form-section__heading h3 { margin: 1px 0 4px; color: #173126; font-size: 16px; font-weight: 700; }
-    .letter-service-form .form-section__heading p { margin: 0; color: #6e7e76; font-size: 13px; line-height: 1.5; }
-    .letter-service-form .form-section__body { padding: 20px; }
-    .letter-service-form .control-label { color: #33473d; font-weight: 600; }
+    .letter-service-form { --letter-green: var(--admin-primary, #526b42); --letter-green-soft: #eef5e9; --letter-border: var(--admin-border, #dfe3da); }
+    .letter-service-form .form-section { margin-bottom: 18px; overflow: hidden; border: 1px solid var(--letter-border); border-radius: 2px; box-shadow: none; }
+    .letter-service-form .form-section__heading { display: flex; align-items: flex-start; gap: 12px; padding: 14px 15px; border-bottom: 1px solid var(--letter-border); background: #f8f9f6; }
+    .letter-service-form .form-section__icon { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border-radius: 2px; background: var(--letter-green-soft); color: var(--letter-green); font-size: 16px; }
+    .letter-service-form .form-section__heading h3 { margin: 1px 0 4px; color: var(--admin-ink, #252a31); font-size: 16px; font-weight: 700; }
+    .letter-service-form .form-section__heading p { margin: 0; color: var(--admin-muted, #6f7870); font-size: 13px; line-height: 1.5; }
+    .letter-service-form .form-section__body { padding: 18px 15px; }
+    .letter-service-form .control-label { color: var(--admin-ink, #252a31); font-weight: 600; }
     .letter-service-form .required-mark { color: #c33d32; }
     .letter-service-form .help-block { color: #708077; font-size: 12px; margin: 5px 0 0; }
-    .letter-service-form .form-control { min-height: 40px; border-color: #cfdbd5; border-radius: 5px; box-shadow: none; }
+    .letter-service-form .form-control { min-height: 34px; border-color: #ccd3c8; border-radius: 2px; box-shadow: none; }
     .letter-service-form textarea.form-control { min-height: auto; }
-    .letter-service-form .form-control:focus { border-color: #1b8c55; box-shadow: 0 0 0 3px rgba(27, 140, 85, .12); }
+    .letter-service-form .form-control:focus { border-color: var(--letter-green); box-shadow: 0 0 0 2px rgba(82, 107, 66, .14); }
     .letter-service-form .requirement-table { margin-bottom: 0; min-width: 820px; }
-    .letter-service-form .requirement-table > thead > tr > th { padding: 11px 12px; color: #52655b; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; background: #f5f9f7; border-bottom: 1px solid var(--letter-border); vertical-align: middle; }
+    .letter-service-form .requirement-table > thead > tr > th { padding: 11px 12px; border-bottom: 2px solid var(--letter-green); background: #f2f5ef; color: var(--admin-ink, #252a31); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; vertical-align: middle; }
     .letter-service-form .requirement-table > tbody > tr > td { padding: 12px; border-color: #e7eeea; vertical-align: top; }
     .letter-service-form .requirement-table .form-group { margin: 0; }
     .letter-service-form .requirement-table .checkbox { margin: 9px 0; white-space: nowrap; }
     .letter-service-form .requirement-table .btn-remove-requirement { min-width: 38px; min-height: 38px; }
-    .letter-service-form .requirements-scroll { overflow-x: auto; border: 1px solid var(--letter-border); border-radius: 7px; }
+    .letter-service-form .requirements-scroll { overflow-x: auto; border: 1px solid var(--letter-border); border-radius: 2px; }
     .letter-service-form .requirements-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
     .letter-service-form .requirements-count { color: #607168; font-size: 13px; }
-    .letter-service-form .service-status { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 0 13px; border: 1px solid #cfe6d8; border-radius: 6px; background: #f4fbf6; color: #285b3e; }
+    .letter-service-form .service-status { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 12px; border: 1px solid #cbd7c4; border-radius: 2px; background: #f3f7ef; color: #3d5032; }
     .letter-service-form .service-status input { width: 17px; height: 17px; margin: 0; }
     .letter-service-form .footer-actions { display: flex; justify-content: flex-end; gap: 10px; }
-    .letter-service-form .btn-primary { background: var(--letter-green); border-color: var(--letter-green); }
-    .letter-service-form .btn-primary:hover, .letter-service-form .btn-primary:focus { background: #056534; border-color: #056534; }
+    .letter-service-form .btn-primary { border-color: var(--admin-primary-dark, #3d5032); background: var(--letter-green); }
+    .letter-service-form .btn-primary:hover, .letter-service-form .btn-primary:focus { border-color: #304027; background: var(--admin-primary-dark, #3d5032); }
     @media (max-width: 767px) { .letter-service-form .form-section__body { padding: 15px; } .letter-service-form .requirements-actions { align-items: flex-start; flex-direction: column; } .letter-service-form .footer-actions { justify-content: stretch; flex-direction: column-reverse; } .letter-service-form .footer-actions .btn { width: 100%; } }
 </style>
 @endpush
@@ -91,13 +91,6 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group {{ $errors->has('slug') ? 'has-error' : '' }}">
-                                <label class="control-label" for="slug">Slug URL <span class="required-mark">*</span></label>
-                                <input id="slug" class="form-control" name="slug" value="{{ old('slug', $letterService->slug) }}" required maxlength="160" pattern="[A-Za-z0-9-]+" placeholder="Contoh: surat-keterangan-domisili">
-                                @error('slug') <p class="help-block">{{ $message }}</p> @else <p class="help-block">Gunakan huruf kecil, angka, dan tanda hubung.</p> @enderror
-                            </div>
-                        </div>
                         <div class="col-md-4">
                             <div class="form-group {{ $errors->has('display_order') ? 'has-error' : '' }}">
                                 <label class="control-label" for="display_order">Urutan tampil <span class="required-mark">*</span></label>

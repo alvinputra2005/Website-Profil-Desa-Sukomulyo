@@ -6,6 +6,7 @@
 @csrf @if($item->exists)@method('put')@endif
 <div class="box box-info"><div class="box-header with-border"><h3 class="box-title">Form {{ $config['title'] }}</h3></div><div class="box-body">
 @foreach($config['fields'] as $name=>$field)
+@if($name !== 'slug')
 @php
     $type=$field['type']??'text';
     $value=old($name,request($name,data_get($item,$name)));
@@ -56,6 +57,7 @@
 @endif
 @error($name)<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
 </div>
+@endif
 @endforeach
 </div><div class="box-footer {{ $resource==='galleries' ? 'gallery-form-actions' : '' }}"><a href="{{ route('admin.resources.index',$resource) }}" class="btn btn-default"><i class="fa fa-arrow-left"></i> Kembali</a>@if($resource!=='categories')<button type="reset" class="btn btn-warning"><i class="fa fa-refresh"></i> Reset</button>@endif<button type="submit" class="btn btn-social btn-info pull-right"><i class="fa fa-save"></i> Simpan</button></div></div>
 
