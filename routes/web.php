@@ -113,6 +113,8 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
     Route::get('/', [AdminLetterApplicationController::class, 'index'])->name('index');
     Route::get('/{application:public_id}', [AdminLetterApplicationController::class, 'show'])->name('show');
     Route::get('/{application:public_id}/dokumen/{document}', [AdminLetterApplicationController::class, 'document'])->name('document');
+    Route::get('/{application:public_id}/dokumen/{document}/preview-url', [AdminLetterApplicationController::class, 'previewUrl'])->name('document.preview-url');
+    Route::get('/{application:public_id}/dokumen/{document}/preview-content', [AdminLetterApplicationController::class, 'previewContent'])->name('document.preview-content');
     Route::patch('/{application:public_id}/dokumen/{document}', [AdminLetterApplicationController::class, 'reviewDocument'])->name('document.review');
         Route::patch('/{application:public_id}/status', [LetterApplicationStatusController::class, 'update'])->name('status.update');
         Route::patch('/{application:public_id}/hubungkan-penduduk', [AdminLetterApplicationController::class, 'linkResident'])->name('resident.link');

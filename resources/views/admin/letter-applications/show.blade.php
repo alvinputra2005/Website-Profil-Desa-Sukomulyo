@@ -25,6 +25,7 @@
     .letter-application-detail .documents-table > thead > tr > th { color: var(--admin-ink, #252a31); font-size: 11px; letter-spacing: .03em; text-transform: uppercase; }
     .letter-application-detail .documents-table > tbody > tr > td { vertical-align: top; font-size: 13px; }
     .letter-application-detail .document-name { display: block; margin-bottom: 2px; font-weight: 600; }
+    .letter-application-detail .document-name.btn { padding: 0; border: 0; background: transparent; color: var(--admin-primary, #526b42); line-height: 1.35; white-space: normal; }
     .letter-application-detail .document-meta { color: var(--letter-detail-muted); font-size: 11px; }
     .letter-application-detail .document-review { min-width: 210px; }
     .letter-application-detail .document-review .form-control { height: 30px; margin-top: 7px; border-radius: 2px; font-size: 12px; }
@@ -50,6 +51,24 @@
     .letter-application-detail .status-history__meta { margin: 3px 0 0; color: var(--letter-detail-muted); font-size: 11px; line-height: 1.45; }
     .letter-application-detail .status-history__note { margin: 7px 0 0; padding: 8px 10px; border-left: 2px solid #d5ded0; background: #f8f9f6; color: #4d5950; font-size: 12px; line-height: 1.45; white-space: pre-line; }
     .letter-application-detail .status-history__notification { margin-top: 6px; color: #397049; font-size: 11px; }
+    .document-viewer-modal .modal-dialog { width: 100%; height: 100%; margin: 0; }
+    .document-viewer-modal .modal-content { height: 100%; border: 0; border-radius: 0; background: #1a2227; box-shadow: none; }
+    .document-viewer-modal .modal-header { display: flex; min-height: 58px; padding: 11px 16px; align-items: center; border-bottom: 1px solid rgba(255,255,255,.14); background: #263238; color: #fff; gap: 12px; }
+    .document-viewer-modal .modal-title { overflow: hidden; margin: 0; color: #fff; font-size: 15px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+    .document-viewer-modal .modal-title small { display: block; margin-top: 2px; color: #b8c5c9; font-size: 11px; font-weight: 400; }
+    .document-viewer-modal .viewer-toolbar { display: flex; margin-left: auto; align-items: center; gap: 5px; }
+    .document-viewer-modal .viewer-toolbar .btn { min-width: 32px; padding: 6px 8px; border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.08); color: #fff; }
+    .document-viewer-modal .viewer-toolbar .btn:hover, .document-viewer-modal .viewer-toolbar .btn:focus { background: rgba(255,255,255,.19); color: #fff; }
+    .document-viewer-modal .viewer-toolbar .btn-download { border-color: #4e955e; background: #367d47; }
+    .document-viewer-modal .viewer-toolbar .close { margin-left: 6px; color: #fff; font-size: 25px; opacity: .85; text-shadow: none; }
+    .document-viewer-modal .modal-body { display: flex; height: calc(100% - 58px); padding: 0; align-items: center; justify-content: center; overflow: hidden; background: #151b1f; }
+    .document-viewer-modal .viewer-loading { color: #c7d2d6; font-size: 13px; text-align: center; }
+    .document-viewer-modal .viewer-loading .fa { display: block; margin-bottom: 10px; font-size: 25px; }
+    .document-viewer-modal .viewer-image-wrap { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; overflow: auto; }
+    .document-viewer-modal .viewer-image { max-width: 94%; max-height: 94%; transition: transform .18s ease; transform-origin: center center; }
+    .document-viewer-modal .viewer-pdf { width: 100%; height: 100%; border: 0; background: #fff; }
+    .document-viewer-modal .is-hidden { display: none !important; }
+    @media (max-width: 767px) { .document-viewer-modal .modal-header { align-items: flex-start; flex-wrap: wrap; } .document-viewer-modal .viewer-toolbar { width: 100%; margin-left: 0; } .document-viewer-modal .viewer-toolbar .btn { flex: 1; } .document-viewer-modal .viewer-toolbar .btn-close { max-width: 42px; } }
     @media (max-width: 767px) { .letter-application-detail .application-header { padding: 15px; flex-direction: column; gap: 9px; } .letter-application-detail .application-header__number { font-size: 19px; } .letter-application-detail .application-facts > div { grid-template-columns: 1fr; gap: 3px; } .letter-application-detail .document-review { min-width: 180px; } }
 </style>
 @endpush
@@ -92,7 +111,7 @@
                             @forelse($application->documents as $document)
                                 <tr>
                                     <td>{{ $requirementLabels[$document->requirement_key] ?? $document->label }}</td>
-                                    <td><a class="document-name" href="{{ route('admin.letter-applications.document', [$application, $document->id]) }}"><i class="fa fa-download" aria-hidden="true"></i> {{ $document->original_name }}</a><span class="document-meta">{{ number_format(($document->size_bytes ?: $document->file_size) / 1024, 0) }} KB</span></td>
+                                    <td><button type="button" class="document-name btn btn-link text-left" data-document-preview data-preview-url="{{ route('admin.letter-applications.document.preview-url', [$application, $document->id]) }}" data-download-url="{{ route('admin.letter-applications.document', [$application, $document->id]) }}" data-document-name="{{ $document->original_name }}" data-document-size="{{ number_format(($document->size_bytes ?: $document->file_size) / 1024, 0) }} KB"><i class="fa fa-eye" aria-hidden="true"></i> {{ $document->original_name }}</button><span class="document-meta">{{ number_format(($document->size_bytes ?: $document->file_size) / 1024, 0) }} KB · Klik untuk pratinjau</span></td>
                                     <td class="document-review"><span class="label label-{{ $document->review_status === 'approved' ? 'success' : ($document->review_status === 'rejected' ? 'danger' : 'warning') }}">{{ $document->review_status === 'approved' ? 'Sesuai' : ($document->review_status === 'rejected' ? 'Perlu diganti' : 'Menunggu review') }}</span><form method="post" action="{{ route('admin.letter-applications.document.review', [$application, $document->id]) }}">@csrf @method('PATCH')<label class="sr-only" for="document-status-{{ $document->id }}">Status dokumen</label><select id="document-status-{{ $document->id }}" name="review_status" class="form-control input-sm"><option value="approved" @selected($document->review_status === 'approved')>Sesuai</option><option value="rejected" @selected($document->review_status === 'rejected')>Minta diganti</option></select><label class="sr-only" for="document-note-{{ $document->id }}">Catatan review</label><input id="document-note-{{ $document->id }}" name="review_note" class="form-control input-sm" value="{{ $document->review_note }}" placeholder="Catatan bila perlu diganti"><button class="btn btn-xs btn-success" type="submit">Simpan Review</button></form></td>
                                 </tr>
                             @empty
@@ -140,4 +159,110 @@
         </aside>
     </div>
 </div>
+
+<div class="modal fade document-viewer-modal" id="document-viewer" tabindex="-1" role="dialog" aria-labelledby="document-viewer-title" aria-modal="true">
+    <div class="modal-dialog" role="document"><div class="modal-content">
+        <div class="modal-header">
+            <div><h2 class="modal-title" id="document-viewer-title">Pratinjau dokumen</h2><small id="document-viewer-meta"></small></div>
+            <div class="viewer-toolbar" role="toolbar" aria-label="Kontrol pratinjau dokumen">
+                <button type="button" class="btn btn-sm viewer-image-control" data-viewer-action="zoom-out" title="Perkecil" aria-label="Perkecil"><i class="fa fa-search-minus" aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-sm viewer-image-control" data-viewer-action="zoom-in" title="Perbesar" aria-label="Perbesar"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-sm viewer-image-control" data-viewer-action="rotate" title="Putar gambar" aria-label="Putar gambar"><i class="fa fa-repeat" aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-sm" data-viewer-action="print" title="Cetak" aria-label="Cetak"><i class="fa fa-print" aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-sm" data-viewer-action="open" title="Buka di tab baru" aria-label="Buka di tab baru"><i class="fa fa-external-link" aria-hidden="true"></i></button>
+                <a id="document-viewer-download" class="btn btn-sm btn-download" href="#"><i class="fa fa-download" aria-hidden="true"></i><span class="hidden-xs"> Unduh</span></a>
+                <button type="button" class="btn btn-sm btn-close" data-dismiss="modal" title="Tutup" aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
+            </div>
+        </div>
+        <div class="modal-body"><div class="viewer-loading" id="document-viewer-loading"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i>Menyiapkan pratinjau aman...</div><div class="viewer-image-wrap is-hidden" id="document-viewer-image-wrap"><img id="document-viewer-image" class="viewer-image" alt=""></div><iframe id="document-viewer-pdf" class="viewer-pdf is-hidden" title="Pratinjau PDF"></iframe></div>
+    </div></div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = $('#document-viewer');
+    const image = document.getElementById('document-viewer-image');
+    const imageWrap = document.getElementById('document-viewer-image-wrap');
+    const pdf = document.getElementById('document-viewer-pdf');
+    const loading = document.getElementById('document-viewer-loading');
+    const title = document.getElementById('document-viewer-title');
+    const meta = document.getElementById('document-viewer-meta');
+    const download = document.getElementById('document-viewer-download');
+    const imageControls = document.querySelectorAll('.viewer-image-control');
+    let viewerUrl = '';
+    let isImage = false;
+    let zoom = 1;
+    let rotation = 0;
+
+    function updateImageTransform() { image.style.transform = `scale(${zoom}) rotate(${rotation}deg)`; }
+    function resetViewer() { viewerUrl = ''; zoom = 1; rotation = 0; image.removeAttribute('src'); pdf.src = 'about:blank'; imageWrap.classList.add('is-hidden'); pdf.classList.add('is-hidden'); loading.classList.remove('is-hidden'); imageControls.forEach(function (button) { button.classList.add('is-hidden'); }); }
+    function showPreview(data) {
+        viewerUrl = data.url;
+        isImage = Boolean(data.is_image);
+        title.textContent = data.name;
+        meta.textContent = `${data.mime_type === 'application/pdf' ? 'PDF' : 'Gambar'} · URL sementara berlaku hingga ${new Date(data.expires_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+        loading.classList.add('is-hidden');
+        download.href = download.dataset.url;
+        if (isImage) {
+            image.alt = `Pratinjau ${data.name}`;
+            image.src = viewerUrl;
+            updateImageTransform();
+            imageWrap.classList.remove('is-hidden');
+            imageControls.forEach(function (button) { button.classList.remove('is-hidden'); });
+        } else {
+            pdf.src = viewerUrl;
+            pdf.classList.remove('is-hidden');
+        }
+    }
+
+    document.querySelectorAll('[data-document-preview]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            resetViewer();
+            title.textContent = button.dataset.documentName;
+            meta.textContent = button.dataset.documentSize;
+            download.dataset.url = button.dataset.downloadUrl;
+            download.href = button.dataset.downloadUrl;
+            modal.modal('show');
+            fetch(button.dataset.previewUrl, { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+                .then(function (response) { if (!response.ok) throw new Error('Gagal membuat URL pratinjau.'); return response.json(); })
+                .then(showPreview)
+                .catch(function () { loading.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>Pratinjau tidak dapat dimuat. Silakan unduh dokumen untuk membukanya.'; });
+        });
+    });
+
+    document.querySelectorAll('[data-viewer-action]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const action = button.dataset.viewerAction;
+            if (action === 'zoom-in' && isImage) { zoom = Math.min(zoom + .2, 3); updateImageTransform(); }
+            if (action === 'zoom-out' && isImage) { zoom = Math.max(zoom - .2, .4); updateImageTransform(); }
+            if (action === 'rotate' && isImage) { rotation = (rotation + 90) % 360; updateImageTransform(); }
+            if (action === 'open' && viewerUrl) {
+                const tab = window.open(viewerUrl, '_blank');
+                if (tab) tab.opener = null;
+            }
+            if (action === 'print') {
+                if (isImage) {
+                    const printWindow = window.open('', '_blank');
+                    if (!printWindow) { window.alert('Izinkan pop-up untuk mencetak gambar.'); return; }
+                    printWindow.opener = null;
+                    printWindow.document.write('<!doctype html><html><head><title>Cetak dokumen</title><style>body{margin:0;text-align:center}img{max-width:100%;max-height:100vh}</style></head><body></body></html>');
+                    const printableImage = printWindow.document.createElement('img');
+                    printableImage.src = viewerUrl;
+                    printableImage.alt = title.textContent;
+                    printableImage.onload = function () { printWindow.focus(); printWindow.print(); };
+                    printWindow.document.body.appendChild(printableImage);
+                    return;
+                }
+                const printWindow = window.open(viewerUrl, '_blank');
+                if (printWindow) printWindow.opener = null;
+                if (!printWindow) window.alert('Izinkan pop-up untuk mencetak dokumen PDF.');
+            }
+        });
+    });
+
+    modal.on('hidden.bs.modal', resetViewer);
+});
+</script>
+@endpush

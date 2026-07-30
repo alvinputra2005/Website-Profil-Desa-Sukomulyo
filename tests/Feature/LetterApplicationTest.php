@@ -4,10 +4,13 @@ namespace Tests\Feature;
 
 use App\Enums\LetterApplicationStatus;
 use App\Models\LetterApplication;
+use App\Models\LetterApplicationDocument;
 use App\Models\LetterService;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class LetterApplicationTest extends TestCase
@@ -90,6 +93,36 @@ class LetterApplicationTest extends TestCase
         $this->assertSame(LetterApplicationStatus::Submitted, $history->from_status);
         $this->assertSame(LetterApplicationStatus::UnderReview, $history->to_status);
         $this->assertNotNull(data_get($history->metadata_json, 'whatsapp_opened_at'));
+    }
+
+    public function test_data_admin_receives_inline_preview_url_for_document_viewer(): void
+    {
+        Storage::fake('local');
+        Storage::disk('local')->put('layanan-surat/test/ktp-pemohon.pdf', 'PDF preview content');
+        $application = LetterApplication::factory()->create();
+        $document = LetterApplicationDocument::create([
+            'public_id' => (string) Str::ulid(),
+            'letter_application_id' => $application->id,
+            'requirement_key' => 'ktp-pemohon',
+            'label' => 'Fotokopi KTP Pemohon',
+            'disk' => 'local',
+            'path' => 'layanan-surat/test/ktp-pemohon.pdf',
+            'original_name' => 'ktp-pemohon.pdf',
+            'mime_type' => 'application/pdf',
+            'file_size' => 19,
+            'size_bytes' => 19,
+            'upload_status' => 'uploaded',
+            'review_status' => 'pending_review',
+        ]);
+        $admin = $this->user('admin_data');
+
+        $this->actingAs($admin)
+            ->getJson(route('admin.letter-applications.document.preview-url', [$application, $document->id]))
+            ->assertOk()
+            ->assertJsonPath('name', 'ktp-pemohon.pdf')
+            ->assertJsonPath('mime_type', 'application/pdf')
+            ->assertJsonPath('is_image', false)
+            ->assertJsonPath('url', route('admin.letter-applications.document.preview-content', [$application, $document->id]));
     }
 
     private function user(string $roleCode): User

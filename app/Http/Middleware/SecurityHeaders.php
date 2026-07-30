@@ -48,6 +48,7 @@ final class SecurityHeaders
         $styleSources = ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'];
         $connectSources = ["'self'"];
         $imageSources = ["'self'", 'data:', 'https:'];
+        $frameSources = ["'self'", 'https://www.google.com'];
         $letterDocumentsOrigin = $this->letterDocumentsOrigin();
 
         if ($viteOrigin !== null) {
@@ -60,6 +61,7 @@ final class SecurityHeaders
 
         if ($letterDocumentsOrigin !== null) {
             $connectSources[] = $letterDocumentsOrigin;
+            $frameSources[] = $letterDocumentsOrigin;
         }
 
         return implode('; ', [
@@ -72,7 +74,7 @@ final class SecurityHeaders
             'style-src '.implode(' ', $styleSources),
             "font-src 'self' data: https://fonts.gstatic.com",
             'img-src '.implode(' ', $imageSources),
-            "frame-src 'self' https://www.google.com",
+            'frame-src '.implode(' ', $frameSources),
             'connect-src '.implode(' ', $connectSources),
             "media-src 'self'",
         ]);

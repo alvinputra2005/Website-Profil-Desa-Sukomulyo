@@ -10,6 +10,7 @@ use App\Models\LetterService;
 use App\Models\Resident;
 use App\Models\User;
 use App\Queries\Letters\AdminLetterApplicationIndexQuery;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -38,6 +39,44 @@ class LetterApplicationController extends Controller
         $file = $application->documents()->findOrFail($document);
         abort_unless(Storage::disk($file->disk)->exists($file->path), 404);
         return Storage::disk($file->disk)->download($file->path, $file->original_name);
+    }
+
+    public function previewUrl(LetterApplication $application, int $document): JsonResponse
+    {
+        $this->authorize('view', $application);
+        $file = $application->documents()->findOrFail($document);
+        $disk = Storage::disk($file->disk);
+
+        abort_unless($disk->exists($file->path), 404);
+
+        $url = $file->disk === 'r2_letters'
+            ? $disk->temporaryUrl($file->path, now()->addMinutes(5), [
+                'ResponseContentType' => $file->mime_type,
+                'ResponseContentDisposition' => 'inline; filename="'.$file->original_name.'"',
+            ])
+            : route('admin.letter-applications.document.preview-content', [$application, $file->id]);
+
+        return response()->json([
+            'url' => $url,
+            'name' => $file->original_name,
+            'mime_type' => $file->mime_type,
+            'is_image' => str_starts_with((string) $file->mime_type, 'image/'),
+            'expires_at' => now()->addMinutes(5)->toIso8601String(),
+        ])->header('Cache-Control', 'private, no-store');
+    }
+
+    public function previewContent(LetterApplication $application, int $document)
+    {
+        $this->authorize('view', $application);
+        $file = $application->documents()->findOrFail($document);
+        $disk = Storage::disk($file->disk);
+
+        abort_unless($disk->exists($file->path), 404);
+
+        return $disk->response($file->path, $file->original_name, [
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ], 'inline');
     }
 
     public function reviewDocument(ReviewLetterDocumentRequest $request, LetterApplication $application, int $document): RedirectResponse
