@@ -23,11 +23,11 @@ class StoreLetterApplicationRequest extends FormRequest
             'applicant_name' => ['required', 'string', 'min:3', 'max:150'],
             'applicant_nik' => ['required', 'digits:16'],
             'applicant_phone' => ['required', 'string', 'regex:/^(?:\+?62|0)[0-9]{8,13}$/'],
-            'birth_place' => ['nullable', 'string', 'max:100'],
-            'birth_date' => ['nullable', 'date', 'before_or_equal:today'],
-            'sex' => ['nullable', 'in:L,P'],
+            'birth_place' => ['required', 'string', 'max:100'],
+            'birth_date' => ['required', 'date', 'before_or_equal:today'],
+            'sex' => ['required', 'in:L,P'],
             'address' => ['required', 'string', 'min:10', 'max:2000'],
-            'hamlet' => ['nullable', 'string', Rule::in(
+            'hamlet' => ['required', 'string', Rule::in(
                 collect(['Gumul', 'Talasan', 'Bakir', 'Kedungrejo', 'Biyan'])
                     ->concat(PopulationArea::query()->whereNotNull('hamlet')->distinct()->pluck('hamlet'))
                     ->filter()
@@ -35,8 +35,8 @@ class StoreLetterApplicationRequest extends FormRequest
                     ->values()
                     ->all()
             )],
-            'rt' => ['nullable', 'digits_between:1,3'],
-            'rw' => ['nullable', 'digits_between:1,3'],
+            'rt' => ['required', 'digits_between:1,3'],
+            'rw' => ['required', 'digits_between:1,3'],
             'purpose' => ['required', 'string', 'min:5', 'max:2000'],
             'declaration' => ['accepted'],
             'website' => ['nullable', 'max:0'],

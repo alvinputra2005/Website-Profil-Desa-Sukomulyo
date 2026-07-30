@@ -20,7 +20,9 @@ class LetterFormSchemaService
     {
         $rules = [];
         foreach ($this->fields($service) as $field) {
-            $fieldRules = [($field['required'] ?? false) ? 'required' : 'nullable'];
+            // Semua field pada formulir publik wajib diisi agar data permohonan
+            // lengkap sebelum masuk ke tahap berikutnya.
+            $fieldRules = ['required'];
             $fieldRules[] = match ($field['type']) {
                 'date' => 'date',
                 'number' => 'numeric',
