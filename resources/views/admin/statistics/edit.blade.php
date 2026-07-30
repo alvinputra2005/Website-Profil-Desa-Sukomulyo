@@ -1,14 +1,16 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Data Statistik')
+@php($isCreate = $isCreate ?? false)
+@section('title', $isCreate ? 'Tambah Data Statistik' : 'Edit Data Statistik')
 @section('page-description', $category->name.' · '.($dataset->short_title ?: $dataset->title))
 
 @section('content')
-<form method="post" action="{{ route('admin.statistics.categories.update', ['category' => $category->slug, 'dataset' => $dataset->slug]) }}" class="statistics-edit-form">
-    @csrf @method('put')
+<form method="post" action="{{ $isCreate ? route('admin.statistics.categories.store', $category->slug) : route('admin.statistics.categories.update', ['category' => $category->slug, 'dataset' => $dataset->slug]) }}" class="statistics-edit-form">
+    @csrf @unless($isCreate) @method('put') @endunless
+    @if($isCreate && $templateId)<input type="hidden" name="template_id" value="{{ $templateId }}">@endif
     <div class="box box-success">
         <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-info-circle"></i> Informasi Dataset</h3><div class="box-tools">
-            <a href="{{ route('admin.statistics.categories.show', ['category' => $category->slug, 'data' => ($dataset->family && $dataset->table_number ? $dataset->family.':'.$dataset->table_number : 'dataset:'.$dataset->id), 'period' => $dataset->period]) }}" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Kembali</a>
+            <a href="{{ $isCreate ? route('admin.statistics.categories.show', $category->slug) : route('admin.statistics.categories.show', ['category' => $category->slug, 'data' => ($dataset->family && $dataset->table_number ? $dataset->family.':'.$dataset->table_number : 'dataset:'.$dataset->id), 'period' => $dataset->period]) }}" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Kembali</a>
             <button type="submit" class="btn btn-success btn-sm"><i class="fa fa-save"></i> Simpan Perubahan</button>
         </div></div>
         <div class="box-body">
@@ -39,7 +41,7 @@
                     />
                     <tbody>
                         @forelse ($dataset->rows as $rowIndex => $row)
-                            <tr id="row-{{ $row->id }}"><td class="text-center">{{ $rowIndex + 1 }}<input type="hidden" name="rows[{{ $rowIndex }}][id]" value="{{ $row->id }}"></td>
+                            <tr @if(!$isCreate) id="row-{{ $row->id }}" @endif><td class="text-center">{{ $rowIndex + 1 }}@unless($isCreate)<input type="hidden" name="rows[{{ $rowIndex }}][id]" value="{{ $row->id }}">@endunless</td>
                                 @foreach ($dataset->columns_json ?? [] as $column)
                                     @php($key = $column['key']) @php($type = $column['type'] ?? 'string')
                                     @php($currentValue = match ($key) { 'area_code' => $row->area_code, 'area_name' => $row->area_name, default => data_get($row->values_json, $key) })

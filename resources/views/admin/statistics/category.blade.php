@@ -50,7 +50,7 @@
                 </select>
             </div>
             <div class="statistics-category-filter-action">
-                <a href="{{ route('admin.statistics.import.create') }}" class="btn btn-success"><i class="fa fa-plus"></i> Import Data</a>
+                <a href="{{ route('admin.statistics.categories.create', ['category' => $category->slug, 'template' => $dataset?->id]) }}" class="btn btn-success"><i class="fa fa-plus"></i> Tambah Data</a>
             </div>
         </form>
     </div>

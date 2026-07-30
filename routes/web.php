@@ -108,6 +108,8 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
     Route::middleware('can:manage-data')->prefix('statistics')->name('statistics.categories.')->group(function () {
         Route::get('/', [StatisticDatasetController::class, 'index'])->name('index');
         Route::get('/{category:slug}', [StatisticDatasetController::class, 'show'])->name('show');
+        Route::get('/{category:slug}/create', [StatisticDatasetController::class, 'create'])->name('create');
+        Route::post('/{category:slug}', [StatisticDatasetController::class, 'store'])->name('store');
         Route::get('/{category:slug}/{dataset:slug}/edit', [StatisticDatasetController::class, 'edit'])->name('edit');
         Route::put('/{category:slug}/{dataset:slug}', [StatisticDatasetController::class, 'update'])->name('update');
     });

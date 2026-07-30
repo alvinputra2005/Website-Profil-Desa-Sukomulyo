@@ -100,6 +100,40 @@ class AdminStatisticDatasetManagementTest extends TestCase
         ]);
         $this->assertSame(['under_15' => 3, 'age_15_19' => 5], $row->fresh()->values_json);
         $this->assertSame(['under_15' => 7, 'age_15_19' => 11], $dataset->fresh()->totals_json);
+
+        $this->actingAs($admin)
+            ->get(route('admin.statistics.categories.create', [
+                'category' => $category->slug,
+                'template' => $dataset->id,
+            ]))
+            ->assertOk()
+            ->assertSee('Tambah Data Statistik')
+            ->assertSee('BAKIR RW 01');
+
+        $this->actingAs($admin)
+            ->post(route('admin.statistics.categories.store', $category->slug), [
+                'template_id' => $dataset->id,
+                'title' => 'Dataset Baru',
+                'short_title' => 'Dataset Baru',
+                'period' => '2023',
+                'unit' => 'keluarga',
+                'status' => 'draft',
+                'rows' => [[
+                    'area_code' => '0101',
+                    'area_name' => 'BAKIR RW 01',
+                    'under_15' => '4',
+                    'age_15_19' => '6',
+                ]],
+                'totals' => ['under_15' => '4', 'age_15_19' => '6'],
+            ])
+            ->assertRedirect(route('admin.statistics.categories.edit', [
+                'category' => $category->slug,
+                'dataset' => 'dataset-baru-2023',
+            ]));
+
+        $created = StatisticDataset::query()->where('slug', 'dataset-baru-2023')->sole();
+        $this->assertSame($category->id, $created->statistic_category_id);
+        $this->assertSame(['under_15' => 4, 'age_15_19' => 6], $created->rows()->sole()->values_json);
     }
 
     private function adminDataUser(): User

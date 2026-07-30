@@ -4,13 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateStatisticDatasetRequest;
+use App\Http\Requests\Admin\StoreStatisticDatasetRequest;
 use App\Models\StatisticCategory;
 use App\Models\StatisticDataset;
+use App\Models\StatisticRow;
 use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class StatisticDatasetController extends Controller
@@ -119,6 +122,95 @@ class StatisticDatasetController extends Controller
         $dataset->load('rows');
 
         return view('admin.statistics.edit', compact('category', 'dataset'));
+    }
+
+    public function create(Request $request, StatisticCategory $category): View
+    {
+        $this->authorize('create', StatisticDataset::class);
+        $template = $category->datasets()
+            ->with('rows')
+            ->find($request->integer('template'));
+
+        $dataset = new StatisticDataset([
+            'title' => $template ? 'Salinan '.$template->title : '',
+            'short_title' => $template?->short_title,
+            'description' => $template?->description,
+            'period' => $template?->period ?? now()->year,
+            'year' => $template?->year ?? now()->year,
+            'unit' => $template?->unit ?? 'data',
+            'source' => $template?->source,
+            'status' => 'draft',
+            'visualization_type' => $template?->visualization_type ?? 'table',
+            'columns_json' => $template?->columns_json ?? [],
+            'totals_json' => $template?->totals_json ?? [],
+        ]);
+        $dataset->setRelation('rows', $template
+            ? $template->rows->map(fn (StatisticRow $row): StatisticRow => new StatisticRow([
+                'area_code' => $row->area_code,
+                'area_name' => $row->area_name,
+                'values_json' => $row->values_json,
+            ]))
+            : collect());
+
+        return view('admin.statistics.edit', [
+            'category' => $category,
+            'dataset' => $dataset,
+            'isCreate' => true,
+            'templateId' => $template?->id,
+        ]);
+    }
+
+    public function store(StoreStatisticDatasetRequest $request, StatisticCategory $category): RedirectResponse
+    {
+        $template = $request->template();
+        abort_if($template && $template->statistic_category_id !== $category->id, 404);
+        $validated = $request->validated();
+        $columns = collect($template?->columns_json ?? [])->keyBy('key');
+
+        $dataset = DB::transaction(function () use ($validated, $category, $template, $columns): StatisticDataset {
+            $period = trim((string) $validated['period']);
+            $dataset = StatisticDataset::query()->create([
+                'statistic_category_id' => $category->id,
+                'category' => $category->slug,
+                'family' => $template?->family,
+                'table_number' => $template?->table_number,
+                'period' => $period,
+                'title' => trim((string) $validated['title']),
+                'short_title' => filled($validated['short_title'] ?? null) ? trim((string) $validated['short_title']) : trim((string) $validated['title']),
+                'slug' => $this->uniqueSlug((string) $validated['title'], $period),
+                'description' => $validated['description'] ?? null,
+                'year' => preg_match('/^\d{4}$/', $period) ? (int) $period : now()->year,
+                'unit' => trim((string) $validated['unit']),
+                'visualization_type' => $template?->visualization_type ?? 'table',
+                'source' => $validated['source'] ?? null,
+                'status' => $validated['status'],
+                'display_order' => ((int) $category->datasets()->max('display_order')) + 1,
+                'created_by' => auth()->id(),
+                'columns_json' => $template?->columns_json ?? [],
+                'totals_json' => $this->normalizedValues($validated['totals'] ?? [], $columns, true),
+                'source_metadata_json' => $template?->source_metadata_json,
+                'visualization_config_json' => $template?->visualization_config_json ?? ['type' => 'table'],
+                'requires_manual_review' => $validated['status'] === 'needs_review',
+            ]);
+
+            foreach ($validated['rows'] ?? [] as $order => $rowData) {
+                $values = $this->normalizedValues($rowData, $columns);
+                $dataset->rows()->create([
+                    'area_code' => $this->nullableString($rowData['area_code'] ?? null),
+                    'area_name' => $this->nullableString($rowData['area_name'] ?? null),
+                    'values_json' => collect($values)->except(['area_code', 'area_name'])->all(),
+                    'display_order' => $order + 1,
+                ]);
+            }
+
+            return $dataset;
+        });
+
+        $this->logger->log('created', 'statistics', $dataset, null, $dataset->fresh()->toArray());
+
+        return redirect()
+            ->route('admin.statistics.categories.edit', ['category' => $category->slug, 'dataset' => $dataset->slug])
+            ->with('success', 'Data statistik baru berhasil ditambahkan.');
     }
 
     public function update(
@@ -234,5 +326,17 @@ class StatisticDatasetController extends Controller
         $value = trim((string) $value);
 
         return $value === '' ? null : $value;
+    }
+
+    private function uniqueSlug(string $title, string $period): string
+    {
+        $base = Str::slug($title.'-'.$period) ?: 'dataset-statistik';
+        $slug = $base;
+        $suffix = 2;
+        while (StatisticDataset::withTrashed()->where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$suffix++;
+        }
+
+        return $slug;
     }
 }
