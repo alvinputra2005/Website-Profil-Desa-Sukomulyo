@@ -63,6 +63,8 @@ class LetterApplication extends Model
         return $this->hasMany(LetterApplicationStatusHistory::class)->orderBy('created_at');
     }
 
+    public function documents() { return $this->hasMany(LetterApplicationDocument::class); }
+
     public function lastWhatsAppOpener()
     {
         return $this->belongsTo(User::class, 'last_whatsapp_opened_by');

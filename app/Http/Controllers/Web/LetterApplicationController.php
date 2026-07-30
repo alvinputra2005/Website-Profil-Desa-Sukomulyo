@@ -9,14 +9,18 @@ use App\Enums\LetterApplicationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\StoreLetterApplicationRequest;
 use App\Http\Requests\Web\UpdateLetterApplicationRequest;
+use App\Http\Requests\Web\UploadLetterDocumentsRequest;
 use App\Models\LetterApplication;
+use App\Models\LetterApplicationDocument;
 use App\Models\LetterService;
 use App\Models\PopulationArea;
 use App\Services\Letters\LetterFormSchemaService;
 use App\Services\Web\PublicSiteService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class LetterApplicationController extends Controller
 {
@@ -62,9 +66,39 @@ class LetterApplicationController extends Controller
             session(["letter_submission.{$submissionKey}" => ['service_id' => $letterService->id, 'token' => $created->trackingToken]]);
         }
 
-        return redirect()->route('letter-services.track.token', $created->trackingToken)
+        return redirect()->route('letter-services.application.documents', $created->trackingToken)
             ->with('tracking_pin', $created->trackingPin)
             ->with('new_application', true);
+    }
+
+    public function documents(string $token, PublicSiteService $site): View
+    {
+        $application = $this->fromToken($token);
+        $site->shareLayout();
+        return view('pages.letters.documents', compact('application', 'token'));
+    }
+
+    public function uploadDocuments(UploadLetterDocumentsRequest $request, string $token): RedirectResponse
+    {
+        $application = $this->fromToken($token);
+        $requirements = collect($application->service->requirements_json ?? []);
+        foreach ($requirements as $index => $requirement) {
+            if (!$request->hasFile("documents.{$index}")) {
+                throw ValidationException::withMessages(["documents.{$index}" => 'Dokumen '.($requirement['label'] ?? 'persyaratan').' wajib diunggah.']);
+            }
+        }
+        $disk = config('filesystems.media_disk', 'public');
+        foreach ($requirements as $index => $requirement) {
+            $file = $request->file("documents.{$index}");
+            if (!$file) continue;
+            $key = $requirement['key'] ?? 'requirement_'.($index + 1);
+            $path = $file->store('layanan-surat/'.Str::slug($application->service->name).'/'.$application->application_number, $disk);
+            LetterApplicationDocument::updateOrCreate(
+                ['letter_application_id' => $application->id, 'requirement_key' => $key],
+                ['label' => $requirement['label'] ?? 'Dokumen persyaratan', 'disk' => $disk, 'path' => $path, 'original_name' => $file->getClientOriginalName(), 'mime_type' => $file->getMimeType(), 'file_size' => $file->getSize(), 'review_status' => 'pending', 'review_note' => null, 'reviewed_by' => null, 'reviewed_at' => null]
+            );
+        }
+        return redirect()->route('letter-services.track.token', $token)->with('success', 'Dokumen berhasil diunggah dan menunggu verifikasi petugas.');
     }
 
     public function edit(string $token, PublicSiteService $site, LetterFormSchemaService $schemas): View

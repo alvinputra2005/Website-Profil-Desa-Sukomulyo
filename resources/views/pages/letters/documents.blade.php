@@ -1,0 +1,16 @@
+<x-layouts.app title="Unggah Dokumen Persyaratan" robots="noindex, nofollow">
+<div class="letter-service-page letter-documents-page"><div class="container">
+<ol class="letter-steps" aria-label="Tahapan pengajuan surat">
+@foreach(['Data Diri','Data Keperluan','Unggah Dokumen','Konfirmasi'] as $step)<li @class(['is-active'=>$loop->iteration<=3]) @if($loop->iteration===3) aria-current="step" @endif><span>{{ $loop->iteration <= 2 ? '✓' : $loop->iteration }}</span><strong>{{ $step }}</strong></li>@endforeach
+</ol>
+<div class="letter-form-heading"><span class="section-kicker">Tahap 3 dari 4</span><h2>Unggah Dokumen Persyaratan</h2><p>Unggah dokumen sesuai persyaratan yang dibutuhkan.</p></div>
+<form class="letter-documents-form" method="post" action="{{ route('letter-services.application.documents.upload',$token) }}" enctype="multipart/form-data">@csrf
+<div class="letter-documents-info"><i class="fas fa-info-circle" aria-hidden="true"></i><div><strong>Informasi</strong><p>Pastikan dokumen yang diunggah jelas dan terbaca dengan baik. Format yang diperbolehkan: JPG, PNG, PDF. Maksimal ukuran 5MB per file.</p></div></div>
+<div class="letter-upload-list">@foreach(($application->service->requirements_json ?? []) as $index=>$requirement)
+<label class="letter-upload-row"><span class="letter-upload-icon"><i class="fas fa-file-image" aria-hidden="true"></i></span><span class="letter-upload-copy"><strong>{{ $requirement['label'] ?? 'Dokumen persyaratan' }} <em>*</em></strong><small>{{ $requirement['description'] ?? 'Unggah dokumen pendukung yang sesuai.' }}</small></span><span class="letter-file-picker"><i class="fas fa-upload" aria-hidden="true"></i><span>Pilih File</span><small>atau seret file ke sini</small><input type="file" name="documents[{{ $index }}]" accept=".jpg,.jpeg,.png,.pdf" required></span></label>
+@endforeach
+<label class="letter-upload-row letter-upload-row--optional"><span class="letter-upload-icon"><i class="fas fa-file-medical" aria-hidden="true"></i></span><span class="letter-upload-copy"><strong>Dokumen Pendukung Lainnya <small>(Opsional)</small></strong><small>Dokumen lain yang mendukung permohonan</small></span><span class="letter-file-picker"><i class="fas fa-upload" aria-hidden="true"></i><span>Pilih File</span><small>atau seret file ke sini</small><input type="file" name="documents[optional]" accept=".jpg,.jpeg,.png,.pdf"></span></label></div>
+<div class="letter-documents-note"><i class="fas fa-exclamation-circle" aria-hidden="true"></i><div><strong>Catatan</strong><p>Dokumen asli tetap harus dibawa saat pengambilan surat di Kantor Desa.</p></div></div>
+<div class="letter-form-actions"><a class="letter-form-back" href="{{ route('letter-services.track.token',$token) }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Kembali</a><button class="letter-button" type="submit">Unggah &amp; Lanjutkan <i class="fas fa-arrow-right" aria-hidden="true"></i></button></div>
+</form></div></div>
+</x-layouts.app>

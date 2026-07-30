@@ -110,8 +110,10 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
     });
     Route::middleware('can:manage-letter-applications')->prefix('permohonan-surat')->name('letter-applications.')->group(function () {
-        Route::get('/', [AdminLetterApplicationController::class, 'index'])->name('index');
-        Route::get('/{application:public_id}', [AdminLetterApplicationController::class, 'show'])->name('show');
+    Route::get('/', [AdminLetterApplicationController::class, 'index'])->name('index');
+    Route::get('/{application:public_id}', [AdminLetterApplicationController::class, 'show'])->name('show');
+    Route::get('/{application:public_id}/dokumen/{document}', [AdminLetterApplicationController::class, 'document'])->name('document');
+    Route::patch('/{application:public_id}/dokumen/{document}', [AdminLetterApplicationController::class, 'reviewDocument'])->name('document.review');
         Route::patch('/{application:public_id}/status', [LetterApplicationStatusController::class, 'update'])->name('status.update');
         Route::patch('/{application:public_id}/hubungkan-penduduk', [AdminLetterApplicationController::class, 'linkResident'])->name('resident.link');
         Route::post('/{application:public_id}/whatsapp', LetterApplicationWhatsAppController::class)->name('whatsapp.open');
@@ -153,6 +155,8 @@ Route::prefix('layanan-surat')->name('letter-services.')->group(function () {
     Route::get('/t/{token}', [LetterTrackingController::class, 'showToken'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:60,1')->name('track.token');
     Route::post('/t/{token}/konfirmasi-whatsapp', LetterWhatsAppConfirmationController::class)->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:10,1')->name('whatsapp.confirm');
     Route::get('/t/{token}/perbaiki', [LetterApplicationController::class, 'edit'])->where('token', '[A-Za-z0-9]{64}')->name('application.edit');
+    Route::get('/t/{token}/dokumen', [LetterApplicationController::class, 'documents'])->where('token', '[A-Za-z0-9]{64}')->name('application.documents');
+    Route::post('/t/{token}/dokumen', [LetterApplicationController::class, 'uploadDocuments'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:letter-application-update')->name('application.documents.upload');
     Route::put('/t/{token}/perbaiki', [LetterApplicationController::class, 'update'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:letter-application-update')->name('application.update');
     Route::patch('/t/{token}/batalkan', [LetterApplicationController::class, 'cancel'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:5,1')->name('application.cancel');
     Route::get('/{letterService:slug}/ajukan', [LetterApplicationController::class, 'create'])->name('application.create');
