@@ -62,6 +62,7 @@ export const initGenericStatistics = () => {
     const controller = new AbortController();
     const { signal } = controller;
     const { page, latest } = payload;
+    const currentTitle = page.current_title || page.title;
     const decimals = Number(page.decimals) || 0;
     const numberFormatter = new Intl.NumberFormat('id-ID', {
         minimumFractionDigits: decimals,
@@ -97,6 +98,9 @@ export const initGenericStatistics = () => {
     };
 
     if (currentContainer && latest.items.length) {
+        if (page.chart !== 'pie') {
+            currentContainer.style.minHeight = `${Math.max(360, latest.items.length * 38)}px`;
+        }
         currentChart = echarts.init(currentContainer, null, { renderer: 'canvas' });
         const isPie = page.chart === 'pie';
         currentChart.setOption({
@@ -370,8 +374,8 @@ export const initGenericStatistics = () => {
             : `${fromSelect?.value || ''}-${toSelect?.value || ''}`;
         const filename = `${payload.context}-${actual ? 'aktual' : 'tahunan'}-${range}`;
         const title = actual
-            ? `${page.title} Tahun ${latest.year}`
-            : `${page.title} Tahun ${fromSelect?.value}–${toSelect?.value}`;
+            ? `${currentTitle} Tahun ${latest.year}`
+            : `${currentTitle} Tahun ${fromSelect?.value}–${toSelect?.value}`;
         const date = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(new Date());
         const asset = combineChartAndTable(
             chart,

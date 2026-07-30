@@ -5,6 +5,7 @@
     $labels = collect($history)->flatMap(fn (array $row) => collect($row['items'])->pluck('label'))->unique()->values();
     $showPercentage = $page['show_total'] && $latest['total'] > 0 && $page['unit'] !== 'data';
     $menu = (string) request('menu', '');
+    $currentTitle = $page['current_title'] ?? $page['title'];
 @endphp
 
 <x-layouts.app :title="$page['title']" :description="$page['description']">
@@ -21,10 +22,37 @@
     <div class="container">
         <div id="sc_innerpage_wrap" class="population-statistics-wrap statistics-page-layout">
             <section class="sc_innerpage_contentbx population-statistics generic-statistics" data-generic-statistics>
+                @if(!empty($datasetOptions))
+                    <section class="statistics-dataset-picker" aria-labelledby="statistics-dataset-picker-title">
+                        <div>
+                            <span class="section-kicker">Indikator Statistik</span>
+                            <h2 id="statistics-dataset-picker-title">Pilih data yang ingin divisualisasikan</h2>
+                            <p>Grafik komposisi memakai data terbaru, sedangkan grafik garis membandingkan indikator yang sama antar tahun.</p>
+                        </div>
+                        <form method="get" action="{{ url()->current() }}" data-imported-dataset-selector>
+                            <label for="statistics-dataset">Dataset</label>
+                            <div class="statistics-dataset-picker__controls">
+                                <select id="statistics-dataset" name="dataset">
+                                    @foreach($datasetOptions as $option)
+                                        <option value="{{ $option['value'] }}" @selected($option['value'] === $selectedDataset)>
+                                            {{ $option['label'] }} ({{ implode(', ', $option['years']) }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="submit">Tampilkan Grafik</button>
+                                <a href="{{ $datasetDetailUrl }}">
+                                    <i class="fas fa-table" aria-hidden="true"></i>
+                                    Lihat Tabel Lengkap
+                                </a>
+                            </div>
+                        </form>
+                    </section>
+                @endif
+
                 <section class="population-chart-card" aria-labelledby="generic-current-title">
                     <header class="population-chart-card__heading population-statistics-heading">
                         <div class="population-statistics-heading__content">
-                            <h1 id="generic-current-title" class="entry-title">{{ $page['title'] }} Tahun {{ $latest['year'] }}</h1>
+                            <h1 id="generic-current-title" class="entry-title">{{ $currentTitle }} Tahun {{ $latest['year'] }}</h1>
                             <div class="postmeta" aria-label="Informasi data statistik">
                                 <span class="post-date"><i class="far fa-calendar-alt" aria-hidden="true"></i>Diperbarui {{ $updatedLabel }}</span>
                                 <span class="post-author"><i class="far fa-user" aria-hidden="true"></i>Pemerintah Desa Sukomulyo</span>
@@ -70,7 +98,7 @@
                                 data-generic-current-chart
                                 role="img"
                                 tabindex="0"
-                                aria-label="Grafik {{ $page['title'] }} tahun {{ $latest['year'] }}"
+                                aria-label="Grafik {{ $currentTitle }} tahun {{ $latest['year'] }}"
                             ></div>
                             <p class="population-empty-state" data-generic-current-empty @if(count($latest['items'])) hidden @endif>
                                 Data {{ strtolower($page['title']) }} belum tersedia.
@@ -80,7 +108,7 @@
 
                     <div class="population-table-scroll population-summary-table-wrap">
                         <table class="population-summary-table" data-generic-current-table>
-                            <caption class="screen-reader-text">{{ $page['title'] }} tahun {{ $latest['year'] }}</caption>
+                            <caption class="screen-reader-text">{{ $currentTitle }} tahun {{ $latest['year'] }}</caption>
                             <thead>
                                 <tr>
                                     <th scope="col">Kategori</th>
@@ -144,6 +172,7 @@
 
                     <form method="get" action="{{ url()->current() }}" class="population-range-filter population-range-filter--with-category" data-generic-year-filter>
                         @if($menu !== '')<input type="hidden" name="menu" value="{{ $menu }}">@endif
+                        @if(!empty($selectedDataset))<input type="hidden" name="dataset" value="{{ $selectedDataset }}">@endif
                         <div>
                             <label for="generic-series">Kategori Grafik</label>
                             <select id="generic-series" data-generic-series>
@@ -185,7 +214,7 @@
                             data-generic-trend-chart
                             role="img"
                             tabindex="0"
-                            aria-label="Grafik perkembangan {{ $page['title'] }} tahunan"
+                            aria-label="Grafik perkembangan {{ $currentTitle }} tahunan"
                         ></div>
                         <p class="population-empty-state" data-generic-trend-empty @if(count($history)) hidden @endif>
                             Data tahunan belum tersedia.
@@ -194,7 +223,7 @@
 
                     <div class="population-table-scroll population-history-table-wrap" tabindex="0" aria-label="Tabel riwayat dapat digulir secara horizontal">
                         <table class="population-history-table" data-generic-history-table>
-                            <caption class="screen-reader-text">Riwayat {{ $page['title'] }} berdasarkan tahun</caption>
+                            <caption class="screen-reader-text">Riwayat {{ $currentTitle }} berdasarkan tahun</caption>
                             <thead>
                                 <tr>
                                     <th scope="col">Tahun</th>

@@ -29,7 +29,11 @@ class ImportedStatisticsPublicPagesTest extends TestCase
         $this->get(route('data-statistik.detail', ['section' => $category->slug]))
             ->assertOk()
             ->assertSee('Dataset Penduduk Menurut RW')
-            ->assertSee('1 baris data')
+            ->assertSee('data-generic-statistics', false)
+            ->assertSee('data-imported-dataset-selector', false)
+            ->assertSee('data-generic-current-chart', false)
+            ->assertSee('data-generic-trend-chart', false)
+            ->assertSee('Lihat Tabel Lengkap')
             ->assertSee('Navigasi data statistik')
             ->assertSee(route('data-statistik.imported.show', [
                 'category' => $category->slug,

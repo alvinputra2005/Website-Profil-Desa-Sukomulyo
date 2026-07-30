@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\PopulationTrendRequest;
+use App\Services\ImportedStatisticPageData;
 use App\Services\PopulationStatistics;
 use App\Services\StatisticPageData;
 use App\Services\Web\PublicSiteService;
@@ -22,6 +23,7 @@ class VillageStatisticController extends Controller
         PublicSiteService $site,
         PopulationStatistics $statistics,
         StatisticPageData $statisticPages,
+        ImportedStatisticPageData $importedStatisticPages,
         string $section,
     ): View {
         if ($section === 'penduduk') {
@@ -29,7 +31,10 @@ class VillageStatisticController extends Controller
         }
 
         if ($category = $site->findPublishedStatisticCategory($section)) {
-            return $site->importedStatisticCategory($category);
+            return $site->genericStatistic($importedStatisticPages->build(
+                $category,
+                $request->only(['dataset', 'from_year', 'to_year', 'sort']),
+            ));
         }
 
         $context = $statisticPages->sectionContext($section, $request->query('menu'));
