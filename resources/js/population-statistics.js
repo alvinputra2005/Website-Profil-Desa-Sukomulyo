@@ -136,7 +136,7 @@ const svgText = (value, x, centerY, width, options = {}) => {
         + '</text>';
 };
 
-const tableToSvg = (table, title, subtitle) => {
+const tableToSvg = (table) => {
     const headers = [...table.querySelectorAll('thead th')].map(cleanCellText);
     const rows = [...table.querySelectorAll('tbody tr')].map((row) => (
         [...row.querySelectorAll('th, td')].map(cleanCellText)
@@ -151,29 +151,26 @@ const tableToSvg = (table, title, subtitle) => {
         return Math.min(isLastColumn ? 360 : 230, Math.max(125, (longest * 8) + 34));
     });
     const width = columnWidths.reduce((sum, columnWidth) => sum + columnWidth, 0);
-    const titleHeight = 92;
     const headerHeight = 62;
     const rowHeight = 62;
-    const height = titleHeight + headerHeight + (Math.max(rows.length, 1) * rowHeight) + 24;
+    const height = headerHeight + (Math.max(rows.length, 1) * rowHeight) + 24;
     let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`;
     svg += `<rect width="${width}" height="${height}" fill="#ffffff"/>`;
-    svg += `<text x="18" y="32" fill="${COLORS.text}" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(title)}</text>`;
-    svg += `<text x="18" y="59" fill="${COLORS.muted}" font-family="Arial, sans-serif" font-size="13">${escapeXml(subtitle)}</text>`;
 
     let x = 0;
     headers.forEach((header, index) => {
         const columnWidth = columnWidths[index];
-        svg += `<rect x="${x}" y="${titleHeight}" width="${columnWidth}" height="${headerHeight}" fill="${COLORS.total}"/>`;
-        svg += svgText(header, x, titleHeight + (headerHeight / 2), columnWidth, { color: '#ffffff', weight: 700, fontSize: 13 });
+        svg += `<rect x="${x}" y="0" width="${columnWidth}" height="${headerHeight}" fill="${COLORS.total}"/>`;
+        svg += svgText(header, x, headerHeight / 2, columnWidth, { color: '#ffffff', weight: 700, fontSize: 13 });
         x += columnWidth;
     });
 
     if (rows.length === 0) {
-        svg += svgText('Belum ada data yang tersedia.', 0, titleHeight + headerHeight + (rowHeight / 2), width);
+        svg += svgText('Belum ada data yang tersedia.', 0, headerHeight + (rowHeight / 2), width);
     }
 
     rows.forEach((row, rowIndex) => {
-        const y = titleHeight + headerHeight + (rowIndex * rowHeight);
+        const y = headerHeight + (rowIndex * rowHeight);
         svg += `<rect x="0" y="${y}" width="${width}" height="${rowHeight}" fill="${rowIndex % 2 === 0 ? '#ffffff' : '#f4f7f2'}"/>`;
         x = 0;
         row.forEach((value, index) => {
@@ -267,10 +264,12 @@ const svgDataUrlToText = (dataUrl) => {
 
 const svgBody = (svg) => svg.slice(svg.indexOf('>') + 1, svg.lastIndexOf('</svg>'));
 
-const chartToSvgAsset = (chart, container) => {
+const chartToSvgAsset = (chart, container, preferredWidth = null) => {
     const option = chart.getOption();
     const hasPieSeries = option.series?.some((series) => series.type === 'pie');
-    const width = Math.max(hasPieSeries ? 900 : 720, Math.round(container.clientWidth || 0));
+    const width = preferredWidth === null
+        ? Math.max(hasPieSeries ? 900 : 720, Math.round(container.clientWidth || 0))
+        : Math.max(720, Math.round(preferredWidth));
     const height = Math.max(hasPieSeries ? 500 : 380, Math.round(container.clientHeight || 0));
     const exportOption = {
         ...option,
@@ -333,21 +332,26 @@ const chartToSvgAsset = (chart, container) => {
 };
 
 export const combineChartAndTable = (chart, container, table, title, subtitle) => {
-    const chartAsset = chartToSvgAsset(chart, container);
-    const tableAsset = tableToSvg(table, title, subtitle);
+    const tableAsset = tableToSvg(table);
+    const chartAsset = chartToSvgAsset(chart, container, tableAsset.width);
     const gap = 24;
     const horizontalPadding = 56;
     const verticalPadding = 28;
+    const headingHeight = 76;
     const contentWidth = Math.max(chartAsset.width, tableAsset.width);
     const width = contentWidth + (horizontalPadding * 2);
-    const height = verticalPadding + chartAsset.height + gap + tableAsset.height + verticalPadding;
+    const height = verticalPadding + headingHeight + chartAsset.height + gap + tableAsset.height + verticalPadding;
     const chartX = horizontalPadding + ((contentWidth - chartAsset.width) / 2);
     const tableX = horizontalPadding + ((contentWidth - tableAsset.width) / 2);
-    const tableY = verticalPadding + chartAsset.height + gap;
+    const chartY = verticalPadding + headingHeight;
+    const tableY = chartY + chartAsset.height + gap;
+    const headingX = tableX + 18;
     const svg = [
         `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
         `<rect width="${width}" height="${height}" fill="#ffffff"/>`,
-        `<svg x="${chartX}" y="${verticalPadding}" width="${chartAsset.width}" height="${chartAsset.height}" viewBox="0 0 ${chartAsset.width} ${chartAsset.height}">`,
+        `<text x="${headingX}" y="${verticalPadding + 30}" fill="${COLORS.text}" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(title)}</text>`,
+        `<text x="${headingX}" y="${verticalPadding + 57}" fill="${COLORS.muted}" font-family="Arial, sans-serif" font-size="13">${escapeXml(subtitle)}</text>`,
+        `<svg x="${chartX}" y="${chartY}" width="${chartAsset.width}" height="${chartAsset.height}" viewBox="0 0 ${chartAsset.width} ${chartAsset.height}">`,
         svgBody(chartAsset.svg),
         '</svg>',
         `<svg x="${tableX}" y="${tableY}" width="${tableAsset.width}" height="${tableAsset.height}" viewBox="0 0 ${tableAsset.width} ${tableAsset.height}">`,

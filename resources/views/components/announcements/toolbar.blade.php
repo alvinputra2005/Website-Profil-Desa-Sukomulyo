@@ -25,7 +25,6 @@
     </div>
 
     <div class="announcement-sort">
-        <label for="announcement-sort">Urutkan</label>
         <select id="announcement-sort" name="sort" onchange="this.form.submit()">
             <option value="latest" @selected($filters['sort'] === 'latest')>Terbaru</option>
             <option value="oldest" @selected($filters['sort'] === 'oldest')>Terlama</option>

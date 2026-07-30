@@ -15,7 +15,6 @@
         @if ($announcement->excerpt)
             <p class="announcement-excerpt">{{ $announcement->excerpt }}</p>
         @endif
-        <x-announcements.metadata :announcement="$announcement" />
     </div>
 
     <div class="announcement-actions">

@@ -24,7 +24,6 @@
             <header class="announcement-detail-header">
                 <span class="announcement-category">Pengumuman Desa</span>
                 <h1>{{ $announcement->title }}</h1>
-                <x-announcements.metadata :announcement="$announcement" />
             </header>
 
             <div class="announcement-detail-grid">

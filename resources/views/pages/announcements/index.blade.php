@@ -21,10 +21,18 @@
                     dari {{ $announcements->total() }} pengumuman
                 </p>
 
-                <div class="announcement-list">
-                    @foreach ($announcements as $announcement)
-                        <x-announcements.card :announcement="$announcement" />
-                    @endforeach
+                <div class="announcement-table">
+                    <div class="announcement-table-head" aria-hidden="true">
+                        <span>Tanggal</span>
+                        <span>Pengumuman</span>
+                        <span>Aksi</span>
+                    </div>
+
+                    <div class="announcement-list">
+                        @foreach ($announcements as $announcement)
+                            <x-announcements.card :announcement="$announcement" />
+                        @endforeach
+                    </div>
                 </div>
 
                 @if ($announcements->hasPages())
