@@ -15,6 +15,6 @@ class ChangeLetterApplicationStatusRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['status' => ['required', Rule::enum(LetterApplicationStatus::class)], 'public_note' => [Rule::requiredIf(in_array($this->input('status'), ['revision_required', 'rejected'], true)), 'nullable', 'string', 'max:2000'], 'internal_note' => ['nullable', 'string', 'max:3000']];
+        return ['status' => ['required', Rule::enum(LetterApplicationStatus::class)], 'public_note' => [Rule::requiredIf(in_array($this->input('status'), ['revision_required', 'rejected'], true)), 'nullable', 'string', 'max:2000'], 'internal_note' => ['nullable', 'string', 'max:3000'], 'send_whatsapp' => ['nullable', 'boolean']];
     }
 }

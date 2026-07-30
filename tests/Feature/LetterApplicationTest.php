@@ -70,6 +70,28 @@ class LetterApplicationTest extends TestCase
         $this->assertNotNull($application->refresh()->whatsapp_confirmation_opened_at);
     }
 
+    public function test_status_update_can_open_prefilled_whatsapp_notification_for_applicant(): void
+    {
+        $application = LetterApplication::factory()->create(['status' => LetterApplicationStatus::Submitted]);
+        $admin = $this->user('admin_data');
+
+        config(['app.url' => 'http://localhost']);
+        $this->actingAs($admin)
+            ->patch(route('admin.letter-applications.status.update', $application), [
+                'status' => LetterApplicationStatus::UnderReview->value,
+                'send_whatsapp' => '1',
+            ])
+            ->assertRedirectContains('https://wa.me/');
+
+        $application->refresh();
+        $history = $application->statusHistories()->latest('created_at')->firstOrFail();
+
+        $this->assertSame(LetterApplicationStatus::UnderReview, $application->status);
+        $this->assertSame(LetterApplicationStatus::Submitted, $history->from_status);
+        $this->assertSame(LetterApplicationStatus::UnderReview, $history->to_status);
+        $this->assertNotNull(data_get($history->metadata_json, 'whatsapp_opened_at'));
+    }
+
     private function user(string $roleCode): User
     {
         $role = Role::factory()->create(['code' => $roleCode]);
