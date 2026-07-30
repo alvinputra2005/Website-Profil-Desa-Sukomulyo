@@ -13,6 +13,10 @@
 
     <div class="announcement-page">
         <div class="container">
+            <header class="announcement-section-header">
+                <h1>Pengumuman Desa</h1>
+            </header>
+
             <x-announcements.toolbar :filters="$filters" />
 
             @if ($announcements->total() > 0)

@@ -53,6 +53,12 @@ class AnnouncementTest extends TestCase
 
         $this->get(route('announcements.index'))
             ->assertOk()
+            ->assertSee('<h1>Pengumuman Desa</h1>', false)
+            ->assertSeeInOrder([
+                'class="page-banner',
+                '<div class="announcement-page">',
+                '<h1>Pengumuman Desa</h1>',
+            ], false)
             ->assertSee($visible->title)
             ->assertDontSee('Pengumuman Draf')
             ->assertDontSee('Pengumuman Masa Depan')

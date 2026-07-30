@@ -124,11 +124,12 @@ const svgText = (value, x, centerY, width, options = {}) => {
         weight = 500,
         align = 'center',
         fontSize = 14,
+        maximumLines = 2,
     } = options;
     const anchor = align === 'left' ? 'start' : 'middle';
     const textX = align === 'left' ? x + 14 : x + (width / 2);
     const maximumCharacters = Math.max(8, Math.floor((width - 24) / (fontSize * .58)));
-    const lines = wrapText(value, maximumCharacters);
+    const lines = wrapText(value, maximumCharacters, maximumLines);
     const firstDy = lines.length === 1 ? 0 : -((lines.length - 1) * (fontSize + 4)) / 2;
 
     return `<text x="${textX}" y="${centerY}" fill="${color}" font-family="Arial, sans-serif" font-size="${fontSize}" font-weight="${weight}" text-anchor="${anchor}" dominant-baseline="middle">`
@@ -137,23 +138,42 @@ const svgText = (value, x, centerY, width, options = {}) => {
 };
 
 const tableToSvg = (table) => {
-    const headers = [...table.querySelectorAll('thead th')].map(cleanCellText);
-    const rows = [...table.querySelectorAll('tbody tr')].map((row) => (
-        [...row.querySelectorAll('th, td')].map(cleanCellText)
-    )).filter((row) => row.length === headers.length);
+    const headerCells = [...table.querySelectorAll('thead th')];
+    const headers = headerCells.map(cleanCellText);
+    const columnAlignments = headerCells.map((cell) => cell.dataset.exportAlign || null);
+    const extractRow = (row, footer = false) => {
+        const values = [];
+        [...row.querySelectorAll(':scope > th, :scope > td')].forEach((cell) => {
+            values.push(cleanCellText(cell));
+            for (let index = 1; index < Number(cell.colSpan || 1); index += 1) values.push('');
+        });
+
+        return values.length === headers.length ? { values, footer } : null;
+    };
+    const rows = [
+        ...[...table.querySelectorAll('tbody tr')].map((row) => extractRow(row)),
+        ...[...table.querySelectorAll('tfoot tr')].map((row) => extractRow(row, true)),
+    ].filter(Boolean);
 
     const columnWidths = headers.map((header, index) => {
         const longest = Math.max(
             header.length,
-            ...rows.map((row) => row[index]?.length || 0),
+            ...rows.map((row) => row.values[index]?.length || 0),
         );
         const isLastColumn = index === headers.length - 1;
         return Math.min(isLastColumn ? 360 : 230, Math.max(125, (longest * 8) + 34));
     });
     const width = columnWidths.reduce((sum, columnWidth) => sum + columnWidth, 0);
     const headerHeight = 62;
-    const rowHeight = 62;
-    const height = headerHeight + (Math.max(rows.length, 1) * rowHeight) + 24;
+    const fontSize = 13;
+    const rowHeights = rows.map(({ values }) => Math.max(
+        62,
+        ...values.map((value, index) => {
+            const maximumCharacters = Math.max(8, Math.floor((columnWidths[index] - 24) / (fontSize * .58)));
+            return (wrapText(value, maximumCharacters, Number.MAX_SAFE_INTEGER).length * (fontSize + 4)) + 22;
+        }),
+    ));
+    const height = headerHeight + (rows.length ? rowHeights.reduce((sum, rowHeight) => sum + rowHeight, 0) : 62) + 24;
     let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`;
     svg += `<rect width="${width}" height="${height}" fill="#ffffff"/>`;
 
@@ -166,22 +186,25 @@ const tableToSvg = (table) => {
     });
 
     if (rows.length === 0) {
-        svg += svgText('Belum ada data yang tersedia.', 0, headerHeight + (rowHeight / 2), width);
+        svg += svgText('Belum ada data yang tersedia.', 0, headerHeight + 31, width);
     }
 
-    rows.forEach((row, rowIndex) => {
-        const y = headerHeight + (rowIndex * rowHeight);
-        svg += `<rect x="0" y="${y}" width="${width}" height="${rowHeight}" fill="${rowIndex % 2 === 0 ? '#ffffff' : '#f4f7f2'}"/>`;
+    let y = headerHeight;
+    rows.forEach(({ values, footer }, rowIndex) => {
+        const rowHeight = rowHeights[rowIndex];
+        svg += `<rect x="0" y="${y}" width="${width}" height="${rowHeight}" fill="${footer ? '#e8f0e4' : (rowIndex % 2 === 0 ? '#ffffff' : '#f4f7f2')}"/>`;
         x = 0;
-        row.forEach((value, index) => {
+        values.forEach((value, index) => {
             const columnWidth = columnWidths[index];
             svg += svgText(value, x, y + (rowHeight / 2), columnWidth, {
-                align: index === 0 || index === row.length - 1 ? 'left' : 'center',
-                weight: index === 0 ? 700 : 500,
-                fontSize: 13,
+                align: columnAlignments[index] || (index === 0 || index === values.length - 1 ? 'left' : 'center'),
+                weight: footer || index === 0 ? 700 : 500,
+                fontSize,
+                maximumLines: Number.MAX_SAFE_INTEGER,
             });
             x += columnWidth;
         });
+        y += rowHeight;
     });
 
     svg += '</svg>';
@@ -363,7 +386,63 @@ export const combineChartAndTable = (chart, container, table, title, subtitle) =
     return { svg, width, height };
 };
 
-export const savePdf = async (dataUrl, sourceWidth, sourceHeight, filename) => {
+export const combineExportSections = (sections, title, subtitle) => {
+    const tableAssets = new Map();
+    sections.forEach((section) => {
+        if (section.table) tableAssets.set(section, tableToSvg(section.table));
+    });
+    const preferredWidth = Math.max(900, ...[...tableAssets.values()].map((asset) => asset.width));
+    const assets = sections.map((section) => ({
+        title: section.title,
+        asset: section.chart
+            ? chartToSvgAsset(section.chart, section.container, preferredWidth)
+            : tableAssets.get(section),
+    })).filter(({ asset }) => asset);
+    const gap = 30;
+    const horizontalPadding = 56;
+    const verticalPadding = 28;
+    const headingHeight = 82;
+    const sectionHeadingHeight = 48;
+    const contentWidth = Math.max(preferredWidth, ...assets.map(({ asset }) => asset.width));
+    const width = contentWidth + (horizontalPadding * 2);
+    const height = verticalPadding
+        + headingHeight
+        + assets.reduce((sum, { asset }) => sum + sectionHeadingHeight + asset.height + gap, 0)
+        + verticalPadding;
+    const parts = [
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+        `<rect width="${width}" height="${height}" fill="#ffffff"/>`,
+        `<text x="${horizontalPadding}" y="${verticalPadding + 30}" fill="${COLORS.text}" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(title)}</text>`,
+        `<text x="${horizontalPadding}" y="${verticalPadding + 58}" fill="${COLORS.muted}" font-family="Arial, sans-serif" font-size="13">${escapeXml(subtitle)}</text>`,
+    ];
+    const pageBreaks = [0];
+    let y = verticalPadding + headingHeight;
+
+    assets.forEach(({ title: sectionTitle, asset }) => {
+        pageBreaks.push(y);
+        parts.push(`<line x1="${horizontalPadding}" y1="${y + 4}" x2="${width - horizontalPadding}" y2="${y + 4}" stroke="${COLORS.grid}" stroke-width="1"/>`);
+        parts.push(`<text x="${horizontalPadding}" y="${y + 32}" fill="${COLORS.text}" font-family="Arial, sans-serif" font-size="18" font-weight="700">${escapeXml(sectionTitle)}</text>`);
+        const assetX = horizontalPadding + ((contentWidth - asset.width) / 2);
+        const assetY = y + sectionHeadingHeight;
+        parts.push(`<svg x="${assetX}" y="${assetY}" width="${asset.width}" height="${asset.height}" viewBox="0 0 ${asset.width} ${asset.height}">`);
+        parts.push(svgBody(asset.svg), '</svg>');
+        y = assetY + asset.height + gap;
+    });
+
+    pageBreaks.push(height);
+    parts.push('</svg>');
+
+    return { svg: parts.join(''), width, height, pageBreaks };
+};
+
+const loadRasterImage = (dataUrl) => new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener('load', () => resolve(image), { once: true });
+    image.addEventListener('error', () => reject(new Error('Gambar PDF tidak dapat diproses.')), { once: true });
+    image.src = dataUrl;
+});
+
+export const savePdf = async (dataUrl, sourceWidth, sourceHeight, filename, pageBreaks = []) => {
     const { jsPDF } = await import('jspdf');
     const landscape = sourceWidth >= sourceHeight;
     const pdf = new jsPDF({
@@ -375,22 +454,57 @@ export const savePdf = async (dataUrl, sourceWidth, sourceHeight, filename) => {
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 10;
-    const ratio = Math.min(
-        (pageWidth - (margin * 2)) / sourceWidth,
-        (pageHeight - (margin * 2)) / sourceHeight,
-    );
+    const availableWidth = pageWidth - (margin * 2);
+    const availableHeight = pageHeight - (margin * 2);
+    const ratio = availableWidth / sourceWidth;
     const width = sourceWidth * ratio;
-    const height = sourceHeight * ratio;
-    pdf.addImage(
-        dataUrl,
-        'PNG',
-        (pageWidth - width) / 2,
-        (pageHeight - height) / 2,
-        width,
-        height,
-        undefined,
-        'FAST',
-    );
+    const maximumSliceHeight = Math.floor(availableHeight / ratio);
+    const image = await loadRasterImage(dataUrl);
+    const normalizedBreaks = [...new Set(pageBreaks.map((value) => Math.round(Number(value) || 0)))]
+        .filter((value) => value > 0 && value < sourceHeight)
+        .sort((left, right) => left - right);
+    let sourceY = 0;
+    let pageIndex = 0;
+
+    while (sourceY < sourceHeight) {
+        const idealEnd = Math.min(sourceHeight, sourceY + maximumSliceHeight);
+        const usefulBreaks = normalizedBreaks.filter((value) => (
+            value > sourceY + (maximumSliceHeight * .28) && value <= idealEnd
+        ));
+        const sourceEnd = usefulBreaks.at(-1) || idealEnd;
+        const sliceHeight = Math.max(1, sourceEnd - sourceY);
+        const canvas = document.createElement('canvas');
+        canvas.width = sourceWidth;
+        canvas.height = sliceHeight;
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('Browser tidak dapat menyiapkan halaman PDF.');
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(
+            image,
+            0,
+            sourceY,
+            sourceWidth,
+            sliceHeight,
+            0,
+            0,
+            sourceWidth,
+            sliceHeight,
+        );
+        if (pageIndex > 0) pdf.addPage();
+        pdf.addImage(
+            canvas.toDataURL('image/png'),
+            'PNG',
+            (pageWidth - width) / 2,
+            margin,
+            width,
+            sliceHeight * ratio,
+            undefined,
+            'FAST',
+        );
+        sourceY = sourceEnd;
+        pageIndex += 1;
+    }
     pdf.save(filename);
 };
 

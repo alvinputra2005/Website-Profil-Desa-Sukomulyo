@@ -57,7 +57,7 @@ class SitePagesTest extends TestCase
 
         $this->assertSame(3, substr_count($navigation, '<ul class="sub-menu">'));
         $this->assertSame(3, substr_count($navigation, 'class="nav-dropdown-toggle"'));
-        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Keluarga', 'Layanan Administrasi', 'APBDes'] as $label) {
+        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Pelayanan Surat', 'Statistik Keluarga', 'Layanan Administrasi', 'APBDes'] as $label) {
             $this->assertStringContainsString($label, $navigation);
         }
         foreach (['data-desa-statistik', 'informasi-publik-desa'] as $route) {
@@ -68,10 +68,13 @@ class SitePagesTest extends TestCase
         $this->assertStringNotContainsString('Agenda Desa', $navigation);
         $this->assertStringNotContainsString('Statistik Pendidikan', $navigation);
         $this->assertStringNotContainsString('Statistik Pekerjaan', $navigation);
+        $this->assertStringNotContainsString('Informasi Bantuan Sosial', $navigation);
+        $this->assertStringNotContainsString('Informasi Publik</span>', $navigation);
         $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('profile-desa'), '/').'".*?>\s*<span>Identitas Desa<\/span>/s', $navigation);
         $this->assertStringNotContainsString('>Peta Desa</a>', $navigation);
         $this->assertStringNotContainsString('#', $navigation);
         $this->assertGreaterThan(strpos($navigation, 'Berita Desa'), strpos($navigation, 'Galeri Desa'));
+        $this->assertGreaterThan(strpos($navigation, 'Galeri Desa'), strpos($navigation, 'Pelayanan Surat'));
         $this->assertStringNotContainsString('Asal-usul dan perkembangan', $navigation);
         $this->assertStringNotContainsString('Jumlah penduduk berdasarkan jenjang pendidikan', $navigation);
         $this->assertStringContainsString(route('pemerintahan-desa'), $navigation);
@@ -354,14 +357,14 @@ class SitePagesTest extends TestCase
             ->assertSee('Musyawarah Desa Penyusunan Program Kerja');
     }
 
-    public function test_budget_history_shows_ten_years_of_dummy_data(): void
+    public function test_budget_history_shows_ten_years_of_data(): void
     {
         $this->get(route('transparansi-apbdes'))
             ->assertOk()
             ->assertSee('Riwayat APBDes 10 Tahun Terakhir')
             ->assertSee('2017')
             ->assertSee('2026')
-            ->assertSee('data dummy');
+            ->assertDontSee('data dummy');
     }
 
     public function test_contact_form_validates_and_accepts_a_message(): void

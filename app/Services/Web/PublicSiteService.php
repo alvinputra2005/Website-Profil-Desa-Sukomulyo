@@ -417,22 +417,14 @@ class PublicSiteService
         return $this->render('pages.generic-statistics', $data);
     }
 
-    public function budgetHistory(): View
+    public function budgetHistory(array $budgetHistory): View
     {
-        return $this->render('pages.budget-history', [
-            'budgetHistory' => [
-                ['year' => 2026, 'income' => 2485000000, 'spending' => 2350000000, 'realization' => 1739000000, 'percentage' => 74],
-                ['year' => 2025, 'income' => 2360000000, 'spending' => 2240000000, 'realization' => 1859200000, 'percentage' => 83],
-                ['year' => 2024, 'income' => 2225000000, 'spending' => 2100000000, 'realization' => 1743000000, 'percentage' => 83],
-                ['year' => 2023, 'income' => 2080000000, 'spending' => 1980000000, 'realization' => 1623600000, 'percentage' => 82],
-                ['year' => 2022, 'income' => 1950000000, 'spending' => 1860000000, 'realization' => 1488000000, 'percentage' => 80],
-                ['year' => 2021, 'income' => 1820000000, 'spending' => 1740000000, 'realization' => 1357200000, 'percentage' => 78],
-                ['year' => 2020, 'income' => 1690000000, 'spending' => 1610000000, 'realization' => 1207500000, 'percentage' => 75],
-                ['year' => 2019, 'income' => 1560000000, 'spending' => 1480000000, 'realization' => 1213600000, 'percentage' => 82],
-                ['year' => 2018, 'income' => 1420000000, 'spending' => 1360000000, 'realization' => 1074400000, 'percentage' => 79],
-                ['year' => 2017, 'income' => 1300000000, 'spending' => 1240000000, 'realization' => 954800000, 'percentage' => 77],
-            ],
-        ]);
+        return $this->render('pages.budget-history', compact('budgetHistory'));
+    }
+
+    public function budgetDetail(array $budget): View
+    {
+        return $this->render('pages.budget-detail', compact('budget'));
     }
 
     public function publicInformation(): View
@@ -881,7 +873,6 @@ class PublicSiteService
     {
         return [
             ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
-            ['label' => 'Pelayanan Surat', 'route' => 'letter-services.index', 'active' => 'letter-services.*'],
             ['label' => 'Profil Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
                 ['label' => 'Identitas Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
                 ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
@@ -899,12 +890,11 @@ class PublicSiteService
             ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
                 ['label' => 'Pengumuman Desa', 'route' => 'announcements.index', 'active' => 'announcements.*'],
                 ['label' => 'Layanan Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
-                ['label' => 'Informasi Bantuan Sosial', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'bantuan-sosial']],
-                ['label' => 'Informasi Publik', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'informasi-publik']],
-                ['label' => 'APBDes', 'route' => 'transparansi-apbdes', 'active' => 'transparansi-apbdes'],
+                ['label' => 'APBDes', 'route' => 'transparansi-apbdes', 'active' => 'transparansi-apbdes*'],
             ]],
             ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
             ['label' => 'Galeri Desa', 'route' => 'galeri-desa', 'active' => 'galeri-desa'],
+            ['label' => 'Pelayanan Surat', 'route' => 'letter-services.index', 'active' => 'letter-services.*'],
         ];
     }
 
