@@ -222,6 +222,21 @@ const initAdminPage = () => {
     checks.forEach(checkbox=>checkbox.addEventListener('change',update));
     update();
   }
+  const statisticsCheckAll=document.querySelector('[data-statistics-select-all]');
+  if(statisticsCheckAll&&!statisticsCheckAll.dataset.bulkBound){
+    statisticsCheckAll.dataset.bulkBound='true';
+    const checks=Array.from(document.querySelectorAll('[data-statistics-check]'));
+    const bulkButton=document.querySelector('[data-statistics-bulk-delete]');
+    const update=()=>{
+      const checked=checks.filter(checkbox=>checkbox.checked).length;
+      if(bulkButton)bulkButton.disabled=checked===0;
+      statisticsCheckAll.checked=checks.length>0&&checked===checks.length;
+      statisticsCheckAll.indeterminate=checked>0&&checked<checks.length;
+    };
+    statisticsCheckAll.addEventListener('change',()=>{checks.forEach(checkbox=>{checkbox.checked=statisticsCheckAll.checked});update()});
+    checks.forEach(checkbox=>checkbox.addEventListener('change',update));
+    update();
+  }
   const galleryManager=document.querySelector('[data-gallery-manager]');
   const galleryFiles=document.querySelector('[data-gallery-files]');
   const galleryGrid=document.querySelector('[data-gallery-photo-grid]');

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityController;
+use App\Http\Controllers\Admin\BulkDeleteStatisticDatasetController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\CrudController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -154,6 +155,7 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
     Route::delete('/gallery-trash/{id}/force', [CrudController::class, 'forceDeleteGallery'])->name('galleries.force-delete');
     Route::delete('/gallery-trash', [CrudController::class, 'emptyGalleryTrash'])->name('galleries.empty-trash');
     Route::patch('/galleries/{id}/archive', [CrudController::class, 'archiveGallery'])->name('galleries.archive');
+    Route::delete('/statistics/bulk', BulkDeleteStatisticDatasetController::class)->name('statistics.bulk-destroy');
     Route::get('/{resource}', [CrudController::class, 'index'])->name('resources.index');
     Route::get('/{resource}/create', [CrudController::class, 'create'])->name('resources.create');
     Route::post('/{resource}', [CrudController::class, 'store'])->name('resources.store');
