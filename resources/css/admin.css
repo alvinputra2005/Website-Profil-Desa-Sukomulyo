@@ -70,7 +70,27 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .navbar-nav > .notifications-menu > .dropdown-menu > li .menu > li > a { white-space: normal; }
 
 /* Sidebar mengikuti warna arang kebiruan dan susunan sederhana pada referensi. */
-.main-sidebar { width: 250px; padding-top: 60px; background: var(--admin-sidebar) !important; }
+.main-sidebar {
+    width: 250px;
+    height: 100vh;
+    padding-top: 60px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-color: rgba(255,255,255,.3) transparent;
+    scrollbar-width: thin;
+    background: var(--admin-sidebar) !important;
+}
+.main-sidebar::-webkit-scrollbar { width: 6px; }
+.main-sidebar::-webkit-scrollbar-track { background: transparent; }
+.main-sidebar::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(255,255,255,.3); }
+.main-sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.48); }
+
+@media (min-width: 768px) {
+    .sidebar-collapse .main-sidebar {
+        overflow: visible;
+    }
+}
 .user-panel { min-height: 92px; padding: 18px 15px; border-bottom: 1px solid rgba(255,255,255,.07); background: var(--admin-sidebar-deep); }
 .user-panel > .image > span { width: 48px !important; height: 48px !important; border: 2px solid rgba(255,255,255,.2); background: var(--admin-primary) !important; line-height: 44px !important; }
 .user-panel > .info { position: static; padding: 3px 5px 3px 15px; white-space: normal; }

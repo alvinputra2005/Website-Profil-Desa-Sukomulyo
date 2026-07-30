@@ -16,9 +16,6 @@ class DashboardController extends Controller
 {
     public function __invoke(PopulationStatistics $populationStatistics)
     {
-        $populationSummary = Schema::hasTable('residents')
-            ? $populationStatistics->summary()
-            : ['residents' => 0, 'families' => 0, 'male' => 0, 'female' => 0];
         $populationGender = Schema::hasTable('residents')
             ? collect($populationStatistics->distribution('sex'))->map(fn (array $row) => ['label' => $row['label'], 'value' => $row['total']])->all()
             : [];
@@ -28,8 +25,6 @@ class DashboardController extends Controller
 
         $visitorCount = Schema::hasTable('site_visits') ? SiteVisit::count() : 0;
         $stats = [
-            ['label' => 'Jumlah Penduduk', 'value' => $populationSummary['residents'], 'icon' => 'fa-users', 'color' => 'bg-aqua'],
-            ['label' => 'Jumlah KK', 'value' => $populationSummary['families'], 'icon' => 'fa-home', 'color' => 'bg-green'],
             ['label' => 'Statistik Pengunjung', 'value' => $visitorCount, 'icon' => 'fa-line-chart', 'color' => 'bg-yellow'],
             ['label' => 'Berita', 'value' => News::count(), 'icon' => 'fa-newspaper-o', 'color' => 'bg-red'],
         ];
