@@ -43,10 +43,10 @@ class CreateLetterApplicationAction
                 'applicant_nik_hash' => $this->hasher->nik($nik),
                 'applicant_phone' => $phone,
                 'form_data_json' => $this->schemas->sanitize($service, $data['form_data'] ?? []),
-                'status' => LetterApplicationStatus::Submitted,
-                'submitted_at' => now(),
+                'status' => LetterApplicationStatus::Draft,
+                'submitted_at' => null,
             ]);
-            $application->statusHistories()->create(['to_status' => LetterApplicationStatus::Submitted, 'created_at' => now()]);
+            $application->statusHistories()->create(['to_status' => LetterApplicationStatus::Draft, 'created_at' => now()]);
             $this->logger->log('created', 'letter_applications', $application, null, ['application_number' => $application->application_number, 'status' => $application->status->value]);
 
             return new CreatedLetterApplication($application, $token, $pin);

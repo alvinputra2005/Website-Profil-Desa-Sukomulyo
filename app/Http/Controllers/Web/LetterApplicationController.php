@@ -17,6 +17,7 @@ use App\Models\PopulationArea;
 use App\Services\Letters\LetterFormSchemaService;
 use App\Services\Web\PublicSiteService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
@@ -87,18 +88,65 @@ class LetterApplicationController extends Controller
                 throw ValidationException::withMessages(["documents.{$index}" => 'Dokumen '.($requirement['label'] ?? 'persyaratan').' wajib diunggah.']);
             }
         }
-        $disk = config('filesystems.media_disk', 'public');
+        $disk = config('filesystems.letter_documents_disk', 'local');
         foreach ($requirements as $index => $requirement) {
             $file = $request->file("documents.{$index}");
             if (!$file) continue;
             $key = $requirement['key'] ?? 'requirement_'.($index + 1);
-            $path = $file->store('layanan-surat/'.Str::slug($application->service->name).'/'.$application->application_number, $disk);
+            $path = $file->store('layanan-surat/'.Str::slug($application->service->slug).'/'.$application->application_number.'/'.$key, $disk);
             LetterApplicationDocument::updateOrCreate(
                 ['letter_application_id' => $application->id, 'requirement_key' => $key],
-                ['label' => $requirement['label'] ?? 'Dokumen persyaratan', 'disk' => $disk, 'path' => $path, 'original_name' => $file->getClientOriginalName(), 'mime_type' => $file->getMimeType(), 'file_size' => $file->getSize(), 'review_status' => 'pending', 'review_note' => null, 'reviewed_by' => null, 'reviewed_at' => null]
+                ['public_id' => (string) Str::ulid(), 'label' => $requirement['label'] ?? 'Dokumen persyaratan', 'disk' => $disk, 'path' => $path, 'original_name' => $file->getClientOriginalName(), 'stored_extension' => $file->extension(), 'mime_type' => $file->getMimeType(), 'file_size' => $file->getSize(), 'size_bytes' => $file->getSize(), 'upload_status' => 'uploaded', 'review_status' => 'pending_review', 'review_note' => null, 'reviewed_by' => null, 'reviewed_at' => null, 'uploaded_at' => now(), 'checksum_sha256' => hash_file('sha256', $file->getRealPath())]
             );
         }
+        $application->forceFill(['status' => LetterApplicationStatus::Submitted, 'submitted_at' => now()])->save();
+        $application->statusHistories()->create(['from_status' => LetterApplicationStatus::Draft, 'to_status' => LetterApplicationStatus::Submitted, 'created_at' => now()]);
         return redirect()->route('letter-services.track.token', $token)->with('success', 'Dokumen berhasil diunggah dan menunggu verifikasi petugas.');
+    }
+
+    public function presign(Request $request, string $token): \Illuminate\Http\JsonResponse
+    {
+        $application = $this->fromToken($token);
+        abort_unless($application->status === LetterApplicationStatus::Draft, 409);
+        $data = $request->validate(['requirement_key' => ['required', 'string', 'max:100'], 'original_name' => ['required', 'string', 'max:255'], 'mime_type' => ['required', 'in:image/jpeg,image/png,application/pdf'], 'size_bytes' => ['required', 'integer', 'min:1', 'max:5242880']]);
+        $extension = $data['mime_type'] === 'application/pdf' ? 'pdf' : ($data['mime_type'] === 'image/png' ? 'png' : 'jpg');
+        $path = 'layanan-surat/'.Str::slug($application->service->slug).'/'.$application->application_number.'/'.$data['requirement_key'].'/'.Str::ulid().'.'.$extension;
+        $disk = config('filesystems.letter_documents_disk', 'local');
+        if (!method_exists(Storage::disk($disk), 'temporaryUploadUrl')) return response()->json(['message' => 'Presigned upload belum tersedia pada disk ini.'], 422);
+        ['url' => $url, 'headers' => $headers] = Storage::disk($disk)->temporaryUploadUrl($path, now()->addMinutes(10), ['ContentType' => $data['mime_type'], 'ContentDisposition' => 'inline']);
+        $document = LetterApplicationDocument::updateOrCreate(
+            ['letter_application_id' => $application->id, 'requirement_key' => $data['requirement_key']],
+            ['public_id' => (string) Str::ulid(), 'label' => $data['requirement_key'],
+             'disk' => $disk, 'path' => $path, 'original_name' => basename($data['original_name']),
+             'stored_extension' => $extension, 'mime_type' => $data['mime_type'], 'size_bytes' => $data['size_bytes'],
+             'file_size' => $data['size_bytes'], 'upload_status' => 'pending_upload', 'review_status' => 'pending_review',
+             'uploaded_at' => null, 'reviewed_at' => null, 'reviewed_by' => null, 'review_note' => null]
+        );
+        return response()->json(['document_id' => $document->public_id, 'upload_url' => $url, 'upload_headers' => $headers, 'expires_at' => now()->addMinutes(10)->toIso8601String()]);
+    }
+
+    public function completeDocument(Request $request, string $token): \Illuminate\Http\JsonResponse
+    {
+        $application = $this->fromToken($token);
+        $document = $application->documents()->where('public_id', $request->input('document_id'))->firstOrFail();
+        $disk = Storage::disk($document->disk);
+        abort_unless($disk->exists($document->path), 422, 'Best belum ditemukan di penyimpanan.');
+        $actualSize = $disk->size($document->path);
+        abort_unless($actualSize <= 5242880 && $actualSize > 0, 422, 'Ukuran file tidak valid.');
+        $document->update(['upload_status' => 'uploaded', 'uploaded_at' => now(), 'file_size' => $actualSize, 'size_bytes' => $actualSize]);
+        $requiredKeys = collect($application->service->requirements_json ?? [])->pluck('key')->filter();
+        if ($requiredKeys->isNotEmpty() && $application->documents()->whereIn('requirement_key', $requiredKeys)->where('upload_status', 'uploaded')->distinct('requirement_key')->count('requirement_key') >= $requiredKeys->count()) {
+            $application->forceFill(['status' => LetterApplicationStatus::Submitted, 'submitted_at' => now()])->save();
+        }
+        return response()->json(['document' => ['id' => $document->public_id, 'name' => $document->original_name, 'size' => $actualSize, 'preview_url' => route('letter-services.application.documents.preview', [$token, $document->public_id])]]);
+    }
+
+    public function previewDocument(string $token, string $document): \Symfony\Component\HttpFoundation\Response
+    {
+        $application = $this->fromToken($token);
+        $file = $application->documents()->where('public_id', $document)->firstOrFail();
+        $url = Storage::disk($file->disk)->temporaryUrl($file->path, now()->addMinutes(5));
+        return redirect()->away($url)->header('Cache-Control', 'private, no-store');
     }
 
     public function edit(string $token, PublicSiteService $site, LetterFormSchemaService $schemas): View

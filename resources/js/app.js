@@ -86,6 +86,55 @@ const initGovernmentOrganization = () => {
 const initPublicPage = () => {
     initGovernmentOrganization();
 
+    const documentForm = document.querySelector('[data-r2-documents]');
+    if (documentForm && documentForm.dataset.presigned === 'true' && documentForm.dataset.bound !== 'true') {
+        const requiredInputs = [...documentForm.querySelectorAll('.letter-upload-row:not(.letter-upload-row--optional) input[type="file"]')];
+        const rows = [...documentForm.querySelectorAll('.letter-upload-row:not(.letter-upload-row--optional)')];
+        const complete = new Set();
+        documentForm.dataset.bound = 'true';
+        requiredInputs.forEach((input, index) => {
+            input.required = false;
+            input.addEventListener('change', async () => {
+                if (documentForm.dataset.fallback === 'true') return;
+                const file = input.files?.[0];
+                if (!file) return;
+                if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.type) || file.size > 5242880) {
+                    window.alert('File harus JPG, PNG, atau PDF dengan ukuran maksimal 5 MB.');
+                    input.value = '';
+                    return;
+                }
+                const key = `requirement_${index + 1}`;
+                const row = rows[index];
+                row.querySelector('.letter-file-picker span').textContent = file.name;
+                try {
+                    const presign = await window.axios.post(documentForm.dataset.presignUrl, { requirement_key: key, original_name: file.name, mime_type: file.type, size_bytes: file.size });
+                    const uploadHeaders = new Headers({ 'Content-Type': file.type });
+                    Object.entries(presign.data.upload_headers || {}).forEach(([name, value]) => {
+                        if (name.toLowerCase() === 'host') return;
+                        uploadHeaders.set(name, Array.isArray(value) ? value[0] : value);
+                    });
+                    const uploadResponse = await fetch(presign.data.upload_url, { method: 'PUT', headers: uploadHeaders, body: file });
+                    if (!uploadResponse.ok) throw new Error(`R2 upload failed (${uploadResponse.status})`);
+                    await window.axios.post(documentForm.dataset.completeUrl, { document_id: presign.data.document_id });
+                    complete.add(key);
+                    row.classList.add('is-uploaded');
+                    if (complete.size === requiredInputs.length) window.location.assign(documentForm.dataset.finalUrl);
+                } catch (error) {
+                    documentForm.dataset.fallback = 'true';
+                    requiredInputs.forEach((requiredInput) => { requiredInput.required = true; });
+                    window.alert('Upload langsung ke R2 dibatasi browser. File akan dikirim melalui server saat Anda menekan “Unggah & Lanjutkan”.');
+                }
+            });
+        });
+        documentForm.addEventListener('submit', (event) => {
+            if (documentForm.dataset.fallback === 'true') return;
+            if (complete.size !== requiredInputs.length) {
+                event.preventDefault();
+                window.alert('Unggah semua dokumen wajib terlebih dahulu.');
+            }
+        });
+    }
+
     const letterSelector = document.querySelector('[data-letter-selector]');
 
     if (letterSelector && letterSelector.dataset.bound !== 'true') {

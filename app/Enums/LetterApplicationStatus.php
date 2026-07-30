@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum LetterApplicationStatus: string
 {
+    case Draft = 'draft';
     case Submitted = 'submitted';
     case UnderReview = 'under_review';
     case RevisionRequired = 'revision_required';
@@ -16,6 +17,7 @@ enum LetterApplicationStatus: string
     public function label(): string
     {
         return match ($this) {
+            self::Draft => 'Draft',
             self::Submitted => 'Permohonan Dikirim',
             self::UnderReview => 'Sedang Diverifikasi',
             self::RevisionRequired => 'Perlu Diperbaiki',
@@ -30,6 +32,7 @@ enum LetterApplicationStatus: string
     public function badgeClass(): string
     {
         return match ($this) {
+            self::Draft => 'label-default',
             self::Submitted => 'label-info',
             self::UnderReview => 'label-primary',
             self::RevisionRequired => 'label-warning',
@@ -49,6 +52,7 @@ enum LetterApplicationStatus: string
     public function allowedTransitions(): array
     {
         return match ($this) {
+            self::Draft => [self::Submitted, self::Cancelled],
             self::Submitted => [self::UnderReview, self::Cancelled],
             self::UnderReview => [self::RevisionRequired, self::Processing, self::Rejected, self::Cancelled],
             self::RevisionRequired => [self::Submitted, self::UnderReview, self::Cancelled],

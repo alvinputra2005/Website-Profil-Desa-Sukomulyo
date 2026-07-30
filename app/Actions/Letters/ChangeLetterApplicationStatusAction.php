@@ -18,6 +18,9 @@ class ChangeLetterApplicationStatusAction
     {
         return DB::transaction(function () use ($application, $target, $data, $user) {
             $locked = LetterApplication::query()->whereKey($application->getKey())->lockForUpdate()->firstOrFail();
+            if ($target === LetterApplicationStatus::Processing && $locked->documents()->where('review_status', '!=', 'approved')->exists()) {
+                throw ValidationException::withMessages(['status' => 'Semua dokumen harus disetujui sebelum permohonan diproses.']);
+            }
             if (! $locked->status->canTransitionTo($target)) {
                 throw ValidationException::withMessages(['status' => 'Perubahan status tidak diizinkan.']);
             }
