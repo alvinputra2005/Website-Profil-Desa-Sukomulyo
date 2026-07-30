@@ -86,6 +86,25 @@ const initGovernmentOrganization = () => {
 const initPublicPage = () => {
     initGovernmentOrganization();
 
+    const letterSelector = document.querySelector('[data-letter-selector]');
+
+    if (letterSelector && letterSelector.dataset.bound !== 'true') {
+        const choices = [...letterSelector.querySelectorAll('[data-letter-choice]')];
+        const next = letterSelector.querySelector('[data-letter-next]');
+
+        letterSelector.dataset.bound = 'true';
+        choices.forEach((choice) => {
+            choice.addEventListener('click', () => {
+                choices.forEach((item) => {
+                    const selected = item === choice;
+                    item.classList.toggle('is-selected', selected);
+                    item.setAttribute('aria-checked', String(selected));
+                });
+                if (next) next.href = choice.dataset.url;
+            });
+        });
+    }
+
     const menuButton = document.querySelector('.menu-toggle');
     const menu = document.querySelector('#primary-menu');
 

@@ -16,7 +16,10 @@ class LetterServiceController extends Controller
         abort_unless($settings->enabled(), Response::HTTP_NOT_FOUND);
         $site->shareLayout();
 
-        return view('pages.letters.index', ['services' => LetterService::query()->where('is_active', true)->orderBy('display_order')->get()]);
+        return view('pages.letters.index', [
+            'services' => LetterService::query()->where('is_active', true)->orderBy('display_order')->get(),
+            'settings' => $settings,
+        ]);
     }
 
     public function show(LetterService $letterService, PublicSiteService $site, LetterSettings $settings): View
