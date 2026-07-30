@@ -67,6 +67,28 @@ class CmsResourceRequest extends FormRequest
             ];
         }
 
+        if ($this->route('resource') === 'publications') {
+            $rules['published_at'] = ['nullable', 'date', 'required_if:status,published'];
+            $rules += [
+                'publication_attachments' => ['nullable', 'array'],
+                'publication_attachments.*.title' => ['nullable', 'string', 'max:255'],
+                'publication_attachments.*.display_order' => ['required', 'integer', 'min:0'],
+                'remove_publication_attachments' => ['nullable', 'array'],
+                'remove_publication_attachments.*' => ['integer'],
+                'attachment_uploads' => ['nullable', 'array', 'max:10'],
+                'attachment_uploads.*' => [
+                    'file',
+                    'mimes:pdf',
+                    'mimetypes:application/pdf',
+                    'max:10240',
+                ],
+                'attachment_upload_titles' => ['nullable', 'array'],
+                'attachment_upload_titles.*' => ['nullable', 'string', 'max:255'],
+                'attachment_sequence' => ['nullable', 'array'],
+                'attachment_sequence.*' => ['string', 'regex:/^(existing|new):[0-9]+$/'],
+            ];
+        }
+
         return $rules;
     }
 
@@ -78,6 +100,11 @@ class CmsResourceRequest extends FormRequest
             'gallery_item_uploads.*.max' => 'Gambar ke-:position berukuran lebih dari 5 MB.',
             'gallery_item_uploads.*.image' => 'File ke-:position bukan gambar yang valid.',
             'gallery_item_uploads.*.mimes' => 'Gambar ke-:position harus berformat JPG, PNG, atau WebP.',
+            'published_at.required_if' => 'Waktu terbit wajib diisi ketika status publikasi adalah Terbit.',
+            'attachment_uploads.max' => 'Maksimal 10 PDF dapat diunggah per sekali simpan.',
+            'attachment_uploads.*.mimes' => 'Lampiran ke-:position harus berupa PDF.',
+            'attachment_uploads.*.mimetypes' => 'Isi file lampiran ke-:position bukan PDF yang valid.',
+            'attachment_uploads.*.max' => 'Lampiran ke-:position berukuran lebih dari 10 MB.',
         ];
     }
 

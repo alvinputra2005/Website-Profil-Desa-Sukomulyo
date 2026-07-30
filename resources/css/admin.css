@@ -504,3 +504,75 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 @media (max-width: 480px) {
     .media-grid, .dashboard-stats { grid-template-columns: 1fr; }
 }
+
+.publication-attachment-manager {
+    margin-top: 26px;
+}
+
+.publication-attachment-list {
+    display: grid;
+    gap: 10px;
+}
+
+.publication-attachment-row {
+    display: grid;
+    grid-template-columns: 24px 32px minmax(0, 1fr) auto;
+    padding: 12px;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #d8ded5;
+    border-radius: 4px;
+    background: #fbfcfa;
+}
+
+.publication-attachment-row.is-removed {
+    opacity: .48;
+    background: #f5dddd;
+}
+
+.publication-attachment-handle {
+    color: #9ba39a;
+    text-align: center;
+}
+
+.publication-attachment-file-icon {
+    font-size: 25px;
+}
+
+.publication-attachment-fields {
+    display: grid;
+    min-width: 0;
+    gap: 6px;
+}
+
+.publication-attachment-fields strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.publication-attachment-fields small {
+    color: #7b837a;
+}
+
+.publication-attachment-remove {
+    margin: 0;
+    color: #a94442;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.publication-attachment-controls {
+    display: flex;
+    gap: 4px;
+}
+
+@media (max-width: 767px) {
+    .publication-attachment-row {
+        grid-template-columns: 20px 28px minmax(0, 1fr);
+    }
+
+    .publication-attachment-controls {
+        grid-column: 3;
+    }
+}

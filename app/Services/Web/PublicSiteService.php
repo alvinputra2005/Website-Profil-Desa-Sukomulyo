@@ -37,7 +37,7 @@ class PublicSiteService
             $staticRoutes = [
                 'beranda', 'profile-desa', 'pemerintahan-desa', 'potensi-desa',
                 'data-desa-statistik', 'informasi-publik-desa', 'peta-desa',
-                'galeri-desa', 'berita-desa.index', 'kontak.index',
+                'announcements.index', 'galeri-desa', 'berita-desa.index', 'kontak.index',
             ];
             $urls = collect($staticRoutes)->map(fn (string $route) => [
                 'loc' => route($route),
@@ -49,6 +49,15 @@ class PublicSiteService
                     News::published()->get(['slug', 'updated_at'])->map(fn (News $news) => [
                         'loc' => route('berita-desa.show', $news->slug),
                         'lastmod' => $news->updated_at->toDateString(),
+                    ])
+                );
+            }
+
+            if (Schema::hasTable('publications')) {
+                $urls = $urls->concat(
+                    Publication::query()->announcements()->published()->get(['slug', 'updated_at'])->map(fn (Publication $publication) => [
+                        'loc' => route('announcements.show', ['publication' => $publication->slug]),
+                        'lastmod' => $publication->updated_at->toDateString(),
                     ])
                 );
             }
@@ -438,12 +447,6 @@ class PublicSiteService
     public function informationDetail(string $section): View
     {
         $pages = [
-            'pengumuman' => [
-                'title' => 'Pengumuman Desa',
-                'description' => 'Informasi resmi dan pengumuman penting dari Pemerintah Desa Sukomulyo.',
-                'type' => 'announcement',
-                'fallback' => [['title' => 'Belum Ada Pengumuman Terbaru', 'content' => 'Pengumuman resmi desa akan ditampilkan pada halaman ini.']],
-            ],
             'layanan-administrasi' => [
                 'title' => 'Layanan Administrasi',
                 'description' => 'Persyaratan surat, jadwal pelayanan, dan alur pelayanan masyarakat.',
@@ -495,6 +498,11 @@ class PublicSiteService
         }
 
         return $this->render('pages.information-detail', compact('page', 'items'));
+    }
+
+    public function page(string $view, array $data = []): View
+    {
+        return $this->render($view, $data);
     }
 
     public function map(): View
@@ -882,7 +890,7 @@ class PublicSiteService
                 ['label' => 'IDM (Indeks Desa Membangun)', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'idm']],
             ]],
             ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
-                ['label' => 'Pengumuman Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'pengumuman']],
+                ['label' => 'Pengumuman Desa', 'route' => 'announcements.index', 'active' => 'announcements.*'],
                 ['label' => 'Layanan Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
                 ['label' => 'Agenda Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'agenda']],
                 ['label' => 'Informasi Bantuan Sosial', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'bantuan-sosial']],

@@ -192,20 +192,33 @@ const tableToSvg = (table, title, subtitle) => {
     return { svg, width, height };
 };
 
-export const downloadBlob = (blob, filename) => {
-    const url = URL.createObjectURL(blob);
+const triggerDownload = (url, filename) => {
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
+    link.style.display = 'none';
+    link.setAttribute('aria-hidden', 'true');
+    document.body.append(link);
     link.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    link.remove();
+};
+
+export const downloadBlob = (blob, filename) => {
+    if (typeof navigator.msSaveOrOpenBlob === 'function') {
+        navigator.msSaveOrOpenBlob(blob, filename);
+        return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    triggerDownload(url, filename);
+
+    // Firefox and Safari can cancel the download when the object URL is
+    // revoked in the same event loop as the synthetic click.
+    window.setTimeout(() => URL.revokeObjectURL(url), 30000);
 };
 
 export const downloadDataUrl = (dataUrl, filename) => {
-    const link = document.createElement('a');
-    link.href = dataUrl;
-    link.download = filename;
-    link.click();
+    triggerDownload(dataUrl, filename);
 };
 
 export const svgToRaster = (svg, width, height, format = 'png') => new Promise((resolve, reject) => {
@@ -219,11 +232,21 @@ export const svgToRaster = (svg, width, height, format = 'png') => new Promise((
         canvas.width = Math.ceil(width * scale);
         canvas.height = Math.ceil(height * scale);
         const context = canvas.getContext('2d');
+        if (!context) {
+            URL.revokeObjectURL(url);
+            reject(new Error('Browser tidak dapat menyiapkan gambar untuk diunduh.'));
+            return;
+        }
         context.fillStyle = '#ffffff';
         context.fillRect(0, 0, canvas.width, canvas.height);
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', .94));
+        const dataUrl = canvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', .94);
+        if (!dataUrl || dataUrl === 'data:,') {
+            reject(new Error('Ukuran gambar hasil unduhan terlalu besar untuk browser.'));
+            return;
+        }
+        resolve(dataUrl);
     }, { once: true });
     image.addEventListener('error', () => {
         URL.revokeObjectURL(url);
@@ -245,15 +268,59 @@ const svgDataUrlToText = (dataUrl) => {
 const svgBody = (svg) => svg.slice(svg.indexOf('>') + 1, svg.lastIndexOf('</svg>'));
 
 const chartToSvgAsset = (chart, container) => {
-    const width = Math.max(720, Math.round(container.clientWidth || 0));
-    const height = Math.max(380, Math.round(container.clientHeight || 0));
+    const option = chart.getOption();
+    const hasPieSeries = option.series?.some((series) => series.type === 'pie');
+    const width = Math.max(hasPieSeries ? 900 : 720, Math.round(container.clientWidth || 0));
+    const height = Math.max(hasPieSeries ? 500 : 380, Math.round(container.clientHeight || 0));
+    const exportOption = {
+        ...option,
+        animation: false,
+        series: option.series?.map((series) => {
+            if (series.type !== 'pie') return series;
+
+            return {
+                ...series,
+                radius: '62%',
+                center: ['50%', '43%'],
+                avoidLabelOverlap: true,
+                minShowLabelAngle: 0,
+                label: {
+                    ...(series.label || {}),
+                    show: true,
+                    position: 'outside',
+                    alignTo: 'edge',
+                    edgeDistance: 28,
+                    bleedMargin: 8,
+                    color: COLORS.text,
+                    fontSize: 15,
+                    fontWeight: 700,
+                    lineHeight: 18,
+                    formatter: ({ name, percent }) => (
+                        `${name}\n${percentageFormatter.format(Number(percent) || 0)}%`
+                    ),
+                },
+                labelLine: {
+                    ...(series.labelLine || {}),
+                    show: true,
+                    length: 18,
+                    length2: 20,
+                    smooth: false,
+                },
+                labelLayout: {
+                    hideOverlap: false,
+                    moveOverlap: 'shiftY',
+                },
+            };
+        }),
+    };
     const exportContainer = document.createElement('div');
     exportContainer.style.cssText = `position:fixed;left:-10000px;top:0;width:${width}px;height:${height}px;`;
     document.body.append(exportContainer);
     const exportChart = echarts.init(exportContainer, null, { renderer: 'svg', width, height });
 
     try {
-        exportChart.setOption(chart.getOption(), true);
+        exportChart.setOption(exportOption, true);
+        exportChart.resize({ width, height, animation: false });
         return {
             svg: svgDataUrlToText(exportChart.getDataURL({ type: 'svg', backgroundColor: '#ffffff' })),
             width,
@@ -269,17 +336,21 @@ export const combineChartAndTable = (chart, container, table, title, subtitle) =
     const chartAsset = chartToSvgAsset(chart, container);
     const tableAsset = tableToSvg(table, title, subtitle);
     const gap = 24;
-    const width = Math.max(chartAsset.width, tableAsset.width);
-    const height = chartAsset.height + gap + tableAsset.height;
-    const chartX = (width - chartAsset.width) / 2;
-    const tableX = (width - tableAsset.width) / 2;
+    const horizontalPadding = 56;
+    const verticalPadding = 28;
+    const contentWidth = Math.max(chartAsset.width, tableAsset.width);
+    const width = contentWidth + (horizontalPadding * 2);
+    const height = verticalPadding + chartAsset.height + gap + tableAsset.height + verticalPadding;
+    const chartX = horizontalPadding + ((contentWidth - chartAsset.width) / 2);
+    const tableX = horizontalPadding + ((contentWidth - tableAsset.width) / 2);
+    const tableY = verticalPadding + chartAsset.height + gap;
     const svg = [
         `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
         `<rect width="${width}" height="${height}" fill="#ffffff"/>`,
-        `<svg x="${chartX}" y="0" width="${chartAsset.width}" height="${chartAsset.height}" viewBox="0 0 ${chartAsset.width} ${chartAsset.height}">`,
+        `<svg x="${chartX}" y="${verticalPadding}" width="${chartAsset.width}" height="${chartAsset.height}" viewBox="0 0 ${chartAsset.width} ${chartAsset.height}">`,
         svgBody(chartAsset.svg),
         '</svg>',
-        `<svg x="${tableX}" y="${chartAsset.height + gap}" width="${tableAsset.width}" height="${tableAsset.height}" viewBox="0 0 ${tableAsset.width} ${tableAsset.height}">`,
+        `<svg x="${tableX}" y="${tableY}" width="${tableAsset.width}" height="${tableAsset.height}" viewBox="0 0 ${tableAsset.width} ${tableAsset.height}">`,
         svgBody(tableAsset.svg),
         '</svg>',
         '</svg>',

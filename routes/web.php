@@ -29,6 +29,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\MediaFileController;
 use App\Http\Controllers\Web\ContactController;
+use App\Http\Controllers\Web\AnnouncementAttachmentController;
+use App\Http\Controllers\Web\AnnouncementController;
 use App\Http\Controllers\Web\ErrorController;
 use App\Http\Controllers\Web\GalleryController;
 use App\Http\Controllers\Web\HomeController;
@@ -145,7 +147,17 @@ Route::get('/data-statistik/penduduk', [VillageStatisticController::class, 'popu
 Route::get('/data-statistik/{section}', [VillageStatisticController::class, 'show'])->where('section', 'penduduk|keluarga|pendidikan|pekerjaan|ekonomi|idm|visualisasi')->name('data-statistik.detail');
 Route::get('/transparansi-apbdes', [VillageStatisticController::class, 'budgetHistory'])->name('transparansi-apbdes');
 Route::get('/informasi-publik-desa', [PublicationController::class, 'index'])->name('informasi-publik-desa');
-Route::get('/informasi-desa/{section}', [PublicationController::class, 'show'])->where('section', 'pengumuman|layanan-administrasi|agenda|bantuan-sosial|informasi-publik')->name('informasi-desa.detail');
+Route::prefix('informasi-desa/pengumuman')->name('announcements.')->group(function () {
+    Route::get('/', [AnnouncementController::class, 'index'])->name('index');
+    Route::get('/{publication:slug}/lampiran/{attachment}/lihat', [AnnouncementAttachmentController::class, 'preview'])
+        ->middleware('throttle:120,1')
+        ->name('attachments.preview');
+    Route::get('/{publication:slug}/lampiran/{attachment}/unduh', [AnnouncementAttachmentController::class, 'download'])
+        ->middleware('throttle:60,1')
+        ->name('attachments.download');
+    Route::get('/{publication:slug}', [AnnouncementController::class, 'show'])->name('show');
+});
+Route::get('/informasi-desa/{section}', [PublicationController::class, 'show'])->where('section', 'layanan-administrasi|agenda|bantuan-sosial|informasi-publik')->name('informasi-desa.detail');
 Route::get('/peta-desa', [VillageMapController::class, 'index'])->name('peta-desa');
 Route::get('/peta-desa/geojson', [VillageMapController::class, 'geoJson'])->middleware('throttle:60,1')->name('peta-desa.geojson');
 Route::get('/galeri-desa', [GalleryController::class, 'index'])->name('galeri-desa');

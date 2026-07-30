@@ -50,6 +50,7 @@ final class SecurityHeaders
             $connectSources[] = preg_replace('/^http/', 'ws', $viteOrigin);
             $imageSources[] = $viteOrigin;
         }
+        $imageSources[] = 'blob:';
 
         return implode('; ', [
             "default-src 'self'",

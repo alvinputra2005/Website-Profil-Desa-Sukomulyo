@@ -57,6 +57,38 @@
 @error($name)<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
 </div>
 @endforeach
+@if($resource==='publications')
+<div class="publication-attachment-manager" data-publication-attachments>
+    <hr>
+    <h4><i class="fa fa-file-pdf-o text-red"></i> Lampiran PDF</h4>
+    <p class="help-block">Unggah maksimal 10 PDF per sekali simpan, masing-masing maksimal 10 MB. Lampiran pertama menjadi PDF utama pada daftar pengumuman.</p>
+    <div class="form-group {{ $errors->has('attachment_uploads.*')?'has-error':'' }}">
+        <label for="attachment_uploads">Tambah lampiran PDF</label>
+        <input id="attachment_uploads" type="file" name="attachment_uploads[]" class="form-control" accept="application/pdf,.pdf" multiple data-attachment-files>
+        @error('attachment_uploads')<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
+        @error('attachment_uploads.*')<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
+    </div>
+    <div class="publication-attachment-list" data-attachment-list>
+        @foreach($publicationAttachments as $attachment)
+        <div class="publication-attachment-row" data-attachment-row data-existing-attachment>
+            <span class="publication-attachment-handle" title="Urutkan lampiran"><i class="fa fa-bars"></i></span>
+            <i class="fa fa-file-pdf-o text-red publication-attachment-file-icon"></i>
+            <div class="publication-attachment-fields">
+                <strong>{{ $attachment->media?->original_name }}</strong>
+                <input type="text" name="publication_attachments[{{ $attachment->id }}][title]" class="form-control input-sm" value="{{ old('publication_attachments.'.$attachment->id.'.title',$attachment->title) }}" placeholder="Judul tampilan (opsional)">
+                <input type="hidden" name="publication_attachments[{{ $attachment->id }}][display_order]" value="{{ $attachment->display_order }}" data-attachment-order>
+                <input type="hidden" name="attachment_sequence[]" value="existing:{{ $attachment->id }}" data-attachment-sequence>
+                <label class="publication-attachment-remove"><input type="checkbox" name="remove_publication_attachments[]" value="{{ $attachment->id }}" data-attachment-remove> Hapus lampiran</label>
+            </div>
+            <div class="publication-attachment-controls">
+                <button type="button" class="btn btn-default btn-xs" data-attachment-up aria-label="Naikkan urutan"><i class="fa fa-arrow-up"></i></button>
+                <button type="button" class="btn btn-default btn-xs" data-attachment-down aria-label="Turunkan urutan"><i class="fa fa-arrow-down"></i></button>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
 </div><div class="box-footer {{ $resource==='galleries' ? 'gallery-form-actions' : '' }}"><a href="{{ route('admin.resources.index',$resource) }}" class="btn btn-default"><i class="fa fa-arrow-left"></i> Kembali</a>@if($resource!=='categories')<button type="reset" class="btn btn-warning"><i class="fa fa-refresh"></i> Reset</button>@endif<button type="submit" class="btn btn-social btn-info pull-right"><i class="fa fa-save"></i> Simpan</button></div></div>
 
 </form>

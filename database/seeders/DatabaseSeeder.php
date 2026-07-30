@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
         }
         $this->call(GovernmentOfficialSeeder::class);
         $this->call(NewsSeeder::class);
+        $this->call(AnnouncementSeeder::class);
         $this->call(GallerySeeder::class);
         Gallery::firstOrCreate(['slug' => 'kegiatan-desa'], ['title' => 'Kegiatan Desa', 'description' => 'Dokumentasi kegiatan warga Desa Sukomulyo.', 'status' => 'published', 'created_by' => $admin->id]);
         StatisticDataset::firstOrCreate(['slug' => 'jumlah-penduduk'], ['category' => 'penduduk', 'title' => 'Jumlah Penduduk', 'description' => 'Statistik jumlah penduduk desa.', 'year' => now()->year, 'unit' => 'jiwa', 'visualization_type' => 'bar', 'status' => 'published', 'display_order' => 0, 'created_by' => $admin->id]);
