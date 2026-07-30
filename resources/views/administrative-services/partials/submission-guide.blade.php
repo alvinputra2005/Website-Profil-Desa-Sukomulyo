@@ -9,7 +9,6 @@
             data-sidebar-accordion-toggle
         >
             <span>
-                <i class="fas fa-list-ol" aria-hidden="true"></i>
                 Tata Cara Pengajuan
             </span>
             <i class="fas fa-chevron-down administration-sidebar-chevron" aria-hidden="true"></i>

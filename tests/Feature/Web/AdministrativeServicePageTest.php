@@ -34,22 +34,16 @@ class AdministrativeServicePageTest extends TestCase
         $this->assertSame(1, substr_count($html, 'data-administrative-services'));
     }
 
-    public function test_page_shows_flow_schedule_contact_and_free_service_status(): void
+    public function test_page_shows_flow_and_submission_guide_without_office_information_card(): void
     {
         $this->get(route('informasi-desa.detail', ['section' => 'layanan-administrasi']))
             ->assertOk()
             ->assertSee('Alur Pelayanan')
             ->assertSee('Tata Cara Pengajuan')
-            ->assertSee('Senin–Jumat')
-            ->assertSee('08.00–16.00 WIB')
-            ->assertSee('12.00–13.00 WIB')
-            ->assertSee('085731625435')
-            ->assertSee('Gratis')
-            ->assertSee('Tanpa dipungut biaya')
-            ->assertSee('1 × 24 jam')
-            ->assertSee('https://wa.me/6285731625435?text=', false)
-            ->assertSee('target="_blank"', false)
-            ->assertSee('rel="noopener noreferrer"', false);
+            ->assertDontSee('service-flow-actor', false)
+            ->assertDontSee('Informasi Pelayanan')
+            ->assertDontSee('administration-office-card', false)
+            ->assertDontSee('administration-whatsapp', false);
     }
 
     public function test_page_uses_accessible_accordions_and_local_search(): void

@@ -1,5 +1,4 @@
 <header class="administration-section-header">
-    <span class="administration-section-kicker">Pelayanan masyarakat</span>
     <h2 id="administration-requirements-heading">Persyaratan Pelayanan</h2>
     <p>Pilih jenis pelayanan untuk melihat dokumen yang perlu disiapkan.</p>
 </header>

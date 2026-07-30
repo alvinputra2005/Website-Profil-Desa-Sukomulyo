@@ -14,7 +14,7 @@
         <x-page-header
             :title="$page['title']"
             :description="$page['description']"
-            :show-heading="true"
+            :show-heading="false"
             :breadcrumbs="[
                 ['label' => 'Informasi Desa', 'url' => route('informasi-publik-desa')],
                 ['label' => $page['title']],
