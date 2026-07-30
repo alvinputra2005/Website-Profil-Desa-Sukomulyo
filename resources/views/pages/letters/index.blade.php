@@ -28,19 +28,12 @@
                     @if($services->isNotEmpty())
                         <div class="letter-choice-grid" role="radiogroup" aria-label="Jenis surat">
                             @foreach($services as $service)
-                                <button class="letter-choice {{ $loop->first ? 'is-selected' : '' }}" type="button" role="radio"
-                                    aria-checked="{{ $loop->first ? 'true' : 'false' }}" data-letter-choice
-                                    data-url="{{ route('letter-services.application.create', $service) }}">
+                                <a class="letter-choice {{ $loop->first ? 'is-selected' : '' }}" href="{{ route('letter-services.application.create', $service) }}">
                                     <span class="letter-choice-icon"><i class="fas {{ $serviceIcons[$service->code] ?? 'fa-file-alt' }}" aria-hidden="true"></i></span>
                                     <span class="letter-choice-copy"><strong>{{ $service->name }}</strong><small>{{ $service->description }}</small></span>
                                     <i class="fas fa-chevron-right letter-choice-arrow" aria-hidden="true"></i>
-                                </button>
+                                </a>
                             @endforeach
-                        </div>
-                        <div class="letter-selector-action">
-                            <a class="letter-next-button" data-letter-next href="{{ route('letter-services.application.create', $firstService) }}">
-                                Selanjutnya <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                            </a>
                         </div>
                     @else
                         <div class="letter-notice">Belum ada layanan surat yang aktif.</div>

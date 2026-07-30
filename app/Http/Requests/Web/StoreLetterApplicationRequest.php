@@ -3,8 +3,10 @@
 namespace App\Http\Requests\Web;
 
 use App\Models\LetterService;
+use App\Models\PopulationArea;
 use App\Services\Letters\LetterFormSchemaService;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreLetterApplicationRequest extends FormRequest
 {
@@ -25,7 +27,14 @@ class StoreLetterApplicationRequest extends FormRequest
             'birth_date' => ['nullable', 'date', 'before_or_equal:today'],
             'sex' => ['nullable', 'in:L,P'],
             'address' => ['required', 'string', 'min:10', 'max:2000'],
-            'hamlet' => ['nullable', 'string', 'max:100'],
+            'hamlet' => ['nullable', 'string', Rule::in(
+                collect(['Gumul', 'Talasan', 'Bakir', 'Kedungrejo', 'Biyan'])
+                    ->concat(PopulationArea::query()->whereNotNull('hamlet')->distinct()->pluck('hamlet'))
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all()
+            )],
             'rt' => ['nullable', 'digits_between:1,3'],
             'rw' => ['nullable', 'digits_between:1,3'],
             'purpose' => ['required', 'string', 'min:5', 'max:2000'],

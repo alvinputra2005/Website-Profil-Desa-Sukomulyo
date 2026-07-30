@@ -11,6 +11,7 @@ use App\Http\Requests\Web\StoreLetterApplicationRequest;
 use App\Http\Requests\Web\UpdateLetterApplicationRequest;
 use App\Models\LetterApplication;
 use App\Models\LetterService;
+use App\Models\PopulationArea;
 use App\Services\Letters\LetterFormSchemaService;
 use App\Services\Web\PublicSiteService;
 use Illuminate\Http\RedirectResponse;
@@ -27,7 +28,23 @@ class LetterApplicationController extends Controller
         session(["letter_submission.{$submissionKey}" => ['service_id' => $letterService->id]]);
         $site->shareLayout();
 
-        return view('pages.letters.create', ['letterService' => $letterService, 'fields' => $schemas->fields($letterService), 'submissionKey' => $submissionKey]);
+        $defaultHamlets = ['Gumul', 'Talasan', 'Bakir', 'Kedungrejo', 'Biyan'];
+        $hamlets = PopulationArea::query()
+            ->whereNotNull('hamlet')
+            ->distinct()
+            ->orderBy('hamlet')
+            ->pluck('hamlet')
+            ->filter()
+            ->values()
+            ->all();
+        $hamlets = collect($defaultHamlets)->concat($hamlets)->unique()->values()->all();
+
+        return view('pages.letters.create', [
+            'letterService' => $letterService,
+            'fields' => $schemas->fields($letterService),
+            'submissionKey' => $submissionKey,
+            'hamlets' => $hamlets,
+        ]);
     }
 
     public function store(StoreLetterApplicationRequest $request, LetterService $letterService, CreateLetterApplicationAction $action): RedirectResponse
