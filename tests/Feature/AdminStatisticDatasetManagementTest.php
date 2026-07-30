@@ -102,13 +102,22 @@ class AdminStatisticDatasetManagementTest extends TestCase
         $this->assertSame(['under_15' => 7, 'age_15_19' => 11], $dataset->fresh()->totals_json);
 
         $this->actingAs($admin)
+            ->get(route('admin.statistics.categories.export.csv', [
+                'category' => $category->slug,
+                'dataset' => $dataset->slug,
+            ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+        $this->actingAs($admin)
             ->get(route('admin.statistics.categories.create', [
                 'category' => $category->slug,
                 'template' => $dataset->id,
             ]))
             ->assertOk()
-            ->assertSee('Tambah Data Statistik')
-            ->assertSee('BAKIR RW 01');
+            ->assertSee('Tambah Periode Statistik')
+            ->assertSee('BAKIR RW 01')
+            ->assertSee('Semua nilai statistik dan total telah dikosongkan');
 
         $this->actingAs($admin)
             ->post(route('admin.statistics.categories.store', $category->slug), [

@@ -1,13 +1,14 @@
 @extends('layouts.admin')
 
 @php($isCreate = $isCreate ?? false)
-@section('title', $isCreate ? 'Tambah Data Statistik' : 'Edit Data Statistik')
+@section('title', $isCreate ? 'Tambah Periode Statistik' : 'Edit Data Statistik')
 @section('page-description', $category->name.' · '.($dataset->short_title ?: $dataset->title))
 
 @section('content')
 <form method="post" action="{{ $isCreate ? route('admin.statistics.categories.store', $category->slug) : route('admin.statistics.categories.update', ['category' => $category->slug, 'dataset' => $dataset->slug]) }}" class="statistics-edit-form">
     @csrf @unless($isCreate) @method('put') @endunless
     @if($isCreate && $templateId)<input type="hidden" name="template_id" value="{{ $templateId }}">@endif
+    @if($isCreate && $templateId)<div class="callout callout-info"><h4>Periode baru</h4><p>Struktur tabel dan daftar RW disalin dari periode sebelumnya. Semua nilai statistik dan total telah dikosongkan; isi data baru sebelum menerbitkannya.</p></div>@endif
     <div class="box box-success">
         <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-info-circle"></i> Informasi Dataset</h3><div class="box-tools">
             <a href="{{ $isCreate ? route('admin.statistics.categories.show', $category->slug) : route('admin.statistics.categories.show', ['category' => $category->slug, 'data' => ($dataset->family && $dataset->table_number ? $dataset->family.':'.$dataset->table_number : 'dataset:'.$dataset->id), 'period' => $dataset->period]) }}" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Kembali</a>
@@ -19,7 +20,7 @@
                 <div class="form-group col-md-4 @error('short_title') has-error @enderror"><label for="short_title">Nama pada Dropdown</label><input id="short_title" name="short_title" class="form-control" value="{{ old('short_title', $dataset->short_title) }}" maxlength="255">@error('short_title')<span class="help-block">{{ $message }}</span>@enderror</div>
             </div>
             <div class="row">
-                <div class="form-group col-md-3 @error('period') has-error @enderror"><label for="period">Tahun/Periode</label><input id="period" name="period" class="form-control" value="{{ old('period', $dataset->period ?: $dataset->year) }}" required maxlength="50">@error('period')<span class="help-block">{{ $message }}</span>@enderror</div>
+                <div class="form-group col-md-3 @error('period') has-error @enderror"><label for="period">Tahun/Periode</label><input id="period" name="period" class="form-control" value="{{ old('period', $dataset->period) }}" placeholder="Contoh: 2023" required maxlength="50">@error('period')<span class="help-block">{{ $message }}</span>@enderror</div>
                 <div class="form-group col-md-3 @error('unit') has-error @enderror"><label for="unit">Satuan</label><input id="unit" name="unit" class="form-control" value="{{ old('unit', $dataset->unit) }}" required maxlength="50">@error('unit')<span class="help-block">{{ $message }}</span>@enderror</div>
                 <div class="form-group col-md-3 @error('status') has-error @enderror"><label for="status">Status Publikasi</label><select id="status" name="status" class="form-control">@foreach (['draft' => 'Draf', 'published' => 'Terbit', 'needs_review' => 'Perlu Ditinjau', 'archived' => 'Arsip'] as $value => $label)<option value="{{ $value }}" @selected(old('status', $dataset->status) === $value)>{{ $label }}</option>@endforeach</select>@error('status')<span class="help-block">{{ $message }}</span>@enderror</div>
                 <div class="form-group col-md-3 @error('source') has-error @enderror"><label for="source">Sumber</label><input id="source" name="source" class="form-control" value="{{ old('source', $dataset->source) }}" maxlength="255">@error('source')<span class="help-block">{{ $message }}</span>@enderror</div>

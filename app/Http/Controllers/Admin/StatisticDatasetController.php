@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\View\View;
 
 class StatisticDatasetController extends Controller
@@ -124,31 +125,69 @@ class StatisticDatasetController extends Controller
         return view('admin.statistics.edit', compact('category', 'dataset'));
     }
 
+    public function exportCsv(StatisticCategory $category, StatisticDataset $dataset): StreamedResponse
+    {
+        $this->ensureDatasetBelongsToCategory($category, $dataset);
+        $this->authorize('view', $dataset);
+        $dataset->load('rows');
+        $columns = collect($dataset->columns_json ?? []);
+        $filename = Str::slug($dataset->short_title ?: $dataset->title).'-'.($dataset->period ?: $dataset->year).'.csv';
+
+        return response()->streamDownload(function () use ($dataset, $columns): void {
+            $output = fopen('php://output', 'wb');
+            fwrite($output, "\xEF\xBB\xBF");
+            fputcsv($output, $columns->pluck('label')->all(), ';');
+
+            foreach ($dataset->rows as $row) {
+                fputcsv($output, $columns->map(function (array $column) use ($row): mixed {
+                    return match ($column['key'] ?? '') {
+                        'area_code' => $row->area_code,
+                        'area_name' => $row->area_name,
+                        default => data_get($row->values_json, $column['key'] ?? ''),
+                    };
+                })->all(), ';');
+            }
+
+            if ($dataset->totals_json) {
+                fputcsv($output, $columns->map(function (array $column) use ($dataset): mixed {
+                    return match ($column['key'] ?? '') {
+                        'area_code' => 'JUMLAH TOTAL',
+                        'area_name' => '',
+                        default => data_get($dataset->totals_json, $column['key'] ?? ''),
+                    };
+                })->all(), ';');
+            }
+
+            fclose($output);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function create(Request $request, StatisticCategory $category): View
     {
         $this->authorize('create', StatisticDataset::class);
         $template = $category->datasets()
             ->with('rows')
             ->find($request->integer('template'));
+        $columns = collect($template?->columns_json ?? [])->keyBy('key');
 
         $dataset = new StatisticDataset([
-            'title' => $template ? 'Salinan '.$template->title : '',
+            'title' => $template?->title,
             'short_title' => $template?->short_title,
             'description' => $template?->description,
-            'period' => $template?->period ?? now()->year,
-            'year' => $template?->year ?? now()->year,
+            'period' => '',
+            'year' => now()->year,
             'unit' => $template?->unit ?? 'data',
             'source' => $template?->source,
             'status' => 'draft',
             'visualization_type' => $template?->visualization_type ?? 'table',
             'columns_json' => $template?->columns_json ?? [],
-            'totals_json' => $template?->totals_json ?? [],
+            'totals_json' => $this->emptyStatisticValues($columns),
         ]);
         $dataset->setRelation('rows', $template
             ? $template->rows->map(fn (StatisticRow $row): StatisticRow => new StatisticRow([
                 'area_code' => $row->area_code,
                 'area_name' => $row->area_name,
-                'values_json' => $row->values_json,
+                'values_json' => $this->emptyStatisticValues($columns),
             ]))
             : collect());
 
@@ -184,7 +223,8 @@ class StatisticDatasetController extends Controller
                 'visualization_type' => $template?->visualization_type ?? 'table',
                 'source' => $validated['source'] ?? null,
                 'status' => $validated['status'],
-                'display_order' => ((int) $category->datasets()->max('display_order')) + 1,
+                'display_order' => $template?->display_order
+                    ?? ((int) $category->datasets()->max('display_order')) + 1,
                 'created_by' => auth()->id(),
                 'columns_json' => $template?->columns_json ?? [],
                 'totals_json' => $this->normalizedValues($validated['totals'] ?? [], $columns, true),
@@ -210,7 +250,7 @@ class StatisticDatasetController extends Controller
 
         return redirect()
             ->route('admin.statistics.categories.edit', ['category' => $category->slug, 'dataset' => $dataset->slug])
-            ->with('success', 'Data statistik baru berhasil ditambahkan.');
+            ->with('success', 'Periode statistik baru berhasil ditambahkan.');
     }
 
     public function update(
@@ -326,6 +366,18 @@ class StatisticDatasetController extends Controller
         $value = trim((string) $value);
 
         return $value === '' ? null : $value;
+    }
+
+    /**
+     * @param  Collection<string, array<string, mixed>>  $columns
+     * @return array<string, null>
+     */
+    private function emptyStatisticValues(Collection $columns): array
+    {
+        return $columns
+            ->except(['area_code', 'area_name'])
+            ->mapWithKeys(fn (array $_column, string $key): array => [$key => null])
+            ->all();
     }
 
     private function uniqueSlug(string $title, string $period): string

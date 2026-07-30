@@ -50,7 +50,7 @@
                 </select>
             </div>
             <div class="statistics-category-filter-action">
-                <a href="{{ route('admin.statistics.categories.create', ['category' => $category->slug, 'template' => $dataset?->id]) }}" class="btn btn-success"><i class="fa fa-plus"></i> Tambah Data</a>
+                <a href="{{ route('admin.statistics.categories.create', ['category' => $category->slug, 'template' => $dataset?->id]) }}" class="btn btn-success"><i class="fa fa-plus"></i> Tambah Periode</a>
             </div>
         </form>
     </div>
@@ -85,6 +85,7 @@
                 </dl>
             </div>
             <div class="statistics-dataset-actions">
+                <a href="{{ route('admin.statistics.categories.export.csv', ['category' => $category->slug, 'dataset' => $dataset->slug]) }}" class="btn btn-default"><i class="fa fa-download"></i> Download CSV</a>
                 @if ($dataset->status === 'published')
                     <a href="{{ route('data-statistik.imported.show', ['category' => $category->slug, 'dataset' => $dataset->slug]) }}" target="_blank" rel="noopener" class="btn btn-default"><i class="fa fa-eye"></i> Lihat Publik</a>
                 @endif
@@ -98,7 +99,6 @@
                     <x-statistic-table-header
                         :columns="$dataset->columns_json ?? []"
                         :leading="[['label' => 'No', 'class' => 'statistics-row-number']]"
-                        :trailing="[['label' => 'Aksi', 'class' => 'statistics-row-action']]"
                     />
                     <tbody>
                         @forelse ($dataset->rows as $row)
@@ -108,10 +108,9 @@
                                     @php($value = match ($key) { 'area_code' => $row->area_code, 'area_name' => $row->area_name, default => data_get($row->values_json, $key) })
                                     <td class="{{ $key === 'area_name' ? 'statistics-area-name' : 'statistics-data-cell' }}">{{ $formatValue($value, $column['type'] ?? 'string') }}</td>
                                 @endforeach
-                                <td class="text-center"><a href="{{ route('admin.statistics.categories.edit', ['category' => $category->slug, 'dataset' => $dataset->slug]).'#row-'.$row->id }}" class="btn btn-warning btn-xs" title="Edit baris {{ $loop->iteration }}"><i class="fa fa-pencil"></i></a></td>
                             </tr>
                         @empty
-                            <tr><td colspan="{{ count($dataset->columns_json ?? []) + 2 }}" class="empty-state">Dataset ini belum memiliki baris data.</td></tr>
+                            <tr><td colspan="{{ count($dataset->columns_json ?? []) + 1 }}" class="empty-state">Dataset ini belum memiliki baris data.</td></tr>
                         @endforelse
                     </tbody>
                     @if ($dataset->totals_json)
@@ -120,7 +119,6 @@
                             @foreach (collect($dataset->columns_json ?? [])->reject(fn ($column) => in_array($column['key'] ?? '', ['area_code', 'area_name'], true)) as $column)
                                 <th class="text-right">{{ $formatValue(data_get($dataset->totals_json, $column['key']), $column['type'] ?? 'string') }}</th>
                             @endforeach
-                            <th></th>
                         </tr></tfoot>
                     @endif
                 </table>
