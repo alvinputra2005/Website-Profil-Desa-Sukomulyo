@@ -4,9 +4,13 @@ use App\Http\Middleware\EnsureActiveUser;
 use App\Http\Middleware\HandleCmsRedirects;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TrackSiteVisit;
+use App\Services\Web\PublicSiteService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -25,5 +29,18 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $renderAnnouncementNotFound = function (Request $request) {
+            if (! $request->is('informasi-desa/pengumuman*') || $request->expectsJson()) {
+                return null;
+            }
+
+            return app(PublicSiteService::class)->notFound();
+        };
+
+        $exceptions->render(
+            fn (NotFoundHttpException $exception, Request $request) => $renderAnnouncementNotFound($request)
+        );
+        $exceptions->render(
+            fn (ModelNotFoundException $exception, Request $request) => $renderAnnouncementNotFound($request)
+        );
     })->create();

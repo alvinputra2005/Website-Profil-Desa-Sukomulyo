@@ -31,6 +31,7 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringContainsString('https://fonts.googleapis.com', $policy);
         $this->assertStringContainsString('https://fonts.gstatic.com', $policy);
         $this->assertStringContainsString('https://www.google.com', $policy);
+        $this->assertStringContainsString('blob:', $policy);
         $this->assertStringNotContainsString('*', $policy);
     }
 

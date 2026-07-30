@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\PopulationGroupController;
 use App\Http\Controllers\Admin\PopulationGroupMemberController;
 use App\Http\Controllers\Admin\PopulationReportController;
 use App\Http\Controllers\Admin\PopulationStatisticsController;
+use App\Http\Controllers\Admin\PopulationYearlySnapshotController;
 use App\Http\Controllers\Admin\RegionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\Village\VillageIdentityController;
@@ -32,6 +33,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\MediaFileController;
 use App\Http\Controllers\Web\ContactController;
+use App\Http\Controllers\Web\AnnouncementAttachmentController;
+use App\Http\Controllers\Web\AnnouncementController;
 use App\Http\Controllers\Web\ErrorController;
 use App\Http\Controllers\Web\GalleryController;
 use App\Http\Controllers\Web\HomeController;
@@ -106,6 +109,12 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::put('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'update'])->name('groups.members.update');
         Route::delete('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'destroy'])->name('groups.members.destroy');
         Route::get('statistik', PopulationStatisticsController::class)->name('statistics');
+        Route::patch('statistik-tahunan/{yearly_snapshot}/publikasi', [PopulationYearlySnapshotController::class, 'togglePublication'])
+            ->name('yearly-snapshots.toggle-publication');
+        Route::resource('statistik-tahunan', PopulationYearlySnapshotController::class)
+            ->parameters(['statistik-tahunan' => 'yearly_snapshot'])
+            ->except('show')
+            ->names('yearly-snapshots');
         Route::get('laporan-penduduk', [PopulationReportController::class, 'index'])->name('report');
         Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
     });
@@ -181,13 +190,21 @@ Route::get('/profile-desa/{section}', [VillageProfileController::class, 'show'])
 Route::get('/pemerintahan-desa', [VillageProfileController::class, 'government'])->name('pemerintahan-desa');
 Route::get('/potensi-desa', [VillageProfileController::class, 'potentials'])->name('potensi-desa');
 Route::get('/data-desa-statistik', [VillageStatisticController::class, 'index'])->name('data-desa-statistik');
-Route::get('/data-statistik/{section}', [VillageStatisticController::class, 'show'])->where('section', 'penduduk|pendidikan|pekerjaan|ekonomi|idm|visualisasi')->name('data-statistik.detail');
-Route::get('/kependudukan', [VillageStatisticController::class, 'index'])->name('kependudukan');
-Route::get('/kependudukan/{section}', [VillageStatisticController::class, 'show'])->where('section', 'ringkasan|jenis-kelamin|kelompok-umur|pendidikan|pekerjaan|agama|status-perkawinan')->name('kependudukan.detail');
-Route::get('/laporan-penduduk', [VillageStatisticController::class, 'populationReport'])->name('laporan-penduduk');
+Route::get('/data-statistik/penduduk', [VillageStatisticController::class, 'population'])->name('data-statistik.population');
+Route::get('/data-statistik/{section}', [VillageStatisticController::class, 'show'])->where('section', 'penduduk|keluarga|pendidikan|pekerjaan|ekonomi|idm|visualisasi')->name('data-statistik.detail');
 Route::get('/transparansi-apbdes', [VillageStatisticController::class, 'budgetHistory'])->name('transparansi-apbdes');
 Route::get('/informasi-publik-desa', [PublicationController::class, 'index'])->name('informasi-publik-desa');
-Route::get('/informasi-desa/{section}', [PublicationController::class, 'show'])->where('section', 'pengumuman|layanan-administrasi|agenda|bantuan-sosial|informasi-publik')->name('informasi-desa.detail');
+Route::prefix('informasi-desa/pengumuman')->name('announcements.')->group(function () {
+    Route::get('/', [AnnouncementController::class, 'index'])->name('index');
+    Route::get('/{publication:slug}/lampiran/{attachment}/lihat', [AnnouncementAttachmentController::class, 'preview'])
+        ->middleware('throttle:120,1')
+        ->name('attachments.preview');
+    Route::get('/{publication:slug}/lampiran/{attachment}/unduh', [AnnouncementAttachmentController::class, 'download'])
+        ->middleware('throttle:60,1')
+        ->name('attachments.download');
+    Route::get('/{publication:slug}', [AnnouncementController::class, 'show'])->name('show');
+});
+Route::get('/informasi-desa/{section}', [PublicationController::class, 'show'])->where('section', 'layanan-administrasi|agenda|bantuan-sosial|informasi-publik')->name('informasi-desa.detail');
 Route::get('/peta-desa', [VillageMapController::class, 'index'])->name('peta-desa');
 Route::get('/peta-desa/geojson', [VillageMapController::class, 'geoJson'])->middleware('throttle:60,1')->name('peta-desa.geojson');
 Route::get('/galeri-desa', [GalleryController::class, 'index'])->name('galeri-desa');

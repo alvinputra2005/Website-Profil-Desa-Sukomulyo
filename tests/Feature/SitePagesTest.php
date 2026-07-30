@@ -21,19 +21,12 @@ class SitePagesTest extends TestCase
             route('potensi-desa') => 'Potensi Desa',
             route('data-desa-statistik') => 'Data Desa',
             route('data-statistik.detail', ['section' => 'penduduk']) => 'Statistik Penduduk',
+            route('data-statistik.detail', ['section' => 'keluarga']) => 'Statistik Keluarga',
             route('data-statistik.detail', ['section' => 'pendidikan']) => 'Statistik Pendidikan',
             route('data-statistik.detail', ['section' => 'pekerjaan']) => 'Statistik Pekerjaan',
             route('data-statistik.detail', ['section' => 'ekonomi']) => 'Statistik Ekonomi',
             route('data-statistik.detail', ['section' => 'idm']) => 'IDM (Indeks Desa Membangun)',
             route('data-statistik.detail', ['section' => 'visualisasi']) => 'Visualisasi Data',
-            route('kependudukan') => 'Data Desa',
-            route('kependudukan.detail', ['section' => 'ringkasan']) => 'Ringkasan Penduduk',
-            route('kependudukan.detail', ['section' => 'jenis-kelamin']) => 'Jenis Kelamin',
-            route('kependudukan.detail', ['section' => 'kelompok-umur']) => 'Kelompok Umur',
-            route('kependudukan.detail', ['section' => 'pendidikan']) => 'Pendidikan',
-            route('kependudukan.detail', ['section' => 'pekerjaan']) => 'Pekerjaan',
-            route('kependudukan.detail', ['section' => 'agama']) => 'Agama',
-            route('kependudukan.detail', ['section' => 'status-perkawinan']) => 'Status Perkawinan',
             route('informasi-publik-desa') => 'Informasi Publik Desa',
             route('informasi-desa.detail', ['section' => 'pengumuman']) => 'Pengumuman Desa',
             route('informasi-desa.detail', ['section' => 'layanan-administrasi']) => 'Layanan Administrasi',
@@ -62,14 +55,18 @@ class SitePagesTest extends TestCase
         preg_match('/<nav class="header-navigation".*?<\/nav>/s', $html, $matches);
         $navigation = $matches[0] ?? '';
 
-        $this->assertSame(4, substr_count($navigation, '<ul class="sub-menu">'));
-        $this->assertSame(4, substr_count($navigation, 'class="nav-dropdown-toggle"'));
-        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Kependudukan', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Pendidikan', 'Layanan Administrasi', 'APBDes'] as $label) {
+        $this->assertSame(3, substr_count($navigation, '<ul class="sub-menu">'));
+        $this->assertSame(3, substr_count($navigation, 'class="nav-dropdown-toggle"'));
+        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Keluarga', 'Layanan Administrasi', 'APBDes'] as $label) {
             $this->assertStringContainsString($label, $navigation);
         }
-        foreach (['data-desa-statistik', 'kependudukan', 'informasi-publik-desa'] as $route) {
+        foreach (['data-desa-statistik', 'informasi-publik-desa'] as $route) {
             $this->assertDoesNotMatchRegularExpression('/<a href="'.preg_quote(route($route), '/').'"/', $navigation);
         }
+        $this->assertStringNotContainsString('Visualisasi Data', $navigation);
+        $this->assertStringNotContainsString('Kependudukan', $navigation);
+        $this->assertStringNotContainsString('Statistik Pendidikan', $navigation);
+        $this->assertStringNotContainsString('Statistik Pekerjaan', $navigation);
         $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('profile-desa'), '/').'".*?>\s*<span>Identitas Desa<\/span>/s', $navigation);
         $this->assertStringNotContainsString('>Peta Desa</a>', $navigation);
         $this->assertStringNotContainsString('#', $navigation);
@@ -89,6 +86,28 @@ class SitePagesTest extends TestCase
         $this->get('/berita-desa/artikel-tidak-ada')
             ->assertNotFound()
             ->assertSee('Halaman Tidak Ditemukan');
+    }
+
+    public function test_removed_population_pages_are_not_accessible_or_listed_in_navigation(): void
+    {
+        foreach ([
+            '/kependudukan',
+            '/kependudukan/ringkasan',
+            '/kependudukan/jenis-kelamin',
+            '/kependudukan/kelompok-umur',
+            '/kependudukan/pendidikan',
+            '/kependudukan/pekerjaan',
+            '/kependudukan/agama',
+            '/kependudukan/status-perkawinan',
+            '/laporan-penduduk',
+        ] as $url) {
+            $this->get($url)->assertNotFound();
+        }
+
+        $html = $this->get(route('beranda'))->assertOk()->getContent();
+        preg_match('/<nav class="header-navigation".*?<\/nav>/s', $html, $matches);
+
+        $this->assertStringNotContainsString('Kependudukan', $matches[0] ?? '');
     }
 
     public function test_homepage_shows_budget_transparency_section(): void
@@ -293,7 +312,6 @@ class SitePagesTest extends TestCase
         $pages = [
             route('profile-desa.detail', 'visi-misi') => ['Profile Desa', 'Visi dan Misi'],
             route('data-statistik.detail', 'pendidikan') => ['Data Statistik', 'Statistik Pendidikan'],
-            route('kependudukan.detail', 'pekerjaan') => ['Kependudukan', 'Pekerjaan'],
             route('informasi-desa.detail', 'agenda') => ['Informasi Desa', 'Agenda Desa'],
         ];
 

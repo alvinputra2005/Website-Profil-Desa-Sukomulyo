@@ -31,7 +31,7 @@
                 <section class="information-services">
                     <h2>Akses Informasi Desa</h2>
                     <div class="value-grid">
-                        <article id="pengumuman-desa"><i class="fas fa-bullhorn" aria-hidden="true"></i><h3>Pengumuman Desa</h3><p>Informasi resmi dan pengumuman penting dari pemerintah desa.</p></article>
+                        <article id="pengumuman-desa"><i class="fas fa-bullhorn" aria-hidden="true"></i><h3><a href="{{ route('announcements.index') }}">Pengumuman Desa</a></h3><p>Informasi resmi dan pengumuman penting dari pemerintah desa.</p></article>
                         <article id="layanan-administrasi"><i class="fas fa-id-card" aria-hidden="true"></i><h3>Layanan Administrasi</h3><p>Persyaratan surat, jadwal pelayanan, dan alur pelayanan masyarakat.</p></article>
                         <article id="agenda-desa"><i class="fas fa-calendar-alt" aria-hidden="true"></i><h3>Agenda Desa</h3><p>Jadwal kegiatan desa, musyawarah, dan kegiatan masyarakat.</p></article>
                         <article id="informasi-bantuan-sosial"><i class="fas fa-hands-helping" aria-hidden="true"></i><h3>Informasi Bantuan Sosial</h3><p>Jadwal bantuan, syarat penerima, dan informasi penyaluran.</p></article>

@@ -17,6 +17,7 @@ use App\Models\Official;
 use App\Models\PopulationArea;
 use App\Models\PopulationGroup;
 use App\Models\PopulationGroupMember;
+use App\Models\PopulationYearlySnapshot;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
 use App\Models\Resident;
@@ -88,6 +89,7 @@ class AppServiceProvider extends ServiceProvider
             FamilyCard::class,
             Household::class,
             PopulationArea::class,
+            PopulationYearlySnapshot::class,
             ResidentEvent::class,
             StatisticDataset::class,
             StatisticValue::class,
@@ -128,5 +130,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(PopulationGroupMember::class, PopulationGroupMemberPolicy::class);
         Gate::policy(LetterApplication::class, LetterApplicationPolicy::class);
         Gate::policy(LetterService::class, LetterServicePolicy::class);
+        Gate::policy(PopulationYearlySnapshot::class, DataResourcePolicy::class);
     }
 }

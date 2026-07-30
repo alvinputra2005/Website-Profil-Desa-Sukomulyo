@@ -1,90 +1,11 @@
 import './bootstrap';
 import { initAjaxNavigation } from './ajax';
-
-const initGovernmentOrganization = () => {
-    const tree = document.querySelector('[data-org-tree]');
-
-    if (!tree || tree.dataset.bound === 'true') return;
-
-    tree.dataset.bound = 'true';
-
-    const chart = tree.querySelector('[data-org-chart]');
-    const nodes = [...tree.querySelectorAll('[data-org-node]')];
-    const controller = new AbortController();
-    const { signal } = controller;
-    let observer;
-
-    const setNodeActive = (node, active) => {
-        node.classList.toggle('is-active', active);
-        node.setAttribute('aria-pressed', String(active));
-    };
-
-    const closeNodes = (except = null) => {
-        nodes.forEach((node) => {
-            if (node !== except) setNodeActive(node, false);
-        });
-    };
-
-    nodes.forEach((node) => {
-        node.addEventListener('click', (event) => {
-            event.stopPropagation();
-
-            const willOpen = !node.classList.contains('is-active');
-            closeNodes(node);
-            setNodeActive(node, willOpen);
-        }, { signal });
-
-        node.addEventListener('keydown', (event) => {
-            if (event.key !== 'Escape') return;
-
-            event.preventDefault();
-            setNodeActive(node, false);
-            node.focus();
-        }, { signal });
-    });
-
-    tree.querySelectorAll('[data-org-image]').forEach((image) => {
-        const showFallback = () => {
-            image.closest('[data-org-portrait]')?.classList.add('has-image-error');
-            image.remove();
-        };
-
-        image.addEventListener('error', showFallback, { once: true, signal });
-        if (image.complete && image.naturalWidth === 0) showFallback();
-    });
-
-    document.addEventListener('click', (event) => {
-        if (!event.target.closest?.('[data-org-node]')) closeNodes();
-    }, { signal });
-
-    if (chart) {
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        if (reduceMotion || !('IntersectionObserver' in window)) {
-            chart.classList.add('is-visible');
-        } else {
-            chart.classList.add('is-animated');
-            observer = new IntersectionObserver(([entry]) => {
-                if (!entry.isIntersecting) return;
-
-                chart.classList.add('is-visible');
-                observer.disconnect();
-            }, {
-                threshold: 0.14,
-                rootMargin: '0px 0px -8% 0px',
-            });
-            observer.observe(chart);
-        }
-    }
-
-    window.addEventListener('ajax:before-render', () => {
-        observer?.disconnect();
-        controller.abort();
-    }, { once: true, signal });
-};
+import { initGenericStatistics } from './generic-statistics';
+import { initPopulationStatistics } from './population-statistics';
 
 const initPublicPage = () => {
-    initGovernmentOrganization();
+    initPopulationStatistics();
+    initGenericStatistics();
 
     const documentForm = document.querySelector('[data-r2-documents]');
     if (documentForm && documentForm.dataset.presigned === 'true' && documentForm.dataset.bound !== 'true') {
@@ -168,7 +89,8 @@ const initPublicPage = () => {
     const disableScrollReveal = Boolean(document.querySelector('[data-disable-scroll-reveal]'));
     const revealSections = disableScrollReveal
         ? []
-        : document.querySelectorAll('main section:not(.hero-slider), .footer-wrapper .footer-widget');
+        : [...document.querySelectorAll('main section:not(.hero-slider), .footer-wrapper .footer-widget')]
+            .filter((section) => !section.closest('[data-no-scroll-reveal]'));
 
     if (disableScrollReveal) {
         document.querySelectorAll('.scroll-reveal').forEach((section) => {
@@ -420,10 +342,13 @@ const initPublicPage = () => {
         toggle.addEventListener('click', () => {
             const expanded = toggle.getAttribute('aria-expanded') === 'true';
 
-            if (!expanded && toggle.hasAttribute('data-profile-widget-toggle')) {
-                const accordion = toggle.closest('[data-profile-accordion]');
+            const isAccordionToggle = toggle.hasAttribute('data-profile-widget-toggle')
+                || toggle.hasAttribute('data-sidebar-accordion-toggle');
 
-                accordion?.querySelectorAll('[data-profile-widget-toggle][aria-expanded="true"]').forEach((openToggle) => {
+            if (!expanded && isAccordionToggle) {
+                const accordion = toggle.closest('[data-profile-accordion], [data-sidebar-accordion]');
+
+                accordion?.querySelectorAll('[data-profile-widget-toggle][aria-expanded="true"], [data-sidebar-accordion-toggle][aria-expanded="true"]').forEach((openToggle) => {
                     if (openToggle === toggle) return;
 
                     openToggle.setAttribute('aria-expanded', 'false');

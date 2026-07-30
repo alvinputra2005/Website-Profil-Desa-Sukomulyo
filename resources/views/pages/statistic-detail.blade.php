@@ -1,25 +1,22 @@
 <x-layouts.app :title="$page['title']">
-    <x-page-header :title="$page['title']" :description="$page['description']" :breadcrumbs="request()->routeIs('kependudukan.detail')
-        ? [
-            ['label' => 'Kependudukan', 'url' => route('kependudukan')],
-            ['label' => $page['title']],
-        ]
-        : [
-            ['label' => 'Data Statistik', 'url' => route('data-desa-statistik')],
-            ['label' => $page['title']],
-        ]" />
+    <x-page-header :title="$page['title']" :description="$page['description']" :breadcrumbs="[
+        ['label' => 'Data Statistik', 'url' => route('data-desa-statistik')],
+        ['label' => $page['title']],
+    ]" />
 
     <div class="container">
-        <div id="sc_innerpage_wrap">
-            <section class="sc_innerpage_contentbx fullwidth">
+        <div id="sc_innerpage_wrap" class="statistics-page-layout">
+            <section class="sc_innerpage_contentbx">
                 @if (!empty($page['summary']))
                     <div class="statistics-grid">
-                        @foreach ([
+                        @php($summaryCards = $page['summary_cards'] ?? [
                             ['Jumlah Penduduk', $summary['residents'], 'jiwa', 'fas fa-users'],
                             ['Kepala Keluarga', $summary['families'], 'KK', 'fas fa-home'],
                             ['Rumah Tangga', $summary['households'], 'rumah tangga', 'fas fa-building'],
                             ['Wilayah Dusun', $summary['areas'], 'dusun', 'fas fa-map-signs'],
-                        ] as [$label, $value, $unit, $icon])
+                        ])
+                        @foreach ($summaryCards as [$label, $value, $unit, $icon])
+                            @php($value = is_string($value) ? $summary[$value] : $value)
                             <article class="statistic-card">
                                 <i class="{{ $icon }}" aria-hidden="true"></i>
                                 <div><strong>{{ number_format($value, 0, ',', '.') }}</strong><span>{{ $unit }}</span></div>
@@ -29,7 +26,7 @@
                     </div>
                 @endif
 
-                @if (empty($page['categories']))
+                @if (!empty($page['is_idm']))
                     <section class="data-panel">
                         <span class="section-kicker">Indeks Desa Membangun</span>
                         @if ($idm)
@@ -48,7 +45,7 @@
                         @endif
                     </section>
                 @else
-                    <div class="data-section-grid">
+                    <div @class(['data-section-grid', 'data-section-grid--single' => count($panels) === 1])>
                         @foreach ($panels as $panel)
                             <section class="data-panel">
                                 <span class="section-kicker">Kependudukan</span>
@@ -70,6 +67,8 @@
                     </div>
                 @endif
             </section>
+
+            <x-statistics-sidebar />
         </div>
     </div>
 </x-layouts.app>
