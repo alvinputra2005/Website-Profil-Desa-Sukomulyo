@@ -21,7 +21,16 @@
     .letter-application-detail .application-facts > div:last-child { padding-bottom: 0; border-bottom: 0; }
     .letter-application-detail .application-facts dt { margin: 0; color: var(--letter-detail-muted); font-size: 12px; font-weight: 600; }
     .letter-application-detail .application-facts dd { margin: 0; color: var(--admin-ink, #252a31); font-size: 14px; line-height: 1.45; }
-    .letter-application-detail .documents-table { margin-bottom: 0; }
+    .letter-application-detail .documents-table { width: 100%; min-width: 720px; margin-bottom: 0; table-layout: fixed; transition: min-width .15s ease; }
+    .letter-application-detail .documents-table__requirement { width: 22%; }
+    .letter-application-detail .documents-table__file { width: 25%; }
+    .letter-application-detail .documents-table__status { width: 15%; }
+    .letter-application-detail .documents-table__review { width: 38%; }
+    .letter-application-detail .documents-table.has-rejected-review { min-width: 940px; }
+    .letter-application-detail .documents-table.has-rejected-review .documents-table__requirement { width: 19%; }
+    .letter-application-detail .documents-table.has-rejected-review .documents-table__file { width: 22%; }
+    .letter-application-detail .documents-table.has-rejected-review .documents-table__status { width: 13%; }
+    .letter-application-detail .documents-table.has-rejected-review .documents-table__review { width: 46%; }
     .letter-application-detail .documents-table > thead > tr > th { color: var(--admin-ink, #252a31); font-size: 11px; letter-spacing: .03em; text-transform: uppercase; }
     .letter-application-detail .documents-table > tbody > tr > td { vertical-align: top; font-size: 13px; }
     .letter-application-detail .document-name { display: block; margin-bottom: 2px; font-weight: 600; }
@@ -29,7 +38,7 @@
     .letter-application-detail .document-meta { color: var(--letter-detail-muted); font-size: 11px; }
     .letter-application-detail .document-status { min-width: 120px; }
     .letter-application-detail .document-status .label { display: inline-block; margin-top: 2px; }
-    .letter-application-detail .document-review { min-width: 210px; }
+    .letter-application-detail .document-review { min-width: 0; }
     .letter-application-detail .document-review .form-control { height: 30px; margin-top: 7px; border-radius: 2px; font-size: 12px; }
     .letter-application-detail .document-review .btn { margin-top: 6px; }
     .letter-application-detail .document-review__note-label { display: block; margin: 8px 0 -3px; color: var(--letter-detail-muted); font-size: 11px; font-weight: 600; }
@@ -111,6 +120,7 @@
                 <div class="box-header with-border"><h2 id="documents-heading" class="box-title"><i class="fa fa-files-o" aria-hidden="true"></i> Dokumen Persyaratan</h2></div>
                 <div class="box-body table-responsive">
                     <table class="table table-striped documents-table">
+                        <colgroup><col class="documents-table__requirement"><col class="documents-table__file"><col class="documents-table__status"><col class="documents-table__review"></colgroup>
                         <thead><tr><th>Persyaratan</th><th>File</th><th>Status Saat Ini</th><th>Review Dokumen</th></tr></thead>
                         <tbody>
                             @forelse($application->documents as $document)
@@ -280,6 +290,10 @@ document.addEventListener('DOMContentLoaded', function () {
             note.setAttribute('aria-required', needsNote ? 'true' : 'false');
             requiredMark.hidden = !needsNote;
             help.hidden = !needsNote;
+            const table = form.closest('.documents-table');
+            table.classList.toggle('has-rejected-review', Array.from(table.querySelectorAll('[data-review-status]')).some(function (select) {
+                return select.value === 'rejected';
+            }));
         }
 
         status.addEventListener('change', syncReviewRequirement);
