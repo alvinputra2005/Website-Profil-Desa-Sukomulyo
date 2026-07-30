@@ -1222,7 +1222,7 @@
 
 .announcement-detail-grid .announcement-attachment-actions {
     grid-column: 1 / -1;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
 }
 
 .announcement-section-heading {
@@ -1296,7 +1296,7 @@
 }
 
 .announcement-attachment-actions {
-    grid-template-columns: repeat(2, auto);
+    grid-template-columns: minmax(0, 1fr);
 }
 
 .announcement-attachment-empty {
@@ -1393,7 +1393,7 @@
 
     .announcement-detail-grid .announcement-attachment-actions {
         grid-column: 1 / -1;
-        grid-template-columns: repeat(2, auto);
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 

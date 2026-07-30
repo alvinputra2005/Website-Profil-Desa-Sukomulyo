@@ -29,12 +29,5 @@
             <i class="far fa-eye" aria-hidden="true"></i>
             <span>Lihat PDF</span>
         </a>
-        <a
-            class="announcement-button announcement-button--download"
-            href="{{ route('announcements.attachments.download', ['publication' => $announcement->slug, 'attachment' => $attachment->id]) }}"
-        >
-            <i class="fas fa-download" aria-hidden="true"></i>
-            <span>Unduh PDF</span>
-        </a>
     </div>
 </li>
