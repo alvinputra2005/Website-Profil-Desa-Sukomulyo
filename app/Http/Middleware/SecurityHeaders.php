@@ -48,6 +48,7 @@ final class SecurityHeaders
         $styleSources = ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'];
         $connectSources = ["'self'"];
         $imageSources = ["'self'", 'data:', 'https:'];
+        $letterDocumentsOrigin = $this->letterDocumentsOrigin();
 
         if ($viteOrigin !== null) {
             $scriptSources[] = $viteOrigin;
@@ -55,6 +56,10 @@ final class SecurityHeaders
             $connectSources[] = $viteOrigin;
             $connectSources[] = preg_replace('/^http/', 'ws', $viteOrigin);
             $imageSources[] = $viteOrigin;
+        }
+
+        if ($letterDocumentsOrigin !== null) {
+            $connectSources[] = $letterDocumentsOrigin;
         }
 
         return implode('; ', [
@@ -71,6 +76,29 @@ final class SecurityHeaders
             'connect-src '.implode(' ', $connectSources),
             "media-src 'self'",
         ]);
+    }
+
+    private function letterDocumentsOrigin(): ?string
+    {
+        if (config('filesystems.letter_documents_disk') !== 'r2_letters') {
+            return null;
+        }
+
+        $endpoint = (string) config('filesystems.disks.r2_letters.endpoint');
+        $bucket = trim((string) config('filesystems.disks.r2_letters.bucket'));
+        $parts = parse_url($endpoint);
+
+        if (
+            $bucket === ''
+            || ! is_array($parts)
+            || ($parts['scheme'] ?? null) !== 'https'
+            || empty($parts['host'])
+            || ! str_ends_with($parts['host'], '.r2.cloudflarestorage.com')
+        ) {
+            return null;
+        }
+
+        return 'https://'.$bucket.'.'.$parts['host'];
     }
 
     private function viteDevServerOrigin(): ?string

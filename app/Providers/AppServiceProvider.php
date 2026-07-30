@@ -71,6 +71,7 @@ class AppServiceProvider extends ServiceProvider
             Limit::perDay(10)->by($request->ip()),
         ]);
         RateLimiter::for('letter-application-update', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+        RateLimiter::for('letter-document-upload', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
         RateLimiter::for('letter-tracking', function (Request $request) {
             $number = Str::upper(trim((string) $request->input('application_number')));
 

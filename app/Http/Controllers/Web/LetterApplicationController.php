@@ -113,7 +113,11 @@ class LetterApplicationController extends Controller
         $path = 'layanan-surat/'.Str::slug($application->service->slug).'/'.$application->application_number.'/'.$data['requirement_key'].'/'.Str::ulid().'.'.$extension;
         $disk = config('filesystems.letter_documents_disk', 'local');
         if (!method_exists(Storage::disk($disk), 'temporaryUploadUrl')) return response()->json(['message' => 'Presigned upload belum tersedia pada disk ini.'], 422);
-        ['url' => $url, 'headers' => $headers] = Storage::disk($disk)->temporaryUploadUrl($path, now()->addMinutes(10), ['ContentType' => $data['mime_type'], 'ContentDisposition' => 'inline']);
+        ['url' => $url, 'headers' => $headers] = Storage::disk($disk)->temporaryUploadUrl(
+            $path,
+            now()->addMinutes(10),
+            ['ContentType' => $data['mime_type']]
+        );
         $document = LetterApplicationDocument::updateOrCreate(
             ['letter_application_id' => $application->id, 'requirement_key' => $data['requirement_key']],
             ['public_id' => (string) Str::ulid(), 'label' => $data['requirement_key'],

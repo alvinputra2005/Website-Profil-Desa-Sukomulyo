@@ -157,8 +157,8 @@ Route::prefix('layanan-surat')->name('letter-services.')->group(function () {
     Route::get('/t/{token}/perbaiki', [LetterApplicationController::class, 'edit'])->where('token', '[A-Za-z0-9]{64}')->name('application.edit');
     Route::get('/t/{token}/dokumen', [LetterApplicationController::class, 'documents'])->where('token', '[A-Za-z0-9]{64}')->name('application.documents');
     Route::post('/t/{token}/dokumen', [LetterApplicationController::class, 'uploadDocuments'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:letter-application-update')->name('application.documents.upload');
-    Route::post('/t/{token}/dokumen/presign', [LetterApplicationController::class, 'presign'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:letter-application-update')->name('application.documents.presign');
-    Route::post('/t/{token}/dokumen/complete', [LetterApplicationController::class, 'completeDocument'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:letter-application-update')->name('application.documents.complete');
+    Route::post('/t/{token}/dokumen/presign', [LetterApplicationController::class, 'presign'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:letter-document-upload')->name('application.documents.presign');
+    Route::post('/t/{token}/dokumen/complete', [LetterApplicationController::class, 'completeDocument'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:letter-document-upload')->name('application.documents.complete');
     Route::get('/t/{token}/dokumen/{document}/preview', [LetterApplicationController::class, 'previewDocument'])->where('token', '[A-Za-z0-9]{64}')->name('application.documents.preview');
     Route::put('/t/{token}/perbaiki', [LetterApplicationController::class, 'update'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:letter-application-update')->name('application.update');
     Route::patch('/t/{token}/batalkan', [LetterApplicationController::class, 'cancel'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:5,1')->name('application.cancel');

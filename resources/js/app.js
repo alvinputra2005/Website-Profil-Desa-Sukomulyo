@@ -108,13 +108,15 @@ const initPublicPage = () => {
                 row.querySelector('.letter-file-picker span').textContent = file.name;
                 try {
                     const presign = await window.axios.post(documentForm.dataset.presignUrl, { requirement_key: key, original_name: file.name, mime_type: file.type, size_bytes: file.size });
-                    const uploadHeaders = new Headers({ 'Content-Type': file.type });
-                    Object.entries(presign.data.upload_headers || {}).forEach(([name, value]) => {
-                        if (name.toLowerCase() === 'host') return;
-                        uploadHeaders.set(name, Array.isArray(value) ? value[0] : value);
+                    const uploadResponse = await fetch(presign.data.upload_url, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': file.type },
+                        body: file,
                     });
-                    const uploadResponse = await fetch(presign.data.upload_url, { method: 'PUT', headers: uploadHeaders, body: file });
-                    if (!uploadResponse.ok) throw new Error(`R2 upload failed (${uploadResponse.status})`);
+                    if (!uploadResponse.ok) {
+                        const body = await uploadResponse.text();
+                        throw new Error(`Upload gagal (${uploadResponse.status}): ${body}`);
+                    }
                     await window.axios.post(documentForm.dataset.completeUrl, { document_id: presign.data.document_id });
                     complete.add(key);
                     row.classList.add('is-uploaded');
