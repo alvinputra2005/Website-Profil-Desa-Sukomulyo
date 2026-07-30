@@ -9,6 +9,77 @@ const initPublicPage = () => {
     initPopulationStatistics();
     initGenericStatistics();
 
+    const documentForm = document.querySelector('[data-r2-documents]');
+    if (documentForm && documentForm.dataset.presigned === 'true' && documentForm.dataset.bound !== 'true') {
+        const rows = [...documentForm.querySelectorAll('.letter-upload-row[data-requirement-key]')];
+        const requiredRows = rows.filter((row) => row.dataset.requiredDocument === 'true');
+        const requiredInputs = requiredRows.map((row) => row.querySelector('input[type="file"]'));
+        const complete = new Set();
+        documentForm.dataset.bound = 'true';
+        rows.forEach((row) => {
+            const input = row.querySelector('input[type="file"]');
+            input.required = false;
+            input.addEventListener('change', async () => {
+                if (documentForm.dataset.fallback === 'true') return;
+                const file = input.files?.[0];
+                if (!file) return;
+                if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.type) || file.size > 5242880) {
+                    window.alert('File harus JPG, PNG, atau PDF dengan ukuran maksimal 5 MB.');
+                    input.value = '';
+                    return;
+                }
+                const key = row.dataset.requirementKey;
+                row.querySelector('.letter-file-picker span').textContent = file.name;
+                try {
+                    const presign = await window.axios.post(documentForm.dataset.presignUrl, { requirement_key: key, original_name: file.name, mime_type: file.type, size_bytes: file.size });
+                    const uploadResponse = await fetch(presign.data.upload_url, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': file.type },
+                        body: file,
+                    });
+                    if (!uploadResponse.ok) {
+                        const body = await uploadResponse.text();
+                        throw new Error(`Upload gagal (${uploadResponse.status}): ${body}`);
+                    }
+                    await window.axios.post(documentForm.dataset.completeUrl, { document_id: presign.data.document_id });
+                    complete.add(key);
+                    row.classList.add('is-uploaded');
+                    if (requiredRows.every((requiredRow) => complete.has(requiredRow.dataset.requirementKey))) window.location.assign(documentForm.dataset.finalUrl);
+                } catch (error) {
+                    documentForm.dataset.fallback = 'true';
+                    requiredInputs.forEach((requiredInput) => { requiredInput.required = true; });
+                    window.alert('Upload langsung ke R2 dibatasi browser. File akan dikirim melalui server saat Anda menekan “Unggah & Lanjutkan”.');
+                }
+            });
+        });
+        documentForm.addEventListener('submit', (event) => {
+            if (documentForm.dataset.fallback === 'true') return;
+            if (!requiredRows.every((requiredRow) => complete.has(requiredRow.dataset.requirementKey))) {
+                event.preventDefault();
+                window.alert('Unggah semua dokumen wajib terlebih dahulu.');
+            }
+        });
+    }
+
+    const letterSelector = document.querySelector('[data-letter-selector]');
+
+    if (letterSelector && letterSelector.dataset.bound !== 'true') {
+        const choices = [...letterSelector.querySelectorAll('[data-letter-choice]')];
+        const next = letterSelector.querySelector('[data-letter-next]');
+
+        letterSelector.dataset.bound = 'true';
+        choices.forEach((choice) => {
+            choice.addEventListener('click', () => {
+                choices.forEach((item) => {
+                    const selected = item === choice;
+                    item.classList.toggle('is-selected', selected);
+                    item.setAttribute('aria-checked', String(selected));
+                });
+                if (next) next.href = choice.dataset.url;
+            });
+        });
+    }
+
     const menuButton = document.querySelector('.menu-toggle');
     const menu = document.querySelector('#primary-menu');
 

@@ -25,6 +25,12 @@ final class SecurityHeaders
             $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
         }
 
+        if ($request->is('layanan-surat/lacak', 'layanan-surat/lacak/*', 'layanan-surat/t/*')) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+            $response->headers->set('Cache-Control', 'no-store, private');
+            $response->headers->set('Pragma', 'no-cache');
+        }
+
         if (config('app.env') === 'production' && $request->isSecure()) {
             $response->headers->set(
                 'Strict-Transport-Security',
@@ -42,6 +48,8 @@ final class SecurityHeaders
         $styleSources = ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'];
         $connectSources = ["'self'"];
         $imageSources = ["'self'", 'data:', 'https:'];
+        $frameSources = ["'self'", 'https://www.google.com'];
+        $letterDocumentsOrigin = $this->letterDocumentsOrigin();
 
         if ($viteOrigin !== null) {
             $scriptSources[] = $viteOrigin;
@@ -51,6 +59,11 @@ final class SecurityHeaders
             $imageSources[] = $viteOrigin;
         }
         $imageSources[] = 'blob:';
+
+        if ($letterDocumentsOrigin !== null) {
+            $connectSources[] = $letterDocumentsOrigin;
+            $frameSources[] = $letterDocumentsOrigin;
+        }
 
         return implode('; ', [
             "default-src 'self'",
@@ -62,10 +75,33 @@ final class SecurityHeaders
             'style-src '.implode(' ', $styleSources),
             "font-src 'self' data: https://fonts.gstatic.com",
             'img-src '.implode(' ', $imageSources),
-            "frame-src 'self' https://www.google.com",
+            'frame-src '.implode(' ', $frameSources),
             'connect-src '.implode(' ', $connectSources),
             "media-src 'self'",
         ]);
+    }
+
+    private function letterDocumentsOrigin(): ?string
+    {
+        if (config('filesystems.letter_documents_disk') !== 'r2_letters') {
+            return null;
+        }
+
+        $endpoint = (string) config('filesystems.disks.r2_letters.endpoint');
+        $bucket = trim((string) config('filesystems.disks.r2_letters.bucket'));
+        $parts = parse_url($endpoint);
+
+        if (
+            $bucket === ''
+            || ! is_array($parts)
+            || ($parts['scheme'] ?? null) !== 'https'
+            || empty($parts['host'])
+            || ! str_ends_with($parts['host'], '.r2.cloudflarestorage.com')
+        ) {
+            return null;
+        }
+
+        return 'https://'.$bucket.'.'.$parts['host'];
     }
 
     private function viteDevServerOrigin(): ?string

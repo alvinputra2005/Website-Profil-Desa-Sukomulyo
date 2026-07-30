@@ -18,6 +18,7 @@ return [
     // Disk khusus untuk seluruh media CMS. Gunakan "public" saat lokal dan
     // "r2" di production tanpa perlu mengubah kode aplikasi.
     'media_disk' => env('MEDIA_DISK', 'public'),
+    'letter_documents_disk' => env('LETTER_DOCUMENTS_DISK', 'local'),
 
     /*
     |--------------------------------------------------------------------------
@@ -74,6 +75,18 @@ return [
             'proxy' => env('R2_PROXY_URL', false),
             'endpoint' => env('R2_ENDPOINT'),
             'use_path_style_endpoint' => false,
+            'throw' => true,
+            'report' => true,
+        ],
+        'r2_letters' => [
+            'driver' => 's3',
+            'key' => env('R2_LETTERS_ACCESS_KEY_ID'),
+            'secret' => env('R2_LETTERS_SECRET_ACCESS_KEY'),
+            'region' => env('R2_LETTERS_REGION', 'auto'),
+            'bucket' => env('R2_LETTERS_BUCKET', 'sukomulyo-letter-documents'),
+            'endpoint' => env('R2_LETTERS_ENDPOINT'),
+            'use_path_style_endpoint' => false,
+            'visibility' => 'private',
             'throw' => true,
             'report' => true,
         ],

@@ -6,6 +6,8 @@ use App\Models\FamilyCard;
 use App\Models\Gallery;
 use App\Models\GalleryItem;
 use App\Models\Household;
+use App\Models\LetterApplication;
+use App\Models\LetterService;
 use App\Models\MapFeature;
 use App\Models\MapLayer;
 use App\Models\Media;
@@ -31,6 +33,8 @@ use App\Policies\CmsResourcePolicy;
 use App\Policies\DataResourcePolicy;
 use App\Policies\FamilyCardPolicy;
 use App\Policies\HouseholdPolicy;
+use App\Policies\LetterApplicationPolicy;
+use App\Policies\LetterServicePolicy;
 use App\Policies\OfficialPolicy;
 use App\Policies\PopulationGroupMemberPolicy;
 use App\Policies\PopulationGroupPolicy;
@@ -62,6 +66,17 @@ class AppServiceProvider extends ServiceProvider
             $email = Str::lower(trim((string) $request->input('email')));
 
             return Limit::perMinute(5)->by($email.'|'.$request->ip());
+        });
+        RateLimiter::for('letter-application', fn (Request $request) => [
+            Limit::perMinute(3)->by($request->ip()),
+            Limit::perDay(10)->by($request->ip()),
+        ]);
+        RateLimiter::for('letter-application-update', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+        RateLimiter::for('letter-document-upload', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
+        RateLimiter::for('letter-tracking', function (Request $request) {
+            $number = Str::upper(trim((string) $request->input('application_number')));
+
+            return [Limit::perMinute(5)->by($request->ip()), Limit::perMinute(5)->by($number.'|'.$request->ip())];
         });
 
         foreach ([
@@ -95,6 +110,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-data', fn (User $user) => $user->hasRole('admin_data'));
         Gate::define('manage-media', fn (User $user) => $user->hasRole('admin_konten', 'admin_data'));
         Gate::define('manage-users', fn (User $user) => false);
+        Gate::define('manage-letter-applications', fn (User $user) => $user->hasRole('admin_data'));
+        Gate::define('manage-letter-services', fn (User $user) => $user->hasRole('admin_data'));
 
         foreach (config('admin.resources', []) as $resource) {
             $policy = match ($resource['ability']) {
@@ -112,5 +129,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(PopulationGroup::class, PopulationGroupPolicy::class);
         Gate::policy(PopulationGroupMember::class, PopulationGroupMemberPolicy::class);
         Gate::policy(PopulationYearlySnapshot::class, DataResourcePolicy::class);
+        Gate::policy(LetterApplication::class, LetterApplicationPolicy::class);
+        Gate::policy(LetterService::class, LetterServicePolicy::class);
     }
 }

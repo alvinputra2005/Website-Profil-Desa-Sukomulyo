@@ -1,0 +1,3 @@
+@extends('layouts.admin')
+@section('title','Layanan Surat')
+@section('content')<div class="box box-primary"><div class="box-header"><a class="btn btn-primary" href="{{ route('admin.letter-services.create') }}">Tambah Layanan</a></div><div class="box-body table-responsive"><table class="table table-striped"><thead><tr><th>Kode</th><th>Layanan</th><th>Status</th><th>Permohonan</th><th></th></tr></thead><tbody>@foreach($services as $service)<tr><td>{{ $service->code }}</td><td>{{ $service->name }}</td><td>{{ $service->is_active?'Aktif':'Nonaktif' }}</td><td>{{ $service->applications_count }}</td><td><a class="btn btn-xs btn-warning" href="{{ route('admin.letter-services.edit',$service) }}">Edit</a></td></tr>@endforeach</tbody></table></div></div>@endsection

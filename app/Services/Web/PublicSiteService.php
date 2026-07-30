@@ -816,6 +816,11 @@ class PublicSiteService
         return view($view, $data);
     }
 
+    public function shareLayout(): void
+    {
+        view()->share($this->shared());
+    }
+
     private function renderNews(Request $request, array $data, string $page = 'index'): View
     {
         $view = $page === 'search' ? 'news.search' : 'news.index';
@@ -876,6 +881,7 @@ class PublicSiteService
     {
         return [
             ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
+            ['label' => 'Pelayanan Surat', 'route' => 'letter-services.index', 'active' => 'letter-services.*'],
             ['label' => 'Profil Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
                 ['label' => 'Identitas Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
                 ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],

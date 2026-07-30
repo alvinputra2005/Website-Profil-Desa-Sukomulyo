@@ -28,6 +28,15 @@ class DatabaseSeeder extends Seeder
         foreach (['site.name' => 'Desa Sukomulyo', 'site.tagline' => 'Website Resmi Pemerintah Desa Sukomulyo', 'site.email' => 'pemdes@sukomulyo.desa.id', 'site.phone' => '(0000) 123 456', 'site.address' => 'Kantor Desa Sukomulyo, Indonesia'] as $key => $value) {
             Setting::firstOrCreate(['key' => $key], ['value' => $value, 'type' => 'string', 'group' => 'identitas', 'is_public' => true, 'updated_by' => $admin->id]);
         }
+        foreach ([
+            'letter_service.whatsapp_number' => env('VILLAGE_WHATSAPP_NUMBER', ''),
+            'letter_service.office_hours' => env('LETTER_OFFICE_HOURS', 'Senin-Jumat, 08.00-14.00 WIB'),
+            'letter_service.pickup_address' => env('LETTER_PICKUP_ADDRESS', 'Kantor Desa Sukomulyo'),
+            'letter_service.tracking_retention_days' => env('LETTER_TRACKING_RETENTION_DAYS', 90),
+            'letter_service.enabled' => true,
+        ] as $key => $value) {
+            Setting::firstOrCreate(['key' => $key], ['value' => (string) $value, 'type' => is_bool($value) ? 'boolean' : 'string', 'group' => 'pelayanan_surat', 'is_public' => false, 'updated_by' => $admin->id]);
+        }
         foreach ([['history', 'Sejarah Desa', 'Desa Sukomulyo tumbuh melalui semangat gotong royong masyarakat.'], ['vision', 'Visi Desa', 'Terwujudnya desa yang maju, mandiri, transparan, dan sejahtera.'], ['mission', 'Misi Desa', 'Meningkatkan pelayanan publik, ekonomi warga, dan pembangunan berkelanjutan.']] as [$key,$title,$content]) {
             VillageProfileSection::firstOrCreate(['section_key' => $key], ['title' => $title, 'content' => '<p>'.$content.'</p>', 'status' => 'published', 'display_order' => 0, 'updated_by' => $admin->id]);
         }
@@ -35,6 +44,7 @@ class DatabaseSeeder extends Seeder
         $this->call(NewsSeeder::class);
         $this->call(AnnouncementSeeder::class);
         $this->call(GallerySeeder::class);
+        $this->call(LetterServiceSeeder::class);
         Gallery::firstOrCreate(['slug' => 'kegiatan-desa'], ['title' => 'Kegiatan Desa', 'description' => 'Dokumentasi kegiatan warga Desa Sukomulyo.', 'status' => 'published', 'created_by' => $admin->id]);
         StatisticDataset::firstOrCreate(['slug' => 'jumlah-penduduk'], ['category' => 'penduduk', 'title' => 'Jumlah Penduduk', 'description' => 'Statistik jumlah penduduk desa.', 'year' => now()->year, 'unit' => 'jiwa', 'visualization_type' => 'bar', 'status' => 'published', 'display_order' => 0, 'created_by' => $admin->id]);
         IdmScore::firstOrCreate(['year' => now()->year], ['idm_score' => 0.7500, 'iks_score' => 0.7600, 'ike_score' => 0.7300, 'ikl_score' => 0.7600, 'status_label' => 'Maju', 'source' => 'Data awal desa']);
