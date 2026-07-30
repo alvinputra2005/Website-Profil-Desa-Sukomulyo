@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\PopulationReportController;
 use App\Http\Controllers\Admin\PopulationStatisticsController;
 use App\Http\Controllers\Admin\PopulationYearlySnapshotController;
 use App\Http\Controllers\Admin\RegionController;
+use App\Http\Controllers\Admin\StatisticImportController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\Village\VillageIdentityController;
 use App\Http\Controllers\Admin\Village\VillageSectionController;
@@ -32,9 +33,9 @@ use App\Http\Controllers\Admin\Village\VisionMissionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\MediaFileController;
-use App\Http\Controllers\Web\ContactController;
 use App\Http\Controllers\Web\AnnouncementAttachmentController;
 use App\Http\Controllers\Web\AnnouncementController;
+use App\Http\Controllers\Web\ContactController;
 use App\Http\Controllers\Web\ErrorController;
 use App\Http\Controllers\Web\GalleryController;
 use App\Http\Controllers\Web\HomeController;
@@ -96,6 +97,12 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::patch('/officials/{official}/move/{direction}', MoveOfficialController::class)->where('direction', 'up|down')->name('officials.move');
         Route::resource('officials', OfficialController::class)->except('show');
     });
+    Route::middleware('can:manage-data')->prefix('statistik')->name('statistics.')->group(function () {
+        Route::get('/import', [StatisticImportController::class, 'create'])->name('import.create');
+        Route::post('/import', [StatisticImportController::class, 'store'])->name('import.store');
+        Route::get('/import/{import:public_id}/preview', [StatisticImportController::class, 'preview'])->name('import.preview');
+        Route::post('/import/{import:public_id}/process', [StatisticImportController::class, 'processImport'])->name('import.process');
+    });
     Route::middleware('can:manage-data')->prefix('kependudukan')->name('population.')->group(function () {
         Route::get('penduduk/template-import', [ResidentImportController::class, 'template'])->name('residents.import-template');
         Route::post('penduduk/import', [ResidentImportController::class, 'store'])->name('residents.import');
@@ -119,12 +126,12 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
     });
     Route::middleware('can:manage-letter-applications')->prefix('permohonan-surat')->name('letter-applications.')->group(function () {
-    Route::get('/', [AdminLetterApplicationController::class, 'index'])->name('index');
-    Route::get('/{application:public_id}', [AdminLetterApplicationController::class, 'show'])->name('show');
-    Route::get('/{application:public_id}/dokumen/{document}', [AdminLetterApplicationController::class, 'document'])->name('document');
-    Route::get('/{application:public_id}/dokumen/{document}/preview-url', [AdminLetterApplicationController::class, 'previewUrl'])->name('document.preview-url');
-    Route::get('/{application:public_id}/dokumen/{document}/preview-content', [AdminLetterApplicationController::class, 'previewContent'])->name('document.preview-content');
-    Route::patch('/{application:public_id}/dokumen/{document}', [AdminLetterApplicationController::class, 'reviewDocument'])->name('document.review');
+        Route::get('/', [AdminLetterApplicationController::class, 'index'])->name('index');
+        Route::get('/{application:public_id}', [AdminLetterApplicationController::class, 'show'])->name('show');
+        Route::get('/{application:public_id}/dokumen/{document}', [AdminLetterApplicationController::class, 'document'])->name('document');
+        Route::get('/{application:public_id}/dokumen/{document}/preview-url', [AdminLetterApplicationController::class, 'previewUrl'])->name('document.preview-url');
+        Route::get('/{application:public_id}/dokumen/{document}/preview-content', [AdminLetterApplicationController::class, 'previewContent'])->name('document.preview-content');
+        Route::patch('/{application:public_id}/dokumen/{document}', [AdminLetterApplicationController::class, 'reviewDocument'])->name('document.review');
         Route::patch('/{application:public_id}/status', [LetterApplicationStatusController::class, 'update'])->name('status.update');
         Route::patch('/{application:public_id}/hubungkan-penduduk', [AdminLetterApplicationController::class, 'linkResident'])->name('resident.link');
         Route::post('/{application:public_id}/whatsapp', LetterApplicationWhatsAppController::class)->name('whatsapp.open');
