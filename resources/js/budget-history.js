@@ -13,6 +13,7 @@ import {
     downloadBlob,
     downloadDataUrl,
     savePdf,
+    scalePdfLayout,
     svgToRaster,
 } from './population-statistics';
 
@@ -371,7 +372,7 @@ const initExportControls = (root, payload, chartMap) => {
                             asset.width * 2,
                             asset.height * 2,
                             `${filename}.pdf`,
-                            (asset.pageBreaks || []).map((value) => value * 2),
+                            scalePdfLayout(asset, 2),
                         );
                     } else {
                         downloadDataUrl(raster, `${filename}.${format}`);

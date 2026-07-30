@@ -1,5 +1,5 @@
 <header class="administration-section-header">
-    <h2 id="administration-requirements-heading">Layanan Administrasi</h2>
+    <h2 id="administration-requirements-heading">Syarat Administrasi</h2>
 </header>
 
 <div class="administration-search" role="search">

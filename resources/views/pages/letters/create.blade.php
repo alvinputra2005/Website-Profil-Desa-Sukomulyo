@@ -1,7 +1,12 @@
 <x-layouts.app :title="'Ajukan '.$letterService->name" robots="noindex, nofollow">
-    <x-page-header :title="'Ajukan '.$letterService->name" description="Isi data sesuai dokumen resmi. Data hanya digunakan untuk memproses permohonan ini." :show-heading="true" :breadcrumbs="[['label'=>'Pelayanan Surat','url'=>route('letter-services.index')],['label'=>$letterService->name],['label'=>'Isi Data Pemohon']]" />
+    <x-page-header :title="'Ajukan '.$letterService->name" :show-heading="false" :breadcrumbs="[['label'=>'Pelayanan'],['label'=>'Pengajuan Surat','url'=>route('letter-services.index')],['label'=>$letterService->name],['label'=>'Isi Data Pemohon']]" />
     <div class="letter-service-page letter-form-page">
         <div class="container">
+            <header class="letter-service-heading">
+                <h1>Ajukan {{ $letterService->name }}</h1>
+                <p>Isi data sesuai dokumen resmi. Data hanya digunakan untuk memproses permohonan ini.</p>
+            </header>
+
             <ol class="letter-steps" aria-label="Tahapan pengajuan surat">
                 @foreach(['Pilih Jenis Surat', 'Isi Data Pemohon', 'Unggah Dokumen', 'Konfirmasi'] as $step)
                     <li @class(['is-active' => $loop->iteration <= 2]) @if($loop->iteration === 2) aria-current="step" @endif>
@@ -13,7 +18,6 @@
             <div class="letter-form-layout">
                 <main>
                     <div class="letter-form-heading">
-                        <span class="section-kicker">Tahap 2 dari 4</span>
                         <h2>Isi Data Pemohon</h2>
                         <p>Lengkapi data berikut sesuai dokumen resmi. Kolom bertanda <b>*</b> wajib diisi.</p>
                     </div>
@@ -38,14 +42,6 @@
                             <div><dt>Estimasi selesai</dt><dd>{{ $letterService->processing_days }} hari kerja</dd></div>
                             <div><dt>Biaya layanan</dt><dd>{{ $letterService->fee_information }}</dd></div>
                         </dl>
-                    </section>
-                    <section class="letter-info-card letter-form-tip">
-                        <h2><i class="fas fa-lightbulb" aria-hidden="true"></i> Tips pengisian</h2>
-                        <ul>
-                            <li>Pastikan NIK berjumlah 16 digit.</li>
-                            <li>Gunakan nomor WhatsApp yang aktif.</li>
-                            <li>Periksa kembali data sebelum melanjutkan.</li>
-                        </ul>
                     </section>
                 </aside>
             </div>

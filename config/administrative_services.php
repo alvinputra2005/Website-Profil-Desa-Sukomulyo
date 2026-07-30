@@ -2,7 +2,7 @@
 
 return [
     'page' => [
-        'title' => 'Layanan Administrasi',
+        'title' => 'Syarat Administrasi',
         'description' => 'Informasi persyaratan, alur pelayanan, jadwal, dan tata cara pengajuan administrasi di Desa Sukomulyo.',
     ],
 

@@ -57,7 +57,17 @@
         <div class="mainhdrnav" id="primary-menu">
             <ul>
                 @foreach ($navigation as $item)
-                    @php($itemActive = request()->routeIs($item['active']) || collect($item['children'] ?? [])->contains(fn ($child) => request()->routeIs($child['active'])))
+                    @php
+                        $itemActive = request()->routeIs($item['active'])
+                            || collect($item['children'] ?? [])->contains(function ($child) {
+                                $childParameters = $child['parameters'] ?? [];
+
+                                return request()->routeIs($child['active'])
+                                    && collect($childParameters)->every(
+                                        fn ($value, $key) => (string) request()->route($key) === (string) $value
+                                    );
+                            });
+                    @endphp
                     <li class="{{ $itemActive ? 'current-menu-item' : '' }}{{ !empty($item['children']) ? ' menu-item-has-children' : '' }}">
                         @if (!empty($item['children']))
                             <button class="nav-dropdown-toggle" type="button" aria-haspopup="true">{{ $item['label'] }}</button>

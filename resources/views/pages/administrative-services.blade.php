@@ -16,7 +16,7 @@
             :description="$page['description']"
             :show-heading="false"
             :breadcrumbs="[
-                ['label' => 'Informasi Desa', 'url' => route('informasi-publik-desa')],
+                ['label' => 'Pelayanan'],
                 ['label' => $page['title']],
             ]"
         />

@@ -161,19 +161,20 @@ const tableToSvg = (table) => {
             ...rows.map((row) => row.values[index]?.length || 0),
         );
         const isLastColumn = index === headers.length - 1;
-        return Math.min(isLastColumn ? 360 : 230, Math.max(125, (longest * 8) + 34));
+        return Math.min(isLastColumn ? 330 : 215, Math.max(112, (longest * 7.2) + 28));
     });
     const width = columnWidths.reduce((sum, columnWidth) => sum + columnWidth, 0);
-    const headerHeight = 62;
-    const fontSize = 13;
+    const headerHeight = 50;
+    const fontSize = 12;
     const rowHeights = rows.map(({ values }) => Math.max(
-        62,
+        48,
         ...values.map((value, index) => {
             const maximumCharacters = Math.max(8, Math.floor((columnWidths[index] - 24) / (fontSize * .58)));
-            return (wrapText(value, maximumCharacters, Number.MAX_SAFE_INTEGER).length * (fontSize + 4)) + 22;
+            return (wrapText(value, maximumCharacters, Number.MAX_SAFE_INTEGER).length * (fontSize + 3)) + 16;
         }),
     ));
-    const height = headerHeight + (rows.length ? rowHeights.reduce((sum, rowHeight) => sum + rowHeight, 0) : 62) + 24;
+    const height = headerHeight + (rows.length ? rowHeights.reduce((sum, rowHeight) => sum + rowHeight, 0) : 48) + 12;
+    const pageBreaks = [];
     let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`;
     svg += `<rect width="${width}" height="${height}" fill="#ffffff"/>`;
 
@@ -205,11 +206,12 @@ const tableToSvg = (table) => {
             x += columnWidth;
         });
         y += rowHeight;
+        pageBreaks.push(y);
     });
 
     svg += '</svg>';
 
-    return { svg, width, height };
+    return { svg, width, height, pageBreaks };
 };
 
 const triggerDownload = (url, filename) => {
@@ -357,10 +359,10 @@ const chartToSvgAsset = (chart, container, preferredWidth = null) => {
 export const combineChartAndTable = (chart, container, table, title, subtitle) => {
     const tableAsset = tableToSvg(table);
     const chartAsset = chartToSvgAsset(chart, container, tableAsset.width);
-    const gap = 24;
-    const horizontalPadding = 56;
-    const verticalPadding = 28;
-    const headingHeight = 76;
+    const gap = 16;
+    const horizontalPadding = 38;
+    const verticalPadding = 20;
+    const headingHeight = 66;
     const contentWidth = Math.max(chartAsset.width, tableAsset.width);
     const width = contentWidth + (horizontalPadding * 2);
     const height = verticalPadding + headingHeight + chartAsset.height + gap + tableAsset.height + verticalPadding;
@@ -372,8 +374,8 @@ export const combineChartAndTable = (chart, container, table, title, subtitle) =
     const svg = [
         `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
         `<rect width="${width}" height="${height}" fill="#ffffff"/>`,
-        `<text x="${headingX}" y="${verticalPadding + 30}" fill="${COLORS.text}" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(title)}</text>`,
-        `<text x="${headingX}" y="${verticalPadding + 57}" fill="${COLORS.muted}" font-family="Arial, sans-serif" font-size="13">${escapeXml(subtitle)}</text>`,
+        `<text x="${headingX}" y="${verticalPadding + 26}" fill="${COLORS.text}" font-family="Arial, sans-serif" font-size="22" font-weight="700">${escapeXml(title)}</text>`,
+        `<text x="${headingX}" y="${verticalPadding + 49}" fill="${COLORS.muted}" font-family="Arial, sans-serif" font-size="12">${escapeXml(subtitle)}</text>`,
         `<svg x="${chartX}" y="${chartY}" width="${chartAsset.width}" height="${chartAsset.height}" viewBox="0 0 ${chartAsset.width} ${chartAsset.height}">`,
         svgBody(chartAsset.svg),
         '</svg>',
@@ -383,7 +385,18 @@ export const combineChartAndTable = (chart, container, table, title, subtitle) =
         '</svg>',
     ].join('');
 
-    return { svg, width, height };
+    return {
+        svg,
+        width,
+        height,
+        pageBreaks: (tableAsset.pageBreaks || []).map((value) => tableY + value),
+        keepTogether: [
+            { start: 0, end: chartY + chartAsset.height },
+            ...(tableAsset.pageBreaks?.length
+                ? [{ start: tableY, end: tableY + tableAsset.pageBreaks[0] }]
+                : []),
+        ],
+    };
 };
 
 export const combineExportSections = (sections, title, subtitle) => {
@@ -398,11 +411,11 @@ export const combineExportSections = (sections, title, subtitle) => {
             ? chartToSvgAsset(section.chart, section.container, preferredWidth)
             : tableAssets.get(section),
     })).filter(({ asset }) => asset);
-    const gap = 30;
-    const horizontalPadding = 56;
-    const verticalPadding = 28;
-    const headingHeight = 82;
-    const sectionHeadingHeight = 48;
+    const gap = 18;
+    const horizontalPadding = 38;
+    const verticalPadding = 20;
+    const headingHeight = 68;
+    const sectionHeadingHeight = 38;
     const contentWidth = Math.max(preferredWidth, ...assets.map(({ asset }) => asset.width));
     const width = contentWidth + (horizontalPadding * 2);
     const height = verticalPadding
@@ -412,27 +425,43 @@ export const combineExportSections = (sections, title, subtitle) => {
     const parts = [
         `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
         `<rect width="${width}" height="${height}" fill="#ffffff"/>`,
-        `<text x="${horizontalPadding}" y="${verticalPadding + 30}" fill="${COLORS.text}" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(title)}</text>`,
-        `<text x="${horizontalPadding}" y="${verticalPadding + 58}" fill="${COLORS.muted}" font-family="Arial, sans-serif" font-size="13">${escapeXml(subtitle)}</text>`,
+        `<text x="${horizontalPadding}" y="${verticalPadding + 26}" fill="${COLORS.text}" font-family="Arial, sans-serif" font-size="22" font-weight="700">${escapeXml(title)}</text>`,
+        `<text x="${horizontalPadding}" y="${verticalPadding + 50}" fill="${COLORS.muted}" font-family="Arial, sans-serif" font-size="12">${escapeXml(subtitle)}</text>`,
     ];
     const pageBreaks = [0];
+    const keepTogether = [];
     let y = verticalPadding + headingHeight;
 
     assets.forEach(({ title: sectionTitle, asset }) => {
-        pageBreaks.push(y);
+        const sectionStart = y;
         parts.push(`<line x1="${horizontalPadding}" y1="${y + 4}" x2="${width - horizontalPadding}" y2="${y + 4}" stroke="${COLORS.grid}" stroke-width="1"/>`);
-        parts.push(`<text x="${horizontalPadding}" y="${y + 32}" fill="${COLORS.text}" font-family="Arial, sans-serif" font-size="18" font-weight="700">${escapeXml(sectionTitle)}</text>`);
+        parts.push(`<text x="${horizontalPadding}" y="${y + 27}" fill="${COLORS.text}" font-family="Arial, sans-serif" font-size="16" font-weight="700">${escapeXml(sectionTitle)}</text>`);
         const assetX = horizontalPadding + ((contentWidth - asset.width) / 2);
         const assetY = y + sectionHeadingHeight;
         parts.push(`<svg x="${assetX}" y="${assetY}" width="${asset.width}" height="${asset.height}" viewBox="0 0 ${asset.width} ${asset.height}">`);
         parts.push(svgBody(asset.svg), '</svg>');
+
+        if (asset.pageBreaks?.length) {
+            asset.pageBreaks.forEach((value) => pageBreaks.push(assetY + value));
+            keepTogether.push({ start: sectionStart, end: assetY + asset.pageBreaks[0] });
+        } else {
+            keepTogether.push({ start: sectionStart, end: assetY + asset.height });
+            pageBreaks.push(assetY + asset.height);
+        }
+
         y = assetY + asset.height + gap;
     });
 
     pageBreaks.push(height);
     parts.push('</svg>');
 
-    return { svg: parts.join(''), width, height, pageBreaks };
+    return {
+        svg: parts.join(''),
+        width,
+        height,
+        pageBreaks,
+        keepTogether,
+    };
 };
 
 const loadRasterImage = (dataUrl) => new Promise((resolve, reject) => {
@@ -442,7 +471,15 @@ const loadRasterImage = (dataUrl) => new Promise((resolve, reject) => {
     image.src = dataUrl;
 });
 
-export const savePdf = async (dataUrl, sourceWidth, sourceHeight, filename, pageBreaks = []) => {
+export const scalePdfLayout = (asset, scale = 1) => ({
+    pageBreaks: (asset?.pageBreaks || []).map((value) => value * scale),
+    keepTogether: (asset?.keepTogether || []).map(({ start, end }) => ({
+        start: start * scale,
+        end: end * scale,
+    })),
+});
+
+export const savePdf = async (dataUrl, sourceWidth, sourceHeight, filename, pageLayout = []) => {
     const { jsPDF } = await import('jspdf');
     const landscape = sourceWidth >= sourceHeight;
     const pdf = new jsPDF({
@@ -453,25 +490,41 @@ export const savePdf = async (dataUrl, sourceWidth, sourceHeight, filename, page
     });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 10;
+    const margin = 7;
     const availableWidth = pageWidth - (margin * 2);
     const availableHeight = pageHeight - (margin * 2);
     const ratio = availableWidth / sourceWidth;
     const width = sourceWidth * ratio;
     const maximumSliceHeight = Math.floor(availableHeight / ratio);
     const image = await loadRasterImage(dataUrl);
-    const normalizedBreaks = [...new Set(pageBreaks.map((value) => Math.round(Number(value) || 0)))]
+    const rawBreaks = Array.isArray(pageLayout) ? pageLayout : (pageLayout?.pageBreaks || []);
+    const rawKeepTogether = Array.isArray(pageLayout) ? [] : (pageLayout?.keepTogether || []);
+    const normalizedBreaks = [...new Set(rawBreaks.map((value) => Math.round(Number(value) || 0)))]
         .filter((value) => value > 0 && value < sourceHeight)
         .sort((left, right) => left - right);
+    const keepTogether = rawKeepTogether
+        .map(({ start, end }) => ({
+            start: Math.round(Number(start) || 0),
+            end: Math.round(Number(end) || 0),
+        }))
+        .filter(({ start, end }) => start >= 0 && end > start && end <= sourceHeight)
+        .sort((left, right) => left.start - right.start);
     let sourceY = 0;
     let pageIndex = 0;
 
     while (sourceY < sourceHeight) {
         const idealEnd = Math.min(sourceHeight, sourceY + maximumSliceHeight);
-        const usefulBreaks = normalizedBreaks.filter((value) => (
-            value > sourceY + (maximumSliceHeight * .28) && value <= idealEnd
+        const crossingBlock = keepTogether.find(({ start, end }) => (
+            start > sourceY
+            && start < idealEnd
+            && end > idealEnd
+            && (end - start) <= maximumSliceHeight
+            && (start - sourceY) >= maximumSliceHeight * .35
         ));
-        const sourceEnd = usefulBreaks.at(-1) || idealEnd;
+        const usefulBreaks = normalizedBreaks.filter((value) => (
+            value > sourceY + (maximumSliceHeight * .7) && value <= idealEnd
+        ));
+        const sourceEnd = crossingBlock?.start || usefulBreaks.at(-1) || idealEnd;
         const sliceHeight = Math.max(1, sourceEnd - sourceY);
         const canvas = document.createElement('canvas');
         canvas.width = sourceWidth;
@@ -928,7 +981,13 @@ export const initPopulationStatistics = () => {
 
         const raster = await svgToRaster(asset.svg, asset.width, asset.height, format);
         if (format === 'pdf') {
-            await savePdf(raster, asset.width * 2, asset.height * 2, `${filename}.pdf`);
+            await savePdf(
+                raster,
+                asset.width * 2,
+                asset.height * 2,
+                `${filename}.pdf`,
+                scalePdfLayout(asset, 2),
+            );
             return;
         }
 

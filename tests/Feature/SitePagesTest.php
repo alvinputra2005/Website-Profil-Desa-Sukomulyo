@@ -29,7 +29,7 @@ class SitePagesTest extends TestCase
             route('data-statistik.detail', ['section' => 'visualisasi']) => 'Visualisasi Data',
             route('informasi-publik-desa') => 'Informasi Publik Desa',
             route('informasi-desa.detail', ['section' => 'pengumuman']) => 'Pengumuman Desa',
-            route('informasi-desa.detail', ['section' => 'layanan-administrasi']) => 'Layanan Administrasi',
+            route('informasi-desa.detail', ['section' => 'layanan-administrasi']) => 'Syarat Administrasi',
             route('informasi-desa.detail', ['section' => 'agenda']) => 'Agenda Desa',
             route('informasi-desa.detail', ['section' => 'bantuan-sosial']) => 'Informasi Bantuan Sosial',
             route('informasi-desa.detail', ['section' => 'informasi-publik']) => 'Informasi Publik',
@@ -55,9 +55,9 @@ class SitePagesTest extends TestCase
         preg_match('/<nav class="header-navigation".*?<\/nav>/s', $html, $matches);
         $navigation = $matches[0] ?? '';
 
-        $this->assertSame(3, substr_count($navigation, '<ul class="sub-menu">'));
-        $this->assertSame(3, substr_count($navigation, 'class="nav-dropdown-toggle"'));
-        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Pelayanan Surat', 'Statistik Keluarga', 'Layanan Administrasi', 'APBDes'] as $label) {
+        $this->assertSame(4, substr_count($navigation, '<ul class="sub-menu">'));
+        $this->assertSame(4, substr_count($navigation, 'class="nav-dropdown-toggle"'));
+        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Pelayanan', 'Pengajuan Surat', 'Statistik Keluarga', 'Syarat Administrasi', 'APBDes'] as $label) {
             $this->assertStringContainsString($label, $navigation);
         }
         foreach (['data-desa-statistik', 'informasi-publik-desa'] as $route) {
@@ -73,8 +73,16 @@ class SitePagesTest extends TestCase
         $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('profile-desa'), '/').'".*?>\s*<span>Identitas Desa<\/span>/s', $navigation);
         $this->assertStringNotContainsString('>Peta Desa</a>', $navigation);
         $this->assertStringNotContainsString('#', $navigation);
-        $this->assertGreaterThan(strpos($navigation, 'Berita Desa'), strpos($navigation, 'Galeri Desa'));
-        $this->assertGreaterThan(strpos($navigation, 'Galeri Desa'), strpos($navigation, 'Pelayanan Surat'));
+        preg_match('/>Informasi Desa<\/button>\s*<ul class="sub-menu">(.*?)<\/ul>/s', $navigation, $informationMenu);
+        $this->assertStringContainsString(route('berita-desa.index'), $informationMenu[1] ?? '');
+        $this->assertStringContainsString(route('galeri-desa'), $informationMenu[1] ?? '');
+        $this->assertStringNotContainsString(route('informasi-desa.detail', 'layanan-administrasi'), $informationMenu[1] ?? '');
+
+        preg_match('/>Pelayanan<\/button>\s*<ul class="sub-menu">(.*?)<\/ul>/s', $navigation, $serviceMenu);
+        $this->assertStringContainsString(route('informasi-desa.detail', 'layanan-administrasi'), $serviceMenu[1] ?? '');
+        $this->assertStringContainsString('Syarat Administrasi', $serviceMenu[1] ?? '');
+        $this->assertStringContainsString(route('letter-services.index'), $serviceMenu[1] ?? '');
+        $this->assertStringContainsString('Pengajuan Surat', $serviceMenu[1] ?? '');
         $this->assertStringNotContainsString('Asal-usul dan perkembangan', $navigation);
         $this->assertStringNotContainsString('Jumlah penduduk berdasarkan jenjang pendidikan', $navigation);
         $this->assertStringContainsString(route('pemerintahan-desa'), $navigation);
@@ -317,13 +325,15 @@ class SitePagesTest extends TestCase
             route('profile-desa.detail', 'visi-misi') => ['Profile Desa', 'Visi dan Misi'],
             route('data-statistik.detail', 'pendidikan') => ['Data Statistik', 'Statistik Pendidikan'],
             route('informasi-desa.detail', 'agenda') => ['Informasi Desa', 'Agenda Desa'],
+            route('berita-desa.index') => ['Informasi Desa', 'Berita Desa'],
+            route('galeri-desa') => ['Informasi Desa', 'Galeri Desa'],
+            route('informasi-desa.detail', 'layanan-administrasi') => ['Pelayanan', 'Syarat Administrasi'],
+            route('letter-services.index') => ['Pelayanan', 'Pengajuan Surat'],
         ];
 
         foreach ($pages as $url => [$parent, $child]) {
             $response = $this->get($url)->assertOk();
             $html = $response->getContent();
-            preg_match('/<header class="page-banner">(.*?)<\/header>/s', $html, $bannerMatches);
-            $banner = $bannerMatches[1] ?? '';
             preg_match('/<nav class="breadcrumbs".*?<\/nav>/s', $html, $matches);
             $breadcrumbs = $matches[0] ?? '';
 
@@ -334,15 +344,13 @@ class SitePagesTest extends TestCase
             $this->assertStringContainsString('aria-hidden="true">/</span>', $breadcrumbs);
             $this->assertStringNotContainsString('fa-chevron-right', $breadcrumbs);
             $this->assertStringContainsString($child, $breadcrumbs);
-            $this->assertStringContainsString('class="page-banner-heading"', $banner);
-            $this->assertStringContainsString('<h1>'.$child.'</h1>', $banner);
         }
 
         $this->get(route('galeri-desa'))
             ->assertOk()
-            ->assertDontSee('<nav class="breadcrumbs"', false)
-            ->assertSee('page-banner--no-breadcrumbs', false)
-            ->assertSee('page-banner--no-divider', false);
+            ->assertSee('<nav class="breadcrumbs"', false)
+            ->assertSee('Informasi Desa')
+            ->assertSee('Galeri Desa');
 
         $this->get(route('berita-desa.index'))
             ->assertOk()

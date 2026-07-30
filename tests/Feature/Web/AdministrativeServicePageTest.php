@@ -13,8 +13,9 @@ class AdministrativeServicePageTest extends TestCase
     {
         $response = $this->get(route('informasi-desa.detail', ['section' => 'layanan-administrasi']))
             ->assertOk()
-            ->assertSee('Layanan Administrasi')
-            ->assertSee('Persyaratan Pelayanan')
+            ->assertSee('Syarat Administrasi')
+            ->assertSee('Pelayanan')
+            ->assertSee('Dokumen yang perlu disiapkan:')
             ->assertSee('Pengajuan Kartu Keluarga')
             ->assertSee('Pengajuan Akta Kematian')
             ->assertSee('Administrasi Nikah')

@@ -1,5 +1,5 @@
-<x-layouts.app title="Pelayanan Surat Desa" description="Ajukan permohonan awal surat desa dan pantau prosesnya.">
-    <x-page-header title="Pelayanan Surat Desa" description="Ajukan permohonan awal, pantau prosesnya, lalu ambil surat fisik di Kantor Desa Sukomulyo." :show-heading="true" />
+<x-layouts.app title="Pengajuan Surat" description="Layanan pengajuan surat Desa Sukomulyo.">
+    <x-page-header title="Pengajuan Surat" :show-heading="false" :breadcrumbs="[['label'=>'Pelayanan'],['label'=>'Pengajuan Surat']]" />
     @php
         $serviceIcons = [
             'SKU' => 'fa-store', 'SKD' => 'fa-home', 'SKTM' => 'fa-hand-holding-heart',
@@ -10,6 +10,10 @@
     @endphp
     <div class="letter-service-page" data-letter-selector>
         <div class="container">
+            <header class="letter-service-heading">
+                <h1>Pengajuan Surat</h1>
+            </header>
+
             <ol class="letter-steps" aria-label="Tahapan pengajuan surat">
                 @foreach(['Pilih Jenis Surat', 'Isi Data Pemohon', 'Unggah Dokumen', 'Konfirmasi'] as $step)
                     <li @class(['is-active' => $loop->first]) @if($loop->first) aria-current="step" @endif>
@@ -41,24 +45,6 @@
                 </section>
 
                 <aside class="letter-info-sidebar" aria-label="Informasi pelayanan surat">
-                    <section class="letter-info-card letter-info-card--requirements">
-                        <div>
-                            <h2>Syarat Umum</h2>
-                            <ul>
-                                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Fotokopi KTP pemohon</li>
-                                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Fotokopi Kartu Keluarga</li>
-                                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Data sesuai dengan dokumen asli</li>
-                            </ul>
-                            <small>*Syarat tambahan menyesuaikan jenis surat</small>
-                        </div>
-                        <span class="letter-document-illustration" aria-hidden="true"><i class="fas fa-folder-open"></i><i class="fas fa-file-alt"></i></span>
-                    </section>
-
-                    <section class="letter-info-card letter-info-card--notice">
-                        <h2><i class="fas fa-exclamation-circle" aria-hidden="true"></i> Informasi Penting</h2>
-                        <p>Permohonan surat hanya bersifat sebagai permohonan. Surat yang sudah selesai tidak dapat diunduh dan harus diambil langsung di {{ $settings->pickupAddress() }} pada jam layanan.</p>
-                    </section>
-
                     <section class="letter-info-card letter-info-card--help">
                         <h2>Butuh Bantuan?</h2>
                         <p>Hubungi petugas Desa Sukomulyo melalui WhatsApp untuk informasi lebih lanjut.</p>

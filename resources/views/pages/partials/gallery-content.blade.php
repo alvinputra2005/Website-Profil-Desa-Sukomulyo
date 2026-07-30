@@ -10,6 +10,15 @@
     data-page-title="Galeri Desa | {{ $site['name'] }}"
     data-page-description="Dokumentasi kegiatan Desa Sukomulyo."
 >
+    <x-page-header
+        title="Galeri Desa"
+        :show-heading="false"
+        :breadcrumbs="[
+            ['label' => 'Informasi Desa', 'url' => route('informasi-publik-desa')],
+            ['label' => 'Galeri Desa'],
+        ]"
+    />
+
     <div class="container">
         <div id="sc_innerpage_wrap" class="gallery-page-wrap">
             <section class="sc_innerpage_contentbx fullwidth" aria-label="Galeri kegiatan Desa Sukomulyo">

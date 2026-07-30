@@ -887,14 +887,16 @@ class PublicSiteService
                 ['label' => 'Statistik Ekonomi', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'ekonomi']],
                 ['label' => 'IDM (Indeks Desa Membangun)', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'idm']],
             ]],
-            ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
+            ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-publik-desa', 'children' => [
                 ['label' => 'Pengumuman Desa', 'route' => 'announcements.index', 'active' => 'announcements.*'],
-                ['label' => 'Layanan Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
                 ['label' => 'APBDes', 'route' => 'transparansi-apbdes', 'active' => 'transparansi-apbdes*'],
+                ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
+                ['label' => 'Galeri Desa', 'route' => 'galeri-desa', 'active' => 'galeri-desa'],
             ]],
-            ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
-            ['label' => 'Galeri Desa', 'route' => 'galeri-desa', 'active' => 'galeri-desa'],
-            ['label' => 'Pelayanan Surat', 'route' => 'letter-services.index', 'active' => 'letter-services.*'],
+            ['label' => 'Pelayanan', 'route' => 'letter-services.index', 'active' => 'pelayanan-*', 'children' => [
+                ['label' => 'Syarat Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
+                ['label' => 'Pengajuan Surat', 'route' => 'letter-services.index', 'active' => 'letter-services.*'],
+            ]],
         ];
     }
 
