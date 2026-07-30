@@ -21,7 +21,7 @@
                     dari {{ $announcements->total() }} pengumuman
                 </p>
 
-                <div class="announcement-table">
+                <div id="announcement-list" class="announcement-table">
                     <div class="announcement-table-head" aria-hidden="true">
                         <span>Tanggal</span>
                         <span>Pengumuman</span>
@@ -35,11 +35,7 @@
                     </div>
                 </div>
 
-                @if ($announcements->hasPages())
-                    <nav class="announcement-pagination" aria-label="Halaman pengumuman">
-                        {{ $announcements->links() }}
-                    </nav>
-                @endif
+                {{ $announcements->links('components.announcement-pagination') }}
             @else
                 <x-announcements.empty-state :search="$filters['search']" />
             @endif

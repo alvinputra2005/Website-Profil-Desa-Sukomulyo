@@ -26,7 +26,7 @@ final class AnnouncementQueryService
             default => $query->orderByRaw('COALESCE(published_at, created_at) desc')->orderByDesc('id'),
         };
 
-        return $query->paginate(10)->withQueryString();
+        return $query->paginate($filters['per_page'] ?? 10)->withQueryString();
     }
 
     public function findPublished(string $slug): Publication

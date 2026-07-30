@@ -49,6 +49,86 @@ class AnnouncementSeeder extends Seeder
             ],
         ];
 
+        $additionalAnnouncements = [
+            [
+                'title' => 'Pengumuman Penyaluran BLT Dana Desa Tahap II Tahun 2026',
+                'slug' => 'penyaluran-blt-dana-desa-tahap-ii-2026',
+                'excerpt' => 'Informasi jadwal dan persyaratan pengambilan BLT Dana Desa tahap kedua bagi keluarga penerima manfaat.',
+                'published_at' => '2026-07-08 08:00:00',
+                'download_count' => 36,
+            ],
+            [
+                'title' => 'Pendaftaran Pelatihan Pengembangan UMKM Desa Sukomulyo',
+                'slug' => 'pendaftaran-pelatihan-pengembangan-umkm-2026',
+                'excerpt' => 'Pelaku usaha desa dapat mendaftarkan diri untuk mengikuti pelatihan pemasaran dan pengelolaan usaha.',
+                'published_at' => '2026-07-04 08:00:00',
+                'download_count' => 24,
+            ],
+            [
+                'title' => 'Jadwal Pelayanan Administrasi Keliling Bulan Juni 2026',
+                'slug' => 'jadwal-pelayanan-administrasi-keliling-juni-2026',
+                'excerpt' => 'Pelayanan administrasi kependudukan keliling akan hadir di setiap dusun sesuai jadwal.',
+                'published_at' => '2026-06-28 08:00:00',
+                'download_count' => 45,
+            ],
+            [
+                'title' => 'Pendataan Ulang Calon Penerima Bantuan Sosial Desa',
+                'slug' => 'pendataan-ulang-penerima-bantuan-sosial-2026',
+                'excerpt' => 'Warga diminta memeriksa dan memperbarui data keluarga untuk proses verifikasi bantuan sosial.',
+                'published_at' => '2026-06-21 08:00:00',
+                'download_count' => 52,
+            ],
+            [
+                'title' => 'Gotong Royong Pembersihan Saluran Irigasi Desa',
+                'slug' => 'gotong-royong-pembersihan-saluran-irigasi-2026',
+                'excerpt' => 'Pemerintah desa mengajak warga mengikuti pembersihan saluran irigasi menjelang musim tanam.',
+                'published_at' => '2026-06-15 08:00:00',
+                'download_count' => 19,
+            ],
+            [
+                'title' => 'Sosialisasi dan Pembentukan Bank Sampah Desa Sukomulyo',
+                'slug' => 'sosialisasi-pembentukan-bank-sampah-desa-2026',
+                'excerpt' => 'Sosialisasi pengelolaan sampah rumah tangga dan pembentukan pengurus bank sampah desa.',
+                'published_at' => '2026-06-08 08:00:00',
+                'download_count' => 27,
+            ],
+            [
+                'title' => 'Imbauan Pembayaran Pajak Bumi dan Bangunan Tahun 2026',
+                'slug' => 'imbauan-pembayaran-pbb-tahun-2026',
+                'excerpt' => 'Warga diimbau melakukan pembayaran Pajak Bumi dan Bangunan sebelum batas waktu yang ditentukan.',
+                'published_at' => '2026-05-31 08:00:00',
+                'download_count' => 31,
+            ],
+            [
+                'title' => 'Pendaftaran Calon Kader Posyandu Desa Sukomulyo',
+                'slug' => 'pendaftaran-calon-kader-posyandu-2026',
+                'excerpt' => 'Pemerintah desa membuka kesempatan bagi warga untuk berpartisipasi sebagai kader Posyandu.',
+                'published_at' => '2026-05-24 08:00:00',
+                'download_count' => 22,
+            ],
+            [
+                'title' => 'Pelaksanaan Vaksinasi Hewan Peliharaan Gratis',
+                'slug' => 'vaksinasi-hewan-peliharaan-gratis-2026',
+                'excerpt' => 'Layanan vaksinasi gratis tersedia bagi hewan peliharaan milik warga Desa Sukomulyo.',
+                'published_at' => '2026-05-17 08:00:00',
+                'download_count' => 18,
+            ],
+            [
+                'title' => 'Musyawarah Desa Program Ketahanan Pangan Tahun 2026',
+                'slug' => 'musyawarah-desa-ketahanan-pangan-2026',
+                'excerpt' => 'Musyawarah desa membahas rencana kegiatan dan prioritas program ketahanan pangan tahun 2026.',
+                'published_at' => '2026-05-10 08:00:00',
+                'download_count' => 34,
+            ],
+        ];
+
+        foreach ($additionalAnnouncements as $item) {
+            $item['content'] = '<p>'.$item['excerpt'].'</p><p>Rincian jadwal, lokasi, dan ketentuan pelaksanaan dapat dibaca pada dokumen lampiran pengumuman.</p>';
+            $item['document_title'] = $item['title'];
+            $item['file_name'] = $item['slug'].'.pdf';
+            $announcements[] = $item;
+        }
+
         foreach ($announcements as $item) {
             $publication = Publication::updateOrCreate(
                 ['slug' => $item['slug']],

@@ -87,6 +87,27 @@ class AnnouncementTest extends TestCase
             ->assertSee('Isi pengumuman resmi.', false);
     }
 
+    public function test_index_allows_the_number_of_displayed_announcements_to_be_changed(): void
+    {
+        foreach (range(1, 6) as $number) {
+            $this->publication([
+                'slug' => 'pengumuman-tampilan-'.$number,
+                'published_at' => now()->subMinutes($number),
+            ]);
+        }
+
+        $this->get(route('announcements.index', ['per_page' => 5]))
+            ->assertOk()
+            ->assertViewHas(
+                'announcements',
+                fn ($announcements) => $announcements->count() === 5
+                    && $announcements->perPage() === 5
+                    && $announcements->lastPage() === 2,
+            )
+            ->assertSee('name="per_page"', false)
+            ->assertSee('value="5" selected', false);
+    }
+
     public function test_draft_and_non_announcement_detail_are_not_public(): void
     {
         $draft = $this->publication([

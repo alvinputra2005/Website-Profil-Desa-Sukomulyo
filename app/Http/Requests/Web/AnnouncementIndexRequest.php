@@ -17,6 +17,7 @@ class AnnouncementIndexRequest extends FormRequest
         return [
             'q' => ['nullable', 'string', 'max:100'],
             'sort' => ['nullable', Rule::in(['latest', 'oldest', 'most_downloaded'])],
+            'per_page' => ['nullable', 'integer', Rule::in([5, 10, 25, 50])],
         ];
     }
 
@@ -25,6 +26,7 @@ class AnnouncementIndexRequest extends FormRequest
         $this->merge([
             'q' => trim((string) $this->query('q')),
             'sort' => $this->query('sort', 'latest'),
+            'per_page' => $this->query('per_page', 10),
         ]);
     }
 
@@ -35,6 +37,7 @@ class AnnouncementIndexRequest extends FormRequest
         return [
             'search' => $validated['q'] !== '' ? $validated['q'] : null,
             'sort' => $validated['sort'] ?? 'latest',
+            'per_page' => (int) ($validated['per_page'] ?? 10),
         ];
     }
 }

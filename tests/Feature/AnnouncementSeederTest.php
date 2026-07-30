@@ -19,7 +19,24 @@ class AnnouncementSeederTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         $this->seed(DatabaseSeeder::class);
 
-        $this->assertSame(3, Publication::query()->announcements()->count());
+        $this->assertSame(13, Publication::query()->announcements()->count());
+
+        $this->get(route('announcements.index'))
+            ->assertOk()
+            ->assertViewHas(
+                'announcements',
+                fn ($announcements) => $announcements->count() === 10
+                    && $announcements->total() === 13
+                    && $announcements->lastPage() === 2,
+            );
+
+        $this->get(route('announcements.index', ['page' => 2]))
+            ->assertOk()
+            ->assertViewHas(
+                'announcements',
+                fn ($announcements) => $announcements->count() === 3
+                    && $announcements->currentPage() === 2,
+            );
 
         $announcement = Publication::query()
             ->where('slug', 'pemberitahuan-kerja-bakti-desa-juli-2026')

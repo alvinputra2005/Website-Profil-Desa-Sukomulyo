@@ -19,7 +19,6 @@
 
     <div class="announcement-actions">
         <a class="announcement-button announcement-button--view" href="{{ route('announcements.show', ['publication' => $announcement->slug]) }}">
-            <i class="far fa-eye" aria-hidden="true"></i>
             <span>Lihat Pengumuman</span>
         </a>
         @if ($primaryAttachment)
@@ -27,7 +26,6 @@
                 class="announcement-button announcement-button--download"
                 href="{{ route('announcements.attachments.download', ['publication' => $announcement->slug, 'attachment' => $primaryAttachment->id]) }}"
             >
-                <i class="fas fa-download" aria-hidden="true"></i>
                 <span>Unduh PDF</span>
             </a>
         @else
