@@ -25,11 +25,16 @@
     .letter-application-detail .documents-table > thead > tr > th { color: var(--admin-ink, #252a31); font-size: 11px; letter-spacing: .03em; text-transform: uppercase; }
     .letter-application-detail .documents-table > tbody > tr > td { vertical-align: top; font-size: 13px; }
     .letter-application-detail .document-name { display: block; margin-bottom: 2px; font-weight: 600; }
-    .letter-application-detail .document-name.btn { padding: 0; border: 0; background: transparent; color: var(--admin-primary, #526b42); line-height: 1.35; white-space: normal; }
+    .letter-application-detail .document-name.btn { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: var(--admin-primary, #526b42); line-height: 1.35; text-align: left; white-space: normal; }
     .letter-application-detail .document-meta { color: var(--letter-detail-muted); font-size: 11px; }
+    .letter-application-detail .document-status { min-width: 120px; }
+    .letter-application-detail .document-status .label { display: inline-block; margin-top: 2px; }
     .letter-application-detail .document-review { min-width: 210px; }
     .letter-application-detail .document-review .form-control { height: 30px; margin-top: 7px; border-radius: 2px; font-size: 12px; }
     .letter-application-detail .document-review .btn { margin-top: 6px; }
+    .letter-application-detail .document-review__note-label { display: block; margin: 8px 0 -3px; color: var(--letter-detail-muted); font-size: 11px; font-weight: 600; }
+    .letter-application-detail .document-review__note-label .required-mark { color: #b23b30; }
+    .letter-application-detail .document-review__help { margin: 5px 0 0; color: #9c5d24; font-size: 11px; line-height: 1.35; }
     .letter-application-detail .status-current { margin-bottom: 16px; padding: 11px 12px; border: 1px solid var(--letter-detail-border); border-left: 3px solid var(--admin-primary, #526b42); background: #f8f9f6; }
     .letter-application-detail .status-current small { display: block; margin-bottom: 3px; color: var(--letter-detail-muted); font-size: 11px; }
     .letter-application-detail .status-current strong { color: var(--admin-ink, #252a31); font-size: 15px; }
@@ -51,8 +56,8 @@
     .letter-application-detail .status-history__meta { margin: 3px 0 0; color: var(--letter-detail-muted); font-size: 11px; line-height: 1.45; }
     .letter-application-detail .status-history__note { margin: 7px 0 0; padding: 8px 10px; border-left: 2px solid #d5ded0; background: #f8f9f6; color: #4d5950; font-size: 12px; line-height: 1.45; white-space: pre-line; }
     .letter-application-detail .status-history__notification { margin-top: 6px; color: #397049; font-size: 11px; }
-    .document-viewer-modal .modal-dialog { width: 100%; height: 100%; margin: 0; }
-    .document-viewer-modal .modal-content { height: 100%; border: 0; border-radius: 0; background: #1a2227; box-shadow: none; }
+    .document-viewer-modal .modal-dialog { width: calc(100% - 48px); max-width: 1120px; height: 82vh; margin: 7vh auto 0; }
+    .document-viewer-modal .modal-content { height: 100%; overflow: hidden; border: 1px solid rgba(255,255,255,.15); border-radius: 3px; background: #1a2227; box-shadow: 0 12px 38px rgba(0,0,0,.45); }
     .document-viewer-modal .modal-header { display: flex; min-height: 58px; padding: 11px 16px; align-items: center; border-bottom: 1px solid rgba(255,255,255,.14); background: #263238; color: #fff; gap: 12px; }
     .document-viewer-modal .modal-title { overflow: hidden; margin: 0; color: #fff; font-size: 15px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
     .document-viewer-modal .modal-title small { display: block; margin-top: 2px; color: #b8c5c9; font-size: 11px; font-weight: 400; }
@@ -68,7 +73,7 @@
     .document-viewer-modal .viewer-image { max-width: 94%; max-height: 94%; transition: transform .18s ease; transform-origin: center center; }
     .document-viewer-modal .viewer-pdf { width: 100%; height: 100%; border: 0; background: #fff; }
     .document-viewer-modal .is-hidden { display: none !important; }
-    @media (max-width: 767px) { .document-viewer-modal .modal-header { align-items: flex-start; flex-wrap: wrap; } .document-viewer-modal .viewer-toolbar { width: 100%; margin-left: 0; } .document-viewer-modal .viewer-toolbar .btn { flex: 1; } .document-viewer-modal .viewer-toolbar .btn-close { max-width: 42px; } }
+    @media (max-width: 767px) { .document-viewer-modal .modal-dialog { width: calc(100% - 20px); height: 88vh; margin-top: 4vh; } .document-viewer-modal .modal-header { align-items: flex-start; flex-wrap: wrap; } .document-viewer-modal .viewer-toolbar { width: 100%; margin-left: 0; } .document-viewer-modal .viewer-toolbar .btn { flex: 1; } .document-viewer-modal .viewer-toolbar .btn-close { max-width: 42px; } }
     @media (max-width: 767px) { .letter-application-detail .application-header { padding: 15px; flex-direction: column; gap: 9px; } .letter-application-detail .application-header__number { font-size: 19px; } .letter-application-detail .application-facts > div { grid-template-columns: 1fr; gap: 3px; } .letter-application-detail .document-review { min-width: 180px; } }
 </style>
 @endpush
@@ -106,16 +111,17 @@
                 <div class="box-header with-border"><h2 id="documents-heading" class="box-title"><i class="fa fa-files-o" aria-hidden="true"></i> Dokumen Persyaratan</h2></div>
                 <div class="box-body table-responsive">
                     <table class="table table-striped documents-table">
-                        <thead><tr><th>Persyaratan</th><th>File</th><th>Status &amp; Review</th></tr></thead>
+                        <thead><tr><th>Persyaratan</th><th>File</th><th>Status Saat Ini</th><th>Review Dokumen</th></tr></thead>
                         <tbody>
                             @forelse($application->documents as $document)
                                 <tr>
                                     <td>{{ $requirementLabels[$document->requirement_key] ?? $document->label }}</td>
-                                    <td><button type="button" class="document-name btn btn-link text-left" data-document-preview data-preview-url="{{ route('admin.letter-applications.document.preview-url', [$application, $document->id]) }}" data-download-url="{{ route('admin.letter-applications.document', [$application, $document->id]) }}" data-document-name="{{ $document->original_name }}" data-document-size="{{ number_format(($document->size_bytes ?: $document->file_size) / 1024, 0) }} KB"><i class="fa fa-eye" aria-hidden="true"></i> {{ $document->original_name }}</button><span class="document-meta">{{ number_format(($document->size_bytes ?: $document->file_size) / 1024, 0) }} KB · Klik untuk pratinjau</span></td>
-                                    <td class="document-review"><span class="label label-{{ $document->review_status === 'approved' ? 'success' : ($document->review_status === 'rejected' ? 'danger' : 'warning') }}">{{ $document->review_status === 'approved' ? 'Sesuai' : ($document->review_status === 'rejected' ? 'Perlu diganti' : 'Menunggu review') }}</span><form method="post" action="{{ route('admin.letter-applications.document.review', [$application, $document->id]) }}">@csrf @method('PATCH')<label class="sr-only" for="document-status-{{ $document->id }}">Status dokumen</label><select id="document-status-{{ $document->id }}" name="review_status" class="form-control input-sm"><option value="approved" @selected($document->review_status === 'approved')>Sesuai</option><option value="rejected" @selected($document->review_status === 'rejected')>Minta diganti</option></select><label class="sr-only" for="document-note-{{ $document->id }}">Catatan review</label><input id="document-note-{{ $document->id }}" name="review_note" class="form-control input-sm" value="{{ $document->review_note }}" placeholder="Catatan bila perlu diganti"><button class="btn btn-xs btn-success" type="submit">Simpan Review</button></form></td>
+                                    <td><button type="button" class="document-name btn btn-link" data-document-preview data-preview-url="{{ route('admin.letter-applications.document.preview-url', [$application, $document->id]) }}" data-download-url="{{ route('admin.letter-applications.document', [$application, $document->id]) }}" data-document-name="{{ $document->original_name }}" data-document-size="{{ number_format(($document->size_bytes ?: $document->file_size) / 1024, 0) }} KB">{{ $document->original_name }}</button><span class="document-meta">{{ number_format(($document->size_bytes ?: $document->file_size) / 1024, 0) }} KB · Klik untuk pratinjau</span></td>
+                                    <td class="document-status"><span class="label label-{{ $document->review_status === 'approved' ? 'success' : ($document->review_status === 'rejected' ? 'danger' : 'warning') }}">{{ $document->review_status === 'approved' ? 'Sesuai' : ($document->review_status === 'rejected' ? 'Perlu diganti' : 'Menunggu review') }}</span></td>
+                                    <td class="document-review"><form method="post" action="{{ route('admin.letter-applications.document.review', [$application, $document->id]) }}" data-document-review-form>@csrf @method('PATCH')<label class="sr-only" for="document-status-{{ $document->id }}">Status dokumen</label><select id="document-status-{{ $document->id }}" name="review_status" class="form-control input-sm" data-review-status><option value="approved" @selected($document->review_status === 'approved')>Sesuai</option><option value="rejected" @selected($document->review_status === 'rejected')>Minta diganti</option></select><label class="document-review__note-label" for="document-note-{{ $document->id }}">Catatan perbaikan <span class="required-mark" data-review-required-mark hidden>*</span></label><input id="document-note-{{ $document->id }}" name="review_note" class="form-control input-sm" value="{{ $document->review_note }}" placeholder="Jelaskan dokumen yang perlu diperbaiki" data-review-note><p class="document-review__help" data-review-note-help hidden>Catatan wajib diisi agar pemohon mengetahui perbaikan yang diperlukan.</p><button class="btn btn-xs btn-success" type="submit">Simpan Review</button></form></td>
                                 </tr>
                             @empty
-                                <tr><td colspan="3" class="text-center text-muted">Belum ada dokumen yang diunggah.</td></tr>
+                                <tr><td colspan="4" class="text-center text-muted">Belum ada dokumen yang diunggah.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -260,6 +266,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!printWindow) window.alert('Izinkan pop-up untuk mencetak dokumen PDF.');
             }
         });
+    });
+
+    document.querySelectorAll('[data-document-review-form]').forEach(function (form) {
+        const status = form.querySelector('[data-review-status]');
+        const note = form.querySelector('[data-review-note]');
+        const requiredMark = form.querySelector('[data-review-required-mark]');
+        const help = form.querySelector('[data-review-note-help]');
+
+        function syncReviewRequirement() {
+            const needsNote = status.value === 'rejected';
+            note.required = needsNote;
+            note.setAttribute('aria-required', needsNote ? 'true' : 'false');
+            requiredMark.hidden = !needsNote;
+            help.hidden = !needsNote;
+        }
+
+        status.addEventListener('change', syncReviewRequirement);
+        syncReviewRequirement();
     });
 
     modal.on('hidden.bs.modal', resetViewer);
