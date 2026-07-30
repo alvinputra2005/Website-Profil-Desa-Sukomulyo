@@ -1,0 +1,233 @@
+<?php
+
+return [
+    'page' => [
+        'title' => 'Layanan Administrasi',
+        'description' => 'Informasi persyaratan, alur pelayanan, jadwal, dan tata cara pengajuan administrasi di Desa Sukomulyo.',
+    ],
+
+    'services' => [
+        [
+            'id' => 'kartu-keluarga',
+            'title' => 'Pengajuan Kartu Keluarga',
+            'icon' => 'far fa-address-card',
+            'keywords' => ['kk', 'kartu keluarga'],
+            'children' => [
+                [
+                    'id' => 'kk-baru',
+                    'title' => 'Penerbitan KK Baru',
+                    'keywords' => ['kk baru', 'keluarga baru'],
+                    'requirements' => [
+                        'Surat pengantar RT/RW.',
+                        'KK lama asli dan KTP-el asli.',
+                        'Buku nikah, kutipan akta perceraian, atau akta perkawinan.',
+                        'Surat kelahiran dari bidan asli.',
+                    ],
+                    'notes' => [],
+                ],
+                [
+                    'id' => 'kk-perubahan-data',
+                    'title' => 'Penerbitan KK Perubahan Data',
+                    'keywords' => ['ubah data', 'perubahan kk'],
+                    'requirements' => [
+                        'Surat pengantar RT/RW.',
+                        'KK lama asli dan KTP-el asli.',
+                        'Surat keterangan atau bukti pendukung perubahan data.',
+                    ],
+                    'notes' => [],
+                ],
+                [
+                    'id' => 'kk-hilang-rusak',
+                    'title' => 'Penerbitan KK Hilang/Rusak',
+                    'keywords' => ['kk hilang', 'kk rusak', 'kehilangan'],
+                    'requirements' => [
+                        'Surat pengantar RT/RW.',
+                        'KTP-el asli.',
+                        'Surat keterangan kehilangan dari kepolisian.',
+                    ],
+                    'notes' => [],
+                ],
+            ],
+        ],
+        [
+            'id' => 'akta-kematian',
+            'title' => 'Pengajuan Akta Kematian',
+            'icon' => 'fas fa-file-alt',
+            'keywords' => ['akta', 'kematian', 'meninggal', 'almarhum'],
+            'requirements' => [
+                'Surat pengantar RT/RW.',
+                'KTP pelapor dalam satu KK; pelapor dapat berasal dari RT sesuai ketentuan petugas.',
+                'KK dan KTP almarhum.',
+                'Fotokopi KTP dua orang saksi.',
+                'Materai.',
+            ],
+            'notes' => [
+                'Butir persyaratan mengenai identitas pelapor perlu dikonfirmasi kembali kepada perangkat desa.',
+            ],
+        ],
+        [
+            'id' => 'administrasi-nikah',
+            'title' => 'Administrasi Nikah',
+            'icon' => 'fas fa-venus-mars',
+            'keywords' => ['nikah', 'perkawinan', 'calon pengantin', 'wali'],
+            'requirements' => [
+                'Surat pengantar RT/RW.',
+                'Fotokopi Kartu Keluarga.',
+                'Fotokopi KTP-el.',
+                'Fotokopi akta kelahiran atau ijazah.',
+                'Fotokopi KTP dua orang saksi dan wali.',
+                'Fotokopi kutipan buku nikah orang tua calon pengantin wanita.',
+                'Akta cerai atau akta kematian asli bagi calon pengantin yang berstatus duda/janda.',
+                'Pas foto ukuran 3 × 4 sebanyak 5 lembar, ukuran 2 × 3 sebanyak 5 lembar, dan ukuran 4 × 6 sebanyak 2 lembar.',
+                'Materai.',
+                'Surat kesehatan sebagai syarat nikah dari puskesmas.',
+            ],
+            'notes' => [],
+        ],
+        [
+            'id' => 'skck',
+            'title' => 'SKCK',
+            'icon' => 'fas fa-id-badge',
+            'keywords' => ['skck', 'catatan kepolisian', 'foto'],
+            'requirements' => [
+                'Surat pengantar RT/RW.',
+                'Kartu Keluarga asli.',
+                'KTP-el asli.',
+                'Pas foto ukuran 4 × 6 sebanyak 6 lembar.',
+                'Wajib memiliki BPJS.',
+            ],
+            'notes' => [
+                'Tahun kelahiran ganjil menggunakan latar foto merah.',
+                'Tahun kelahiran genap menggunakan latar foto biru.',
+            ],
+        ],
+        [
+            'id' => 'akta-kelahiran',
+            'title' => 'Pengajuan Akta Kelahiran',
+            'icon' => 'fas fa-birthday-cake',
+            'keywords' => ['akta', 'kelahiran', 'bayi', 'bidan'],
+            'requirements' => [
+                'Surat pengantar RT/RW.',
+                'KK dan KTP orang tua asli.',
+                'Buku nikah asli.',
+                'Surat kelahiran dari bidan atau rumah sakit asli.',
+                'Fotokopi KTP dua orang saksi.',
+                'Materai.',
+            ],
+            'notes' => [],
+        ],
+        [
+            'id' => 'pindah-tempat',
+            'title' => 'Pindah Tempat (Masuk/Keluar)',
+            'icon' => 'fas fa-exchange-alt',
+            'keywords' => ['pindah', 'masuk', 'keluar', 'domisili'],
+            'requirements' => [
+                'Surat pengantar RT/RW.',
+                'Kartu Keluarga lama asli.',
+                'KTP asli.',
+                'Materai.',
+            ],
+            'notes' => [
+                'Minta atau bawa surat pindah dari desa yang bersangkutan.',
+            ],
+        ],
+        [
+            'id' => 'kartu-identitas-anak',
+            'title' => 'Kartu Identitas Anak (KIA)',
+            'icon' => 'fas fa-child',
+            'keywords' => ['kia', 'kartu identitas anak', 'anak'],
+            'requirements' => [
+                'Surat pengantar RT/RW.',
+                'Akta kelahiran asli.',
+                'Kartu Keluarga asli.',
+                'Pas foto ukuran 3 × 4 sebanyak 2 lembar untuk anak usia di atas 5 tahun.',
+                'KTP orang tua asli.',
+            ],
+            'notes' => [],
+        ],
+        [
+            'id' => 'bpjs',
+            'title' => 'BPJS',
+            'icon' => 'fas fa-heartbeat',
+            'keywords' => ['bpjs', 'kesehatan', 'rekening', 'bank'],
+            'requirements' => [
+                'Surat pengantar RT/RW.',
+                'Kartu Keluarga asli.',
+                'KTP-el asli.',
+                'Buku rekening bank.',
+            ],
+            'notes' => [],
+        ],
+    ],
+
+    'service_flow' => [
+        [
+            'number' => 1,
+            'actor' => 'Pemohon',
+            'title' => 'Meminta surat pengantar',
+            'description' => 'Pemohon meminta surat pengantar kepada Ketua RT setempat dengan membawa Kartu Keluarga dan KTP-el.',
+            'icon' => 'fas fa-user',
+        ],
+        [
+            'number' => 2,
+            'actor' => 'Ketua RT',
+            'title' => 'Menyiapkan surat pengantar',
+            'description' => 'Ketua RT mengisi surat sesuai keperluan pemohon, menandatangani surat, dan memberikan stempel.',
+            'icon' => 'fas fa-file-signature',
+        ],
+        [
+            'number' => 3,
+            'actor' => 'Pemohon',
+            'title' => 'Membawa berkas ke kantor desa',
+            'description' => 'Pemohon membawa seluruh persyaratan lengkap ke kantor pelayanan desa.',
+            'icon' => 'fas fa-folder-open',
+        ],
+        [
+            'number' => 4,
+            'actor' => 'Ruang Pelayanan',
+            'title' => 'Pemeriksaan dan registrasi',
+            'description' => 'Petugas memeriksa kelengkapan berkas, membuat surat yang diperlukan, dan meregistrasi dokumen.',
+            'icon' => 'fas fa-clipboard-check',
+        ],
+        [
+            'number' => 5,
+            'actor' => 'Petugas',
+            'title' => 'Proses lanjutan SIPEDULI',
+            'description' => 'Petugas mengunggah berkas yang telah diregister ke aplikasi SIPEDULI apabila layanan memerlukan proses lanjutan.',
+            'icon' => 'fas fa-cloud-upload-alt',
+        ],
+        [
+            'number' => 6,
+            'actor' => 'Hasil',
+            'title' => 'Dokumen selesai diproses',
+            'description' => 'Surat yang tidak perlu diunggah dapat langsung digunakan. Dokumen yang memerlukan persetujuan Dukcapil memiliki estimasi proses 1 × 24 jam.',
+            'icon' => 'fas fa-check',
+        ],
+    ],
+
+    'submission_steps' => [
+        'Pilih jenis pelayanan yang dibutuhkan.',
+        'Buka daftar persyaratan dan siapkan dokumen asli serta fotokopi yang diminta.',
+        'Minta surat pengantar RT/RW.',
+        'Datang ke Kantor Desa Sukomulyo pada jam pelayanan.',
+        'Serahkan dokumen kepada petugas untuk pemeriksaan dan registrasi.',
+        'Simpan informasi atau bukti registrasi yang diberikan petugas.',
+        'Ambil dokumen langsung apabila tidak memerlukan proses Dukcapil.',
+        'Untuk dokumen yang diproses melalui SIPEDULI, tunggu konfirmasi petugas atau hubungi WhatsApp pelayanan.',
+    ],
+
+    'submission_notice' => 'Pastikan seluruh dokumen lengkap sebelum datang agar proses pelayanan tidak tertunda.',
+
+    'office' => [
+        'days' => 'Senin–Jumat',
+        'hours' => '08.00–16.00 WIB',
+        'break' => '12.00–13.00 WIB',
+        'closed' => 'Sabtu, Minggu, dan tanggal merah',
+        'whatsapp_display' => '085731625435',
+        'whatsapp_e164' => '6285731625435',
+        'whatsapp_message' => 'Halo, saya ingin menanyakan informasi layanan administrasi Desa Sukomulyo.',
+        'fee' => 'Gratis',
+        'fee_description' => 'Tanpa dipungut biaya',
+        'processing_estimate' => '1 × 24 jam untuk layanan yang memerlukan persetujuan Dukcapil',
+    ],
+];

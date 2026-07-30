@@ -29,7 +29,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PublicSiteService
 {
-    public function __construct(private readonly SiteCache $cache) {}
+    public function __construct(
+        private readonly SiteCache $cache,
+        private readonly AdministrativeServicePage $administrativeServicePage,
+    ) {}
 
     public function sitemap(): Response
     {
@@ -446,16 +449,14 @@ class PublicSiteService
 
     public function informationDetail(string $section): View
     {
+        if ($section === 'layanan-administrasi') {
+            return $this->render(
+                'pages.administrative-services',
+                $this->administrativeServicePage->data(),
+            );
+        }
+
         $pages = [
-            'layanan-administrasi' => [
-                'title' => 'Layanan Administrasi',
-                'description' => 'Persyaratan surat, jadwal pelayanan, dan alur pelayanan masyarakat.',
-                'fallback' => [
-                    ['title' => 'Persyaratan Surat', 'content' => 'Siapkan KTP, Kartu Keluarga, dan dokumen pendukung sesuai jenis layanan yang diajukan.'],
-                    ['title' => 'Jadwal Pelayanan', 'content' => 'Pelayanan administrasi dilaksanakan pada hari dan jam kerja kantor desa.'],
-                    ['title' => 'Alur Pelayanan', 'content' => 'Ajukan berkas ke petugas, lakukan verifikasi data, kemudian ambil dokumen setelah selesai diproses.'],
-                ],
-            ],
             'agenda' => [
                 'title' => 'Agenda Desa',
                 'description' => 'Jadwal kegiatan desa, musyawarah, dan kegiatan masyarakat.',
@@ -898,7 +899,6 @@ class PublicSiteService
             ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
                 ['label' => 'Pengumuman Desa', 'route' => 'announcements.index', 'active' => 'announcements.*'],
                 ['label' => 'Layanan Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
-                ['label' => 'Agenda Desa', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'agenda']],
                 ['label' => 'Informasi Bantuan Sosial', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'bantuan-sosial']],
                 ['label' => 'Informasi Publik', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'informasi-publik']],
                 ['label' => 'APBDes', 'route' => 'transparansi-apbdes', 'active' => 'transparansi-apbdes'],

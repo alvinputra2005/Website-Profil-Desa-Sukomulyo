@@ -65,6 +65,7 @@ class SitePagesTest extends TestCase
         }
         $this->assertStringNotContainsString('Visualisasi Data', $navigation);
         $this->assertStringNotContainsString('Kependudukan', $navigation);
+        $this->assertStringNotContainsString('Agenda Desa', $navigation);
         $this->assertStringNotContainsString('Statistik Pendidikan', $navigation);
         $this->assertStringNotContainsString('Statistik Pekerjaan', $navigation);
         $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('profile-desa'), '/').'".*?>\s*<span>Identitas Desa<\/span>/s', $navigation);

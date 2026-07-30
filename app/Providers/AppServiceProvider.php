@@ -128,8 +128,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Household::class, HouseholdPolicy::class);
         Gate::policy(PopulationGroup::class, PopulationGroupPolicy::class);
         Gate::policy(PopulationGroupMember::class, PopulationGroupMemberPolicy::class);
+        Gate::policy(PopulationYearlySnapshot::class, DataResourcePolicy::class);
         Gate::policy(LetterApplication::class, LetterApplicationPolicy::class);
         Gate::policy(LetterService::class, LetterServicePolicy::class);
-        Gate::policy(PopulationYearlySnapshot::class, DataResourcePolicy::class);
     }
 }
