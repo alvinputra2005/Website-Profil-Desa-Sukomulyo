@@ -83,7 +83,7 @@
                             aria-label="Salin tabel {{ $selectedIndicator?->label ?? 'statistik penduduk' }}"
                             data-statistics-copy="population-table"
                         ><i class="far fa-copy" aria-hidden="true"></i></button>
-                        <table class="population-summary-table" data-population-current-table>
+                        <table class="population-summary-table {{ $selectedIndicator?->key === 'gender' ? 'population-complete-table' : '' }}" data-population-current-table>
                             @if ($selectedIndicator?->key === 'gender')
                             <caption class="screen-reader-text">
                                 Komposisi penduduk Desa Sukomulyo tahun {{ $genderSummary['year'] }} berdasarkan jenis kelamin

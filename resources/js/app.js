@@ -4,12 +4,53 @@ import { initAdministrativeServices } from './administrative-services';
 import { initBudgetHistory } from './budget-history';
 import { initGenericStatistics } from './generic-statistics';
 import { initPopulationStatistics } from './population-statistics';
+import { bindStatisticsCopyButtons } from './statistics-copy';
+
+const initPublicTableCopy = () => {
+    const tables = {};
+    let index = 0;
+
+    document.querySelectorAll('table:not([hidden])').forEach((table) => {
+        if (table.dataset.publicTableCopyBound === 'true') return;
+
+        // Statistics pages already render a purpose-built control next to their tables.
+        const previous = table.previousElementSibling;
+        if (previous?.matches('.statistics-copy-button--table')) return;
+        if (table.closest('[hidden]')) return;
+
+        const target = `public-table-${index++}`;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'statistics-copy-button statistics-copy-button--table';
+        button.title = 'Salin tabel';
+        button.setAttribute('aria-label', 'Salin tabel');
+        button.dataset.statisticsCopy = target;
+        button.innerHTML = '<i class="far fa-copy" aria-hidden="true"></i>';
+
+        // Pada detail APBDes, letakkan tombol di heading bagian supaya judul,
+        // deskripsi, dan ikon salin berada pada satu baris yang sama.
+        const budgetSection = table.closest('.budget-data-section');
+        const budgetHeading = budgetSection?.querySelector(':scope > .budget-section-heading');
+        if (budgetHeading) {
+            budgetHeading.append(button);
+        } else {
+            table.parentElement?.insertBefore(button, table);
+        }
+        table.dataset.publicTableCopyBound = 'true';
+        tables[target] = () => table;
+    });
+
+    if (Object.keys(tables).length) {
+        bindStatisticsCopyButtons({ root: document, tables });
+    }
+};
 
 const initPublicPage = () => {
     initAdministrativeServices();
     initBudgetHistory();
     initPopulationStatistics();
     initGenericStatistics();
+    initPublicTableCopy();
 
     const documentForm = document.querySelector('[data-r2-documents]');
     if (documentForm && documentForm.dataset.presigned === 'true' && documentForm.dataset.bound !== 'true') {

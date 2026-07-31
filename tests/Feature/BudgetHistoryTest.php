@@ -34,6 +34,8 @@ class BudgetHistoryTest extends TestCase
                 ->assertSee('Detail APBDes Tahun '.$year)
                 ->assertSee('data-budget-allocation-chart', false)
                 ->assertSee('data-budget-comparison-chart', false)
+                ->assertSee('data-statistics-copy="allocation"', false)
+                ->assertSee('data-statistics-copy="comparison"', false)
                 ->assertDontSee('data-budget-quarter-chart', false)
                 ->assertSee('data-budget-export-toggle="detail"', false)
                 ->assertSee('data-budget-export-title="Ringkasan APBDes"', false)
@@ -42,9 +44,10 @@ class BudgetHistoryTest extends TestCase
                 ->assertDontSee('data-budget-export-title="Rincian Realisasi Triwulanan"', false)
                 ->assertSee('Pembiayaan Desa')
                 ->assertDontSee('Catatan Kualitas Data')
+                ->assertDontSee('Catatan Pelaksanaan dan Sumber LPPD')
                 ->assertDontSee('Sumber data')
-                ->assertSee('Data program tidak dibuat secara estimasi')
-                ->assertSee('data triwulanan tidak dibuat secara estimasi')
+                ->assertDontSee('Data program tidak dibuat secara estimasi')
+                ->assertDontSee('data triwulanan tidak dibuat secara estimasi')
                 ->assertDontSee('data simulasi');
         }
     }

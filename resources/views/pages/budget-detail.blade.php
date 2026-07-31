@@ -133,6 +133,13 @@
 
                 <div class="budget-chart-grid">
                     <section class="budget-chart-panel" aria-labelledby="budget-allocation-title">
+                        <button
+                            class="statistics-copy-button"
+                            type="button"
+                            title="Salin grafik"
+                            aria-label="Salin grafik komposisi alokasi belanja"
+                            data-statistics-copy="allocation"
+                        ><i class="far fa-copy" aria-hidden="true"></i></button>
                         <header>
                             <h2 id="budget-allocation-title">Komposisi Alokasi Belanja</h2>
                             <p>Proporsi anggaran berdasarkan lima bidang utama APBDes.</p>
@@ -149,6 +156,13 @@
                         ></div>
                     </section>
                     <section class="budget-chart-panel" aria-labelledby="budget-comparison-title">
+                        <button
+                            class="statistics-copy-button"
+                            type="button"
+                            title="Salin grafik"
+                            aria-label="Salin grafik anggaran dan realisasi per bidang"
+                            data-statistics-copy="comparison"
+                        ><i class="far fa-copy" aria-hidden="true"></i></button>
                         <header>
                             <h2 id="budget-comparison-title">Anggaran dan Realisasi per Bidang</h2>
                             <p>Perbandingan pagu dengan realisasi untuk mengukur penyerapan anggaran.</p>
@@ -276,17 +290,22 @@
                             </table>
                         </div>
                     </section>
-                @elseif (! empty($budget['programs_note']))
-                    <section class="budget-data-notice" aria-label="Keterangan program APBDes">
-                        <i class="fas fa-info-circle" aria-hidden="true"></i><p>{{ $budget['programs_note'] }}</p>
-                    </section>
                 @endif
 
                 @if ($quartersAvailable)
                     <section class="budget-data-section budget-quarter-section" aria-labelledby="budget-quarter-title">
                         <header class="budget-section-heading"><div><h2 id="budget-quarter-title">Perkembangan Realisasi Triwulanan</h2><p>Akumulasi realisasi belanja sepanjang tahun.</p></div></header>
                         <div class="budget-quarter-layout">
-                            <div class="budget-quarter-chart" data-budget-quarter-chart data-budget-export-section data-budget-export-chart="quarter" data-budget-export-title="Grafik Perkembangan Realisasi Triwulanan" role="img" tabindex="0" aria-label="Grafik perkembangan realisasi belanja per triwulan"></div>
+                            <div class="budget-quarter-chart-wrap">
+                                <button
+                                    class="statistics-copy-button"
+                                    type="button"
+                                    title="Salin grafik"
+                                    aria-label="Salin grafik perkembangan realisasi triwulanan"
+                                    data-statistics-copy="quarter"
+                                ><i class="far fa-copy" aria-hidden="true"></i></button>
+                                <div class="budget-quarter-chart" data-budget-quarter-chart data-budget-export-section data-budget-export-chart="quarter" data-budget-export-title="Grafik Perkembangan Realisasi Triwulanan" role="img" tabindex="0" aria-label="Grafik perkembangan realisasi belanja per triwulan"></div>
+                            </div>
                             <div class="budget-history-table-wrap" tabindex="0" aria-label="Tabel realisasi triwulanan dapat digulir secara horizontal">
                                 <table class="budget-history-table budget-detail-table" data-budget-export-section data-budget-export-title="Rincian Realisasi Triwulanan">
                                     <thead><tr><th>Periode</th><th>Realisasi Periode</th><th>Kumulatif</th><th>Capaian</th></tr></thead>
@@ -298,10 +317,6 @@
                                 </table>
                             </div>
                         </div>
-                    </section>
-                @elseif (! empty($budget['quarters_note']))
-                    <section class="budget-data-notice" aria-label="Keterangan data triwulanan">
-                        <i class="fas fa-calendar-alt" aria-hidden="true"></i><p>{{ $budget['quarters_note'] }}</p>
                     </section>
                 @endif
 
@@ -320,49 +335,18 @@
                     </div>
                 </section>
 
-                @if (! empty($budget['problems']) || ! empty($budget['solutions']) || ! empty($budget['data_quality']) || ! empty($budget['source_reference']['document']))
-                    <section class="budget-data-section" aria-labelledby="budget-lppd-notes-title">
-                        <header class="budget-section-heading">
-                            <div>
-                                <h2 id="budget-lppd-notes-title">Catatan Pelaksanaan dan Sumber LPPD</h2>
-                                <p>Keterangan pelaksanaan anggaran serta rujukan dokumen yang menjadi dasar publikasi data.</p>
-                            </div>
-                        </header>
-                        <div class="budget-insight-grid">
-                            @if (! empty($budget['problems']))
-                                <article class="budget-insight-card">
-                                    <span>Permasalahan</span>
-                                    <strong>{!! nl2br(e($budget['problems'])) !!}</strong>
-                                </article>
-                            @endif
-                            @if (! empty($budget['solutions']))
-                                <article class="budget-insight-card">
-                                    <span>Penyelesaian/Upaya</span>
-                                    <strong>{!! nl2br(e($budget['solutions'])) !!}</strong>
-                                </article>
-                            @endif
-                        </div>
-                        @if (! empty($budget['data_quality']))
-                            <div class="budget-data-quality">
-                                <strong>Catatan kualitas data</strong>
-                                <ul>
-                                    @foreach ($budget['data_quality'] as $note)<li>{{ $note }}</li>@endforeach
-                                </ul>
-                            </div>
-                        @endif
-                        @if (! empty($budget['source_reference']['document']))
-                            <div class="budget-source-reference">
-                                <p>
-                                    <strong>Sumber:</strong> {{ $budget['source_reference']['document'] }}
-                                    @if (! empty($budget['source_reference']['pages'])) — {{ $budget['source_reference']['pages'] }} @endif
-                                </p>
-                            </div>
-                        @endif
-                    </section>
-                @endif
-
                 <p class="screen-reader-text" data-budget-export-status aria-live="polite"></p>
-                <script type="application/json" data-budget-payload>{!! \Illuminate\Support\Js::encode(['mode' => 'detail', 'budget' => $budget]) !!}</script>
+                <script type="application/json" data-budget-payload>{!! \Illuminate\Support\Js::encode([
+                    'mode' => 'detail',
+                    'budget' => \Illuminate\Support\Arr::except($budget, [
+                        'programs_note',
+                        'quarters_note',
+                        'data_quality',
+                        'problems',
+                        'solutions',
+                        'source_reference',
+                    ]),
+                ]) !!}</script>
             </article>
         </div>
     </div>

@@ -100,8 +100,9 @@ export const initGenericStatistics = () => {
     const historyTable = root.querySelector('[data-generic-history-table]');
     const compactPie = (currentContainer?.clientWidth || 0) < 640;
     const pieLegendNameWidth = compactPie
-        ? 72
-        : Math.max(130, Math.min(190, Math.round((currentContainer?.clientWidth || 760) * 0.25)));
+        ? 84
+        : Math.max(110, Math.min(150, Math.round((currentContainer?.clientWidth || 760) * 0.18)));
+    const pieLegendLineHeight = compactPie ? 20 : 24;
     let currentChart = null;
     let trendChart = null;
     let visibleRows = [];
@@ -134,27 +135,27 @@ export const initGenericStatistics = () => {
                     orient: 'vertical',
                     right: '1%',
                     top: 'middle',
-                    width: '43%',
+                    width: '38%',
                     type: 'scroll',
-                    itemWidth: compactPie ? 10 : 14,
-                    itemHeight: compactPie ? 10 : 14,
-                    itemGap: compactPie ? 10 : 17,
+                    itemWidth: compactPie ? 12 : 18,
+                    itemHeight: compactPie ? 12 : 18,
+                    itemGap: compactPie ? 10 : 12,
                     selectedMode: true,
                     formatter: (name) => `{name|${name}}{value|${percentageFormatter.format(piePercentages.get(name) || 0)}%}`,
                     textStyle: {
                         color: '#26352a',
-                        fontSize: compactPie ? 10 : 12,
+                        fontSize: compactPie ? 10 : 13,
                         rich: {
                             name: {
                                 width: pieLegendNameWidth,
                                 overflow: 'truncate',
-                                lineHeight: 19,
+                                lineHeight: pieLegendLineHeight,
                             },
                             value: {
-                                width: compactPie ? 45 : 58,
+                                width: compactPie ? 50 : 70,
                                 align: 'right',
-                                fontWeight: 600,
-                                lineHeight: 19,
+                                fontWeight: 700,
+                                lineHeight: pieLegendLineHeight,
                             },
                         },
                     },
