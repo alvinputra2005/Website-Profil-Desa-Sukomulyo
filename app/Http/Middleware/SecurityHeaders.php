@@ -23,6 +23,8 @@ final class SecurityHeaders
 
         if ($request->is('admin', 'admin/*')) {
             $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+            $response->headers->set('Cache-Control', 'no-store, private');
+            $response->headers->set('Pragma', 'no-cache');
         }
 
         if ($request->is('layanan-surat/lacak', 'layanan-surat/lacak/*', 'layanan-surat/t/*')) {
@@ -48,7 +50,7 @@ final class SecurityHeaders
         $styleSources = ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'];
         $connectSources = ["'self'"];
         $imageSources = ["'self'", 'data:', 'https:'];
-        $frameSources = ["'self'", 'https://www.google.com'];
+        $frameSources = ["'self'", 'https://www.google.com', 'https://www.youtube.com', 'https://www.youtube-nocookie.com'];
         $letterDocumentsOrigin = $this->letterDocumentsOrigin();
 
         if ($viteOrigin !== null) {
@@ -68,7 +70,7 @@ final class SecurityHeaders
         return implode('; ', [
             "default-src 'self'",
             "base-uri 'self'",
-            "form-action 'self'",
+            "form-action 'self' https://wa.me",
             "frame-ancestors 'self'",
             "object-src 'none'",
             'script-src '.implode(' ', $scriptSources),

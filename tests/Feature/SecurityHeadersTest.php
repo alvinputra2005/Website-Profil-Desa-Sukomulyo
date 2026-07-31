@@ -26,7 +26,7 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringContainsString("default-src 'self'", $policy);
         $this->assertStringContainsString("object-src 'none'", $policy);
         $this->assertStringContainsString("base-uri 'self'", $policy);
-        $this->assertStringContainsString("form-action 'self'", $policy);
+        $this->assertStringContainsString("form-action 'self' https://wa.me", $policy);
         $this->assertStringContainsString("frame-ancestors 'self'", $policy);
         $this->assertStringContainsString('https://fonts.googleapis.com', $policy);
         $this->assertStringContainsString('https://fonts.gstatic.com', $policy);
@@ -88,11 +88,15 @@ class SecurityHeadersTest extends TestCase
     {
         $this->get(route('login'))
             ->assertOk()
-            ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertHeader('Pragma', 'no-cache');
 
         $this->get(route('admin.dashboard'))
             ->assertRedirect(route('login'))
-            ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertHeader('Pragma', 'no-cache');
     }
 
     public function test_hsts_is_only_sent_for_secure_production_requests(): void

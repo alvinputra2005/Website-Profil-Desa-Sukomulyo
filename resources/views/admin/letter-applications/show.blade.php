@@ -141,7 +141,7 @@
                 <div class="box-body">
                     <div class="status-current"><small>Status saat ini</small><strong>{{ $application->status->label() }}</strong></div>
                     @if($application->status->allowedTransitions())
-                        <form class="status-form" method="post" action="{{ route('admin.letter-applications.status.update', $application) }}">
+                        <form class="status-form" method="post" action="{{ route('admin.letter-applications.status.update', $application, false) }}" data-no-ajax>
                             @csrf @method('PATCH')
                             <div class="form-group {{ $errors->has('status') ? 'has-error' : '' }}"><label for="status">Status berikutnya</label><select id="status" class="form-control" name="status" required>@foreach($application->status->allowedTransitions() as $status)<option value="{{ $status->value }}" @selected(old('status') === $status->value)>{{ $status->label() }}</option>@endforeach</select>@error('status')<span class="help-block">{{ $message }}</span>@enderror</div>
                             <div class="form-group {{ $errors->has('public_note') ? 'has-error' : '' }}"><label for="public_note">Catatan untuk pemohon</label><textarea id="public_note" class="form-control" name="public_note" rows="3" maxlength="2000" placeholder="Wajib untuk status perlu diperbaiki atau ditolak.">{{ old('public_note') }}</textarea>@error('public_note')<span class="help-block">{{ $message }}</span>@enderror</div>
@@ -152,7 +152,7 @@
                     @else
                         <p class="text-muted mb-0">Status ini sudah final dan tidak dapat diubah lagi.</p>
                     @endif
-                    <form class="whatsapp-manual" method="post" action="{{ route('admin.letter-applications.whatsapp.open', $application) }}">@csrf<button class="btn btn-success btn-block" type="submit"><i class="fa fa-whatsapp" aria-hidden="true"></i> Kirim Ulang Notifikasi WhatsApp</button></form>
+                    <form class="whatsapp-manual" method="post" action="{{ route('admin.letter-applications.whatsapp.open', $application, false) }}" data-no-ajax>@csrf<button class="btn btn-success btn-block" type="submit"><i class="fa fa-whatsapp" aria-hidden="true"></i> Kirim Ulang Notifikasi WhatsApp</button></form>
                 </div>
             </section>
 
