@@ -34,7 +34,6 @@
                     </button>
                 </h2>
                 <div id="statistics-sidebar-population" class="statistics-sidebar__panel" data-sidebar-panel @if(! $populationOpen) hidden @endif>
-                    <strong class="statistics-sidebar__panel-title">Semua Dataset</strong>
                     <ul class="statistics-sidebar__list">
                         @foreach($populationIndicators as $indicator)
                             <li>
@@ -48,10 +47,6 @@
                             </li>
                         @endforeach
                     </ul>
-                    <a class="statistics-sidebar__see-all" href="{{ route('data-statistik.population') }}">
-                        <span>Lihat Semua</span>
-                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                    </a>
                 </div>
             </section>
         @endif
@@ -100,7 +95,6 @@
                     </button>
                 </h2>
                 <div id="statistics-sidebar-{{ $category->slug }}" class="statistics-sidebar__panel" data-sidebar-panel @if(! $categoryOpen) hidden @endif>
-                    <strong class="statistics-sidebar__panel-title">Semua Dataset</strong>
                     <ul class="statistics-sidebar__list">
                         @foreach($datasetGroups as $dataset)
                             <li>
@@ -123,10 +117,6 @@
                             </li>
                         @endforeach
                     </ul>
-                    <a class="statistics-sidebar__see-all" href="{{ route('data-statistik.detail', ['section' => $category->slug]) }}">
-                        <span>Lihat Semua</span>
-                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                    </a>
                 </div>
             </section>
         @endforeach

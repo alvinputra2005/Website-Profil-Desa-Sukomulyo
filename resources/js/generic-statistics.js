@@ -14,6 +14,7 @@ import {
     savePdf,
     svgToRaster,
 } from './population-statistics';
+import { bindStatisticsCopyButtons } from './statistics-copy';
 
 echarts.use([
     BarChart,
@@ -69,6 +70,15 @@ export const initGenericStatistics = () => {
         maximumFractionDigits: decimals,
     });
     const formatValue = (value) => numberFormatter.format(Number(value) || 0);
+    const percentageFormatter = new Intl.NumberFormat('id-ID', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    });
+    const pieTotal = latest.items.reduce((total, item) => total + (Number(item.value) || 0), 0);
+    const piePercentages = new Map(latest.items.map((item) => [
+        item.label,
+        pieTotal > 0 ? (Number(item.value) || 0) / pieTotal * 100 : 0,
+    ]));
     const allRows = [...(payload.allHistory || payload.history || [])]
         .map((row) => ({
             ...row,
@@ -87,6 +97,10 @@ export const initGenericStatistics = () => {
     const historyBody = root.querySelector('[data-generic-history-body]');
     const currentTable = root.querySelector('[data-generic-current-table]');
     const historyTable = root.querySelector('[data-generic-history-table]');
+    const compactPie = (currentContainer?.clientWidth || 0) < 640;
+    const pieLegendNameWidth = compactPie
+        ? 72
+        : Math.max(130, Math.min(190, Math.round((currentContainer?.clientWidth || 760) * 0.25)));
     let currentChart = null;
     let trendChart = null;
     let visibleRows = [];
@@ -115,7 +129,35 @@ export const initGenericStatistics = () => {
                 },
             },
             legend: isPie
-                ? { bottom: 0, type: 'scroll', textStyle: { color: '#26352a' } }
+                ? {
+                    orient: 'vertical',
+                    right: '1%',
+                    top: 'middle',
+                    width: '43%',
+                    type: 'scroll',
+                    itemWidth: compactPie ? 10 : 14,
+                    itemHeight: compactPie ? 10 : 14,
+                    itemGap: compactPie ? 10 : 17,
+                    selectedMode: true,
+                    formatter: (name) => `{name|${name}}{value|${percentageFormatter.format(piePercentages.get(name) || 0)}%}`,
+                    textStyle: {
+                        color: '#26352a',
+                        fontSize: compactPie ? 10 : 12,
+                        rich: {
+                            name: {
+                                width: pieLegendNameWidth,
+                                overflow: 'truncate',
+                                lineHeight: 19,
+                            },
+                            value: {
+                                width: compactPie ? 45 : 58,
+                                align: 'right',
+                                fontWeight: 600,
+                                lineHeight: 19,
+                            },
+                        },
+                    },
+                }
                 : undefined,
             grid: isPie
                 ? undefined
@@ -139,13 +181,19 @@ export const initGenericStatistics = () => {
             series: isPie
                 ? [{
                     type: 'pie',
-                    radius: '72%',
-                    center: ['50%', '44%'],
+                    radius: compactPie ? '48%' : '68%',
+                    center: compactPie ? ['25%', '50%'] : ['28%', '50%'],
                     itemStyle: { borderColor: '#fff', borderWidth: 3, borderRadius: 6 },
                     label: {
                         color: '#26352a',
                         fontWeight: 600,
-                        formatter: ({ name, percent }) => `${name}\n${new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(percent)}%`,
+                        fontSize: compactPie ? 10 : 12,
+                        formatter: ({ percent }) => `${percentageFormatter.format(percent)}%`,
+                    },
+                    labelLine: {
+                        show: true,
+                        length: compactPie ? 6 : 12,
+                        length2: compactPie ? 4 : 10,
                     },
                     data: latest.items.map((item) => ({ name: item.label, value: item.value, unit: item.unit, label: item.label })),
                 }]
@@ -314,6 +362,19 @@ export const initGenericStatistics = () => {
     seriesSelect?.addEventListener('change', () => {
         applyRange(fromSelect?.value, toSelect?.value, sortSelect?.value);
     }, { signal });
+
+    bindStatisticsCopyButtons({
+        root,
+        charts: {
+            'current-chart': () => currentChart,
+            'trend-chart': () => trendChart,
+        },
+        tables: {
+            'current-table': () => currentTable,
+            'history-table': () => historyTable,
+        },
+        signal,
+    });
 
     const controls = [...root.querySelectorAll('[data-generic-export-toggle]')].map((toggle) => ({
         scope: toggle.dataset.genericExportToggle,

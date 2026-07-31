@@ -9,6 +9,7 @@ import {
     TooltipComponent,
 } from 'echarts/components';
 import { CanvasRenderer, SVGRenderer } from 'echarts/renderers';
+import { bindStatisticsCopyButtons } from './statistics-copy';
 
 echarts.use([
     PieChart,
@@ -41,6 +42,63 @@ const percentageFormatter = new Intl.NumberFormat('id-ID', {
 
 const formatInteger = (value) => integerFormatter.format(Number(value) || 0);
 const formatPercentage = (value) => `${percentageFormatter.format(Number(value) || 0)}%`;
+const pieLegend = (items, compact = false, containerWidth = 760) => {
+    const total = items.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+    const percentages = new Map(items.map((item) => [
+        item.name,
+        total > 0 ? (Number(item.value) || 0) / total * 100 : 0,
+    ]));
+    const nameWidth = compact
+        ? 72
+        : Math.max(130, Math.min(190, Math.round(containerWidth * 0.25)));
+
+    return {
+        orient: 'vertical',
+        right: '1%',
+        top: 'middle',
+        width: '43%',
+        type: 'scroll',
+        itemWidth: compact ? 10 : 14,
+        itemHeight: compact ? 10 : 14,
+        itemGap: compact ? 10 : 17,
+        selectedMode: true,
+        formatter: (name) => `{name|${name}}{value|${formatPercentage(percentages.get(name) || 0)}}`,
+        textStyle: {
+            color: COLORS.text,
+            fontSize: compact ? 10 : 12,
+            rich: {
+                name: {
+                    width: nameWidth,
+                    overflow: 'truncate',
+                    lineHeight: 19,
+                },
+                value: {
+                    width: compact ? 45 : 58,
+                    align: 'right',
+                    fontWeight: 600,
+                    lineHeight: 19,
+                },
+            },
+        },
+    };
+};
+const pieSeriesLayout = (compact = false) => ({
+    radius: compact ? '48%' : '68%',
+    center: compact ? ['25%', '50%'] : ['28%', '50%'],
+    stillShowZeroSum: false,
+    avoidLabelOverlap: true,
+    label: {
+        formatter: ({ percent }) => formatPercentage(percent),
+        color: COLORS.text,
+        fontWeight: 600,
+        fontSize: compact ? 10 : 12,
+    },
+    labelLine: {
+        show: true,
+        length: compact ? 6 : 12,
+        length2: compact ? 4 : 10,
+    },
+});
 const signedInteger = (value) => {
     if (value === null || value === undefined) return '—';
 
@@ -268,6 +326,12 @@ const svgBody = (svg) => svg.slice(svg.indexOf('>') + 1, svg.lastIndexOf('</svg>
 const chartToSvgAsset = (chart, container, preferredWidth = null) => {
     const option = chart.getOption();
     const hasPieSeries = option.series?.some((series) => series.type === 'pie');
+    const pieData = option.series?.find((series) => series.type === 'pie')?.data || [];
+    const pieTotal = pieData.reduce((total, item) => total + (Number(item.value) || 0), 0);
+    const piePercentages = new Map(pieData.map((item) => [
+        item.name,
+        pieTotal > 0 ? (Number(item.value) || 0) / pieTotal * 100 : 0,
+    ]));
     const width = preferredWidth === null
         ? Math.max(hasPieSeries ? 900 : 720, Math.round(container.clientWidth || 0))
         : Math.max(720, Math.round(preferredWidth));
@@ -275,13 +339,45 @@ const chartToSvgAsset = (chart, container, preferredWidth = null) => {
     const exportOption = {
         ...option,
         animation: false,
+        legend: hasPieSeries
+            ? (option.legend || [{}]).map((legend) => ({
+                ...legend,
+                orient: 'vertical',
+                right: '2%',
+                left: null,
+                top: 'middle',
+                bottom: null,
+                width: '42%',
+                itemWidth: 15,
+                itemHeight: 15,
+                itemGap: 19,
+                formatter: (name) => `{name|${name}}{value|${formatPercentage(piePercentages.get(name) || 0)}}`,
+                textStyle: {
+                    color: COLORS.text,
+                    fontSize: 14,
+                    rich: {
+                        name: {
+                            width: 245,
+                            overflow: 'truncate',
+                            lineHeight: 21,
+                        },
+                        value: {
+                            width: 64,
+                            align: 'right',
+                            fontWeight: 700,
+                            lineHeight: 21,
+                        },
+                    },
+                },
+            }))
+            : option.legend,
         series: option.series?.map((series) => {
             if (series.type !== 'pie') return series;
 
             return {
                 ...series,
                 radius: '62%',
-                center: ['50%', '43%'],
+                center: ['29%', '50%'],
                 avoidLabelOverlap: true,
                 minShowLabelAngle: 0,
                 label: {
@@ -295,9 +391,7 @@ const chartToSvgAsset = (chart, container, preferredWidth = null) => {
                     fontSize: 15,
                     fontWeight: 700,
                     lineHeight: 18,
-                    formatter: ({ name, percent }) => (
-                        `${name}\n${percentageFormatter.format(Number(percent) || 0)}%`
-                    ),
+                    formatter: ({ percent }) => formatPercentage(percent),
                 },
                 labelLine: {
                     ...(series.labelLine || {}),
@@ -449,6 +543,12 @@ export const initPopulationStatistics = () => {
         pieChart = echarts.init(pieContainer, null, { renderer: 'canvas' });
         const indicatorItems = Array.isArray(payload.items) ? payload.items : [];
         const isGender = !payload.indicator || payload.indicator.key === 'gender';
+        const indicatorPieData = indicatorItems.map((item) => ({ name: item.label, value: item.value }));
+        const genderPieData = [
+            { name: 'Laki-laki', value: Number(summary.male) || 0 },
+            { name: 'Perempuan', value: Number(summary.female) || 0 },
+        ];
+        const compactPie = pieContainer.clientWidth < 640;
         const genericOption = payload.indicator?.chart_type === 'bar'
             ? {
                 animation: !reducedMotion,
@@ -492,18 +592,14 @@ export const initPopulationStatistics = () => {
                         `Tahun ${summary.year}`,
                     ].join('<br>'),
                 },
-                legend: { bottom: 0, selectedMode: true, textStyle: { color: COLORS.text } },
+                legend: pieLegend(indicatorPieData, compactPie, pieContainer.clientWidth),
                 series: [{
                     name: payload.indicator?.label || 'Komposisi Penduduk',
                     type: 'pie',
-                    radius: '74%',
-                    center: ['50%', '44%'],
-                    stillShowZeroSum: false,
-                    avoidLabelOverlap: true,
+                    ...pieSeriesLayout(compactPie),
                     itemStyle: { borderColor: '#ffffff', borderWidth: 3, borderRadius: 7 },
-                    label: { formatter: ({ name, percent }) => `${name}\n${formatPercentage(percent)}`, color: COLORS.text, fontWeight: 600 },
                     emphasis: { scale: true, scaleSize: 8, itemStyle: { shadowBlur: 14, shadowColor: 'rgba(38, 53, 42, .2)' } },
-                    data: indicatorItems.map((item) => ({ name: item.label, value: item.value })),
+                    data: indicatorPieData,
                 }],
             };
         pieChart.setOption(isGender ? {
@@ -518,37 +614,22 @@ export const initPopulationStatistics = () => {
                     `Tahun ${summary.year}`,
                 ].join('<br>'),
             },
-            legend: {
-                bottom: 0,
-                selectedMode: true,
-                textStyle: { color: COLORS.text },
-            },
+            legend: pieLegend(genderPieData, compactPie, pieContainer.clientWidth),
             series: [{
                 name: 'Komposisi Penduduk',
                 type: 'pie',
-                radius: '74%',
-                center: ['50%', '44%'],
-                stillShowZeroSum: false,
-                avoidLabelOverlap: true,
+                ...pieSeriesLayout(compactPie),
                 itemStyle: {
                     borderColor: '#ffffff',
                     borderWidth: 3,
                     borderRadius: 7,
-                },
-                label: {
-                    formatter: ({ name, percent }) => `${name}\n${formatPercentage(percent)}`,
-                    color: COLORS.text,
-                    fontWeight: 600,
                 },
                 emphasis: {
                     scale: true,
                     scaleSize: 8,
                     itemStyle: { shadowBlur: 14, shadowColor: 'rgba(38, 53, 42, .2)' },
                 },
-                data: [
-                    { name: 'Laki-laki', value: Number(summary.male) || 0 },
-                    { name: 'Perempuan', value: Number(summary.female) || 0 },
-                ],
+                data: genderPieData,
             }],
         } : genericOption);
         pieContainer.addEventListener('focus', () => {
@@ -563,6 +644,17 @@ export const initPopulationStatistics = () => {
         pieContainer?.setAttribute('hidden', '');
         pieEmpty?.removeAttribute('hidden');
     }
+
+    bindStatisticsCopyButtons({
+        root,
+        charts: {
+            'population-chart': () => pieChart,
+        },
+        tables: {
+            'population-table': () => root.querySelector('[data-population-current-table]'),
+        },
+        signal,
+    });
 
     const renderHistoryTable = (rows, sort) => {
         if (!historyBody) return;

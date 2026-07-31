@@ -68,8 +68,6 @@
                         </div>
                     </header>
 
-                    <p class="population-statistics-heading__description">{{ $page['description'] }}</p>
-
                     <div class="statistics-display-selector" aria-label="Pilih visualisasi atau tampilan data">
                         <span class="statistics-display-selector__label">Pilih visualisasi / tampilan data</span>
                         <div class="statistics-display-selector__options">
@@ -94,6 +92,13 @@
 
                     <div class="population-composition-grid statistics-view-panel" @if($displayMode !== 'chart') hidden @endif>
                         <div class="population-chart-card__canvas">
+                            <button
+                                class="statistics-copy-button"
+                                type="button"
+                                title="Salin diagram"
+                                aria-label="Salin diagram {{ $currentTitle }}"
+                                data-statistics-copy="current-chart"
+                            ><i class="far fa-copy" aria-hidden="true"></i></button>
                             <div
                                 class="population-pie-chart"
                                 data-generic-current-chart
@@ -109,6 +114,13 @@
 
                     @if(isset($latestDataset))
                     <div class="population-table-scroll population-summary-table-wrap statistics-view-panel" @if($displayMode !== 'table') hidden @endif>
+                        <button
+                            class="statistics-copy-button statistics-copy-button--table"
+                            type="button"
+                            title="Salin tabel"
+                            aria-label="Salin tabel {{ $currentTitle }}"
+                            data-statistics-copy="current-table"
+                        ><i class="far fa-copy" aria-hidden="true"></i></button>
                         <table class="population-summary-table population-complete-table" data-generic-current-table>
                             <caption class="screen-reader-text">{{ $latestDataset->title }}</caption>
                             <x-statistic-table-header :columns="$latestDataset->columns_json ?? []" />
@@ -145,6 +157,13 @@
                     </div>
                     @else
                     <div class="population-table-scroll population-summary-table-wrap statistics-view-panel" @if($displayMode !== 'table') hidden @endif>
+                        <button
+                            class="statistics-copy-button statistics-copy-button--table"
+                            type="button"
+                            title="Salin tabel"
+                            aria-label="Salin tabel {{ $currentTitle }}"
+                            data-statistics-copy="current-table"
+                        ><i class="far fa-copy" aria-hidden="true"></i></button>
                         <table class="population-summary-table" data-generic-current-table>
                             <caption class="screen-reader-text">{{ $currentTitle }} tahun {{ $latest['year'] }}</caption>
                             <thead>
@@ -248,6 +267,13 @@
                     <p class="population-filter-status" data-generic-filter-status aria-live="polite"></p>
 
                     <div class="population-chart-card population-chart-card--trend">
+                        <button
+                            class="statistics-copy-button"
+                            type="button"
+                            title="Salin diagram"
+                            aria-label="Salin diagram perkembangan {{ $currentTitle }}"
+                            data-statistics-copy="trend-chart"
+                        ><i class="far fa-copy" aria-hidden="true"></i></button>
                         <div
                             class="population-line-chart"
                             data-generic-trend-chart
@@ -261,6 +287,13 @@
                     </div>
 
                     <div class="population-table-scroll population-history-table-wrap" tabindex="0" aria-label="Tabel riwayat dapat digulir secara horizontal">
+                        <button
+                            class="statistics-copy-button statistics-copy-button--table"
+                            type="button"
+                            title="Salin tabel"
+                            aria-label="Salin tabel riwayat {{ $currentTitle }}"
+                            data-statistics-copy="history-table"
+                        ><i class="far fa-copy" aria-hidden="true"></i></button>
                         <table class="population-history-table" data-generic-history-table>
                             <caption class="screen-reader-text">Riwayat {{ $currentTitle }} berdasarkan tahun</caption>
                             <thead>
@@ -290,6 +323,8 @@
                         </table>
                     </div>
                 </section>
+
+                <p class="screen-reader-text" aria-live="polite" data-statistics-copy-status></p>
 
                 <script type="application/json" id="generic-statistics-data">{!! \Illuminate\Support\Js::encode([
                     'context' => $context,

@@ -41,6 +41,8 @@ class PopulationStatisticsPageTest extends TestCase
     {
         $this->get(route('data-statistik.population'))
             ->assertOk()
+            ->assertSee('data-statistics-copy="population-chart"', false)
+            ->assertSee('data-statistics-copy="population-table"', false)
             ->assertSee('Data komposisi penduduk tahun 2026 belum tersedia.')
             ->assertSee('0 jiwa')
             ->assertSee('0,00%');

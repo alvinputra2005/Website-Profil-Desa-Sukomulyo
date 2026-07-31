@@ -12,20 +12,6 @@
     <div class="container">
         <div id="sc_innerpage_wrap" class="population-statistics-wrap statistics-page-layout">
             <section class="sc_innerpage_contentbx population-statistics" data-population-statistics>
-                @if ($populationIndicators->isNotEmpty())
-                    <form method="get" action="{{ route('data-statistik.population') }}" class="population-year-filter">
-                        <div class="population-filter-field">
-                            <label for="population-indicator">Indikator</label>
-                            <select id="population-indicator" name="indicator" onchange="this.form.submit()">
-                                @foreach ($populationIndicators as $indicator)
-                                    <option value="{{ $indicator->key }}" @selected($selectedIndicator?->is($indicator))>{{ $indicator->label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <button type="submit" class="profile-print-button">Tampilkan</button>
-                    </form>
-                @endif
-
                 <section class="population-chart-card" aria-labelledby="population-composition-title">
                     <header class="population-chart-card__heading population-statistics-heading">
                         <div class="population-statistics-heading__content">
@@ -69,6 +55,13 @@
 
                     <div class="population-composition-grid">
                         <div class="population-chart-card__canvas">
+                            <button
+                                class="statistics-copy-button"
+                                type="button"
+                                title="Salin diagram"
+                                aria-label="Salin diagram {{ $selectedIndicator?->label ?? 'statistik penduduk' }}"
+                                data-statistics-copy="population-chart"
+                            ><i class="far fa-copy" aria-hidden="true"></i></button>
                             <div
                                 class="population-pie-chart"
                                 data-population-pie
@@ -83,7 +76,14 @@
                     </div>
 
                     <div class="population-table-scroll population-summary-table-wrap">
-                        <table class="population-summary-table">
+                        <button
+                            class="statistics-copy-button statistics-copy-button--table"
+                            type="button"
+                            title="Salin tabel"
+                            aria-label="Salin tabel {{ $selectedIndicator?->label ?? 'statistik penduduk' }}"
+                            data-statistics-copy="population-table"
+                        ><i class="far fa-copy" aria-hidden="true"></i></button>
+                        <table class="population-summary-table" data-population-current-table>
                             @if ($selectedIndicator?->key === 'gender')
                             <caption class="screen-reader-text">
                                 Komposisi penduduk Desa Sukomulyo tahun {{ $genderSummary['year'] }} berdasarkan jenis kelamin
@@ -126,6 +126,8 @@
                         </table>
                     </div>
                 </section>
+
+                <p class="screen-reader-text" aria-live="polite" data-statistics-copy-status></p>
 
                 <script type="application/json" id="population-statistics-data">{!! \Illuminate\Support\Js::encode([
                     'summary' => $genderSummary,
