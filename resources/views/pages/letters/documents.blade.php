@@ -1,6 +1,6 @@
 <x-layouts.app title="Unggah Dokumen Persyaratan" robots="noindex, nofollow">
 <div class="letter-service-page letter-documents-page"><div class="container">
-<ol class="letter-steps" aria-label="Tahapan pengajuan surat">
+<ol class="letter-steps" aria-label="Tahapan pengajuan layanan">
 @foreach(['Data Diri','Data Keperluan','Unggah Dokumen','Konfirmasi'] as $step)<li @class(['is-active'=>$loop->iteration<=3]) @if($loop->iteration===3) aria-current="step" @endif><span>{{ $loop->iteration <= 2 ? '✓' : $loop->iteration }}</span><strong>{{ $step }}</strong></li>@endforeach
 </ol>
 <div class="letter-form-heading"><span class="section-kicker">Tahap 3 dari 4</span><h2>Unggah Dokumen Persyaratan</h2><p>Unggah dokumen sesuai persyaratan yang dibutuhkan.</p></div>

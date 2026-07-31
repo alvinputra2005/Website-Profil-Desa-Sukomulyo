@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Web;
 
+use App\Services\Letters\LetterSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -37,16 +38,38 @@ class AdministrativeServicePageTest extends TestCase
         $this->assertSame(1, substr_count($html, 'data-administrative-services'));
     }
 
-    public function test_page_shows_flow_and_submission_guide_without_office_information_card(): void
+    public function test_page_shows_submission_guide_and_matching_office_hours_without_old_flow(): void
     {
-        $this->get(route('informasi-desa.detail', ['section' => 'layanan-administrasi']))
+        $response = $this->get(route('informasi-desa.detail', ['section' => 'layanan-administrasi']))
             ->assertOk()
-            ->assertSee('Alur Pelayanan')
+            ->assertDontSee('Alur Pelayanan')
             ->assertSee('Tata Cara Pengajuan')
+            ->assertSee('submission-guide-flow', false)
+            ->assertSee('Jam Layanan')
+            ->assertSee('Hari dan jam pelayanan')
+            ->assertSee(app(LetterSettings::class)->officeHours())
+            ->assertSee('Pengajuan Layanan Surat')
+            ->assertSee('Siap Mengajukan Surat?')
+            ->assertSee('Mulai Pengajuan')
+            ->assertSee('href="'.route('letter-services.index').'"', false)
+            ->assertSee('administration-application-cta', false)
+            ->assertSee('data-static-application-cta', false)
             ->assertDontSee('service-flow-actor', false)
             ->assertDontSee('Informasi Pelayanan')
             ->assertDontSee('administration-office-card', false)
             ->assertDontSee('administration-whatsapp', false);
+
+        $html = $response->getContent();
+        preg_match('/<section[^>]*data-static-application-cta[^>]*>.*?<\/section>/s', $html, $applicationCta);
+        $applicationCtaHtml = $applicationCta[0] ?? '';
+        $this->assertNotSame('', $applicationCtaHtml);
+        $this->assertStringNotContainsString('data-sidebar-toggle', $applicationCtaHtml);
+        $this->assertStringNotContainsString('aria-expanded', $applicationCtaHtml);
+        $this->assertStringNotContainsString(' hidden', $applicationCtaHtml);
+        $this->assertLessThan(
+            strpos($html, 'letter-office-hours-heading'),
+            strpos($html, 'administration-application-cta'),
+        );
     }
 
     public function test_page_uses_accessible_accordions_and_local_search(): void
@@ -62,8 +85,8 @@ class AdministrativeServicePageTest extends TestCase
             ->assertSee('aria-expanded="true"', false)
             ->assertSee('Layanan tidak ditemukan');
 
-        $this->assertGreaterThanOrEqual(13, substr_count($response->getContent(), 'data-sidebar-toggle'));
-        $this->assertGreaterThanOrEqual(13, substr_count($response->getContent(), 'data-sidebar-panel'));
+        $this->assertGreaterThanOrEqual(12, substr_count($response->getContent(), 'data-sidebar-toggle'));
+        $this->assertGreaterThanOrEqual(12, substr_count($response->getContent(), 'data-sidebar-panel'));
     }
 
     public function test_administrative_page_no_longer_uses_the_generic_fallback(): void

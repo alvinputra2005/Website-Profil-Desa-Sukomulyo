@@ -895,7 +895,7 @@ class PublicSiteService
             ]],
             ['label' => 'Pelayanan', 'route' => 'letter-services.index', 'active' => 'pelayanan-*', 'children' => [
                 ['label' => 'Syarat Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
-                ['label' => 'Pengajuan Surat', 'route' => 'letter-services.index', 'active' => 'letter-services.*'],
+                ['label' => 'Pengajuan Layanan', 'route' => 'letter-services.index', 'active' => 'letter-services.*'],
             ]],
         ];
     }

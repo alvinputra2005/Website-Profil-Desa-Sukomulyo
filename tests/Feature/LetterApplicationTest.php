@@ -59,7 +59,19 @@ class LetterApplicationTest extends TestCase
         ]);
         $application->statusHistories()->create(['to_status' => LetterApplicationStatus::Submitted, 'created_at' => now()]);
 
-        $this->get(route('letter-services.index'))->assertOk()->assertSee($service->name);
+        $letterIndex = $this->get(route('letter-services.index'))
+            ->assertOk()
+            ->assertSee($service->name)
+            ->assertDontSee($service->description)
+            ->assertSee('Butuh Bantuan?')
+            ->assertSee('Jam Layanan');
+        preg_match('/<aside class="letter-info-sidebar".*?<\/aside>/s', $letterIndex->getContent(), $sidebar);
+        $sidebarHtml = $sidebar[0] ?? '';
+        $this->assertSame(2, substr_count($sidebarHtml, 'data-static-info-card'));
+        $this->assertStringNotContainsString('data-sidebar-toggle', $sidebarHtml);
+        $this->assertStringNotContainsString('data-sidebar-panel', $sidebarHtml);
+        $this->assertStringNotContainsString(' hidden', $sidebarHtml);
+
         $this->get(route('letter-services.application.create', $service))->assertOk()->assertSee('submission_key');
         $this->get(route('letter-services.track.token', $token))
             ->assertOk()

@@ -57,7 +57,7 @@ class SitePagesTest extends TestCase
 
         $this->assertSame(4, substr_count($navigation, '<ul class="sub-menu">'));
         $this->assertSame(4, substr_count($navigation, 'class="nav-dropdown-toggle"'));
-        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Pelayanan', 'Pengajuan Surat', 'Statistik Keluarga', 'Syarat Administrasi', 'APBDes'] as $label) {
+        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Pelayanan', 'Pengajuan Layanan', 'Statistik Keluarga', 'Syarat Administrasi', 'APBDes'] as $label) {
             $this->assertStringContainsString($label, $navigation);
         }
         foreach (['data-desa-statistik', 'informasi-publik-desa'] as $route) {
@@ -82,7 +82,7 @@ class SitePagesTest extends TestCase
         $this->assertStringContainsString(route('informasi-desa.detail', 'layanan-administrasi'), $serviceMenu[1] ?? '');
         $this->assertStringContainsString('Syarat Administrasi', $serviceMenu[1] ?? '');
         $this->assertStringContainsString(route('letter-services.index'), $serviceMenu[1] ?? '');
-        $this->assertStringContainsString('Pengajuan Surat', $serviceMenu[1] ?? '');
+        $this->assertStringContainsString('Pengajuan Layanan', $serviceMenu[1] ?? '');
         $this->assertStringNotContainsString('Asal-usul dan perkembangan', $navigation);
         $this->assertStringNotContainsString('Jumlah penduduk berdasarkan jenjang pendidikan', $navigation);
         $this->assertStringContainsString(route('pemerintahan-desa'), $navigation);
@@ -328,7 +328,7 @@ class SitePagesTest extends TestCase
             route('berita-desa.index') => ['Informasi Desa', 'Berita Desa'],
             route('galeri-desa') => ['Informasi Desa', 'Galeri Desa'],
             route('informasi-desa.detail', 'layanan-administrasi') => ['Pelayanan', 'Syarat Administrasi'],
-            route('letter-services.index') => ['Pelayanan', 'Pengajuan Surat'],
+            route('letter-services.index') => ['Pelayanan', 'Pengajuan Layanan'],
         ];
 
         foreach ($pages as $url => [$parent, $child]) {

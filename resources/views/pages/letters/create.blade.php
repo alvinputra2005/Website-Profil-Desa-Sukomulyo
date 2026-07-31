@@ -1,5 +1,5 @@
 <x-layouts.app :title="'Ajukan '.$letterService->name" robots="noindex, nofollow">
-    <x-page-header :title="'Ajukan '.$letterService->name" :show-heading="false" :breadcrumbs="[['label'=>'Pelayanan'],['label'=>'Pengajuan Surat','url'=>route('letter-services.index')],['label'=>$letterService->name],['label'=>'Isi Data Pemohon']]" />
+    <x-page-header :title="'Ajukan '.$letterService->name" :show-heading="false" :breadcrumbs="[['label'=>'Pelayanan'],['label'=>'Pengajuan Layanan','url'=>route('letter-services.index')],['label'=>$letterService->name],['label'=>'Isi Data Pemohon']]" />
     <div class="letter-service-page letter-form-page">
         <div class="container">
             <header class="letter-service-heading">
@@ -7,7 +7,7 @@
                 <p>Isi data sesuai dokumen resmi. Data hanya digunakan untuk memproses permohonan ini.</p>
             </header>
 
-            <ol class="letter-steps" aria-label="Tahapan pengajuan surat">
+            <ol class="letter-steps" aria-label="Tahapan pengajuan layanan">
                 @foreach(['Pilih Jenis Surat', 'Isi Data Pemohon', 'Unggah Dokumen', 'Konfirmasi'] as $step)
                     <li @class(['is-active' => $loop->iteration <= 2]) @if($loop->iteration === 2) aria-current="step" @endif>
                         <span>{{ $loop->iteration }}</span><strong>{{ $step }}</strong>
@@ -17,10 +17,6 @@
 
             <div class="letter-form-layout">
                 <main>
-                    <div class="letter-form-heading">
-                        <h2>Isi Data Pemohon</h2>
-                        <p>Lengkapi data berikut sesuai dokumen resmi. Kolom bertanda <b>*</b> wajib diisi.</p>
-                    </div>
                     <form class="letter-form letter-card" method="post" action="{{ route('letter-services.application.store', $letterService) }}">
                         @csrf
                         <input type="hidden" name="submission_key" value="{{ $submissionKey }}">
@@ -33,16 +29,14 @@
                         </div>
                     </form>
                 </main>
-                <aside class="letter-form-sidebar">
-                    <section class="letter-info-card letter-form-summary">
-                        <span class="letter-form-summary-icon"><i class="fas fa-file-signature" aria-hidden="true"></i></span>
-                        <h2>{{ $letterService->name }}</h2>
-                        <p>{{ $letterService->description }}</p>
-                        <dl>
-                            <div><dt>Estimasi selesai</dt><dd>{{ $letterService->processing_days }} hari kerja</dd></div>
-                            <div><dt>Biaya layanan</dt><dd>{{ $letterService->fee_information }}</dd></div>
-                        </dl>
-                    </section>
+                <aside class="letter-form-sidebar administration-page" aria-label="Tata cara pengajuan dan jam pelayanan">
+                    <div class="administration-sidebar-panel" data-sidebar-accordion>
+                        @include('administrative-services.partials.submission-guide', [
+                            'submissionGuidePanelId' => 'letter-submission-guide',
+                            'submissionGuideAsFlow' => true,
+                        ])
+                        @include('administrative-services.partials.office-hours')
+                    </div>
                 </aside>
             </div>
         </div>

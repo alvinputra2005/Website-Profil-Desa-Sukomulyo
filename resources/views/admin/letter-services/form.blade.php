@@ -17,6 +17,14 @@
     .letter-service-form .form-control { min-height: 34px; border-color: #ccd3c8; border-radius: 2px; box-shadow: none; }
     .letter-service-form textarea.form-control { min-height: auto; }
     .letter-service-form .form-control:focus { border-color: var(--letter-green); box-shadow: 0 0 0 2px rgba(82, 107, 66, .14); }
+    .letter-service-form .icon-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+    .letter-service-form .icon-picker__option { position: relative; margin: 0; cursor: pointer; }
+    .letter-service-form .icon-picker__option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .letter-service-form .icon-picker__content { display: flex; min-height: 72px; align-items: center; gap: 9px; padding: 10px; border: 1px solid #ccd3c8; border-radius: 4px; background: #fff; color: #4a534d; transition: border-color .15s, background .15s, box-shadow .15s; }
+    .letter-service-form .icon-picker__content i { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border-radius: 50%; background: var(--letter-green-soft); color: var(--letter-green); font-size: 17px; }
+    .letter-service-form .icon-picker__content span { font-size: 12px; font-weight: 600; line-height: 1.25; }
+    .letter-service-form .icon-picker__option input:checked + .icon-picker__content { border-color: var(--letter-green); background: #f5f8f2; box-shadow: 0 0 0 2px rgba(82, 107, 66, .15); }
+    .letter-service-form .icon-picker__option input:focus + .icon-picker__content { outline: 2px solid #72a4d4; outline-offset: 2px; }
     .letter-service-form .requirement-table { margin-bottom: 0; min-width: 820px; }
     .letter-service-form .requirement-table > thead > tr > th { padding: 11px 12px; border-bottom: 2px solid var(--letter-green); background: #f2f5ef; color: var(--admin-ink, #252a31); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; vertical-align: middle; }
     .letter-service-form .requirement-table > tbody > tr > td { padding: 12px; border-color: #e7eeea; vertical-align: top; }
@@ -43,6 +51,8 @@
     ];
     $requirements = old('requirements', $letterService->requirements_json ?: $defaultRequirements);
     $isActive = old('is_active', $letterService->exists ? $letterService->is_active : true);
+    $iconOptions = config('letter_services.icons', []);
+    $selectedIcon = old('icon', $letterService->icon ?: config('letter_services.default_icon'));
 @endphp
 
 <div class="box box-primary letter-service-form">
@@ -99,6 +109,21 @@
                             </div>
                         </div>
                     </div>
+                    <fieldset class="form-group {{ $errors->has('icon') ? 'has-error' : '' }}">
+                        <legend class="control-label" style="border: 0; margin-bottom: 8px; font-size: 14px;">Ikon layanan <span class="required-mark">*</span></legend>
+                        <div class="icon-picker">
+                            @foreach($iconOptions as $iconClass => $iconLabel)
+                                <label class="icon-picker__option">
+                                    <input type="radio" name="icon" value="{{ $iconClass }}" @checked($selectedIcon === $iconClass) required>
+                                    <span class="icon-picker__content">
+                                        <i class="fa {{ $iconClass }}" aria-hidden="true"></i>
+                                        <span>{{ $iconLabel }}</span>
+                                    </span>
+                                </label>
+                            @endforeach
+                        </div>
+                        @error('icon') <p class="help-block">{{ $message }}</p> @else <p class="help-block">Pilih ikon yang paling sesuai dengan jenis surat.</p> @enderror
+                    </fieldset>
                     <div class="form-group {{ $errors->has('description') ? 'has-error' : '' }}">
                         <label class="control-label" for="description">Deskripsi layanan <span class="required-mark">*</span></label>
                         <textarea id="description" class="form-control" name="description" rows="4" required placeholder="Jelaskan kegunaan atau tujuan surat ini.">{{ old('description', $letterService->description) }}</textarea>

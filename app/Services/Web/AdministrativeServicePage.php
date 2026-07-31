@@ -2,11 +2,14 @@
 
 namespace App\Services\Web;
 
+use App\Services\Letters\LetterSettings;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class AdministrativeServicePage
 {
+    public function __construct(private readonly LetterSettings $letterSettings) {}
+
     public function data(): array
     {
         $config = config('administrative_services');
@@ -17,9 +20,9 @@ class AdministrativeServicePage
         return [
             'page' => $config['page'],
             'services' => $services,
-            'serviceFlow' => collect($config['service_flow']),
             'submissionSteps' => collect($config['submission_steps']),
             'submissionNotice' => $config['submission_notice'],
+            'officeHours' => $this->letterSettings->officeHours(),
             'office' => $config['office'],
             'whatsappUrl' => sprintf(
                 'https://wa.me/%s?text=%s',
