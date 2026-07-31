@@ -206,9 +206,16 @@ class StatisticDatasetController extends Controller
         $template = $request->template();
         abort_if($template && $template->statistic_category_id !== $category->id, 404);
         $validated = $request->validated();
-        $columns = collect($template?->columns_json ?? [])->keyBy('key');
+        $columnDefinitions = $template
+            ? ($template->columns_json ?? [])
+            : collect($validated['columns'] ?? [])->map(fn (array $column): array => [
+                'key' => $column['key'],
+                'label' => trim($column['label']),
+                'type' => $column['type'],
+            ])->values()->all();
+        $columns = collect($columnDefinitions)->keyBy('key');
 
-        $dataset = DB::transaction(function () use ($validated, $category, $template, $columns): StatisticDataset {
+        $dataset = DB::transaction(function () use ($validated, $category, $template, $columns, $columnDefinitions): StatisticDataset {
             $period = trim((string) $validated['period']);
             $dataset = StatisticDataset::query()->create([
                 'statistic_category_id' => $category->id,
@@ -228,7 +235,7 @@ class StatisticDatasetController extends Controller
                 'display_order' => $template?->display_order
                     ?? ((int) $category->datasets()->max('display_order')) + 1,
                 'created_by' => auth()->id(),
-                'columns_json' => $template?->columns_json ?? [],
+                'columns_json' => $columnDefinitions,
                 'totals_json' => $this->normalizedValues($validated['totals'] ?? [], $columns, true),
                 'source_metadata_json' => $template?->source_metadata_json,
                 'visualization_config_json' => $template?->visualization_config_json ?? ['type' => 'table'],

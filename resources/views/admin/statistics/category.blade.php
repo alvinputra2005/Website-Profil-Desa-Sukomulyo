@@ -22,7 +22,7 @@
         <form method="get" action="{{ route('admin.statistics.categories.show', $category->slug) }}" class="statistics-category-filters">
             <div class="form-group">
                 <label for="data">Jenis Data Statistik</label>
-                <select id="data" name="data" class="form-control select2" data-placeholder="Pilih Data Statistik">
+                <select id="data" name="data" class="form-control select2" data-placeholder="Pilih Data Statistik" onchange="this.form.submit()">
                     @forelse ($types as $type)
                         <option value="{{ $type['key'] }}" @selected($selectedType === $type['key'])>{{ $type['label'] }}</option>
                     @empty
@@ -32,7 +32,7 @@
             </div>
             <div class="form-group">
                 <label for="period">Periode</label>
-                <select id="period" name="period" class="form-control select2">
+                <select id="period" name="period" class="form-control select2" onchange="this.form.submit()">
                     @forelse ($periods as $period)
                         <option value="{{ $period }}" @selected($selectedPeriod === (string) $period)>{{ $period }}</option>
                     @empty
@@ -51,7 +51,8 @@
             </div>
             <div class="statistics-category-filter-action">
                 <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> Tampilkan Data</button>
-                <a href="{{ route('admin.statistics.categories.create', ['category' => $category->slug, 'template' => $dataset?->id]) }}" class="btn btn-success"><i class="fa fa-plus"></i> Tambah Periode</a>
+                <a href="{{ route('admin.statistics.categories.create', ['category' => $category->slug, 'template' => $dataset?->id]) }}" class="btn btn-success"><i class="fa fa-plus"></i> {{ $dataset ? 'Tambah Periode' : 'Buat Tabel' }}</a>
+                <a href="{{ route('admin.statistics.import.create', ['category' => $category->id]) }}" class="btn btn-default"><i class="fa fa-file-excel-o"></i> Import Excel</a>
             </div>
         </form>
     </div>

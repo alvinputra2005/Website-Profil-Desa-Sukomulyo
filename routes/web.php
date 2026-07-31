@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\PopulationStatisticController;
 use App\Http\Controllers\Admin\RegionController;
 use App\Http\Controllers\Admin\StatisticImportController;
 use App\Http\Controllers\Admin\StatisticDatasetController;
+use App\Http\Controllers\Admin\StatisticCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\Village\VillageIdentityController;
 use App\Http\Controllers\Admin\Village\VillageSectionController;
@@ -102,6 +103,7 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
     Route::middleware('can:manage-data')->prefix('statistik')->name('statistics.')->group(function () {
         Route::get('/import', [StatisticImportController::class, 'create'])->name('import.create');
         Route::post('/import', [StatisticImportController::class, 'store'])->name('import.store');
+        Route::post('/import-excel', [StatisticImportController::class, 'storeExcel'])->name('import.excel');
         Route::get('/import/{import:public_id}/preview', [StatisticImportController::class, 'preview'])->name('import.preview');
         Route::post('/import/{import:public_id}/process', [StatisticImportController::class, 'processImport'])->name('import.process');
     });
@@ -110,6 +112,8 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::get('/population', [PopulationStatisticController::class, 'show'])->name('population.show');
     });
     Route::middleware('can:manage-data')->prefix('statistics')->name('statistics.categories.')->group(function () {
+        Route::get('/categories/create', [StatisticCategoryController::class, 'create'])->name('create-category');
+        Route::post('/categories', [StatisticCategoryController::class, 'store'])->name('store-category');
         Route::get('/{category:slug}', [StatisticDatasetController::class, 'show'])->name('show');
         Route::get('/{category:slug}/create', [StatisticDatasetController::class, 'create'])->name('create');
         Route::post('/{category:slug}', [StatisticDatasetController::class, 'store'])->name('store');
