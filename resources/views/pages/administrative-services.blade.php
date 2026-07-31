@@ -16,7 +16,7 @@
             :description="$page['description']"
             :show-heading="false"
             :breadcrumbs="[
-                ['label' => 'Informasi Desa', 'url' => route('informasi-publik-desa')],
+                ['label' => 'Pelayanan'],
                 ['label' => $page['title']],
             ]"
         />
@@ -33,7 +33,7 @@
 
                 <aside
                     class="administration-sidebar"
-                    aria-label="Informasi alur dan pengajuan pelayanan"
+                    aria-label="Panduan dan akses pengajuan layanan"
                 >
                     @include('administrative-services.partials.sidebar')
                 </aside>

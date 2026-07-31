@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\PopulationStatisticsRequest;
 use App\Services\ImportedStatisticPageData;
-use App\Services\StatisticPageData;
+use App\Services\BudgetHistoryData;
 use App\Services\PopulationStatistics;
+use App\Services\StatisticPageData;
 use App\Services\Statistics\PopulationStatisticAggregator;
 use App\Services\Statistics\PopulationStatisticIndicatorService;
 use App\Services\Web\PublicSiteService;
@@ -99,8 +100,16 @@ class VillageStatisticController extends Controller
         return $site->populationStatistics($indicators, $indicator, $result);
     }
 
-    public function budgetHistory(PublicSiteService $site): View
+    public function budgetHistory(PublicSiteService $site, BudgetHistoryData $budgets): View
     {
-        return $site->budgetHistory();
+        return $site->budgetHistory($budgets->history());
+    }
+
+    public function budgetDetail(PublicSiteService $site, BudgetHistoryData $budgets, int $year): View
+    {
+        $budget = $budgets->detail($year);
+        abort_unless($budget, 404);
+
+        return $site->budgetDetail($budget);
     }
 }

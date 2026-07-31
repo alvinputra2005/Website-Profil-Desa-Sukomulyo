@@ -1,10 +1,15 @@
+@php
+    $serviceFlowPanelId = $serviceFlowPanelId ?? 'administration-service-flow';
+    $serviceFlowExpanded = $serviceFlowExpanded ?? true;
+@endphp
+
 <section class="administration-sidebar-widget administration-flow-widget">
     <h2 class="administration-sidebar-heading">
         <button
             class="administration-sidebar-toggle"
             type="button"
-            aria-expanded="true"
-            aria-controls="administration-service-flow"
+            aria-expanded="{{ $serviceFlowExpanded ? 'true' : 'false' }}"
+            aria-controls="{{ $serviceFlowPanelId }}"
             data-sidebar-toggle
             data-sidebar-accordion-toggle
         >
@@ -16,9 +21,10 @@
     </h2>
 
     <div
-        id="administration-service-flow"
+        id="{{ $serviceFlowPanelId }}"
         class="administration-sidebar-content"
         data-sidebar-panel
+        @if(! $serviceFlowExpanded) hidden @endif
     >
         <ol class="service-flow-list">
             @foreach ($serviceFlow as $step)

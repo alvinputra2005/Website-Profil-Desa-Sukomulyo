@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\BulkDeleteStatisticDatasetController;
+use App\Http\Controllers\Admin\ApbdesController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\CrudController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -131,6 +132,12 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::get('laporan-penduduk', [PopulationReportController::class, 'index'])->name('report');
         Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
     });
+    Route::middleware('can:manage-data')->group(function () {
+        Route::patch('/apbdes/{apbdes}/publikasi', [ApbdesController::class, 'togglePublication'])->name('apbdes.toggle-publication');
+        Route::resource('apbdes', ApbdesController::class)
+            ->parameters(['apbdes' => 'apbdes'])
+            ->except('show');
+    });
     Route::middleware('can:manage-letter-applications')->prefix('permohonan-surat')->name('letter-applications.')->group(function () {
         Route::get('/', [AdminLetterApplicationController::class, 'index'])->name('index');
         Route::get('/{application:public_id}', [AdminLetterApplicationController::class, 'show'])->name('show');
@@ -208,6 +215,7 @@ Route::get('/data-statistik/penduduk', [VillageStatisticController::class, 'popu
 Route::get('/data-statistik/{category}/{dataset}', [VillageStatisticController::class, 'importedDataset'])->name('data-statistik.imported.show');
 Route::get('/data-statistik/{section}', [VillageStatisticController::class, 'show'])->name('data-statistik.detail');
 Route::get('/transparansi-apbdes', [VillageStatisticController::class, 'budgetHistory'])->name('transparansi-apbdes');
+Route::get('/transparansi-apbdes/{year}', [VillageStatisticController::class, 'budgetDetail'])->whereNumber('year')->name('transparansi-apbdes.show');
 Route::get('/informasi-publik-desa', [PublicationController::class, 'index'])->name('informasi-publik-desa');
 Route::prefix('informasi-desa/pengumuman')->name('announcements.')->group(function () {
     Route::get('/', [AnnouncementController::class, 'index'])->name('index');

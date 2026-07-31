@@ -1,6 +1,5 @@
 <header class="administration-section-header">
-    <h2 id="administration-requirements-heading">Persyaratan Pelayanan</h2>
-    <p>Pilih jenis pelayanan untuk melihat dokumen yang perlu disiapkan.</p>
+    <h2 id="administration-requirements-heading">Syarat Administrasi</h2>
 </header>
 
 <div class="administration-search" role="search">

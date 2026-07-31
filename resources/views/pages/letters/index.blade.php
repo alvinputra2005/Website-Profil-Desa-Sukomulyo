@@ -1,16 +1,16 @@
-<x-layouts.app title="Pelayanan Surat Desa" description="Ajukan permohonan awal surat desa dan pantau prosesnya.">
-    <x-page-header title="Pelayanan Surat Desa" description="Ajukan permohonan awal, pantau prosesnya, lalu ambil surat fisik di Kantor Desa Sukomulyo." :show-heading="true" />
+<x-layouts.app title="Pengajuan Layanan" description="Layanan administrasi daring Desa Sukomulyo.">
+    <x-page-header title="Pengajuan Layanan" :show-heading="false" :breadcrumbs="[['label'=>'Pelayanan'],['label'=>'Pengajuan Layanan']]" />
     @php
-        $serviceIcons = [
-            'SKU' => 'fa-store', 'SKD' => 'fa-home', 'SKTM' => 'fa-hand-holding-heart',
-            'SKCK' => 'fa-file-alt', 'SKBM' => 'fa-user', 'SKL' => 'fa-baby', 'SKM' => 'fa-ribbon',
-        ];
         $firstService = $services->first();
         $whatsappNumber = $settings->whatsappNumber();
     @endphp
     <div class="letter-service-page" data-letter-selector>
         <div class="container">
-            <ol class="letter-steps" aria-label="Tahapan pengajuan surat">
+            <header class="letter-service-heading">
+                <h1>Pengajuan Layanan</h1>
+            </header>
+
+            <ol class="letter-steps" aria-label="Tahapan pengajuan layanan">
                 @foreach(['Pilih Jenis Surat', 'Isi Data Pemohon', 'Unggah Dokumen', 'Konfirmasi'] as $step)
                     <li @class(['is-active' => $loop->first]) @if($loop->first) aria-current="step" @endif>
                         <span>{{ $loop->iteration }}</span><strong>{{ $step }}</strong>
@@ -29,8 +29,8 @@
                         <div class="letter-choice-grid" role="radiogroup" aria-label="Jenis surat">
                             @foreach($services as $service)
                                 <a class="letter-choice {{ $loop->first ? 'is-selected' : '' }}" href="{{ route('letter-services.application.create', $service) }}">
-                                    <span class="letter-choice-icon"><i class="fas {{ $serviceIcons[$service->code] ?? 'fa-file-alt' }}" aria-hidden="true"></i></span>
-                                    <span class="letter-choice-copy"><strong>{{ $service->name }}</strong><small>{{ $service->description }}</small></span>
+                                    <span class="letter-choice-icon"><i class="fas {{ $service->icon ?: config('letter_services.default_icon') }}" aria-hidden="true"></i></span>
+                                    <span class="letter-choice-copy"><strong>{{ $service->name }}</strong></span>
                                     <i class="fas fa-chevron-right letter-choice-arrow" aria-hidden="true"></i>
                                 </a>
                             @endforeach
@@ -40,42 +40,39 @@
                     @endif
                 </section>
 
-                <aside class="letter-info-sidebar" aria-label="Informasi pelayanan surat">
-                    <section class="letter-info-card letter-info-card--requirements">
-                        <div>
-                            <h2>Syarat Umum</h2>
-                            <ul>
-                                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Fotokopi KTP pemohon</li>
-                                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Fotokopi Kartu Keluarga</li>
-                                <li><i class="fas fa-check-circle" aria-hidden="true"></i> Data sesuai dengan dokumen asli</li>
-                            </ul>
-                            <small>*Syarat tambahan menyesuaikan jenis surat</small>
+                <aside class="letter-info-sidebar" aria-label="Panduan dan informasi pelayanan surat" data-sidebar-accordion>
+                    @include('administrative-services.partials.submission-guide', [
+                        'submissionGuidePanelId' => 'letter-index-submission-guide',
+                        'submissionGuideAsFlow' => true,
+                    ])
+
+                    <section class="letter-info-card letter-info-card--help" data-static-info-card>
+                        <header class="letter-info-card__heading">
+                            <h2>Butuh Bantuan?</h2>
+                        </header>
+                        <div class="letter-info-card__content">
+                            <p>Hubungi petugas Desa Sukomulyo melalui WhatsApp untuk informasi lebih lanjut.</p>
+                            @if($whatsappNumber)
+                                <a href="https://wa.me/{{ $whatsappNumber }}" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp" aria-hidden="true"></i> Hubungi via WhatsApp</a>
+                            @else
+                                <a href="{{ route('kontak.index') }}"><i class="fas fa-envelope" aria-hidden="true"></i> Hubungi Petugas</a>
+                            @endif
                         </div>
-                        <span class="letter-document-illustration" aria-hidden="true"><i class="fas fa-folder-open"></i><i class="fas fa-file-alt"></i></span>
                     </section>
 
-                    <section class="letter-info-card letter-info-card--notice">
-                        <h2><i class="fas fa-exclamation-circle" aria-hidden="true"></i> Informasi Penting</h2>
-                        <p>Permohonan surat hanya bersifat sebagai permohonan. Surat yang sudah selesai tidak dapat diunduh dan harus diambil langsung di {{ $settings->pickupAddress() }} pada jam layanan.</p>
+                    <section class="letter-info-card letter-info-card--hours" data-static-info-card>
+                        <header class="letter-info-card__heading">
+                            <h2>Jam Layanan</h2>
+                        </header>
+                        <div class="letter-info-card__content letter-info-card__content--hours">
+                            <span class="letter-info-card__feature-icon"><i class="far fa-clock" aria-hidden="true"></i></span>
+                            <div>
+                                <strong>Hari dan jam pelayanan</strong>
+                                <p>{{ $settings->officeHours() }}</p>
+                            </div>
+                        </div>
                     </section>
 
-                    <section class="letter-info-card letter-info-card--help">
-                        <h2>Butuh Bantuan?</h2>
-                        <p>Hubungi petugas Desa Sukomulyo melalui WhatsApp untuk informasi lebih lanjut.</p>
-                        @if($whatsappNumber)
-                            <a href="https://wa.me/{{ $whatsappNumber }}" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp" aria-hidden="true"></i> Hubungi via WhatsApp</a>
-                        @else
-                            <a href="{{ route('kontak.index') }}"><i class="fas fa-envelope" aria-hidden="true"></i> Hubungi Petugas</a>
-                        @endif
-                    </section>
-
-                    <section class="letter-info-card letter-info-card--hours">
-                        <span><i class="far fa-clock" aria-hidden="true"></i></span>
-                        <div><h2>Jam Layanan</h2><p>{{ $settings->officeHours() }}</p></div>
-                        <i class="far fa-calendar-alt letter-hours-icon" aria-hidden="true"></i>
-                    </section>
-
-                    <a class="letter-track-link" href="{{ route('letter-services.track.form') }}"><i class="fas fa-search" aria-hidden="true"></i> Lacak permohonan yang sudah diajukan</a>
                 </aside>
             </div>
         </div>

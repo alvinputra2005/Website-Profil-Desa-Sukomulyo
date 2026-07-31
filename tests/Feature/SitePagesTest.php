@@ -29,7 +29,7 @@ class SitePagesTest extends TestCase
             route('data-statistik.detail', ['section' => 'visualisasi']) => 'Visualisasi Data',
             route('informasi-publik-desa') => 'Informasi Publik Desa',
             route('informasi-desa.detail', ['section' => 'pengumuman']) => 'Pengumuman Desa',
-            route('informasi-desa.detail', ['section' => 'layanan-administrasi']) => 'Layanan Administrasi',
+            route('informasi-desa.detail', ['section' => 'layanan-administrasi']) => 'Syarat Administrasi',
             route('informasi-desa.detail', ['section' => 'agenda']) => 'Agenda Desa',
             route('informasi-desa.detail', ['section' => 'bantuan-sosial']) => 'Informasi Bantuan Sosial',
             route('informasi-desa.detail', ['section' => 'informasi-publik']) => 'Informasi Publik',
@@ -55,9 +55,9 @@ class SitePagesTest extends TestCase
         preg_match('/<nav class="header-navigation".*?<\/nav>/s', $html, $matches);
         $navigation = $matches[0] ?? '';
 
-        $this->assertSame(3, substr_count($navigation, '<ul class="sub-menu">'));
-        $this->assertSame(3, substr_count($navigation, 'class="nav-dropdown-toggle"'));
-        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Statistik Keluarga', 'Layanan Administrasi', 'APBDes'] as $label) {
+        $this->assertSame(4, substr_count($navigation, '<ul class="sub-menu">'));
+        $this->assertSame(4, substr_count($navigation, 'class="nav-dropdown-toggle"'));
+        foreach (['Profil Desa', 'Identitas Desa', 'Data Statistik', 'Informasi Desa', 'Berita Desa', 'Galeri Desa', 'Pelayanan', 'Pengajuan Layanan', 'Statistik Keluarga', 'Syarat Administrasi', 'APBDes'] as $label) {
             $this->assertStringContainsString($label, $navigation);
         }
         foreach (['data-desa-statistik', 'informasi-publik-desa'] as $route) {
@@ -68,14 +68,25 @@ class SitePagesTest extends TestCase
         $this->assertStringNotContainsString('Agenda Desa', $navigation);
         $this->assertStringNotContainsString('Statistik Pendidikan', $navigation);
         $this->assertStringNotContainsString('Statistik Pekerjaan', $navigation);
+        $this->assertStringNotContainsString('Informasi Bantuan Sosial', $navigation);
+        $this->assertStringNotContainsString('Informasi Publik</span>', $navigation);
         $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('profile-desa'), '/').'".*?>\s*<span>Identitas Desa<\/span>/s', $navigation);
         $this->assertStringNotContainsString('>Peta Desa</a>', $navigation);
         $this->assertStringNotContainsString('#', $navigation);
-        $this->assertGreaterThan(strpos($navigation, 'Berita Desa'), strpos($navigation, 'Galeri Desa'));
+        preg_match('/>Informasi Desa<\/button>\s*<ul class="sub-menu">(.*?)<\/ul>/s', $navigation, $informationMenu);
+        $this->assertStringContainsString(route('berita-desa.index'), $informationMenu[1] ?? '');
+        $this->assertStringContainsString(route('galeri-desa'), $informationMenu[1] ?? '');
+        $this->assertStringNotContainsString(route('informasi-desa.detail', 'layanan-administrasi'), $informationMenu[1] ?? '');
+
+        preg_match('/>Pelayanan<\/button>\s*<ul class="sub-menu">(.*?)<\/ul>/s', $navigation, $serviceMenu);
+        $this->assertStringContainsString(route('informasi-desa.detail', 'layanan-administrasi'), $serviceMenu[1] ?? '');
+        $this->assertStringContainsString('Syarat Administrasi', $serviceMenu[1] ?? '');
+        $this->assertStringContainsString(route('letter-services.index'), $serviceMenu[1] ?? '');
+        $this->assertStringContainsString('Pengajuan Layanan', $serviceMenu[1] ?? '');
         $this->assertStringNotContainsString('Asal-usul dan perkembangan', $navigation);
         $this->assertStringNotContainsString('Jumlah penduduk berdasarkan jenjang pendidikan', $navigation);
         $this->assertStringContainsString(route('pemerintahan-desa'), $navigation);
-        $this->assertStringContainsString(route('potensi-desa'), $navigation);
+        $this->assertStringNotContainsString(route('potensi-desa'), $navigation);
     }
 
     public function test_unknown_pages_use_the_converted_404_page(): void
@@ -118,15 +129,15 @@ class SitePagesTest extends TestCase
             ->assertSee('Laki-laki')
             ->assertSee('Perempuan')
             ->assertSee('Transparansi APBDes')
-            ->assertSee('Pendapatan APBDes 2026')
-            ->assertSee('Belanja APBDes 2026')
-            ->assertSee('Realisasi APBDes 2026')
+            ->assertSee('Pendapatan APBDes 2025')
+            ->assertSee('Belanja APBDes 2025')
+            ->assertSee('Realisasi APBDes 2025')
             ->assertSee('budget-progress-fill', false)
             ->assertSee('budget-progress-percent', false)
             ->assertSee(route('transparansi-apbdes'), false)
-            ->assertSee('Total Pendapatan APBDes 2026')
-            ->assertSee('Total Penggunaan Belanja APBDes 2026')
-            ->assertSee('Total Realisasi APBDes 2026');
+            ->assertSee('Total Pendapatan APBDes 2025')
+            ->assertSee('Total Penggunaan Belanja APBDes 2025')
+            ->assertSee('Total Realisasi APBDes 2025');
     }
 
     public function test_homepage_identity_link_opens_the_village_identity_page(): void
@@ -314,13 +325,15 @@ class SitePagesTest extends TestCase
             route('profile-desa.detail', 'visi-misi') => ['Profile Desa', 'Visi dan Misi'],
             route('data-statistik.detail', 'pendidikan') => ['Data Statistik', 'Statistik Pendidikan'],
             route('informasi-desa.detail', 'agenda') => ['Informasi Desa', 'Agenda Desa'],
+            route('berita-desa.index') => ['Informasi Desa', 'Berita Desa'],
+            route('galeri-desa') => ['Informasi Desa', 'Galeri Desa'],
+            route('informasi-desa.detail', 'layanan-administrasi') => ['Pelayanan', 'Syarat Administrasi'],
+            route('letter-services.index') => ['Pelayanan', 'Pengajuan Layanan'],
         ];
 
         foreach ($pages as $url => [$parent, $child]) {
             $response = $this->get($url)->assertOk();
             $html = $response->getContent();
-            preg_match('/<header class="page-banner">(.*?)<\/header>/s', $html, $bannerMatches);
-            $banner = $bannerMatches[1] ?? '';
             preg_match('/<nav class="breadcrumbs".*?<\/nav>/s', $html, $matches);
             $breadcrumbs = $matches[0] ?? '';
 
@@ -331,15 +344,13 @@ class SitePagesTest extends TestCase
             $this->assertStringContainsString('aria-hidden="true">/</span>', $breadcrumbs);
             $this->assertStringNotContainsString('fa-chevron-right', $breadcrumbs);
             $this->assertStringContainsString($child, $breadcrumbs);
-            $this->assertStringContainsString('class="page-banner-heading"', $banner);
-            $this->assertStringContainsString('<h1>'.$child.'</h1>', $banner);
         }
 
         $this->get(route('galeri-desa'))
             ->assertOk()
-            ->assertDontSee('<nav class="breadcrumbs"', false)
-            ->assertSee('page-banner--no-breadcrumbs', false)
-            ->assertSee('page-banner--no-divider', false);
+            ->assertSee('<nav class="breadcrumbs"', false)
+            ->assertSee('Informasi Desa')
+            ->assertSee('Galeri Desa');
 
         $this->get(route('berita-desa.index'))
             ->assertOk()
@@ -354,14 +365,16 @@ class SitePagesTest extends TestCase
             ->assertSee('Musyawarah Desa Penyusunan Program Kerja');
     }
 
-    public function test_budget_history_shows_ten_years_of_dummy_data(): void
+    public function test_budget_history_shows_public_data_through_2025(): void
     {
         $this->get(route('transparansi-apbdes'))
             ->assertOk()
-            ->assertSee('Riwayat APBDes 10 Tahun Terakhir')
-            ->assertSee('2017')
-            ->assertSee('2026')
-            ->assertSee('data dummy');
+            ->assertSee('Riwayat APBDes 2019–2025')
+            ->assertSee(route('transparansi-apbdes.show', 2019), false)
+            ->assertSee(route('transparansi-apbdes.show', 2025), false)
+            ->assertDontSee(route('transparansi-apbdes.show', 2017), false)
+            ->assertDontSee(route('transparansi-apbdes.show', 2026), false)
+            ->assertDontSee('data dummy');
     }
 
     public function test_contact_form_validates_and_accepts_a_message(): void

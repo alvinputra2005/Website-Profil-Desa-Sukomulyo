@@ -15,6 +15,7 @@ use App\Models\LetterApplicationDocument;
 use App\Models\LetterService;
 use App\Models\PopulationArea;
 use App\Services\Letters\LetterFormSchemaService;
+use App\Services\Letters\LetterSettings;
 use App\Services\Web\PublicSiteService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,12 @@ use Illuminate\Support\Str;
 
 class LetterApplicationController extends Controller
 {
-    public function create(LetterService $letterService, PublicSiteService $site, LetterFormSchemaService $schemas): View
+    public function create(
+        LetterService $letterService,
+        PublicSiteService $site,
+        LetterFormSchemaService $schemas,
+        LetterSettings $settings,
+    ): View
     {
         abort_unless($letterService->is_active, 404);
         session(['letter_form_rendered_at' => now()->timestamp]);
@@ -49,6 +55,8 @@ class LetterApplicationController extends Controller
             'fields' => $schemas->fields($letterService),
             'submissionKey' => $submissionKey,
             'hamlets' => $hamlets,
+            'submissionSteps' => collect(config('administrative_services.submission_steps', [])),
+            'officeHours' => $settings->officeHours(),
         ]);
     }
 

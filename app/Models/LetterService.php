@@ -12,7 +12,7 @@ class LetterService extends Model
     /** @use HasFactory<LetterServiceFactory> */
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'slug', 'code', 'description', 'requirements_json', 'form_schema_json', 'processing_days', 'fee_information', 'pickup_instructions', 'is_active', 'display_order', 'created_by', 'updated_by'];
+    protected $fillable = ['name', 'slug', 'code', 'description', 'icon', 'requirements_json', 'form_schema_json', 'processing_days', 'fee_information', 'pickup_instructions', 'is_active', 'display_order', 'created_by', 'updated_by'];
 
     protected function casts(): array
     {

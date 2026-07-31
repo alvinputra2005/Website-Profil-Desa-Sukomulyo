@@ -19,6 +19,7 @@ class LetterServiceController extends Controller
         return view('pages.letters.index', [
             'services' => LetterService::query()->where('is_active', true)->orderBy('display_order')->get(),
             'settings' => $settings,
+            'submissionSteps' => collect(config('administrative_services.submission_steps', [])),
         ]);
     }
 

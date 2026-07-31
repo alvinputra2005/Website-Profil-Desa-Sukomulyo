@@ -62,7 +62,7 @@ class LetterServiceController extends Controller
         $validated = $request->validated();
 
         return [
-            ...collect($validated)->only(['name', 'description', 'processing_days', 'fee_information', 'pickup_instructions', 'display_order'])->all(),
+            ...collect($validated)->only(['name', 'description', 'icon', 'processing_days', 'fee_information', 'pickup_instructions', 'display_order'])->all(),
             'slug' => $request->route('letterService')?->slug ?: $this->uniqueSlug($validated['name']),
             'code' => Str::upper($validated['code']),
             'requirements_json' => collect($validated['requirements'])->values()->map(fn (array $requirement, int $index) => [

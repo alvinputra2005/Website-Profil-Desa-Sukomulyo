@@ -12,6 +12,7 @@ import {
     downloadBlob,
     downloadDataUrl,
     savePdf,
+    scalePdfLayout,
     svgToRaster,
 } from './population-statistics';
 import { bindStatisticsCopyButtons } from './statistics-copy';
@@ -452,7 +453,13 @@ export const initGenericStatistics = () => {
         }
         const raster = await svgToRaster(asset.svg, asset.width, asset.height, format);
         if (format === 'pdf') {
-            await savePdf(raster, asset.width * 2, asset.height * 2, `${filename}.pdf`);
+            await savePdf(
+                raster,
+                asset.width * 2,
+                asset.height * 2,
+                `${filename}.pdf`,
+                scalePdfLayout(asset, 2),
+            );
             return;
         }
         downloadDataUrl(raster, `${filename}.${format}`);

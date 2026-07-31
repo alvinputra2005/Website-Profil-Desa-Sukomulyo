@@ -88,7 +88,25 @@ return new class extends Migration
                 $table->foreignId('changed_by')->nullable()->constrained('users')->nullOnDelete();
                 $table->json('metadata_json')->nullable();
                 $table->timestamp('created_at')->useCurrent();
-                $table->index(['letter_application_id', 'created_at']);
+                $table->index(
+                    ['letter_application_id', 'created_at'],
+                    'letter_history_app_created_idx',
+                );
+            });
+        }
+
+        if (
+            Schema::hasTable('letter_application_status_histories')
+            && ! Schema::hasIndex(
+                'letter_application_status_histories',
+                'letter_history_app_created_idx',
+            )
+        ) {
+            Schema::table('letter_application_status_histories', function (Blueprint $table) {
+                $table->index(
+                    ['letter_application_id', 'created_at'],
+                    'letter_history_app_created_idx',
+                );
             });
         }
     }

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Apbdes;
 use App\Models\FamilyCard;
 use App\Models\Gallery;
 use App\Models\GalleryItem;
@@ -15,6 +16,7 @@ use App\Models\NewsCategory;
 use App\Models\Official;
 use App\Models\PopulationArea;
 use App\Models\PopulationStatisticIndicator;
+use App\Models\PopulationYearlySnapshot;
 use App\Models\PopulationGroup;
 use App\Models\PopulationGroupMember;
 use App\Models\Publication;
@@ -82,6 +84,7 @@ class AppServiceProvider extends ServiceProvider
 
         foreach ([
             Setting::class,
+            Apbdes::class,
             VillageProfileSection::class,
             Official::class,
             News::class,
@@ -130,6 +133,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(FamilyCard::class, FamilyCardPolicy::class);
         Gate::policy(PopulationGroup::class, PopulationGroupPolicy::class);
         Gate::policy(PopulationGroupMember::class, PopulationGroupMemberPolicy::class);
+        Gate::policy(PopulationYearlySnapshot::class, DataResourcePolicy::class);
+        Gate::policy(Apbdes::class, DataResourcePolicy::class);
         Gate::policy(LetterApplication::class, LetterApplicationPolicy::class);
         Gate::policy(LetterService::class, LetterServicePolicy::class);
     }

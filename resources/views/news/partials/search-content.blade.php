@@ -1,5 +1,6 @@
 <div id="news-ajax-root" data-ajax-scope="#news-ajax-root" data-page-title="Pencarian Berita | {{ $site['name'] }}" data-page-description="Temukan informasi dan kegiatan Desa Sukomulyo.">
     <x-page-header title="Pencarian Berita" description="Temukan informasi dan kegiatan Desa Sukomulyo." :breadcrumbs="[
+        ['label' => 'Informasi Desa', 'url' => route('informasi-publik-desa')],
         ['label' => 'Berita Desa', 'url' => route('berita-desa.index')],
         ['label' => 'Pencarian'],
     ]" />

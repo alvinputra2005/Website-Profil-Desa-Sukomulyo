@@ -24,6 +24,7 @@
     :structured-data="$newsStructuredData"
 >
     <x-page-header title="Detail Berita" :breadcrumbs="[
+        ['label' => 'Informasi Desa', 'url' => route('informasi-publik-desa')],
         ['label' => 'Berita Desa', 'url' => route('berita-desa.index')],
         ['label' => $article['title']],
     ]" />

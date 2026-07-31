@@ -1,0 +1,2350 @@
+{
+  "schema_version": "1.0.0",
+  "dataset": "Transparansi APBDes Desa Sukomulyo 2019-2026",
+  "generated_at": "2026-07-31",
+  "village": {
+    "name": "Desa Sukomulyo",
+    "district": "Kecamatan Pujon",
+    "regency": "Kabupaten Malang",
+    "province": "Jawa Timur",
+    "country": "Indonesia"
+  },
+  "period": {
+    "from": 2019,
+    "to": 2026,
+    "available_years": [
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025,
+      2026
+    ]
+  },
+  "currency": {
+    "code": "IDR",
+    "symbol": "Rp",
+    "storage": "numeric rupiah; sebagian angka sumber memiliki dua digit desimal"
+  },
+  "regulatory_basis": [
+    {
+      "name": "Peraturan Menteri Dalam Negeri Nomor 20 Tahun 2018 tentang Pengelolaan Keuangan Desa",
+      "status": "berlaku berdasarkan basis data JDIH BPK pada saat penyusunan JSON",
+      "structure_used": [
+        "Pendapatan Desa",
+        "Belanja Desa",
+        "Pembiayaan Desa",
+        "Lima bidang belanja: penyelenggaraan pemerintahan, pelaksanaan pembangunan, pembinaan kemasyarakatan, pemberdayaan masyarakat, serta penanggulangan bencana/keadaan darurat/mendesak"
+      ],
+      "reference": "https://peraturan.bpk.go.id/Details/139714/permendagri-no-20-tahun-2018"
+    }
+  ],
+  "source": {
+    "primary_document": "lppd AMJ edit 14 jul 26 (1) (1).docx",
+    "document_title": "Laporan Penyelenggaraan Pemerintahan Desa (LPPD) Masa Akhir Jabatan Kepala Desa Sukomulyo",
+    "coverage": "2019-2026",
+    "normalization_policy": [
+      "Tidak mengarang data program atau triwulan yang tidak terdapat dalam sumber.",
+      "Nilai kosong atau tidak terbaca disimpan sebagai null.",
+      "Typo yang dapat direkonsiliasi secara aritmetis dinormalisasi, tetapi nilai mentah dan catatan koreksi tetap disimpan.",
+      "Total belanja tampilan dihitung dari seluruh lima bidang belanja; total mentah dokumen tetap tersedia pada spending_reconciliation.",
+      "Persentase utama dihitung ulang dari nilai anggaran dan realisasi; persentase mentah dokumen disimpan sebagai source_percentage."
+    ]
+  },
+  "repo_compatibility": {
+    "target_branch": "feature/layanan-administrasi",
+    "target_service": "app/Services/BudgetHistoryData.php",
+    "target_views": [
+      "resources/views/pages/budget-history.blade.php",
+      "resources/views/pages/budget-detail.blade.php"
+    ],
+    "current_contract": {
+      "history_key": "history",
+      "detail_key": "years",
+      "summary_fields": [
+        "year",
+        "income",
+        "income_realization",
+        "spending",
+        "realization",
+        "percentage",
+        "remaining_budget",
+        "budget_balance"
+      ]
+    }
+  },
+  "ui_flags": {
+    "show_program_section_only_when_available": true,
+    "show_quarter_section_only_when_available": true,
+    "show_partial_year_badge": true,
+    "show_data_quality_notice": true,
+    "display_null_as": "Belum tersedia",
+    "default_year_range_label": "2019-2026"
+  },
+  "history": [
+    {
+      "year": 2026,
+      "income": 2266869936,
+      "income_realization": 725045580,
+      "spending": 2342349959.77,
+      "realization": 503221867.93,
+      "percentage": 21.48,
+      "remaining_budget": 1839128091.84,
+      "balance": -75480023.77,
+      "is_partial_year": true,
+      "data_status": "needs_source_confirmation"
+    },
+    {
+      "year": 2025,
+      "income": 2461972089.84,
+      "income_realization": 2426314357.67,
+      "spending": 2410567084.28,
+      "realization": 2090443879,
+      "percentage": 86.72,
+      "remaining_budget": 320123205.28,
+      "balance": 51405005.56,
+      "is_partial_year": false,
+      "data_status": "source_with_reconciliation_notes"
+    },
+    {
+      "year": 2024,
+      "income": 2498272385,
+      "income_realization": 2495789149,
+      "spending": 2623658364,
+      "realization": 2359917837.84,
+      "percentage": 89.95,
+      "remaining_budget": 263740526.16,
+      "balance": -125385979,
+      "is_partial_year": false,
+      "data_status": "source_with_reconciliation_notes"
+    },
+    {
+      "year": 2023,
+      "income": 2988687352,
+      "income_realization": 2923465780,
+      "spending": 3123858663,
+      "realization": 2976175315,
+      "percentage": 95.27,
+      "remaining_budget": 147683348,
+      "balance": -135171311,
+      "is_partial_year": false,
+      "data_status": "source_with_reconciliation_notes"
+    },
+    {
+      "year": 2022,
+      "income": 2758210592,
+      "income_realization": 2889392051,
+      "spending": 2889392051.84,
+      "realization": 2327792051.84,
+      "percentage": 80.56,
+      "remaining_budget": 561600000,
+      "balance": -131181459.84,
+      "is_partial_year": false,
+      "data_status": "source_with_reconciliation_notes"
+    },
+    {
+      "year": 2021,
+      "income": 2380340000,
+      "income_realization": 2453017411,
+      "spending": 2641468635.07,
+      "realization": 2201784365,
+      "percentage": 83.35,
+      "remaining_budget": 439684270.07,
+      "balance": -261128635.07,
+      "is_partial_year": false,
+      "data_status": "source_with_reconciliation_notes"
+    },
+    {
+      "year": 2020,
+      "income": 2380441000,
+      "income_realization": 2370010286,
+      "spending": 2497510510,
+      "realization": 2165671580,
+      "percentage": 86.71,
+      "remaining_budget": 331838930,
+      "balance": -117069510,
+      "is_partial_year": false,
+      "data_status": "source_with_reconciliation_notes"
+    },
+    {
+      "year": 2019,
+      "income": 2276529350,
+      "income_realization": 2283358971,
+      "spending": 2497116870.9,
+      "realization": 2444074090,
+      "percentage": 97.88,
+      "remaining_budget": 53042780.9,
+      "balance": -220587520.9,
+      "is_partial_year": false,
+      "data_status": "source_with_reconciliation_notes"
+    }
+  ],
+  "years": {
+    "2019": {
+      "summary": {
+        "year": 2019,
+        "income": 2276529350,
+        "income_realization": 2283358971,
+        "income_percentage": 100.3,
+        "income_source_percentage": 100.3,
+        "spending": 2497116870.9,
+        "realization": 2444074090,
+        "percentage": 97.88,
+        "spending_source_percentage": 97.87,
+        "remaining_budget": 53042780.9,
+        "budget_balance": -220587520.9,
+        "realization_balance": -160715119,
+        "financing_net": -89650145,
+        "estimated_silpa": -250365264,
+        "is_partial_year": false,
+        "data_status": "source_with_reconciliation_notes"
+      },
+      "revenue": [
+        {
+          "code": "1.1",
+          "name": "Pendapatan Asli Desa",
+          "short_name": "PADes",
+          "budget": 113800000,
+          "realization": 113800000,
+          "variance": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": {
+            "realization": "1133.800.000,00"
+          },
+          "note": "Nilai realisasi pada dokumen tertulis 1.133.800.000,00, tetapi dinormalisasi menjadi 113.800.000,00 karena persentase 100% dan total tahun hanya konsisten dengan nilai tersebut."
+        },
+        {
+          "code": "1.2.1",
+          "name": "Dana Desa",
+          "short_name": "Dana Desa",
+          "budget": 1491204000,
+          "realization": 1491204000,
+          "variance": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.2",
+          "name": "Alokasi Dana Desa",
+          "short_name": "ADD",
+          "budget": 647127000,
+          "realization": 647127000,
+          "variance": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.3",
+          "name": "Bagi Hasil Pajak dan Retribusi Daerah",
+          "short_name": "BHP",
+          "budget": 24398350,
+          "realization": 31227971,
+          "variance": 6829621,
+          "percentage": 127.99,
+          "source_percentage": 128.82,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.4",
+          "name": "Bantuan Keuangan Provinsi",
+          "short_name": "BKK Provinsi",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.5",
+          "name": "Bantuan Keuangan Kabupaten",
+          "short_name": "BKK Kabupaten",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        }
+      ],
+      "revenue_reconciliation": {
+        "source_total_budget": 2276529350,
+        "source_total_realization": 2283358971,
+        "known_item_budget_sum": 2276529350,
+        "known_item_realization_sum": 2283358971,
+        "unclassified_budget_difference": 0,
+        "unclassified_realization_difference": 0,
+        "detail_realization_available": true
+      },
+      "spending": [
+        {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 601709505,
+          "realization": 558093400,
+          "remaining": 43616105,
+          "percentage": 92.75,
+          "source_percentage": 92.75,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 1772945365.9,
+          "realization": 1763518690,
+          "remaining": 9426675.9,
+          "percentage": 99.47,
+          "source_percentage": 99.47,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.3",
+          "name": "Pembinaan Kemasyarakatan Desa",
+          "short_name": "Pembinaan",
+          "description": "Belanja pembinaan ketenteraman, kelembagaan masyarakat, kepemudaan, olahraga, seni, budaya, dan kegiatan sosial.",
+          "budget": 86246000,
+          "realization": 86246000,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 33716000,
+          "realization": 33716000,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 2500000,
+          "realization": 2500000,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        }
+      ],
+      "spending_reconciliation": {
+        "display_total_basis": "sum_of_all_five_regulatory_fields",
+        "display_budget_total": 2497116870.9,
+        "display_realization_total": 2444074090,
+        "source_total_budget": 2494616870.9,
+        "source_total_realization": 2441574090,
+        "source_total_percentage": 97.87,
+        "difference_budget": 2500000,
+        "difference_realization": 2500000
+      },
+      "programs": [],
+      "programs_available": false,
+      "programs_note": "Dokumen LPPD tidak menyediakan nominal program/kegiatan per tahun secara lengkap. Data program tidak dibuat secara estimasi.",
+      "quarters": [],
+      "quarters_available": false,
+      "quarters_note": "Dokumen LPPD hanya menyediakan data tahunan; data triwulanan tidak dibuat secara estimasi.",
+      "financing": [
+        {
+          "code": "3.1",
+          "name": "Penerimaan Pembiayaan",
+          "type": "Penerimaan",
+          "amount": 220587510
+        },
+        {
+          "code": "3.2",
+          "name": "Pengeluaran Pembiayaan",
+          "type": "Pengeluaran",
+          "amount": 310237655
+        }
+      ],
+      "financing_summary": {
+        "receipt": 220587510,
+        "expenditure": 310237655,
+        "net": -89650145,
+        "percentage": 140.64,
+        "source_percentage": 140.7
+      },
+      "insights": {
+        "top_allocation": {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 1772945365.9,
+          "realization": 1763518690,
+          "remaining": 9426675.9,
+          "percentage": 99.47,
+          "source_percentage": 99.47,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        "best_absorption": {
+          "code": "2.3",
+          "name": "Pembinaan Kemasyarakatan Desa",
+          "short_name": "Pembinaan",
+          "description": "Belanja pembinaan ketenteraman, kelembagaan masyarakat, kepemudaan, olahraga, seni, budaya, dan kegiatan sosial.",
+          "budget": 86246000,
+          "realization": 86246000,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        "lowest_absorption": {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 601709505,
+          "realization": 558093400,
+          "remaining": 43616105,
+          "percentage": 92.75,
+          "source_percentage": 92.75,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        }
+      },
+      "data_quality": [
+        "Typo sumber pada realisasi PADes telah dinormalisasi dan nilai mentah tetap disimpan.",
+        "Baris JUMLAH belanja pada dokumen tidak sama dengan penjumlahan lima bidang. Total tampilan JSON memakai penjumlahan lima bidang; total mentah dokumen tetap disimpan untuk audit."
+      ],
+      "source_reference": {
+        "document": "LPPD Akhir Masa Jabatan Kepala Desa Sukomulyo 2019-2026",
+        "revenue_pages": "12-15",
+        "spending_pages": "16-20",
+        "financing_page": "20"
+      }
+    },
+    "2020": {
+      "summary": {
+        "year": 2020,
+        "income": 2380441000,
+        "income_realization": 2370010286,
+        "income_percentage": 99.56,
+        "income_source_percentage": 99.56,
+        "spending": 2497510510,
+        "realization": 2165671580,
+        "percentage": 86.71,
+        "spending_source_percentage": 83.41,
+        "remaining_budget": 331838930,
+        "budget_balance": -117069510,
+        "realization_balance": 204338706,
+        "financing_net": -10200000,
+        "estimated_silpa": 194138706,
+        "is_partial_year": false,
+        "data_status": "source_with_reconciliation_notes"
+      },
+      "revenue": [
+        {
+          "code": "1.1",
+          "name": "Pendapatan Asli Desa",
+          "short_name": "PADes",
+          "budget": 114500000,
+          "realization": 114500000,
+          "variance": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.1",
+          "name": "Dana Desa",
+          "short_name": "Dana Desa",
+          "budget": 1625317000,
+          "realization": 1625317000,
+          "variance": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.2",
+          "name": "Alokasi Dana Desa",
+          "short_name": "ADD",
+          "budget": 609124000,
+          "realization": 609063628,
+          "variance": -60372,
+          "percentage": 99.99,
+          "source_percentage": 99.9,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.3",
+          "name": "Bagi Hasil Pajak dan Retribusi Daerah",
+          "short_name": "BHP",
+          "budget": 31500000,
+          "realization": 21229658,
+          "variance": -10270342,
+          "percentage": 67.4,
+          "source_percentage": 67.4,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.4",
+          "name": "Bantuan Keuangan Provinsi",
+          "short_name": "BKK Provinsi",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.5",
+          "name": "Bantuan Keuangan Kabupaten",
+          "short_name": "BKK Kabupaten",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        }
+      ],
+      "revenue_reconciliation": {
+        "source_total_budget": 2380441000,
+        "source_total_realization": 2370010286,
+        "known_item_budget_sum": 2380441000,
+        "known_item_realization_sum": 2370110286,
+        "unclassified_budget_difference": 0,
+        "unclassified_realization_difference": -100000,
+        "detail_realization_available": true
+      },
+      "spending": [
+        {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 713187100,
+          "realization": 658917000,
+          "remaining": 54270100,
+          "percentage": 92.39,
+          "source_percentage": 92.39,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 1168529410,
+          "realization": 914778580,
+          "remaining": 253750830,
+          "percentage": 78.28,
+          "source_percentage": 78.28,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.3",
+          "name": "Pembinaan Kemasyarakatan Desa",
+          "short_name": "Pembinaan",
+          "description": "Belanja pembinaan ketenteraman, kelembagaan masyarakat, kepemudaan, olahraga, seni, budaya, dan kegiatan sosial.",
+          "budget": 57140000,
+          "realization": 57140000,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 52069000,
+          "realization": 29751000,
+          "remaining": 22318000,
+          "percentage": 57.14,
+          "source_percentage": 57.14,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 506585000,
+          "realization": 505085000,
+          "remaining": 1500000,
+          "percentage": 99.7,
+          "source_percentage": 99.5,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        }
+      ],
+      "spending_reconciliation": {
+        "display_total_basis": "sum_of_all_five_regulatory_fields",
+        "display_budget_total": 2497510510,
+        "display_realization_total": 2165671580,
+        "source_total_budget": 1990925510,
+        "source_total_realization": 1660586580,
+        "source_total_percentage": 83.41,
+        "difference_budget": 506585000,
+        "difference_realization": 505085000
+      },
+      "programs": [],
+      "programs_available": false,
+      "programs_note": "Dokumen LPPD tidak menyediakan nominal program/kegiatan per tahun secara lengkap. Data program tidak dibuat secara estimasi.",
+      "quarters": [],
+      "quarters_available": false,
+      "quarters_note": "Dokumen LPPD hanya menyediakan data tahunan; data triwulanan tidak dibuat secara estimasi.",
+      "financing": [
+        {
+          "code": "3.1",
+          "name": "Penerimaan Pembiayaan",
+          "type": "Penerimaan",
+          "amount": 117069510
+        },
+        {
+          "code": "3.2",
+          "name": "Pengeluaran Pembiayaan",
+          "type": "Pengeluaran",
+          "amount": 127269510
+        }
+      ],
+      "financing_summary": {
+        "receipt": 117069510,
+        "expenditure": 127269510,
+        "net": -10200000,
+        "percentage": 108.71,
+        "source_percentage": 110.5
+      },
+      "insights": {
+        "top_allocation": {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 1168529410,
+          "realization": 914778580,
+          "remaining": 253750830,
+          "percentage": 78.28,
+          "source_percentage": 78.28,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        "best_absorption": {
+          "code": "2.3",
+          "name": "Pembinaan Kemasyarakatan Desa",
+          "short_name": "Pembinaan",
+          "description": "Belanja pembinaan ketenteraman, kelembagaan masyarakat, kepemudaan, olahraga, seni, budaya, dan kegiatan sosial.",
+          "budget": 57140000,
+          "realization": 57140000,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        "lowest_absorption": {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 52069000,
+          "realization": 29751000,
+          "remaining": 22318000,
+          "percentage": 57.14,
+          "source_percentage": 57.14,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        }
+      },
+      "data_quality": [
+        "Baris JUMLAH belanja pada dokumen tidak sama dengan penjumlahan lima bidang. Total tampilan JSON memakai penjumlahan lima bidang; total mentah dokumen tetap disimpan untuk audit."
+      ],
+      "source_reference": {
+        "document": "LPPD Akhir Masa Jabatan Kepala Desa Sukomulyo 2019-2026",
+        "revenue_pages": "12-15",
+        "spending_pages": "16-20",
+        "financing_page": "20"
+      }
+    },
+    "2021": {
+      "summary": {
+        "year": 2021,
+        "income": 2380340000,
+        "income_realization": 2453017411,
+        "income_percentage": 103.05,
+        "income_source_percentage": 103.05,
+        "spending": 2641468635.07,
+        "realization": 2201784365,
+        "percentage": 83.35,
+        "spending_source_percentage": 81.38,
+        "remaining_budget": 439684270.07,
+        "budget_balance": -261128635.07,
+        "realization_balance": 251233046,
+        "financing_net": -20020000,
+        "estimated_silpa": 231213046,
+        "is_partial_year": false,
+        "data_status": "source_with_reconciliation_notes"
+      },
+      "revenue": [
+        {
+          "code": "1.1",
+          "name": "Pendapatan Asli Desa",
+          "short_name": "PADes",
+          "budget": 102500000,
+          "realization": 150800000,
+          "variance": 48300000,
+          "percentage": 147.12,
+          "source_percentage": 147.12,
+          "source_raw": {
+            "realization": "150,800.000,00"
+          },
+          "note": "Pemisah ribuan pada dokumen tidak konsisten; dinormalisasi menjadi 150.800.000,00."
+        },
+        {
+          "code": "1.2.1",
+          "name": "Dana Desa",
+          "short_name": "Dana Desa",
+          "budget": 1625217000,
+          "realization": 1635787000,
+          "variance": 10570000,
+          "percentage": 100.65,
+          "source_percentage": 100.65,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.2",
+          "name": "Alokasi Dana Desa",
+          "short_name": "ADD",
+          "budget": 609123000,
+          "realization": 602669331,
+          "variance": -6453669,
+          "percentage": 98.94,
+          "source_percentage": 98.94,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.3",
+          "name": "Bagi Hasil Pajak dan Retribusi Daerah",
+          "short_name": "BHP",
+          "budget": 31500000,
+          "realization": 48761080,
+          "variance": 17261080,
+          "percentage": 154.8,
+          "source_percentage": 154.8,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.4",
+          "name": "Bantuan Keuangan Provinsi",
+          "short_name": "BKK Provinsi",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.5",
+          "name": "Bantuan Keuangan Kabupaten",
+          "short_name": "BKK Kabupaten",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        }
+      ],
+      "revenue_reconciliation": {
+        "source_total_budget": 2380340000,
+        "source_total_realization": 2453017411,
+        "known_item_budget_sum": 2368340000,
+        "known_item_realization_sum": 2438017411,
+        "unclassified_budget_difference": 12000000,
+        "unclassified_realization_difference": 15000000,
+        "detail_realization_available": true
+      },
+      "spending": [
+        {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 857202635.07,
+          "realization": 623843865,
+          "remaining": 233358770.07,
+          "percentage": 72.78,
+          "source_percentage": 72.78,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 1103513000,
+          "realization": 981815500,
+          "remaining": 121697500,
+          "percentage": 88.97,
+          "source_percentage": 88.97,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.3",
+          "name": "Pembinaan Kemasyarakatan Desa",
+          "short_name": "Pembinaan",
+          "description": "Belanja pembinaan ketenteraman, kelembagaan masyarakat, kepemudaan, olahraga, seni, budaya, dan kegiatan sosial.",
+          "budget": 173153000,
+          "realization": 130825000,
+          "remaining": 42328000,
+          "percentage": 75.55,
+          "source_percentage": 75.55,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 0,
+          "realization": 0,
+          "remaining": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 507600000,
+          "realization": 465300000,
+          "remaining": 42300000,
+          "percentage": 91.67,
+          "source_percentage": 91.67,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        }
+      ],
+      "spending_reconciliation": {
+        "display_total_basis": "sum_of_all_five_regulatory_fields",
+        "display_budget_total": 2641468635.07,
+        "display_realization_total": 2201784365,
+        "source_total_budget": 2133868635.07,
+        "source_total_realization": 1736484365,
+        "source_total_percentage": 81.38,
+        "difference_budget": 507600000,
+        "difference_realization": 465300000
+      },
+      "programs": [],
+      "programs_available": false,
+      "programs_note": "Dokumen LPPD tidak menyediakan nominal program/kegiatan per tahun secara lengkap. Data program tidak dibuat secara estimasi.",
+      "quarters": [],
+      "quarters_available": false,
+      "quarters_note": "Dokumen LPPD hanya menyediakan data tahunan; data triwulanan tidak dibuat secara estimasi.",
+      "financing": [
+        {
+          "code": "3.1",
+          "name": "Penerimaan Pembiayaan",
+          "type": "Penerimaan",
+          "amount": 277023635.07
+        },
+        {
+          "code": "3.2",
+          "name": "Pengeluaran Pembiayaan",
+          "type": "Pengeluaran",
+          "amount": 297043635.07
+        }
+      ],
+      "financing_summary": {
+        "receipt": 277023635.07,
+        "expenditure": 297043635.07,
+        "net": -20020000,
+        "percentage": 107.23,
+        "source_percentage": 118.0
+      },
+      "insights": {
+        "top_allocation": {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 1103513000,
+          "realization": 981815500,
+          "remaining": 121697500,
+          "percentage": 88.97,
+          "source_percentage": 88.97,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        "best_absorption": {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 507600000,
+          "realization": 465300000,
+          "remaining": 42300000,
+          "percentage": 91.67,
+          "source_percentage": 91.67,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        "lowest_absorption": {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 857202635.07,
+          "realization": 623843865,
+          "remaining": 233358770.07,
+          "percentage": 72.78,
+          "source_percentage": 72.78,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        }
+      },
+      "data_quality": [
+        "Jumlah item pendapatan tidak sepenuhnya sama dengan baris total sumber; selisih disimpan pada bagian rekonsiliasi.",
+        "Baris JUMLAH belanja pada dokumen tidak sama dengan penjumlahan lima bidang. Total tampilan JSON memakai penjumlahan lima bidang; total mentah dokumen tetap disimpan untuk audit."
+      ],
+      "source_reference": {
+        "document": "LPPD Akhir Masa Jabatan Kepala Desa Sukomulyo 2019-2026",
+        "revenue_pages": "12-15",
+        "spending_pages": "16-20",
+        "financing_page": "20"
+      }
+    },
+    "2022": {
+      "summary": {
+        "year": 2022,
+        "income": 2758210592,
+        "income_realization": 2889392051,
+        "income_percentage": 104.76,
+        "income_source_percentage": 104.76,
+        "spending": 2889392051.84,
+        "realization": 2327792051.84,
+        "percentage": 80.56,
+        "spending_source_percentage": 100.0,
+        "remaining_budget": 561600000,
+        "budget_balance": -131181459.84,
+        "realization_balance": 561599999.16,
+        "financing_net": 0,
+        "estimated_silpa": 561599999.16,
+        "is_partial_year": false,
+        "data_status": "source_with_reconciliation_notes"
+      },
+      "revenue": [
+        {
+          "code": "1.1",
+          "name": "Pendapatan Asli Desa",
+          "short_name": "PADes",
+          "budget": 249300000,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": {
+            "realization": "....."
+          },
+          "note": "Realisasi per sumber tidak tersedia pada dokumen."
+        },
+        {
+          "code": "1.2.1",
+          "name": "Dana Desa",
+          "short_name": "Dana Desa",
+          "budget": 1403672000,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": {
+            "realization": "....."
+          },
+          "note": "Realisasi per sumber tidak tersedia pada dokumen."
+        },
+        {
+          "code": "1.2.2",
+          "name": "Alokasi Dana Desa",
+          "short_name": "ADD",
+          "budget": 720749000,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": {
+            "realization": "....."
+          },
+          "note": "Realisasi per sumber tidak tersedia pada dokumen."
+        },
+        {
+          "code": "1.2.3",
+          "name": "Bagi Hasil Pajak dan Retribusi Daerah",
+          "short_name": "BHP",
+          "budget": 34489592,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": {
+            "realization": "....."
+          },
+          "note": "Realisasi per sumber tidak tersedia pada dokumen."
+        },
+        {
+          "code": "1.2.4",
+          "name": "Bantuan Keuangan Provinsi",
+          "short_name": "BKK Provinsi",
+          "budget": 350000000,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": {
+            "realization": "....."
+          },
+          "note": "Realisasi per sumber tidak tersedia pada dokumen."
+        },
+        {
+          "code": "1.2.5",
+          "name": "Bantuan Keuangan Kabupaten",
+          "short_name": "BKK Kabupaten",
+          "budget": null,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": {
+            "budget": "",
+            "realization": "....."
+          },
+          "note": "Nilai tidak tersedia pada dokumen."
+        }
+      ],
+      "revenue_reconciliation": {
+        "source_total_budget": 2758210592,
+        "source_total_realization": 2889392051,
+        "known_item_budget_sum": 2758210592,
+        "known_item_realization_sum": null,
+        "unclassified_budget_difference": 0,
+        "unclassified_realization_difference": null,
+        "detail_realization_available": false
+      },
+      "spending": [
+        {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 1059143879.84,
+          "realization": 1059143879.84,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 90.0,
+          "source_raw": null,
+          "note": "Persentase sumber 90,00%; hasil hitung dari anggaran dan realisasi adalah 100,00%.",
+          "programs": []
+        },
+        {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 739309672,
+          "realization": 739309672,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.3",
+          "name": "Pembinaan Kemasyarakatan Desa",
+          "short_name": "Pembinaan",
+          "description": "Belanja pembinaan ketenteraman, kelembagaan masyarakat, kepemudaan, olahraga, seni, budaya, dan kegiatan sosial.",
+          "budget": 128473500,
+          "realization": 128473500,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 288565000,
+          "realization": 288565000,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 673900000,
+          "realization": 112300000,
+          "remaining": 561600000,
+          "percentage": 16.66,
+          "source_percentage": 26.9,
+          "source_raw": null,
+          "note": "Persentase sumber 26,90%; hasil hitung dari anggaran dan realisasi adalah 16,66%.",
+          "programs": []
+        }
+      ],
+      "spending_reconciliation": {
+        "display_total_basis": "sum_of_all_five_regulatory_fields",
+        "display_budget_total": 2889392051.84,
+        "display_realization_total": 2327792051.84,
+        "source_total_budget": 2215492051,
+        "source_total_realization": 2215492051.84,
+        "source_total_percentage": 100.0,
+        "difference_budget": 673900000.84,
+        "difference_realization": 112300000
+      },
+      "programs": [],
+      "programs_available": false,
+      "programs_note": "Dokumen LPPD tidak menyediakan nominal program/kegiatan per tahun secara lengkap. Data program tidak dibuat secara estimasi.",
+      "quarters": [],
+      "quarters_available": false,
+      "quarters_note": "Dokumen LPPD hanya menyediakan data tahunan; data triwulanan tidak dibuat secara estimasi.",
+      "financing": [
+        {
+          "code": "3.1",
+          "name": "Penerimaan Pembiayaan",
+          "type": "Penerimaan",
+          "amount": 135533465
+        },
+        {
+          "code": "3.2",
+          "name": "Pengeluaran Pembiayaan",
+          "type": "Pengeluaran",
+          "amount": 135533465
+        }
+      ],
+      "financing_summary": {
+        "receipt": 135533465,
+        "expenditure": 135533465,
+        "net": 0,
+        "percentage": 100.0,
+        "source_percentage": 100.0
+      },
+      "insights": {
+        "top_allocation": {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 1059143879.84,
+          "realization": 1059143879.84,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 90.0,
+          "source_raw": null,
+          "note": "Persentase sumber 90,00%; hasil hitung dari anggaran dan realisasi adalah 100,00%.",
+          "programs": []
+        },
+        "best_absorption": {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 1059143879.84,
+          "realization": 1059143879.84,
+          "remaining": 0,
+          "percentage": 100.0,
+          "source_percentage": 90.0,
+          "source_raw": null,
+          "note": "Persentase sumber 90,00%; hasil hitung dari anggaran dan realisasi adalah 100,00%.",
+          "programs": []
+        },
+        "lowest_absorption": {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 673900000,
+          "realization": 112300000,
+          "remaining": 561600000,
+          "percentage": 16.66,
+          "source_percentage": 26.9,
+          "source_raw": null,
+          "note": "Persentase sumber 26,90%; hasil hitung dari anggaran dan realisasi adalah 16,66%.",
+          "programs": []
+        }
+      },
+      "data_quality": [
+        "Total pendapatan tersedia, tetapi realisasi rinci per sumber tahun 2022 tidak tersedia.",
+        "Baris JUMLAH belanja pada dokumen tidak sama dengan penjumlahan lima bidang. Total tampilan JSON memakai penjumlahan lima bidang; total mentah dokumen tetap disimpan untuk audit."
+      ],
+      "source_reference": {
+        "document": "LPPD Akhir Masa Jabatan Kepala Desa Sukomulyo 2019-2026",
+        "revenue_pages": "12-15",
+        "spending_pages": "16-20",
+        "financing_page": "20"
+      }
+    },
+    "2023": {
+      "summary": {
+        "year": 2023,
+        "income": 2988687352,
+        "income_realization": 2923465780,
+        "income_percentage": 97.82,
+        "income_source_percentage": 97.82,
+        "spending": 3123858663,
+        "realization": 2976175315,
+        "percentage": 95.27,
+        "spending_source_percentage": 94.56,
+        "remaining_budget": 147683348,
+        "budget_balance": -135171311,
+        "realization_balance": -52709535,
+        "financing_net": 135171311,
+        "estimated_silpa": 82461776,
+        "is_partial_year": false,
+        "data_status": "source_with_reconciliation_notes"
+      },
+      "revenue": [
+        {
+          "code": "1.1",
+          "name": "Pendapatan Asli Desa",
+          "short_name": "PADes",
+          "budget": 244700000,
+          "realization": 208700000,
+          "variance": -36000000,
+          "percentage": 85.29,
+          "source_percentage": 85.29,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.1",
+          "name": "Dana Desa",
+          "short_name": "Dana Desa",
+          "budget": 1877532000,
+          "realization": 1877532000,
+          "variance": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.2",
+          "name": "Alokasi Dana Desa",
+          "short_name": "ADD",
+          "budget": 777759000,
+          "realization": 772693135,
+          "variance": -5065865,
+          "percentage": 99.35,
+          "source_percentage": 99.35,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.3",
+          "name": "Bagi Hasil Pajak dan Retribusi Daerah",
+          "short_name": "BHP",
+          "budget": 78045646,
+          "realization": 64540645,
+          "variance": -13505001,
+          "percentage": 82.7,
+          "source_percentage": 82.7,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.4",
+          "name": "Bantuan Keuangan Provinsi",
+          "short_name": "BKK Provinsi",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.5",
+          "name": "Bantuan Keuangan Kabupaten",
+          "short_name": "BKK Kabupaten",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        }
+      ],
+      "revenue_reconciliation": {
+        "source_total_budget": 2988687352,
+        "source_total_realization": 2923465780,
+        "known_item_budget_sum": 2978036646,
+        "known_item_realization_sum": 2923465780,
+        "unclassified_budget_difference": 10650706,
+        "unclassified_realization_difference": 0,
+        "detail_realization_available": true
+      },
+      "spending": [
+        {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 1150015522,
+          "realization": 1042284815,
+          "remaining": 107730707,
+          "percentage": 90.63,
+          "source_percentage": 90.63,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 1316945667,
+          "realization": 1298015500,
+          "remaining": 18930167,
+          "percentage": 98.56,
+          "source_percentage": 98.56,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.3",
+          "name": "Pembinaan Kemasyarakatan Desa",
+          "short_name": "Pembinaan",
+          "description": "Belanja pembinaan ketenteraman, kelembagaan masyarakat, kepemudaan, olahraga, seni, budaya, dan kegiatan sosial.",
+          "budget": 154340000,
+          "realization": 140575000,
+          "remaining": 13765000,
+          "percentage": 91.08,
+          "source_percentage": 91.08,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 53360000,
+          "realization": 48300000,
+          "remaining": 5060000,
+          "percentage": 90.52,
+          "source_percentage": 90.52,
+          "source_raw": {
+            "percentage": ".90,52"
+          },
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 449197474,
+          "realization": 447000000,
+          "remaining": 2197474,
+          "percentage": 99.51,
+          "source_percentage": 98.5,
+          "source_raw": null,
+          "note": "Persentase sumber 98,50%; hasil hitung adalah 99,51%.",
+          "programs": []
+        }
+      ],
+      "spending_reconciliation": {
+        "display_total_basis": "sum_of_all_five_regulatory_fields",
+        "display_budget_total": 3123858663,
+        "display_realization_total": 2976175315,
+        "source_total_budget": 2674661189,
+        "source_total_realization": 2529175315,
+        "source_total_percentage": 94.56,
+        "difference_budget": 449197474,
+        "difference_realization": 447000000
+      },
+      "programs": [],
+      "programs_available": false,
+      "programs_note": "Dokumen LPPD tidak menyediakan nominal program/kegiatan per tahun secara lengkap. Data program tidak dibuat secara estimasi.",
+      "quarters": [],
+      "quarters_available": false,
+      "quarters_note": "Dokumen LPPD hanya menyediakan data tahunan; data triwulanan tidak dibuat secara estimasi.",
+      "financing": [
+        {
+          "code": "3.1",
+          "name": "Penerimaan Pembiayaan",
+          "type": "Penerimaan",
+          "amount": 135171311
+        },
+        {
+          "code": "3.2",
+          "name": "Pengeluaran Pembiayaan",
+          "type": "Pengeluaran",
+          "amount": 0
+        }
+      ],
+      "financing_summary": {
+        "receipt": 135171311,
+        "expenditure": 0,
+        "net": 135171311,
+        "percentage": 0.0,
+        "source_percentage": 0
+      },
+      "insights": {
+        "top_allocation": {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 1316945667,
+          "realization": 1298015500,
+          "remaining": 18930167,
+          "percentage": 98.56,
+          "source_percentage": 98.56,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        "best_absorption": {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 449197474,
+          "realization": 447000000,
+          "remaining": 2197474,
+          "percentage": 99.51,
+          "source_percentage": 98.5,
+          "source_raw": null,
+          "note": "Persentase sumber 98,50%; hasil hitung adalah 99,51%.",
+          "programs": []
+        },
+        "lowest_absorption": {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 53360000,
+          "realization": 48300000,
+          "remaining": 5060000,
+          "percentage": 90.52,
+          "source_percentage": 90.52,
+          "source_raw": {
+            "percentage": ".90,52"
+          },
+          "note": null,
+          "programs": []
+        }
+      },
+      "data_quality": [
+        "Jumlah item pendapatan tidak sama dengan baris total sumber; kemungkinan terdapat komponen yang tidak dirinci.",
+        "Baris JUMLAH belanja pada dokumen tidak sama dengan penjumlahan lima bidang. Total tampilan JSON memakai penjumlahan lima bidang; total mentah dokumen tetap disimpan untuk audit."
+      ],
+      "source_reference": {
+        "document": "LPPD Akhir Masa Jabatan Kepala Desa Sukomulyo 2019-2026",
+        "revenue_pages": "12-15",
+        "spending_pages": "16-20",
+        "financing_page": "20"
+      }
+    },
+    "2024": {
+      "summary": {
+        "year": 2024,
+        "income": 2498272385,
+        "income_realization": 2495789149,
+        "income_percentage": 99.9,
+        "income_source_percentage": 100.26,
+        "spending": 2623658364,
+        "realization": 2359917837.84,
+        "percentage": 89.95,
+        "spending_source_percentage": 88.79,
+        "remaining_budget": 263740526.16,
+        "budget_balance": -125385979,
+        "realization_balance": 135871311.16,
+        "financing_net": 0,
+        "estimated_silpa": 135871311.16,
+        "is_partial_year": false,
+        "data_status": "source_with_reconciliation_notes"
+      },
+      "revenue": [
+        {
+          "code": "1.1",
+          "name": "Pendapatan Asli Desa",
+          "short_name": "PADes",
+          "budget": 171500000,
+          "realization": 162000000,
+          "variance": -9500000,
+          "percentage": 94.46,
+          "source_percentage": 94.46,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.1",
+          "name": "Dana Desa",
+          "short_name": "Dana Desa",
+          "budget": 1495659000,
+          "realization": 1495659000,
+          "variance": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.2",
+          "name": "Alokasi Dana Desa",
+          "short_name": "ADD",
+          "budget": 777759000,
+          "realization": 772488535,
+          "variance": -5270465,
+          "percentage": 99.32,
+          "source_percentage": 99.32,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.3",
+          "name": "Bagi Hasil Pajak dan Retribusi Daerah",
+          "short_name": "BHP",
+          "budget": 32678565,
+          "realization": 63778366,
+          "variance": 31099801,
+          "percentage": 195.17,
+          "source_percentage": 195.17,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.4",
+          "name": "Bantuan Keuangan Provinsi",
+          "short_name": "BKK Provinsi",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.5",
+          "name": "Bantuan Keuangan Kabupaten",
+          "short_name": "BKK Kabupaten",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        }
+      ],
+      "revenue_reconciliation": {
+        "source_total_budget": 2498272385,
+        "source_total_realization": 2495789149,
+        "known_item_budget_sum": 2477596565,
+        "known_item_realization_sum": 2493925901,
+        "unclassified_budget_difference": 20675820,
+        "unclassified_realization_difference": 1863248,
+        "detail_realization_available": true
+      },
+      "spending": [
+        {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 1166574683,
+          "realization": 1133574137.84,
+          "remaining": 33000545.16,
+          "percentage": 97.17,
+          "source_percentage": 97.17,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 940748800,
+          "realization": 746963700,
+          "remaining": 193785100,
+          "percentage": 79.4,
+          "source_percentage": 79.4,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.3",
+          "name": "Pembinaan Kemasyarakatan Desa",
+          "short_name": "Pembinaan",
+          "description": "Belanja pembinaan ketenteraman, kelembagaan masyarakat, kepemudaan, olahraga, seni, budaya, dan kegiatan sosial.",
+          "budget": 231862061,
+          "realization": 202050000,
+          "remaining": 29812061,
+          "percentage": 87.14,
+          "source_percentage": 87.14,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 12072820,
+          "realization": 4980000,
+          "remaining": 7092820,
+          "percentage": 41.25,
+          "source_percentage": 41.25,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 272400000,
+          "realization": 272350000,
+          "remaining": 50000,
+          "percentage": 99.98,
+          "source_percentage": 99.5,
+          "source_raw": null,
+          "note": "Persentase sumber 99,50%; hasil hitung adalah 99,98%.",
+          "programs": []
+        }
+      ],
+      "spending_reconciliation": {
+        "display_total_basis": "sum_of_all_five_regulatory_fields",
+        "display_budget_total": 2623658364,
+        "display_realization_total": 2359917837.84,
+        "source_total_budget": 2351258364,
+        "source_total_realization": 2087567837.84,
+        "source_total_percentage": 88.79,
+        "difference_budget": 272400000,
+        "difference_realization": 272350000
+      },
+      "programs": [],
+      "programs_available": false,
+      "programs_note": "Dokumen LPPD tidak menyediakan nominal program/kegiatan per tahun secara lengkap. Data program tidak dibuat secara estimasi.",
+      "quarters": [],
+      "quarters_available": false,
+      "quarters_note": "Dokumen LPPD hanya menyediakan data tahunan; data triwulanan tidak dibuat secara estimasi.",
+      "financing": [
+        {
+          "code": "3.1",
+          "name": "Penerimaan Pembiayaan",
+          "type": "Penerimaan",
+          "amount": 139392979
+        },
+        {
+          "code": "3.2",
+          "name": "Pengeluaran Pembiayaan",
+          "type": "Pengeluaran",
+          "amount": 139392979
+        }
+      ],
+      "financing_summary": {
+        "receipt": 139392979,
+        "expenditure": 139392979,
+        "net": 0,
+        "percentage": 100.0,
+        "source_percentage": 100.0
+      },
+      "insights": {
+        "top_allocation": {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 1166574683,
+          "realization": 1133574137.84,
+          "remaining": 33000545.16,
+          "percentage": 97.17,
+          "source_percentage": 97.17,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        "best_absorption": {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 272400000,
+          "realization": 272350000,
+          "remaining": 50000,
+          "percentage": 99.98,
+          "source_percentage": 99.5,
+          "source_raw": null,
+          "note": "Persentase sumber 99,50%; hasil hitung adalah 99,98%.",
+          "programs": []
+        },
+        "lowest_absorption": {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 12072820,
+          "realization": 4980000,
+          "remaining": 7092820,
+          "percentage": 41.25,
+          "source_percentage": 41.25,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        }
+      },
+      "data_quality": [
+        "Baris total rinci digunakan sebagai total tahun.",
+        "Tabel rekap sumber menulis target 2.489.272.385,00, sedangkan tabel rinci menulis 2.498.272.385,00.",
+        "Jumlah item pendapatan tidak sama dengan baris total sumber.",
+        "Baris JUMLAH belanja pada dokumen tidak sama dengan penjumlahan lima bidang. Total tampilan JSON memakai penjumlahan lima bidang; total mentah dokumen tetap disimpan untuk audit."
+      ],
+      "source_reference": {
+        "document": "LPPD Akhir Masa Jabatan Kepala Desa Sukomulyo 2019-2026",
+        "revenue_pages": "12-15",
+        "spending_pages": "16-20",
+        "financing_page": "20"
+      }
+    },
+    "2025": {
+      "summary": {
+        "year": 2025,
+        "income": 2461972089.84,
+        "income_realization": 2426314357.67,
+        "income_percentage": 98.55,
+        "income_source_percentage": 98.35,
+        "spending": 2410567084.28,
+        "realization": 2090443879,
+        "percentage": 86.72,
+        "spending_source_percentage": 86.64,
+        "remaining_budget": 320123205.28,
+        "budget_balance": 51405005.56,
+        "realization_balance": 335870478.67,
+        "financing_net": -50500000,
+        "estimated_silpa": 285370478.67,
+        "is_partial_year": false,
+        "data_status": "source_with_reconciliation_notes"
+      },
+      "revenue": [
+        {
+          "code": "1.1",
+          "name": "Pendapatan Asli Desa",
+          "short_name": "PADes",
+          "budget": 239500000,
+          "realization": 234500000,
+          "variance": -5000000,
+          "percentage": 97.91,
+          "source_percentage": 97.91,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.1",
+          "name": "Dana Desa",
+          "short_name": "Dana Desa",
+          "budget": 1300099000,
+          "realization": 1300099000,
+          "variance": 0,
+          "percentage": 100.0,
+          "source_percentage": 100.0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.2",
+          "name": "Alokasi Dana Desa",
+          "short_name": "ADD",
+          "budget": 789159000,
+          "realization": 783438648,
+          "variance": -5720352,
+          "percentage": 99.28,
+          "source_percentage": 99.28,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.3",
+          "name": "Bagi Hasil Pajak dan Retribusi Daerah",
+          "short_name": "BHP",
+          "budget": 119772965,
+          "realization": 108057605,
+          "variance": -11715360,
+          "percentage": 90.22,
+          "source_percentage": 90.22,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.4",
+          "name": "Bantuan Keuangan Provinsi",
+          "short_name": "BKK Provinsi",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        },
+        {
+          "code": "1.2.5",
+          "name": "Bantuan Keuangan Kabupaten",
+          "short_name": "BKK Kabupaten",
+          "budget": 0,
+          "realization": 0,
+          "variance": 0,
+          "percentage": null,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null
+        }
+      ],
+      "revenue_reconciliation": {
+        "source_total_budget": 2461972089.84,
+        "source_total_realization": 2426314357.67,
+        "known_item_budget_sum": 2448530965,
+        "known_item_realization_sum": 2426095253,
+        "unclassified_budget_difference": 13441124.84,
+        "unclassified_realization_difference": 219104.67,
+        "detail_realization_available": true
+      },
+      "spending": [
+        {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 1226464043,
+          "realization": 1058513674,
+          "remaining": 167950369,
+          "percentage": 86.31,
+          "source_percentage": 86.31,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 846534015.28,
+          "realization": 756470580,
+          "remaining": 90063435.28,
+          "percentage": 89.36,
+          "source_percentage": 89.36,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.3",
+          "name": "Pembinaan Kemasyarakatan Desa",
+          "short_name": "Pembinaan",
+          "description": "Belanja pembinaan ketenteraman, kelembagaan masyarakat, kepemudaan, olahraga, seni, budaya, dan kegiatan sosial.",
+          "budget": 161458526,
+          "realization": 125745625,
+          "remaining": 35712901,
+          "percentage": 77.88,
+          "source_percentage": 77.88,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 12188500,
+          "realization": 5714000,
+          "remaining": 6474500,
+          "percentage": 46.88,
+          "source_percentage": 46.88,
+          "source_raw": {
+            "realization": "5.714.000.00"
+          },
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 163922000,
+          "realization": 144000000,
+          "remaining": 19922000,
+          "percentage": 87.85,
+          "source_percentage": 83.0,
+          "source_raw": null,
+          "note": "Persentase sumber 83,00%; hasil hitung adalah 87,85%.",
+          "programs": []
+        }
+      ],
+      "spending_reconciliation": {
+        "display_total_basis": "sum_of_all_five_regulatory_fields",
+        "display_budget_total": 2410567084.28,
+        "display_realization_total": 2090443879,
+        "source_total_budget": 2246645084.28,
+        "source_total_realization": 1946443879,
+        "source_total_percentage": 86.64,
+        "difference_budget": 163922000,
+        "difference_realization": 144000000
+      },
+      "programs": [],
+      "programs_available": false,
+      "programs_note": "Dokumen LPPD tidak menyediakan nominal program/kegiatan per tahun secara lengkap. Data program tidak dibuat secara estimasi.",
+      "quarters": [],
+      "quarters_available": false,
+      "quarters_note": "Dokumen LPPD hanya menyediakan data tahunan; data triwulanan tidak dibuat secara estimasi.",
+      "financing": [
+        {
+          "code": "3.1",
+          "name": "Penerimaan Pembiayaan",
+          "type": "Penerimaan",
+          "amount": 235190037.44
+        },
+        {
+          "code": "3.2",
+          "name": "Pengeluaran Pembiayaan",
+          "type": "Pengeluaran",
+          "amount": 285690037.44
+        }
+      ],
+      "financing_summary": {
+        "receipt": 235190037.44,
+        "expenditure": 285690037.44,
+        "net": -50500000,
+        "percentage": 121.47,
+        "source_percentage": 120.0
+      },
+      "insights": {
+        "top_allocation": {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 1226464043,
+          "realization": 1058513674,
+          "remaining": 167950369,
+          "percentage": 86.31,
+          "source_percentage": 86.31,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        "best_absorption": {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 846534015.28,
+          "realization": 756470580,
+          "remaining": 90063435.28,
+          "percentage": 89.36,
+          "source_percentage": 89.36,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        "lowest_absorption": {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 12188500,
+          "realization": 5714000,
+          "remaining": 6474500,
+          "percentage": 46.88,
+          "source_percentage": 46.88,
+          "source_raw": {
+            "realization": "5.714.000.00"
+          },
+          "note": null,
+          "programs": []
+        }
+      },
+      "data_quality": [
+        "Baris total rinci digunakan sebagai total tahun.",
+        "Tabel rekap sumber berbeda Rp3,00 pada target tahun 2025.",
+        "Jumlah item pendapatan tidak sama dengan baris total sumber.",
+        "Baris JUMLAH belanja pada dokumen tidak sama dengan penjumlahan lima bidang. Total tampilan JSON memakai penjumlahan lima bidang; total mentah dokumen tetap disimpan untuk audit."
+      ],
+      "source_reference": {
+        "document": "LPPD Akhir Masa Jabatan Kepala Desa Sukomulyo 2019-2026",
+        "revenue_pages": "12-15",
+        "spending_pages": "16-20",
+        "financing_page": "20"
+      }
+    },
+    "2026": {
+      "summary": {
+        "year": 2026,
+        "income": 2266869936,
+        "income_realization": 725045580,
+        "income_percentage": 31.98,
+        "income_source_percentage": 34.3,
+        "spending": 2342349959.77,
+        "realization": 503221867.93,
+        "percentage": 21.48,
+        "spending_source_percentage": 45.6,
+        "remaining_budget": 1839128091.84,
+        "budget_balance": -75480023.77,
+        "realization_balance": 221823712.07,
+        "financing_net": 296496853.87,
+        "estimated_silpa": 518320565.94,
+        "is_partial_year": true,
+        "data_status": "needs_source_confirmation"
+      },
+      "revenue": [
+        {
+          "code": "1.1",
+          "name": "Pendapatan Asli Desa",
+          "short_name": "PADes",
+          "budget": 235000000,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": {
+            "realization": "108."
+          },
+          "note": "Nilai realisasi pada dokumen terpotong dan tidak dapat dipastikan."
+        },
+        {
+          "code": "1.2.1",
+          "name": "Dana Desa",
+          "short_name": "Dana Desa",
+          "budget": 1105084150,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": null,
+          "note": "Realisasi rinci tidak tersedia."
+        },
+        {
+          "code": "1.2.2",
+          "name": "Alokasi Dana Desa",
+          "short_name": "ADD",
+          "budget": 787571700,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": null,
+          "note": "Realisasi rinci tidak tersedia."
+        },
+        {
+          "code": "1.2.3",
+          "name": "Bagi Hasil Pajak dan Retribusi Daerah",
+          "short_name": "BHP",
+          "budget": 119772965,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": null,
+          "note": "Realisasi rinci tidak tersedia."
+        },
+        {
+          "code": "1.2.4",
+          "name": "Bantuan Keuangan Provinsi",
+          "short_name": "BKK Provinsi",
+          "budget": 0,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": null,
+          "note": "Realisasi rinci tidak tersedia."
+        },
+        {
+          "code": "1.2.5",
+          "name": "Bantuan Keuangan Kabupaten",
+          "short_name": "BKK Kabupaten",
+          "budget": null,
+          "realization": null,
+          "variance": null,
+          "percentage": null,
+          "source_percentage": null,
+          "source_raw": {
+            "budget": "2.266.869.936,00"
+          },
+          "note": "Angka pada baris BKK Kabupaten tampak merupakan total pendapatan dan perlu konfirmasi dokumen sumber."
+        }
+      ],
+      "revenue_reconciliation": {
+        "source_total_budget": 2266869936,
+        "source_total_realization": 725045580,
+        "known_item_budget_sum": 2247428815,
+        "known_item_realization_sum": null,
+        "unclassified_budget_difference": 19441121,
+        "unclassified_realization_difference": null,
+        "detail_realization_available": false
+      },
+      "spending": [
+        {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 1175624789.77,
+          "realization": 460355867.93,
+          "remaining": 715268921.84,
+          "percentage": 39.16,
+          "source_percentage": 49.5,
+          "source_raw": null,
+          "note": "Persentase sumber 49,50%; hasil hitung adalah 39,16%.",
+          "programs": []
+        },
+        {
+          "code": "2.2",
+          "name": "Pelaksanaan Pembangunan Desa",
+          "short_name": "Pembangunan",
+          "description": "Belanja pelaksanaan pembangunan desa, termasuk infrastruktur, fasilitas umum, pendidikan, kesehatan, dan lingkungan.",
+          "budget": 691665353,
+          "realization": 23546000,
+          "remaining": 668119353,
+          "percentage": 3.4,
+          "source_percentage": 5.5,
+          "source_raw": null,
+          "note": "Persentase sumber 5,50%; hasil hitung adalah 3,40%.",
+          "programs": []
+        },
+        {
+          "code": "2.3",
+          "name": "Pembinaan Kemasyarakatan Desa",
+          "short_name": "Pembinaan",
+          "description": "Belanja pembinaan ketenteraman, kelembagaan masyarakat, kepemudaan, olahraga, seni, budaya, dan kegiatan sosial.",
+          "budget": 63458840,
+          "realization": 1320000,
+          "remaining": 62138840,
+          "percentage": 2.08,
+          "source_percentage": 2.8,
+          "source_raw": null,
+          "note": "Persentase sumber 2,80%; hasil hitung adalah 2,08%.",
+          "programs": []
+        },
+        {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 26525932,
+          "realization": 0,
+          "remaining": 26525932,
+          "percentage": 0.0,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        },
+        {
+          "code": "2.5",
+          "name": "Penanggulangan Bencana, Keadaan Darurat, dan Mendesak Desa",
+          "short_name": "Bencana/Darurat",
+          "description": "Belanja penanggulangan bencana, keadaan darurat, serta kebutuhan mendesak desa.",
+          "budget": 385075045,
+          "realization": 18000000,
+          "remaining": 367075045,
+          "percentage": 4.67,
+          "source_percentage": 5.7,
+          "source_raw": null,
+          "note": "Persentase sumber 5,70%; hasil hitung adalah 4,67%.",
+          "programs": []
+        }
+      ],
+      "spending_reconciliation": {
+        "display_total_basis": "sum_of_all_five_regulatory_fields",
+        "display_budget_total": 2342349959.77,
+        "display_realization_total": 503221867.93,
+        "source_total_budget": 2342349959.87,
+        "source_total_realization": 501919860,
+        "source_total_percentage": 45.6,
+        "difference_budget": -0.1,
+        "difference_realization": 1302007.93
+      },
+      "programs": [],
+      "programs_available": false,
+      "programs_note": "Dokumen LPPD tidak menyediakan nominal program/kegiatan per tahun secara lengkap. Data program tidak dibuat secara estimasi.",
+      "quarters": [],
+      "quarters_available": false,
+      "quarters_note": "Dokumen LPPD hanya menyediakan data tahunan; data triwulanan tidak dibuat secara estimasi.",
+      "financing": [
+        {
+          "code": "3.1",
+          "name": "Penerimaan Pembiayaan",
+          "type": "Penerimaan",
+          "amount": 296496853.87
+        },
+        {
+          "code": "3.2",
+          "name": "Pengeluaran Pembiayaan",
+          "type": "Pengeluaran",
+          "amount": 0
+        }
+      ],
+      "financing_summary": {
+        "receipt": 296496853.87,
+        "expenditure": 0,
+        "net": 296496853.87,
+        "percentage": 0.0,
+        "source_percentage": 0
+      },
+      "insights": {
+        "top_allocation": {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 1175624789.77,
+          "realization": 460355867.93,
+          "remaining": 715268921.84,
+          "percentage": 39.16,
+          "source_percentage": 49.5,
+          "source_raw": null,
+          "note": "Persentase sumber 49,50%; hasil hitung adalah 39,16%.",
+          "programs": []
+        },
+        "best_absorption": {
+          "code": "2.1",
+          "name": "Penyelenggaraan Pemerintahan Desa",
+          "short_name": "Pemerintahan",
+          "description": "Belanja penyelenggaraan pemerintahan desa, operasional pemerintahan, pelayanan administrasi, dan dukungan tata kelola desa.",
+          "budget": 1175624789.77,
+          "realization": 460355867.93,
+          "remaining": 715268921.84,
+          "percentage": 39.16,
+          "source_percentage": 49.5,
+          "source_raw": null,
+          "note": "Persentase sumber 49,50%; hasil hitung adalah 39,16%.",
+          "programs": []
+        },
+        "lowest_absorption": {
+          "code": "2.4",
+          "name": "Pemberdayaan Masyarakat Desa",
+          "short_name": "Pemberdayaan",
+          "description": "Belanja peningkatan kapasitas, ekonomi masyarakat, pertanian, pelatihan, dan penguatan kelembagaan desa.",
+          "budget": 26525932,
+          "realization": 0,
+          "remaining": 26525932,
+          "percentage": 0.0,
+          "source_percentage": 0,
+          "source_raw": null,
+          "note": null,
+          "programs": []
+        }
+      },
+      "data_quality": [
+        "Data pendapatan 2026 bersifat sementara dan perlu verifikasi.",
+        "Baris total rincian pendapatan 2026 kosong.",
+        "Target dan realisasi ringkasan diambil dari tabel rekap yang penamaannya tidak konsisten.",
+        "Persentase sumber 34,30% tidak sama dengan hasil hitung target dan realisasi (31,98%).",
+        "Baris JUMLAH belanja pada dokumen tidak sama dengan penjumlahan lima bidang. Total tampilan JSON memakai penjumlahan lima bidang; total mentah dokumen tetap disimpan untuk audit.",
+        "Tahun 2026 merupakan data tahun berjalan/parsial dan belum final."
+      ],
+      "source_reference": {
+        "document": "LPPD Akhir Masa Jabatan Kepala Desa Sukomulyo 2019-2026",
+        "revenue_pages": "12-15",
+        "spending_pages": "16-20",
+        "financing_page": "20"
+      }
+    }
+  }
+}

@@ -16,6 +16,7 @@ use App\Models\StatisticCategory;
 use App\Models\StatisticDataset;
 use App\Models\VillageComment;
 use App\Models\VillageProfileSection;
+use App\Services\BudgetHistoryData;
 use App\Services\PopulationStatistics as PopulationStatisticsService;
 use App\Services\SiteCache;
 use App\Services\Statistics\PopulationStatisticIndicatorService;
@@ -39,6 +40,7 @@ class PublicSiteService
         private readonly AdministrativeServicePage $administrativeServicePage,
         private readonly PopulationStatisticIndicatorService $populationIndicators,
         private readonly PopulationStatisticAggregator $populationAggregator,
+        private readonly BudgetHistoryData $budgetHistoryData,
     ) {}
 
     public function sitemap(): Response
@@ -96,6 +98,7 @@ class PublicSiteService
 
     public function home(PopulationStatisticsService $populationStatistics): View
     {
+        $apbdes = $this->homeApbdes($this->budgetHistoryData->latest());
         $populationSummary = $this->cache->remember(
             SiteCache::HOME_STATISTICS,
             SiteCache::TEN_MINUTES,
@@ -115,49 +118,64 @@ class PublicSiteService
                 ['label' => 'Laki-laki', 'value' => $populationSummary['male'], 'image' => 'assets/male-resident-avatar.jpg'],
                 ['label' => 'Perempuan', 'value' => $populationSummary['female'], 'image' => 'assets/female-resident-avatar.jpg'],
             ],
-            'apbdes' => [
-                'year' => 2026,
-                'panels' => [
-                    [
-                        'title' => 'Pendapatan APBDes 2026',
-                        'total' => 2485000000,
-                        'total_label' => 'Total Pendapatan APBDes 2026',
-                        'total_percentage' => 100,
-                        'items' => [
-                            ['label' => 'Dana Desa', 'value' => 1150000000],
-                            ['label' => 'Alokasi Dana Desa', 'value' => 850000000],
-                            ['label' => 'Bagi Hasil Pajak dan Retribusi', 'value' => 310000000],
-                            ['label' => 'Pendapatan Asli Desa', 'value' => 175000000],
-                        ],
-                    ],
-                    [
-                        'title' => 'Belanja APBDes 2026',
-                        'total' => 2350000000,
-                        'total_label' => 'Total Penggunaan Belanja APBDes 2026',
-                        'total_percentage' => 95,
-                        'items' => [
-                            ['label' => 'Penyelenggaraan Pemerintahan', 'value' => 720000000],
-                            ['label' => 'Pelaksanaan Pembangunan', 'value' => 930000000],
-                            ['label' => 'Pembinaan Kemasyarakatan', 'value' => 270000000],
-                            ['label' => 'Pemberdayaan Masyarakat', 'value' => 430000000],
-                        ],
-                    ],
-                    [
-                        'title' => 'Realisasi APBDes 2026',
-                        'total' => 1739000000,
-                        'total_label' => 'Total Realisasi APBDes 2026',
-                        'total_percentage' => 74,
-                        'items' => [
-                            ['label' => 'Penyelenggaraan Pemerintahan', 'value' => 520000000, 'percentage' => 72],
-                            ['label' => 'Pelaksanaan Pembangunan', 'value' => 690000000, 'percentage' => 74],
-                            ['label' => 'Pembinaan Kemasyarakatan', 'value' => 194000000, 'percentage' => 72],
-                            ['label' => 'Pemberdayaan Masyarakat', 'value' => 335000000, 'percentage' => 78],
-                        ],
-                    ],
-                ],
-            ],
+            'apbdes' => $apbdes,
             'galleryPhotos' => array_slice($this->galleryPhotos(), 0, 5),
         ]);
+    }
+
+    private function homeApbdes(array $budget): array
+    {
+        $year = (int) $budget['summary']['year'];
+        $income = (float) $budget['summary']['income'];
+        $spending = (float) $budget['summary']['spending'];
+
+        $composition = static fn (array $item, float $total): array => [
+            'label' => $item['short_name'] ?? $item['name'],
+            'value' => (float) ($item['budget'] ?? 0),
+            'percentage' => $total > 0
+                ? round((float) ($item['budget'] ?? 0) / $total * 100, 2)
+                : 0,
+        ];
+
+        return [
+            'year' => $year,
+            'panels' => [
+                [
+                    'title' => "Pendapatan APBDes {$year}",
+                    'total' => $income,
+                    'total_label' => "Total Pendapatan APBDes {$year}",
+                    'total_percentage' => 100,
+                    'items' => collect($budget['revenue'] ?? [])
+                        ->map(fn (array $item): array => $composition($item, $income))
+                        ->values()
+                        ->all(),
+                ],
+                [
+                    'title' => "Belanja APBDes {$year}",
+                    'total' => $spending,
+                    'total_label' => "Total Penggunaan Belanja APBDes {$year}",
+                    'total_percentage' => 100,
+                    'items' => collect($budget['spending'] ?? [])
+                        ->map(fn (array $item): array => $composition($item, $spending))
+                        ->values()
+                        ->all(),
+                ],
+                [
+                    'title' => "Realisasi APBDes {$year}",
+                    'total' => (float) $budget['summary']['realization'],
+                    'total_label' => "Total Realisasi APBDes {$year}",
+                    'total_percentage' => (float) $budget['summary']['percentage'],
+                    'items' => collect($budget['spending'] ?? [])
+                        ->map(fn (array $item): array => [
+                            'label' => $item['short_name'] ?? $item['name'],
+                            'value' => (float) ($item['realization'] ?? 0),
+                            'percentage' => (float) ($item['percentage'] ?? 0),
+                        ])
+                        ->values()
+                        ->all(),
+                ],
+            ],
+        ];
     }
 
     public function profile(): View
@@ -491,29 +509,23 @@ class PublicSiteService
         return $this->publishedStatisticCategories()->firstWhere('slug', $slug);
     }
 
-    public function budgetHistory(): View
+    public function budgetHistory(array $budgetHistory): View
     {
-        return $this->render('pages.budget-history', [
-            'budgetHistory' => [
-                ['year' => 2026, 'income' => 2485000000, 'spending' => 2350000000, 'realization' => 1739000000, 'percentage' => 74],
-                ['year' => 2025, 'income' => 2360000000, 'spending' => 2240000000, 'realization' => 1859200000, 'percentage' => 83],
-                ['year' => 2024, 'income' => 2225000000, 'spending' => 2100000000, 'realization' => 1743000000, 'percentage' => 83],
-                ['year' => 2023, 'income' => 2080000000, 'spending' => 1980000000, 'realization' => 1623600000, 'percentage' => 82],
-                ['year' => 2022, 'income' => 1950000000, 'spending' => 1860000000, 'realization' => 1488000000, 'percentage' => 80],
-                ['year' => 2021, 'income' => 1820000000, 'spending' => 1740000000, 'realization' => 1357200000, 'percentage' => 78],
-                ['year' => 2020, 'income' => 1690000000, 'spending' => 1610000000, 'realization' => 1207500000, 'percentage' => 75],
-                ['year' => 2019, 'income' => 1560000000, 'spending' => 1480000000, 'realization' => 1213600000, 'percentage' => 82],
-                ['year' => 2018, 'income' => 1420000000, 'spending' => 1360000000, 'realization' => 1074400000, 'percentage' => 79],
-                ['year' => 2017, 'income' => 1300000000, 'spending' => 1240000000, 'realization' => 954800000, 'percentage' => 77],
-            ],
-        ]);
+        return $this->render('pages.budget-history', compact('budgetHistory'));
+    }
+
+    public function budgetDetail(array $budget): View
+    {
+        return $this->render('pages.budget-detail', compact('budget'));
     }
 
     public function publicInformation(): View
     {
+        $latestBudgetYear = (string) data_get($this->budgetHistoryData->latest(), 'summary.year', BudgetHistoryData::LATEST_PUBLIC_YEAR);
+
         return $this->render('pages.public-information', [
             'documents' => [
-                ['icon' => 'fas fa-file-pdf', 'title' => 'APBDes Desa Sukomulyo', 'category' => 'Keuangan Desa', 'year' => '2026'],
+                ['icon' => 'fas fa-file-pdf', 'title' => 'APBDes Desa Sukomulyo', 'category' => 'Keuangan Desa', 'year' => $latestBudgetYear],
                 ['icon' => 'fas fa-file-alt', 'title' => 'Rencana Kerja Pemerintah Desa', 'category' => 'Perencanaan', 'year' => '2026'],
                 ['icon' => 'fas fa-clipboard-list', 'title' => 'Laporan Penyelenggaraan Pemerintahan Desa', 'category' => 'Laporan', 'year' => '2025'],
                 ['icon' => 'fas fa-bullhorn', 'title' => 'Standar Pelayanan Publik Desa', 'category' => 'Pelayanan', 'year' => '2026'],
@@ -998,25 +1010,24 @@ class PublicSiteService
 
         return [
             ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
-            ['label' => 'Pelayanan Surat', 'route' => 'letter-services.index', 'active' => 'letter-services.*'],
             ['label' => 'Profil Desa', 'route' => 'profile-desa', 'active' => 'profile-desa*', 'children' => [
                 ['label' => 'Identitas Desa', 'route' => 'profile-desa', 'active' => 'profile-desa'],
                 ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
                 ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
                 ['label' => 'Struktur Pemerintahan', 'route' => 'pemerintahan-desa', 'active' => 'pemerintahan-desa'],
                 ['label' => 'Wilayah Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
-                ['label' => 'Potensi Desa', 'route' => 'potensi-desa', 'active' => 'potensi-desa'],
             ]],
             ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => $statisticChildren],
             ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
                 ['label' => 'Pengumuman Desa', 'route' => 'announcements.index', 'active' => 'announcements.*'],
-                ['label' => 'Layanan Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
-                ['label' => 'Informasi Bantuan Sosial', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'bantuan-sosial']],
-                ['label' => 'Informasi Publik', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'informasi-publik']],
-                ['label' => 'APBDes', 'route' => 'transparansi-apbdes', 'active' => 'transparansi-apbdes'],
+                ['label' => 'APBDes', 'route' => 'transparansi-apbdes', 'active' => 'transparansi-apbdes*'],
+                ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
+                ['label' => 'Galeri Desa', 'route' => 'galeri-desa', 'active' => 'galeri-desa'],
             ]],
-            ['label' => 'Berita Desa', 'route' => 'berita-desa.index', 'active' => 'berita-desa.*'],
-            ['label' => 'Galeri Desa', 'route' => 'galeri-desa', 'active' => 'galeri-desa'],
+            ['label' => 'Pelayanan', 'route' => 'letter-services.index', 'active' => 'pelayanan-*', 'children' => [
+                ['label' => 'Syarat Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
+                ['label' => 'Pengajuan Layanan', 'route' => 'letter-services.index', 'active' => 'letter-services.*'],
+            ]],
         ];
     }
 

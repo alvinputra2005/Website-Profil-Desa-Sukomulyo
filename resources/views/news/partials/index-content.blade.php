@@ -1,12 +1,19 @@
 <div id="news-ajax-root" data-ajax-scope="#news-ajax-root" data-page-title="{{ $heading }} | {{ $site['name'] }}" data-page-description="{{ $description }}">
-    @if ($heading !== 'Berita Desa')
-        <x-page-header
-            :title="$heading"
-            :description="$description"
-            :show-heading="false"
-            :breadcrumbs="[['label' => 'Berita Desa', 'url' => route('berita-desa.index')], ['label' => $heading]]"
-        />
-    @endif
+    <x-page-header
+        :title="$heading"
+        :description="$description"
+        :show-heading="false"
+        :breadcrumbs="$heading === 'Berita Desa'
+            ? [
+                ['label' => 'Informasi Desa', 'url' => route('informasi-publik-desa')],
+                ['label' => 'Berita Desa'],
+            ]
+            : [
+                ['label' => 'Informasi Desa', 'url' => route('informasi-publik-desa')],
+                ['label' => 'Berita Desa', 'url' => route('berita-desa.index')],
+                ['label' => $heading],
+            ]"
+    />
 
     @if (($showFeatured ?? false) && count($featuredArticles ?? []) > 0)
         <section class="featured-news-section" aria-label="Berita utama">

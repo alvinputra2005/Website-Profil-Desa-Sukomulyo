@@ -1,11 +1,13 @@
 import './bootstrap';
 import { initAjaxNavigation } from './ajax';
 import { initAdministrativeServices } from './administrative-services';
+import { initBudgetHistory } from './budget-history';
 import { initGenericStatistics } from './generic-statistics';
 import { initPopulationStatistics } from './population-statistics';
 
 const initPublicPage = () => {
     initAdministrativeServices();
+    initBudgetHistory();
     initPopulationStatistics();
     initGenericStatistics();
 

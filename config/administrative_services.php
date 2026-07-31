@@ -2,7 +2,7 @@
 
 return [
     'page' => [
-        'title' => 'Layanan Administrasi',
+        'title' => 'Syarat Administrasi',
         'description' => 'Informasi persyaratan, alur pelayanan, jadwal, dan tata cara pengajuan administrasi di Desa Sukomulyo.',
     ],
 
@@ -206,17 +206,15 @@ return [
     ],
 
     'submission_steps' => [
-        'Pilih jenis pelayanan yang dibutuhkan.',
-        'Buka daftar persyaratan dan siapkan dokumen asli serta fotokopi yang diminta.',
-        'Minta surat pengantar RT/RW.',
-        'Datang ke Kantor Desa Sukomulyo pada jam pelayanan.',
-        'Serahkan dokumen kepada petugas untuk pemeriksaan dan registrasi.',
-        'Simpan informasi atau bukti registrasi yang diberikan petugas.',
-        'Ambil dokumen langsung apabila tidak memerlukan proses Dukcapil.',
-        'Untuk dokumen yang diproses melalui SIPEDULI, tunggu konfirmasi petugas atau hubungi WhatsApp pelayanan.',
+        'Pilih jenis surat yang ingin diajukan dan periksa dokumen persyaratannya.',
+        'Isi formulir data pemohon dan keperluan sesuai dokumen resmi, lalu nyatakan bahwa data sudah benar.',
+        'Unggah seluruh dokumen wajib dalam format JPG, PNG, atau PDF dengan ukuran maksimal 5 MB per file.',
+        'Kirim pengajuan, lalu simpan nomor permohonan dan PIN pelacakan yang ditampilkan.',
+        'Konfirmasi melalui WhatsApp Desa dan pantau status permohonan menggunakan nomor permohonan serta PIN.',
+        'Jika diminta, perbaiki data sesuai catatan petugas. Setelah surat siap, ambil surat fisik di kantor desa dengan membawa dokumen asli dan nomor permohonan.',
     ],
 
-    'submission_notice' => 'Pastikan seluruh dokumen lengkap sebelum datang agar proses pelayanan tidak tertunda.',
+    'submission_notice' => 'Pastikan data dan dokumen yang diunggah jelas, lengkap, dan sesuai dokumen resmi agar proses verifikasi tidak tertunda.',
 
     'office' => [
         'days' => 'Senin–Jumat',
