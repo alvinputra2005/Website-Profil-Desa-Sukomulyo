@@ -2,7 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Gallery;
+use App\Models\GalleryItem;
+use App\Models\Media;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class SitePagesTest extends TestCase
@@ -242,6 +247,45 @@ class SitePagesTest extends TestCase
 
         $this->assertSame(4, substr_count($response->getContent(), '<article class="article-card"'));
         $this->assertSame(5, substr_count($response->getContent(), 'data-gallery-item'));
+    }
+
+    public function test_homepage_gallery_uses_published_gallery_items_from_cms(): void
+    {
+        $user = User::factory()->create();
+        $media = Media::create([
+            'original_name' => 'gotong-royong.jpg',
+            'stored_name' => 'gotong-royong.jpg',
+            'disk' => 'public',
+            'storage_path' => 'galeri/gotong-royong.jpg',
+            'mime_type' => 'image/jpeg',
+            'extension' => 'jpg',
+            'file_size' => 1234,
+            'alt_text' => 'Warga sedang bergotong royong',
+            'uploaded_by' => $user->id,
+        ]);
+        $gallery = Gallery::create([
+            'title' => 'Gotong Royong Juli 2026',
+            'slug' => 'gotong-royong-juli-2026',
+            'description' => 'Dokumentasi kerja bakti warga.',
+            'event_date' => '2026-07-30',
+            'status' => 'published',
+            'created_by' => $user->id,
+        ]);
+        GalleryItem::create([
+            'gallery_id' => $gallery->id,
+            'media_id' => $media->id,
+            'caption' => 'Warga membersihkan lingkungan bersama.',
+            'display_order' => 1,
+        ]);
+        Cache::forget(\App\Services\SiteCache::GALLERY);
+
+        $response = $this->get(route('beranda'))
+            ->assertOk()
+            ->assertSee('Gotong Royong Juli 2026')
+            ->assertSee('Warga membersihkan lingkungan bersama.')
+            ->assertSee('/storage/galeri/gotong-royong.jpg', false);
+
+        $this->assertSame(1, substr_count($response->getContent(), 'data-gallery-item'));
     }
 
     public function test_news_page_shows_featured_layout_categories_and_five_year_archive(): void

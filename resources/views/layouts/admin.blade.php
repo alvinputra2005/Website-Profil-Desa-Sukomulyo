@@ -72,7 +72,7 @@
                 ['label'=>'Admin Web','icon'=>'fa-desktop','ability'=>'manage-content','items'=>[['Artikel','admin.resources.index','news'],['Kategori Artikel','admin.resources.index','categories'],['Galeri','admin.resources.index','galleries']]],
                 ['label'=>'Informasi Publik','icon'=>'fa-file-text','ability'=>'manage-content','items'=>[['Dokumen & Pengumuman','admin.resources.index','publications'],['Lampiran Publikasi','admin.resources.index','publication-attachments']]],
                 ['label'=>'APBDes','icon'=>'fa-money','ability'=>'manage-data','items'=>[['Data APBDes','admin.apbdes.index',null]]],
-                ['label'=>'Data Desa','icon'=>'fa-database','ability'=>'manage-data','items'=>[['Nilai Statistik Legacy','admin.resources.index','statistic-values'],['Indeks Desa Membangun','admin.resources.index','idm']]],
+                ['label'=>'Data Desa','icon'=>'fa-database','ability'=>'manage-data','items'=>[['Indeks Desa Membangun','admin.resources.index','idm']]],
                 ['label'=>'Statistik','icon'=>'fa-bar-chart','ability'=>'manage-data','items'=>$statisticCategoryItems],
                 ['label'=>'Pemetaan','icon'=>'fa-map','ability'=>'manage-data','items'=>[['Layer Peta','admin.resources.index','map-layers'],['Fitur Peta','admin.resources.index','map-features']]],
                 ['label'=>'Pelayanan','icon'=>'fa-file-text-o','ability'=>'manage-letter-applications','items'=>[['Permohonan Surat','admin.letter-applications.index',null],['Jenis Surat & Persyaratan','admin.letter-services.index',null]]],

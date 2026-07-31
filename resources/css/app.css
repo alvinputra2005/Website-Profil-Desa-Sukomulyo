@@ -1893,6 +1893,17 @@ blockquote { border-left-color: var(--primary); }
 #about_panel .learnmore:hover { color: #fff; background: transparent; }
 .aboutus_thumbox { position: relative; }
 .aboutus_thumbox img { width: 100%; height: 290px; min-height: 0; border: 0; border-radius: var(--radius); object-fit: cover; box-shadow: 0 18px 38px rgba(24,36,20,.24); }
+.about-video-thumb { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; overflow: hidden; border: 0; border-radius: var(--radius); background: #111; color: #fff; cursor: pointer; box-shadow: 0 18px 38px rgba(24,36,20,.24); }
+.about-video-thumb img { width: 100%; height: 100%; border-radius: 0; object-fit: cover; object-position: center; box-shadow: none; transform: scale(1.14); }
+.about-video-thumb::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius); background: rgba(0,0,0,.14); transition: background .2s ease; }
+.about-video-thumb:hover::after, .about-video-thumb:focus-visible::after { background: rgba(0,0,0,.24); }
+.about-video-play { position: absolute; top: 50%; left: 50%; z-index: 1; width: 68px; height: 68px; display: grid; place-items: center; border-radius: 50%; background: rgba(210, 37, 37, .94); box-shadow: 0 12px 28px rgba(0,0,0,.3); transform: translate(-50%, -50%); }
+.about-video-play i { margin-left: 4px; font-size: 24px; }
+.about-video-dialog { position: fixed; inset: 50% auto auto 50%; width: min(960px, calc(100vw - 32px)); margin: 0; padding: 0; overflow: visible; border: 0; border-radius: var(--radius); background: #000; box-shadow: 0 24px 70px rgba(15,20,13,.42); transform: translate(-50%, -50%); }
+.about-video-dialog[open] { animation: gallery-dialog-in .24s ease-out both; }
+.about-video-dialog::backdrop { background: rgba(0,0,0,.82); }
+.about-video-dialog-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius); background: #000; }
+.about-video-dialog-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
 .latest-news-section { background: var(--surface); }
 .latest-news-section .home-section-heading { margin-bottom: 12px; }
 .latest-news-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
@@ -3995,7 +4006,8 @@ h3.widget-title { background: var(--primary); }
     .home-section-link { margin-left: 0; justify-self: end; }
     #about_panel { padding: 45px 0; }
     .about-grid { grid-template-columns: 1fr; gap: 32px; }
-    .aboutus_thumbox img { height: 240px; }
+    .aboutus_thumbox > img { height: 240px; }
+    .about-video-thumb img { height: 100%; }
     .page-banner { padding: 14px 0 16px; }
     .page-banner--no-breadcrumbs.page-banner--no-divider { padding-bottom: 10px; }
     .breadcrumbs { gap: 7px; font-size: 14px; }

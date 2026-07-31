@@ -764,6 +764,29 @@ const initPublicPage = () => {
         });
     }
 
+    const aboutVideoDialog = document.querySelector('[data-about-video-dialog]');
+
+    if (aboutVideoDialog) {
+        const frame = aboutVideoDialog.querySelector('[data-about-video-frame]');
+        const openButton = document.querySelector('[data-about-video-open]');
+        const close = () => {
+            aboutVideoDialog.close();
+            if (frame) frame.src = '';
+        };
+
+        openButton?.addEventListener('click', () => {
+            if (frame) frame.src = openButton.dataset.videoSrc || '';
+            aboutVideoDialog.showModal();
+        });
+        aboutVideoDialog.querySelector('[data-about-video-close]')?.addEventListener('click', close);
+        aboutVideoDialog.addEventListener('click', (event) => {
+            if (event.target === aboutVideoDialog) close();
+        });
+        aboutVideoDialog.addEventListener('close', () => {
+            if (frame) frame.src = '';
+        });
+    }
+
     const backToTop = document.querySelector('.back-to-top');
 
     if (backToTop) {

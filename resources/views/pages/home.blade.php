@@ -46,7 +46,15 @@
                 <a class="learnmore" href="{{ route('profile-desa') }}">Lihat Identitas Desa <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </div>
             <div class="aboutus_thumbox">
-                <img src="{{ asset('assets/village-rice-fields.jpg') }}" alt="Hamparan persawahan hijau dengan latar pegunungan saat matahari terbenam">
+                <button
+                    class="about-video-thumb"
+                    type="button"
+                    data-about-video-open
+                    data-video-src="https://www.youtube.com/embed/-yoqib77rIE?autoplay=1&rel=0"
+                    aria-label="Putar video profil Desa Sukomulyo">
+                    <img src="https://img.youtube.com/vi/-yoqib77rIE/maxresdefault.jpg" alt="Thumbnail video profil Desa Sukomulyo">
+                    <span class="about-video-play" aria-hidden="true"><i class="fas fa-play"></i></span>
+                </button>
             </div>
         </div>
     </section>
@@ -217,6 +225,20 @@
                     @endforeach
                 </div>
             </div>
+        </div>
+    </dialog>
+
+    <dialog class="about-video-dialog" data-about-video-dialog aria-label="Video profil Desa Sukomulyo">
+        <div class="about-video-dialog-frame">
+            <button class="dialog-close" type="button" data-about-video-close aria-label="Tutup video">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <iframe
+                data-about-video-frame
+                src=""
+                title="Video profil Desa Sukomulyo"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
         </div>
     </dialog>
 </x-layouts.app>
