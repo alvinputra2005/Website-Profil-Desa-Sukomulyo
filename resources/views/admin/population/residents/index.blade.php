@@ -19,7 +19,7 @@
         </form>
         <div class="table-responsive">
             <table class="table table-striped table-hover population-table">
-                <thead><tr><th>No</th><th>Aksi</th><th>NIK</th><th>Nama</th><th>No. KK</th><th>No. Rumah Tangga</th><th>JK</th><th>Umur</th><th>Alamat/Wilayah</th><th>Status</th></tr></thead>
+                <thead><tr><th>No</th><th>Aksi</th><th>NIK</th><th>Nama</th><th>No. KK</th><th>JK</th><th>Umur</th><th>Alamat/Wilayah</th><th>Status</th></tr></thead>
                 <tbody>
                 @forelse($residents as $resident)
                     <tr>
@@ -32,14 +32,13 @@
                         <td><code>{{ $resident->nik }}</code></td>
                         <td><a href="{{ route('admin.population.residents.show',$resident) }}"><strong>{{ $resident->name }}</strong></a><br><small>{{ $resident->family_relationship ?: 'Hubungan keluarga belum diisi' }}</small></td>
                         <td>{{ $resident->family?->family_card_number ?? '—' }}</td>
-                        <td>{{ $resident->household?->household_number ?? '—' }}</td>
                         <td>{{ $resident->sex }}</td>
                         <td>{{ $resident->age !== null ? $resident->age.' th' : '—' }}</td>
                         <td>{{ $resident->current_address ?: '—' }}<br><small>{{ $resident->area?->label ?? 'Wilayah belum diisi' }}</small></td>
                         <td><span class="label {{ $resident->status==='active'?'label-success':'label-default' }}">{{ ['active'=>'Aktif','moved'=>'Pindah','deceased'=>'Meninggal','missing'=>'Hilang'][$resident->status] ?? $resident->status }}</span></td>
                     </tr>
                 @empty
-                    <tr><td colspan="10" class="empty-state"><i class="fa fa-users"></i><br>Belum ada data penduduk.</td></tr>
+                    <tr><td colspan="9" class="empty-state"><i class="fa fa-users"></i><br>Belum ada data penduduk.</td></tr>
                 @endforelse
                 </tbody>
             </table>

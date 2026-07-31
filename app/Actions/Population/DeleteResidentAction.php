@@ -12,9 +12,9 @@ class DeleteResidentAction
 
     public function execute(Resident $resident): void
     {
-        if ($resident->headedFamilies()->exists() || $resident->headedHouseholds()->exists() || $resident->chairedGroups()->exists()) {
+        if ($resident->headedFamilies()->exists() || $resident->chairedGroups()->exists()) {
             throw ValidationException::withMessages([
-                'resident' => 'Penduduk masih tercatat sebagai kepala keluarga, kepala rumah tangga, atau ketua kelompok. Ganti penanggung jawab terlebih dahulu.',
+                'resident' => 'Penduduk masih tercatat sebagai kepala keluarga atau ketua kelompok. Ganti penanggung jawab terlebih dahulu.',
             ]);
         }
 

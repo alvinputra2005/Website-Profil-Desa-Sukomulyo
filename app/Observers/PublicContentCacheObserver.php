@@ -5,7 +5,6 @@ namespace App\Observers;
 use App\Models\FamilyCard;
 use App\Models\Gallery;
 use App\Models\GalleryItem;
-use App\Models\Household;
 use App\Models\MapFeature;
 use App\Models\MapLayer;
 use App\Models\Media;
@@ -13,7 +12,6 @@ use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Official;
 use App\Models\PopulationArea;
-use App\Models\PopulationYearlySnapshot;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
 use App\Models\Resident;
@@ -61,9 +59,7 @@ class PublicContentCacheObserver
             $model instanceof News, $model instanceof NewsCategory => $this->cache->invalidateNews(),
             $model instanceof Resident,
             $model instanceof FamilyCard,
-            $model instanceof Household,
             $model instanceof PopulationArea,
-            $model instanceof PopulationYearlySnapshot,
             $model instanceof ResidentEvent,
             $model instanceof StatisticCategory,
             $model instanceof StatisticDataset,

@@ -14,11 +14,6 @@ class PopulationArea extends CmsModel
         return $this->hasMany(FamilyCard::class, 'area_id');
     }
 
-    public function households()
-    {
-        return $this->hasMany(Household::class, 'area_id');
-    }
-
     public function getLabelAttribute(): string
     {
         return collect([

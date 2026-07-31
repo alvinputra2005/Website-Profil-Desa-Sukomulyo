@@ -9,7 +9,6 @@ use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class FamilyController extends PopulationController
@@ -101,6 +100,10 @@ class FamilyController extends PopulationController
         if ($oldHead && $oldHead !== $family->head_resident_id) {
             Resident::whereKey($oldHead)->where('family_id', $family->id)->update(['family_relationship' => 'Anggota Keluarga']);
         }
+        if (! $family->head_resident_id) {
+            return;
+        }
+
         Resident::whereKey($family->head_resident_id)->update([
             'family_id' => $family->id,
             'area_id' => $family->area_id,
@@ -112,7 +115,9 @@ class FamilyController extends PopulationController
     {
         return [
             'family' => $family,
-            'residents' => Resident::where('status', 'active')->orderBy('name')->get(),
+            'residents' => $family->exists
+                ? Resident::where('family_id', $family->id)->orderBy('name')->get()
+                : collect(),
         ];
     }
 }

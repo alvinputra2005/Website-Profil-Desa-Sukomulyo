@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\PopulationYearlySnapshot;
 use App\Models\Resident;
 use App\Services\PopulationStatistics;
 use App\Services\SiteCache;
@@ -17,38 +16,6 @@ class PopulationStatisticsDemoSeeder extends Seeder
     {
         if (! app()->environment(['local', 'testing'])) {
             throw new RuntimeException('Seeder data dummy statistik hanya boleh dijalankan pada environment local atau testing.');
-        }
-
-        $snapshots = [
-            2020 => ['male' => 25, 'female' => 23],
-            2021 => ['male' => 26, 'female' => 24],
-            2022 => ['male' => 27, 'female' => 25],
-            2023 => ['male' => 28, 'female' => 26],
-            2024 => ['male' => 29, 'female' => 27],
-            2025 => ['male' => 30, 'female' => 28],
-            2026 => ['male' => 31, 'female' => 29],
-        ];
-
-        foreach ($snapshots as $year => $counts) {
-            $snapshot = PopulationYearlySnapshot::query()->where('year', $year)->first();
-
-            if ($snapshot && $snapshot->source !== PopulationStatistics::DEMO_SOURCE) {
-                continue;
-            }
-
-            PopulationYearlySnapshot::query()->updateOrCreate(
-                ['year' => $year],
-                [
-                    'male_count' => $counts['male'],
-                    'female_count' => $counts['female'],
-                    'reference_date' => $year === 2026
-                        ? now()->toDateString()
-                        : Carbon::create($year, 12, 31)->toDateString(),
-                    'source' => PopulationStatistics::DEMO_SOURCE,
-                    'notes' => 'Data simulasi untuk memeriksa grafik, tabel, filter, dan tampilan responsif.',
-                    'is_published' => true,
-                ],
-            );
         }
 
         $hasRealResidents = Resident::query()

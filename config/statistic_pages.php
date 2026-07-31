@@ -20,7 +20,6 @@ return [
             '' => 'family-summary',
             'kepala-keluarga' => 'family-heads',
             'anggota-keluarga' => 'family-members',
-            'rumah-tangga' => 'households',
         ],
         'pendidikan' => ['' => 'education-family'],
         'pekerjaan' => ['' => 'occupation'],
@@ -194,13 +193,12 @@ return [
         ],
         'family-summary' => [
             'title' => 'Statistik Keluarga',
-            'description' => 'Ringkasan perkembangan keluarga, rumah tangga, penduduk, dan wilayah desa.',
+            'description' => 'Ringkasan perkembangan keluarga, penduduk, dan wilayah desa.',
             'unit' => 'data',
             'chart' => 'bar',
             'values' => [
                 ['Keluarga', 16, 1, 'KK'],
                 ['Penduduk', 52, 2, 'jiwa'],
-                ['Rumah Tangga', 15, 1, 'rumah tangga'],
                 ['Wilayah Dusun', 3, 0, 'dusun'],
             ],
         ],
@@ -224,18 +222,6 @@ return [
                 ['3–4 anggota', 8, 1],
                 ['5–6 anggota', 4, 0],
                 ['Lebih dari 6', 1, 0],
-            ],
-        ],
-        'households' => [
-            'title' => 'Statistik Rumah Tangga',
-            'description' => 'Komposisi rumah tangga berdasarkan status hunian.',
-            'unit' => 'rumah tangga',
-            'chart' => 'pie',
-            'values' => [
-                ['Milik Sendiri', 11, 1],
-                ['Sewa/Kontrak', 2, 0],
-                ['Menumpang', 1, 0],
-                ['Lainnya', 1, 0],
             ],
         ],
         'economy' => [
@@ -275,7 +261,6 @@ return [
             'values' => [
                 ['Penduduk', 52, 2, 'jiwa'],
                 ['Keluarga', 16, 1, 'KK'],
-                ['Rumah Tangga', 15, 1, 'rumah tangga'],
                 ['Unit Usaha', 38, 4, 'unit usaha'],
             ],
         ],

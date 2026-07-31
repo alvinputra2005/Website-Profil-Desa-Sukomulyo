@@ -9,6 +9,7 @@ use App\Services\ActivityLogger;
 use App\Services\ResidentExcelImportService;
 use App\Services\SiteCache;
 use Illuminate\Http\RedirectResponse;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -48,15 +49,17 @@ class ResidentImportController extends Controller
         $sheet->setTitle('Data Penduduk');
         $sheet->fromArray(ResidentExcelImportService::headers(), null, 'A1');
         $sheet->fromArray([
-            null, 'Contoh Penduduk', 'L', 'Sukomulyo', '1990-01-31',
+            null, null, 'Contoh Penduduk', 'L', 'Sukomulyo', '1990-01-31',
             'Islam', 'Kawin', 'WNI', 'SLTA/Sederajat', 'Petani/Pekebun', 'O',
             'Jl. Desa No. 1', 'Sukomulyo', '01', '02', 'Tetap', 'Aktif',
             now()->toDateString(), '081234567890', 'contoh@example.com', '',
         ], null, 'A2');
         $sheet->setCellValueExplicit('A2', '3300000000000001', DataType::TYPE_STRING);
-        $sheet->getStyle('A1:U1')->getFont()->setBold(true);
+        $sheet->setCellValueExplicit('B2', '3300000000000002', DataType::TYPE_STRING);
+        $lastColumn = Coordinate::stringFromColumnIndex(count(ResidentExcelImportService::headers()));
+        $sheet->getStyle("A1:{$lastColumn}1")->getFont()->setBold(true);
         $sheet->freezePane('A2');
-        foreach (range('A', 'U') as $column) {
+        foreach (range('A', $lastColumn) as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 

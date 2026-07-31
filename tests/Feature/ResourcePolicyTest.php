@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\FamilyCard;
-use App\Models\Household;
 use App\Models\Official;
 use App\Models\PopulationGroup;
 use App\Models\PopulationGroupMember;
@@ -37,7 +36,6 @@ class ResourcePolicyTest extends TestCase
         $models = [
             Resident::class => new Resident,
             FamilyCard::class => new FamilyCard,
-            Household::class => new Household,
             PopulationGroup::class => new PopulationGroup,
             PopulationGroupMember::class => new PopulationGroupMember,
         ];

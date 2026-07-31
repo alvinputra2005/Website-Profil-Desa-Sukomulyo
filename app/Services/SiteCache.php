@@ -19,8 +19,6 @@ class SiteCache
 
     public const PUBLIC_POPULATION_STATISTICS = 'statistics.population.summary';
 
-    public const PUBLIC_POPULATION_TREND = 'statistics.population.trend';
-
     public const LATEST_NEWS = 'home.latest-news';
 
     public const NEWS_LIST = 'news.list.published';
@@ -99,7 +97,6 @@ class SiteCache
         Cache::forget(self::HOME_STATISTICS);
         Cache::forget(self::PUBLIC_STATISTICS);
         Cache::forget(self::PUBLIC_POPULATION_STATISTICS);
-        Cache::forget(self::PUBLIC_POPULATION_TREND);
     }
 
     public function invalidateMap(): void

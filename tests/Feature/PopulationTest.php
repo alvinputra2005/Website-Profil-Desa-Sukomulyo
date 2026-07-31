@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\PopulationGroup;
+use App\Models\FamilyCard;
 use App\Models\Resident;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Tests\TestCase;
@@ -36,7 +39,6 @@ class PopulationTest extends TestCase
             'resident_status' => 'permanent',
             'status' => 'active',
             'family_relationship' => 'Kepala Keluarga',
-            'household_relationship' => 'Kepala Rumah Tangga',
             'hamlet' => 'Sukomulyo',
             'rw' => '1',
             'rt' => '2',
@@ -52,6 +54,16 @@ class PopulationTest extends TestCase
 
         $this->post(route('admin.population.families.store'), [
             'family_card_number' => '3300000000000002',
+            'hamlet' => 'Sukomulyo',
+            'rw' => '1',
+            'rt' => '2',
+            'address' => 'Jl. Desa No. 1',
+            'is_active' => '1',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $family = FamilyCard::firstOrFail();
+        $resident->update(['family_id' => $family->id]);
+        $this->put(route('admin.population.families.update', $family), [
+            'family_card_number' => '3300000000000002',
             'head_resident_id' => $resident->id,
             'hamlet' => 'Sukomulyo',
             'rw' => '1',
@@ -60,16 +72,6 @@ class PopulationTest extends TestCase
             'is_active' => '1',
         ])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertDatabaseHas('families', ['family_card_number' => '3300000000000002', 'head_resident_id' => $resident->id]);
-
-        $this->post(route('admin.population.households.store'), [
-            'household_number' => 'RTM-001',
-            'head_resident_id' => $resident->id,
-            'hamlet' => 'Sukomulyo',
-            'rw' => '1',
-            'rt' => '2',
-            'address' => 'Jl. Desa No. 1',
-            'is_active' => '1',
-        ])->assertRedirect()->assertSessionHasNoErrors();
 
         $this->post(route('admin.population.groups.store'), [
             'code' => 'PKK-01',
@@ -95,6 +97,44 @@ class PopulationTest extends TestCase
             ->assertDontSee('Luas Wilayah');
     }
 
+    public function test_head_of_family_must_belong_to_the_same_family_card(): void
+    {
+        $role = Role::create(['name' => 'Admin Data', 'code' => 'admin_data']);
+        $admin = User::factory()->create(['role_id' => $role->id, 'is_active' => true]);
+        $family = FamilyCard::create(['family_card_number' => '3300000000000002', 'is_active' => true]);
+        $member = Resident::create(['nik' => '3300000000000001', 'name' => 'Anggota KK', 'sex' => 'P', 'family_id' => $family->id, 'status' => 'active']);
+        $otherResident = Resident::create(['nik' => '3300000000000003', 'name' => 'Bukan Anggota KK', 'sex' => 'L', 'status' => 'active']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.population.families.edit', $family))
+            ->assertOk()
+            ->assertSee($member->name)
+            ->assertDontSee($otherResident->name);
+
+        $payload = [
+            'family_card_number' => $family->family_card_number,
+            'head_resident_id' => $otherResident->id,
+            'is_active' => '1',
+        ];
+        $this->put(route('admin.population.families.update', $family), $payload)
+            ->assertSessionHasErrors('head_resident_id');
+
+        $payload['head_resident_id'] = $member->id;
+        $this->put(route('admin.population.families.update', $family), $payload)
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('families', ['id' => $family->id, 'head_resident_id' => $member->id]);
+    }
+
+    public function test_household_and_yearly_snapshot_features_are_removed(): void
+    {
+        $this->assertFalse(Schema::hasTable('households'));
+        $this->assertFalse(Schema::hasTable('population_yearly_snapshots'));
+        $this->assertFalse(Schema::hasColumn('residents', 'household_id'));
+        $this->assertFalse(Schema::hasColumn('residents', 'household_relationship'));
+        $this->assertFalse(Route::has('admin.population.households.index'));
+        $this->assertFalse(Route::has('admin.population.yearly-snapshots.index'));
+    }
+
     public function test_admin_can_import_and_update_residents_from_excel(): void
     {
         $role = Role::create(['name' => 'Admin Data', 'code' => 'admin_data']);
@@ -103,9 +143,9 @@ class PopulationTest extends TestCase
 
         $spreadsheet = new Spreadsheet;
         $spreadsheet->getActiveSheet()->fromArray([
-            ['nik', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'pendidikan', 'pekerjaan', 'dusun', 'rw', 'rt'],
-            ['3300000000000001', 'Siti Sukomulyo', 'Perempuan', '1990-01-01', 'SLTA', 'Petani', 'Sukomulyo', '1', '2'],
-            ['123', 'Data Tidak Valid', 'L', null, null, null, null, null, null],
+            ['nik', 'nomor_kk', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'pendidikan', 'pekerjaan', 'alamat', 'dusun', 'rw', 'rt'],
+            ['3300000000000001', '3300000000000002', 'Siti Sukomulyo', 'Perempuan', '1990-01-01', 'SLTA', 'Petani', 'Jl. Desa No. 1', 'Sukomulyo', '1', '2'],
+            ['123', '123', 'Data Tidak Valid', 'L', null, null, null, null, null, null, null],
         ]);
         $path = tempnam(sys_get_temp_dir(), 'resident-import-').'.xlsx';
         (new Xlsx($spreadsheet))->save($path);
@@ -123,10 +163,25 @@ class PopulationTest extends TestCase
             'sex' => 'P',
             'education' => 'SLTA',
         ]);
+        $familyId = (int) \DB::table('families')
+            ->where('family_card_number', '3300000000000002')
+            ->value('id');
+        $this->assertGreaterThan(0, $familyId);
+        $this->assertDatabaseHas('families', [
+            'id' => $familyId,
+            'family_card_number' => '3300000000000002',
+            'address' => 'Jl. Desa No. 1',
+            'is_active' => true,
+        ]);
+        $this->assertDatabaseHas('residents', [
+            'nik' => '3300000000000001',
+            'family_id' => $familyId,
+        ]);
         $this->assertDatabaseHas('population_areas', ['hamlet' => 'Sukomulyo', 'rw' => '01', 'rt' => '02']);
         $this->assertDatabaseCount('residents', 1);
+        $this->assertDatabaseCount('families', 1);
 
-        $spreadsheet->getActiveSheet()->setCellValue('B2', 'Siti Diperbarui');
+        $spreadsheet->getActiveSheet()->setCellValue('C2', 'Siti Diperbarui');
         (new Xlsx($spreadsheet))->save($path);
         $this->post(route('admin.population.residents.import'), [
             'file' => new UploadedFile($path, 'penduduk.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true),
@@ -134,6 +189,7 @@ class PopulationTest extends TestCase
 
         $this->assertDatabaseHas('residents', ['nik' => '3300000000000001', 'name' => 'Siti Diperbarui']);
         $this->assertDatabaseCount('residents', 1);
+        $this->assertDatabaseCount('families', 1);
     }
 
     public function test_import_template_can_be_downloaded(): void

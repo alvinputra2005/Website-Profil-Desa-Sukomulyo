@@ -26,11 +26,6 @@ class Resident extends CmsModel
         return $this->belongsTo(FamilyCard::class);
     }
 
-    public function household()
-    {
-        return $this->belongsTo(Household::class);
-    }
-
     public function events()
     {
         return $this->hasMany(ResidentEvent::class)->latest('event_date');
@@ -54,11 +49,6 @@ class Resident extends CmsModel
     public function headedFamilies()
     {
         return $this->hasMany(FamilyCard::class, 'head_resident_id');
-    }
-
-    public function headedHouseholds()
-    {
-        return $this->hasMany(Household::class, 'head_resident_id');
     }
 
     public function getSexLabelAttribute(): string

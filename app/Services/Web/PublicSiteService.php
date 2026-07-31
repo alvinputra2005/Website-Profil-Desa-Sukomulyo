@@ -96,7 +96,7 @@ class PublicSiteService
             SiteCache::TEN_MINUTES,
             fn () => Schema::hasTable('residents')
                 ? $populationStatistics->summary()
-                : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'households' => 0, 'areas' => 0, 'education_records' => 0, 'occupation_records' => 0]
+                : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'areas' => 0, 'education_records' => 0, 'occupation_records' => 0]
         );
 
         return $this->render('pages.home', [
@@ -283,7 +283,7 @@ class PublicSiteService
             function () use ($populationStatistics): array {
                 $summary = Schema::hasTable('residents')
                     ? $populationStatistics->summary()
-                    : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'households' => 0, 'areas' => 0];
+                    : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'areas' => 0];
                 $total = max($summary['residents'], 1);
                 $occupations = Schema::hasTable('residents') ? $populationStatistics->distribution('occupation') : [];
 
@@ -291,7 +291,6 @@ class PublicSiteService
                     'statistics' => [
                         ['icon' => 'fas fa-users', 'value' => number_format($summary['residents'], 0, ',', '.'), 'label' => 'Jumlah Penduduk', 'unit' => 'jiwa'],
                         ['icon' => 'fas fa-home', 'value' => number_format($summary['families'], 0, ',', '.'), 'label' => 'Kepala Keluarga', 'unit' => 'KK'],
-                        ['icon' => 'fas fa-building', 'value' => number_format($summary['households'], 0, ',', '.'), 'label' => 'Rumah Tangga', 'unit' => 'rumah tangga'],
                         ['icon' => 'fas fa-map-signs', 'value' => number_format($summary['areas'], 0, ',', '.'), 'label' => 'Wilayah Dusun', 'unit' => 'dusun'],
                     ],
                     'population' => [
@@ -328,10 +327,9 @@ class PublicSiteService
     {
         $dataPages = [
             'penduduk' => ['title' => 'Statistik Penduduk', 'description' => 'Jumlah penduduk, jenis kelamin, usia, dan kepala keluarga.', 'categories' => ['sex'], 'summary' => true],
-            'keluarga' => ['title' => 'Statistik Keluarga', 'description' => 'Ringkasan jumlah keluarga, penduduk, rumah tangga, dan wilayah desa.', 'categories' => [], 'summary' => true, 'summary_cards' => [
+            'keluarga' => ['title' => 'Statistik Keluarga', 'description' => 'Ringkasan jumlah keluarga, penduduk, dan wilayah desa.', 'categories' => [], 'summary' => true, 'summary_cards' => [
                 ['Jumlah Keluarga', 'families', 'KK', 'fas fa-home'],
                 ['Jumlah Penduduk', 'residents', 'jiwa', 'fas fa-users'],
-                ['Rumah Tangga', 'households', 'rumah tangga', 'fas fa-building'],
                 ['Wilayah Dusun', 'areas', 'dusun', 'fas fa-map-signs'],
             ]],
             'pendidikan' => ['title' => 'Statistik Pendidikan', 'description' => 'Jumlah penduduk berdasarkan jenjang pendidikan.', 'categories' => ['education']],
@@ -345,7 +343,7 @@ class PublicSiteService
         $hasResidents = Schema::hasTable('residents');
         $summary = $hasResidents
             ? $populationStatistics->summary()
-            : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'households' => 0, 'areas' => 0];
+            : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'areas' => 0];
         $categoryLabels = [
             'sex' => 'Jenis Kelamin',
             'age' => 'Kelompok Umur',
@@ -365,54 +363,19 @@ class PublicSiteService
         return $this->render('pages.statistic-detail', compact('page', 'summary', 'panels', 'idm'));
     }
 
-    public function populationStatistics(
-        PopulationStatisticsService $populationStatistics,
-        array $filters = [],
-    ): View {
+    public function populationStatistics(PopulationStatisticsService $populationStatistics): View
+    {
         $genderSummary = $this->cache->remember(
             SiteCache::PUBLIC_POPULATION_STATISTICS,
             SiteCache::TEN_MINUTES,
             fn (): array => $populationStatistics->genderSummary(),
         );
-        $populationTrend = $this->cache->remember(
-            SiteCache::PUBLIC_POPULATION_TREND,
-            SiteCache::TEN_MINUTES,
-            fn (): array => $populationStatistics->yearlyTrend(),
-        );
-
-        $availableYears = collect($populationTrend)
-            ->pluck('year')
-            ->map(fn ($year): int => (int) $year)
-            ->unique()
-            ->sort()
-            ->values()
-            ->all();
-        $currentYear = (int) config('village.population_year', now()->year);
-        $minimumYear = $availableYears[0] ?? $currentYear;
-        $defaultFromCandidate = max($minimumYear, $currentYear - 4);
-        $defaultFromYear = collect($availableYears)->first(
-            fn (int $year): bool => $year >= $defaultFromCandidate,
-            $minimumYear,
-        );
-        $defaultToYear = collect($availableYears)->last() ?? $currentYear;
-        $requestedFrom = isset($filters['from_year']) ? (int) $filters['from_year'] : null;
-        $requestedTo = isset($filters['to_year']) ? (int) $filters['to_year'] : null;
-
-        $defaultRange = [
-            'from' => in_array($requestedFrom, $availableYears, true) ? $requestedFrom : $defaultFromYear,
-            'to' => in_array($requestedTo, $availableYears, true) ? $requestedTo : $defaultToYear,
-        ];
-
         return $this->render('pages.population-statistics', [
             'page' => [
                 'title' => 'Statistik Penduduk',
-                'description' => 'Komposisi dan perkembangan jumlah penduduk Desa Sukomulyo berdasarkan data administrasi kependudukan yang telah dipublikasikan.',
+                'description' => 'Komposisi penduduk Desa Sukomulyo berdasarkan data administrasi kependudukan saat ini.',
             ],
             'genderSummary' => $genderSummary,
-            'populationTrend' => $populationTrend,
-            'availableYears' => $availableYears,
-            'defaultRange' => $defaultRange,
-            'tableSort' => $filters['sort'] ?? 'asc',
         ]);
     }
 

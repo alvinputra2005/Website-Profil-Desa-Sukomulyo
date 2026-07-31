@@ -26,8 +26,6 @@
                     <dl class="dl-horizontal population-details">
                         <dt>No. KK</dt><dd>{{ $resident->family?->family_card_number ?? 'Belum masuk keluarga' }}</dd>
                         <dt>Hubungan Keluarga</dt><dd>{{ $resident->family_relationship ?: '—' }}</dd>
-                        <dt>Rumah Tangga</dt><dd>{{ $resident->household?->household_number ?? 'Belum masuk rumah tangga' }}</dd>
-                        <dt>Hubungan RT</dt><dd>{{ $resident->household_relationship ?: '—' }}</dd>
                         <dt>Wilayah</dt><dd>{{ $resident->area?->label ?? 'Belum diisi' }}</dd>
                         <dt>Alamat</dt><dd>{{ $resident->current_address ?: '—' }}</dd>
                         <dt>Agama</dt><dd>{{ $resident->religion ?: '—' }}</dd>

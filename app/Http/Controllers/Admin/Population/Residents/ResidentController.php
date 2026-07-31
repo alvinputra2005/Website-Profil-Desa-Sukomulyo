@@ -8,7 +8,6 @@ use App\Actions\Population\UpdateResidentAction;
 use App\Http\Controllers\Admin\PopulationController;
 use App\Http\Requests\Admin\SaveResidentRequest;
 use App\Models\FamilyCard;
-use App\Models\Household;
 use App\Models\PopulationArea;
 use App\Models\Resident;
 use App\Queries\Population\ResidentFormQuery;
@@ -21,13 +20,13 @@ class ResidentController extends PopulationController
     public function index(Request $request): View
     {
         $this->authorize('viewAny', Resident::class);
-        $query = Resident::with(['family.head', 'household.head', 'area']);
+        $query = Resident::with(['family.head', 'area']);
         if ($search = trim((string) $request->query('q'))) {
             $query->where(fn ($builder) => $builder
                 ->where('name', 'like', "%{$search}%")
                 ->orWhere('nik', 'like', "%{$search}%"));
         }
-        foreach (['status', 'sex', 'area_id', 'family_id', 'household_id'] as $filter) {
+        foreach (['status', 'sex', 'area_id', 'family_id'] as $filter) {
             if ($request->filled($filter)) {
                 $query->where($filter, $request->query($filter));
             }
@@ -37,7 +36,6 @@ class ResidentController extends PopulationController
             'residents' => $query->orderBy('name')->paginate(20)->withQueryString(),
             'areas' => PopulationArea::orderBy('hamlet')->orderBy('rw')->orderBy('rt')->get(),
             'families' => FamilyCard::orderBy('family_card_number')->get(),
-            'households' => Household::orderBy('household_number')->get(),
         ]);
     }
 
@@ -60,7 +58,7 @@ class ResidentController extends PopulationController
     public function show(Resident $resident): View
     {
         $this->authorize('view', $resident);
-        $resident->load(['area', 'family.head', 'household.head', 'events.recorder', 'groupMemberships.group']);
+        $resident->load(['area', 'family.head', 'events.recorder', 'groupMemberships.group']);
 
         return view('admin.population.residents.show', compact('resident'));
     }

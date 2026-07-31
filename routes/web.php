@@ -6,7 +6,6 @@ use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\CrudController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FamilyController;
-use App\Http\Controllers\Admin\HouseholdController;
 use App\Http\Controllers\Admin\LetterApplicationController as AdminLetterApplicationController;
 use App\Http\Controllers\Admin\LetterApplicationStatusController;
 use App\Http\Controllers\Admin\LetterApplicationWhatsAppController;
@@ -24,7 +23,6 @@ use App\Http\Controllers\Admin\PopulationGroupController;
 use App\Http\Controllers\Admin\PopulationGroupMemberController;
 use App\Http\Controllers\Admin\PopulationReportController;
 use App\Http\Controllers\Admin\PopulationStatisticsController;
-use App\Http\Controllers\Admin\PopulationYearlySnapshotController;
 use App\Http\Controllers\Admin\RegionController;
 use App\Http\Controllers\Admin\StatisticImportController;
 use App\Http\Controllers\Admin\StatisticDatasetController;
@@ -119,7 +117,6 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::post('penduduk/import', [ResidentImportController::class, 'store'])->name('residents.import');
         Route::resource('penduduk', ResidentController::class)->parameters(['penduduk' => 'resident'])->names('residents');
         Route::resource('keluarga', FamilyController::class)->parameters(['keluarga' => 'family'])->except('show')->names('families');
-        Route::resource('rumah-tangga', HouseholdController::class)->parameters(['rumah-tangga' => 'household'])->except('show')->names('households');
         Route::resource('kelompok', PopulationGroupController::class)->parameters(['kelompok' => 'group'])->names('groups');
         Route::get('kelompok/{group}/anggota/create', [PopulationGroupMemberController::class, 'create'])->name('groups.members.create');
         Route::post('kelompok/{group}/anggota', [PopulationGroupMemberController::class, 'store'])->name('groups.members.store');
@@ -127,12 +124,6 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::put('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'update'])->name('groups.members.update');
         Route::delete('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'destroy'])->name('groups.members.destroy');
         Route::get('statistik', PopulationStatisticsController::class)->name('statistics');
-        Route::patch('statistik-tahunan/{yearly_snapshot}/publikasi', [PopulationYearlySnapshotController::class, 'togglePublication'])
-            ->name('yearly-snapshots.toggle-publication');
-        Route::resource('statistik-tahunan', PopulationYearlySnapshotController::class)
-            ->parameters(['statistik-tahunan' => 'yearly_snapshot'])
-            ->except('show')
-            ->names('yearly-snapshots');
         Route::get('laporan-penduduk', [PopulationReportController::class, 'index'])->name('report');
         Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
     });

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Web\PopulationTrendRequest;
+use App\Http\Requests\Web\PopulationStatisticsRequest;
 use App\Services\ImportedStatisticPageData;
 use App\Services\PopulationStatistics;
 use App\Services\StatisticPageData;
@@ -27,7 +27,7 @@ class VillageStatisticController extends Controller
         string $section,
     ): View {
         if ($section === 'penduduk') {
-            return $site->populationStatistics($statistics, $request->only(['from_year', 'to_year', 'sort']));
+            return $site->populationStatistics($statistics);
         }
 
         if ($category = $site->findPublishedStatisticCategory($section)) {
@@ -61,7 +61,7 @@ class VillageStatisticController extends Controller
     }
 
     public function population(
-        PopulationTrendRequest $request,
+        PopulationStatisticsRequest $request,
         PublicSiteService $site,
         PopulationStatistics $statistics,
         StatisticPageData $statisticPages,
@@ -76,7 +76,7 @@ class VillageStatisticController extends Controller
             return $site->genericStatistic($statisticPages->build($context, $filters));
         }
 
-        return $site->populationStatistics($statistics, $filters);
+        return $site->populationStatistics($statistics);
     }
 
     public function budgetHistory(PublicSiteService $site): View

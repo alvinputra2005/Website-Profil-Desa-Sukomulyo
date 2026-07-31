@@ -5,7 +5,6 @@ namespace App\Providers;
 use App\Models\FamilyCard;
 use App\Models\Gallery;
 use App\Models\GalleryItem;
-use App\Models\Household;
 use App\Models\LetterApplication;
 use App\Models\LetterService;
 use App\Models\MapFeature;
@@ -17,7 +16,6 @@ use App\Models\Official;
 use App\Models\PopulationArea;
 use App\Models\PopulationGroup;
 use App\Models\PopulationGroupMember;
-use App\Models\PopulationYearlySnapshot;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
 use App\Models\Resident;
@@ -35,7 +33,6 @@ use App\Policies\AdminResourcePolicy;
 use App\Policies\CmsResourcePolicy;
 use App\Policies\DataResourcePolicy;
 use App\Policies\FamilyCardPolicy;
-use App\Policies\HouseholdPolicy;
 use App\Policies\LetterApplicationPolicy;
 use App\Policies\LetterServicePolicy;
 use App\Policies\OfficialPolicy;
@@ -90,9 +87,7 @@ class AppServiceProvider extends ServiceProvider
             NewsCategory::class,
             Resident::class,
             FamilyCard::class,
-            Household::class,
             PopulationArea::class,
-            PopulationYearlySnapshot::class,
             ResidentEvent::class,
             StatisticCategory::class,
             StatisticDataset::class,
@@ -131,10 +126,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Official::class, OfficialPolicy::class);
         Gate::policy(Resident::class, ResidentPolicy::class);
         Gate::policy(FamilyCard::class, FamilyCardPolicy::class);
-        Gate::policy(Household::class, HouseholdPolicy::class);
         Gate::policy(PopulationGroup::class, PopulationGroupPolicy::class);
         Gate::policy(PopulationGroupMember::class, PopulationGroupMemberPolicy::class);
-        Gate::policy(PopulationYearlySnapshot::class, DataResourcePolicy::class);
         Gate::policy(LetterApplication::class, LetterApplicationPolicy::class);
         Gate::policy(LetterService::class, LetterServicePolicy::class);
     }

@@ -12,7 +12,6 @@
                         @php($summaryCards = $page['summary_cards'] ?? [
                             ['Jumlah Penduduk', $summary['residents'], 'jiwa', 'fas fa-users'],
                             ['Kepala Keluarga', $summary['families'], 'KK', 'fas fa-home'],
-                            ['Rumah Tangga', $summary['households'], 'rumah tangga', 'fas fa-building'],
                             ['Wilayah Dusun', $summary['areas'], 'dusun', 'fas fa-map-signs'],
                         ])
                         @foreach ($summaryCards as [$label, $value, $unit, $icon])

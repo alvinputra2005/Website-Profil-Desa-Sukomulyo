@@ -47,7 +47,7 @@ class CreateResidentAction
             'nik', 'name', 'sex', 'birth_place', 'birth_date', 'religion', 'marital_status',
             'citizenship', 'education', 'occupation', 'blood_type', 'father_nik', 'father_name',
             'mother_nik', 'mother_name', 'phone', 'email', 'current_address', 'previous_address',
-            'family_id', 'household_id', 'family_relationship', 'household_relationship',
+            'family_id', 'family_relationship',
             'resident_status', 'status', 'registered_at', 'notes',
         ])->all();
     }

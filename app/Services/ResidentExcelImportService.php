@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\FamilyCard;
 use App\Models\PopulationArea;
 use App\Models\Resident;
 use App\Models\ResidentEvent;
@@ -18,7 +19,7 @@ use Throwable;
 final class ResidentExcelImportService
 {
     private const HEADERS = [
-        'nik', 'nama', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama',
+        'nik', 'nomor_kk', 'nama', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama',
         'status_perkawinan', 'kewarganegaraan', 'pendidikan', 'pekerjaan',
         'golongan_darah', 'alamat', 'dusun', 'rw', 'rt', 'status_penduduk',
         'status_data', 'tanggal_terdaftar', 'telepon', 'email', 'catatan',
@@ -63,12 +64,16 @@ final class ResidentExcelImportService
                     $resident = Resident::withTrashed()->where('nik', $data['nik'])->first();
                     $created = ! $resident;
                     $area = $this->resolveArea($data);
+                    $family = $this->resolveFamily($data, $area);
                     $attributes = collect($data)->only([
                         'nik', 'name', 'sex', 'birth_place', 'birth_date', 'religion',
                         'marital_status', 'citizenship', 'education', 'occupation',
                         'blood_type', 'phone', 'email', 'current_address',
                         'resident_status', 'status', 'registered_at', 'notes',
                     ])->put('area_id', $area?->id)->all();
+                    if ($data['family_card_number_provided']) {
+                        $attributes['family_id'] = $family?->id;
+                    }
 
                     if ($resident) {
                         $resident->restore();
@@ -84,6 +89,7 @@ final class ResidentExcelImportService
                             'resident_name' => $resident->name,
                             'nik' => $resident->nik,
                             'sex' => $resident->sex,
+                            'family_card_number' => $data['family_card_number'],
                             'origin_address' => null,
                             'notes' => 'Dibuat melalui impor Excel.',
                             'recorded_by' => auth()->id(),
@@ -109,6 +115,8 @@ final class ResidentExcelImportService
     {
         $data = [
             'nik' => $this->digits($row['nik'] ?? null),
+            'family_card_number' => $this->digits($row['nomor_kk'] ?? null),
+            'family_card_number_provided' => array_key_exists('nomor_kk', $row),
             'name' => trim((string) ($row['nama'] ?? '')),
             'sex' => $this->sex($row['jenis_kelamin'] ?? null),
             'birth_place' => $this->nullable($row['tempat_lahir'] ?? null),
@@ -133,6 +141,8 @@ final class ResidentExcelImportService
 
         return Validator::make($data, [
             'nik' => ['required', 'digits:16'],
+            'family_card_number' => ['nullable', 'digits:16'],
+            'family_card_number_provided' => ['required', 'boolean'],
             'name' => ['required', 'string', 'max:100'],
             'sex' => ['required', Rule::in(['L', 'P'])],
             'birth_place' => ['nullable', 'string', 'max:100'],
@@ -154,7 +164,8 @@ final class ResidentExcelImportService
             'email' => ['nullable', 'email', 'max:150'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ], [], [
-            'nik' => 'NIK', 'name' => 'nama', 'sex' => 'jenis kelamin',
+            'nik' => 'NIK', 'family_card_number' => 'nomor KK',
+            'name' => 'nama', 'sex' => 'jenis kelamin',
             'birth_date' => 'tanggal lahir', 'registered_at' => 'tanggal terdaftar',
         ])->validate();
     }
@@ -170,6 +181,28 @@ final class ResidentExcelImportService
             'rw' => str_pad($data['rw'] ?? '', 2, '0', STR_PAD_LEFT),
             'rt' => str_pad($data['rt'] ?? '', 2, '0', STR_PAD_LEFT),
         ]);
+    }
+
+    private function resolveFamily(array $data, ?PopulationArea $area): ?FamilyCard
+    {
+        if (! $data['family_card_number']) {
+            return null;
+        }
+
+        $family = FamilyCard::withTrashed()
+            ->firstOrNew(['family_card_number' => $data['family_card_number']]);
+
+        if ($family->trashed()) {
+            $family->restore();
+        }
+
+        $family->area_id ??= $area?->id;
+        $family->address ??= $data['current_address'];
+        $family->registered_at ??= $data['registered_at'];
+        $family->is_active = true;
+        $family->save();
+
+        return $family;
     }
 
     private function normalizeHeader(mixed $value): string

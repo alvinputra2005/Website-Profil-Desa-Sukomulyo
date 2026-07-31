@@ -98,7 +98,6 @@
                     <li><a class="{{ $isFamilyPage && $familyMenu === '' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga']) }}">Ringkasan Keluarga</a></li>
                     <li><a class="{{ $familyMenu === 'kepala-keluarga' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'kepala-keluarga']) }}">Kepala Keluarga</a></li>
                     <li><a class="{{ $familyMenu === 'anggota-keluarga' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'anggota-keluarga']) }}">Anggota Keluarga</a></li>
-                    <li><a class="{{ $familyMenu === 'rumah-tangga' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'rumah-tangga']) }}">Rumah Tangga</a></li>
                 </ul>
             </div>
         </section>

@@ -3,15 +3,11 @@
 namespace App\Services;
 
 use App\Models\FamilyCard;
-use App\Models\Household;
 use App\Models\PopulationArea;
-use App\Models\PopulationYearlySnapshot;
 use App\Models\Resident;
 use App\Models\ResidentEvent;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Schema;
-use InvalidArgumentException;
 
 class PopulationStatistics
 {
@@ -33,7 +29,6 @@ class PopulationStatistics
             'male' => (clone $base)->where('sex', 'L')->count(),
             'female' => (clone $base)->where('sex', 'P')->count(),
             'families' => FamilyCard::where('is_active', true)->count(),
-            'households' => Household::where('is_active', true)->count(),
             'areas' => PopulationArea::distinct()->count('hamlet'),
             'education_records' => (clone $base)->whereNotNull('education')->where('education', '!=', '')->count(),
             'occupation_records' => (clone $base)->whereNotNull('occupation')->where('occupation', '!=', '')->count(),
@@ -61,81 +56,6 @@ class PopulationStatistics
                 ? self::DEMO_SOURCE
                 : 'Administrasi Kependudukan Desa',
         ];
-    }
-
-    public function yearlyTrend(?int $fromYear = null, ?int $toYear = null): array
-    {
-        $currentYear = (int) config('village.population_year', now()->year);
-        $toYear ??= $currentYear;
-
-        if ($toYear > $currentYear) {
-            throw new InvalidArgumentException('Tahun akhir tidak boleh melebihi tahun data aktif.');
-        }
-        if ($fromYear !== null && $fromYear > $toYear) {
-            throw new InvalidArgumentException('Tahun awal tidak boleh melebihi tahun akhir.');
-        }
-
-        $snapshots = collect();
-        if (Schema::hasTable('population_yearly_snapshots')) {
-            $query = PopulationYearlySnapshot::query()
-                ->where('is_published', true)
-                ->where('year', '<=', $toYear);
-
-            if ($fromYear !== null) {
-                $query->where('year', '>=', $fromYear);
-            }
-
-            $snapshots = $query->orderBy('year')->get();
-        }
-
-        $rows = $snapshots->map(fn (PopulationYearlySnapshot $snapshot): array => [
-            'year' => $snapshot->year,
-            'male' => $snapshot->male_count,
-            'female' => $snapshot->female_count,
-            'total' => $snapshot->total_count,
-            'source' => $snapshot->source,
-            'reference_date' => $snapshot->reference_date?->format('Y-m-d'),
-        ]);
-
-        $includesCurrentYear = $currentYear <= $toYear
-            && ($fromYear === null || $currentYear >= $fromYear);
-
-        if ($includesCurrentYear && ! $rows->contains('year', $currentYear)) {
-            $summary = $this->genderSummary();
-            $referenceDate = $summary['updated_at']
-                ? Carbon::parse($summary['updated_at'])->toDateString()
-                : null;
-
-            $rows->push([
-                'year' => $currentYear,
-                'male' => $summary['male'],
-                'female' => $summary['female'],
-                'total' => $summary['total'],
-                'source' => 'Data aktif per '.($referenceDate
-                    ? Carbon::parse($referenceDate)->translatedFormat('d F Y')
-                    : 'tanggal pembaruan terakhir'),
-                'reference_date' => $referenceDate,
-            ]);
-        }
-
-        $previousTotal = null;
-
-        return $rows
-            ->sortBy('year')
-            ->values()
-            ->map(function (array $row) use (&$previousTotal): array {
-                $change = $previousTotal === null ? null : $row['total'] - $previousTotal;
-                $growth = $previousTotal === null || $previousTotal === 0
-                    ? null
-                    : round($change / $previousTotal * 100, 2);
-                $previousTotal = $row['total'];
-
-                return array_merge($row, [
-                    'change' => $change,
-                    'growth_percentage' => $growth,
-                ]);
-            })
-            ->all();
     }
 
     public function distribution(string $category): array
