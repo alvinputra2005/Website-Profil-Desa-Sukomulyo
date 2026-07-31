@@ -21,8 +21,13 @@
             <section class="sc_innerpage_contentbx fullwidth" data-budget-history>
                 <header class="budget-history-intro">
                     <div>
-                        <h1>Riwayat APBDes 2019–2025</h1>
-                        <p>Perbandingan target pendapatan, anggaran belanja, dan realisasi APBDes Desa Sukomulyo dari tahun 2019 sampai 2025.</p>
+                        @php
+                            $historyYears = collect($budgetHistory)->pluck('year')->filter();
+                            $historyFrom = $historyYears->min();
+                            $historyTo = $historyYears->max();
+                        @endphp
+                        <h1>Riwayat APBDes {{ $historyFrom }}–{{ $historyTo }}</h1>
+                        <p>Perbandingan target pendapatan, anggaran belanja, dan realisasi APBDes Desa Sukomulyo dari tahun {{ $historyFrom }} sampai {{ $historyTo }}.</p>
                     </div>
                     <div class="population-download-control budget-download-control">
                         <button
@@ -54,13 +59,13 @@
                     </div>
                 </header>
 
-                <section class="budget-chart-panel budget-history-chart-panel" aria-label="Grafik tren APBDes tahun 2019 sampai 2025">
+                <section class="budget-chart-panel budget-history-chart-panel" aria-label="Grafik tren APBDes tahun {{ $historyFrom }} sampai {{ $historyTo }}">
                     <div
                         class="budget-history-chart"
                         data-budget-trend-chart
                         role="img"
                         tabindex="0"
-                        aria-label="Grafik tren pendapatan, belanja, dan realisasi APBDes tahun 2019 sampai 2025"
+                        aria-label="Grafik tren pendapatan, belanja, dan realisasi APBDes tahun {{ $historyFrom }} sampai {{ $historyTo }}"
                     ></div>
                 </section>
 
@@ -70,7 +75,7 @@
                     aria-label="Tabel riwayat APBDes dapat digulir secara horizontal"
                 >
                     <table class="budget-history-table">
-                        <caption class="screen-reader-text">Riwayat APBDes Desa Sukomulyo tahun 2019 sampai 2025</caption>
+                        <caption class="screen-reader-text">Riwayat APBDes Desa Sukomulyo tahun {{ $historyFrom }} sampai {{ $historyTo }}</caption>
                         <thead>
                             <tr>
                                 <th scope="col">Tahun</th>

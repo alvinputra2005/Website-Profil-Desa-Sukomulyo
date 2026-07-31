@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityController;
+use App\Http\Controllers\Admin\ApbdesController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\CrudController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -117,6 +118,12 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
             ->names('yearly-snapshots');
         Route::get('laporan-penduduk', [PopulationReportController::class, 'index'])->name('report');
         Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
+    });
+    Route::middleware('can:manage-data')->group(function () {
+        Route::patch('/apbdes/{apbdes}/publikasi', [ApbdesController::class, 'togglePublication'])->name('apbdes.toggle-publication');
+        Route::resource('apbdes', ApbdesController::class)
+            ->parameters(['apbdes' => 'apbdes'])
+            ->except('show');
     });
     Route::middleware('can:manage-letter-applications')->prefix('permohonan-surat')->name('letter-applications.')->group(function () {
     Route::get('/', [AdminLetterApplicationController::class, 'index'])->name('index');

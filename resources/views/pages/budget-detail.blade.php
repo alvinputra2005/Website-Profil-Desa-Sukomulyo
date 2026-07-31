@@ -320,6 +320,47 @@
                     </div>
                 </section>
 
+                @if (! empty($budget['problems']) || ! empty($budget['solutions']) || ! empty($budget['data_quality']) || ! empty($budget['source_reference']['document']))
+                    <section class="budget-data-section" aria-labelledby="budget-lppd-notes-title">
+                        <header class="budget-section-heading">
+                            <div>
+                                <h2 id="budget-lppd-notes-title">Catatan Pelaksanaan dan Sumber LPPD</h2>
+                                <p>Keterangan pelaksanaan anggaran serta rujukan dokumen yang menjadi dasar publikasi data.</p>
+                            </div>
+                        </header>
+                        <div class="budget-insight-grid">
+                            @if (! empty($budget['problems']))
+                                <article class="budget-insight-card">
+                                    <span>Permasalahan</span>
+                                    <strong>{!! nl2br(e($budget['problems'])) !!}</strong>
+                                </article>
+                            @endif
+                            @if (! empty($budget['solutions']))
+                                <article class="budget-insight-card">
+                                    <span>Penyelesaian/Upaya</span>
+                                    <strong>{!! nl2br(e($budget['solutions'])) !!}</strong>
+                                </article>
+                            @endif
+                        </div>
+                        @if (! empty($budget['data_quality']))
+                            <div class="budget-data-quality">
+                                <strong>Catatan kualitas data</strong>
+                                <ul>
+                                    @foreach ($budget['data_quality'] as $note)<li>{{ $note }}</li>@endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        @if (! empty($budget['source_reference']['document']))
+                            <div class="budget-source-reference">
+                                <p>
+                                    <strong>Sumber:</strong> {{ $budget['source_reference']['document'] }}
+                                    @if (! empty($budget['source_reference']['pages'])) — {{ $budget['source_reference']['pages'] }} @endif
+                                </p>
+                            </div>
+                        @endif
+                    </section>
+                @endif
+
                 <p class="screen-reader-text" data-budget-export-status aria-live="polite"></p>
                 <script type="application/json" data-budget-payload>{!! \Illuminate\Support\Js::encode(['mode' => 'detail', 'budget' => $budget]) !!}</script>
             </article>

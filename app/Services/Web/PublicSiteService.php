@@ -447,9 +447,11 @@ class PublicSiteService
 
     public function publicInformation(): View
     {
+        $latestBudgetYear = (string) data_get($this->budgetHistoryData->latest(), 'summary.year', BudgetHistoryData::LATEST_PUBLIC_YEAR);
+
         return $this->render('pages.public-information', [
             'documents' => [
-                ['icon' => 'fas fa-file-pdf', 'title' => 'APBDes Desa Sukomulyo', 'category' => 'Keuangan Desa', 'year' => (string) BudgetHistoryData::LATEST_PUBLIC_YEAR],
+                ['icon' => 'fas fa-file-pdf', 'title' => 'APBDes Desa Sukomulyo', 'category' => 'Keuangan Desa', 'year' => $latestBudgetYear],
                 ['icon' => 'fas fa-file-alt', 'title' => 'Rencana Kerja Pemerintah Desa', 'category' => 'Perencanaan', 'year' => '2026'],
                 ['icon' => 'fas fa-clipboard-list', 'title' => 'Laporan Penyelenggaraan Pemerintahan Desa', 'category' => 'Laporan', 'year' => '2025'],
                 ['icon' => 'fas fa-bullhorn', 'title' => 'Standar Pelayanan Publik Desa', 'category' => 'Pelayanan', 'year' => '2026'],
@@ -897,7 +899,6 @@ class PublicSiteService
                 ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
                 ['label' => 'Struktur Pemerintahan', 'route' => 'pemerintahan-desa', 'active' => 'pemerintahan-desa'],
                 ['label' => 'Wilayah Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
-                ['label' => 'Potensi Desa', 'route' => 'potensi-desa', 'active' => 'potensi-desa'],
             ]],
             ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => [
                 ['label' => 'Statistik Penduduk', 'route' => 'data-statistik.population', 'active' => 'data-statistik.population'],

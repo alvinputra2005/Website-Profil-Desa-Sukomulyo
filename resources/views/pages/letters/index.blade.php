@@ -40,7 +40,12 @@
                     @endif
                 </section>
 
-                <aside class="letter-info-sidebar" aria-label="Informasi pelayanan surat">
+                <aside class="letter-info-sidebar" aria-label="Panduan dan informasi pelayanan surat" data-sidebar-accordion>
+                    @include('administrative-services.partials.submission-guide', [
+                        'submissionGuidePanelId' => 'letter-index-submission-guide',
+                        'submissionGuideAsFlow' => true,
+                    ])
+
                     <section class="letter-info-card letter-info-card--help" data-static-info-card>
                         <header class="letter-info-card__heading">
                             <h2>Butuh Bantuan?</h2>

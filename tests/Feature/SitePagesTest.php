@@ -86,7 +86,7 @@ class SitePagesTest extends TestCase
         $this->assertStringNotContainsString('Asal-usul dan perkembangan', $navigation);
         $this->assertStringNotContainsString('Jumlah penduduk berdasarkan jenjang pendidikan', $navigation);
         $this->assertStringContainsString(route('pemerintahan-desa'), $navigation);
-        $this->assertStringContainsString(route('potensi-desa'), $navigation);
+        $this->assertStringNotContainsString(route('potensi-desa'), $navigation);
     }
 
     public function test_unknown_pages_use_the_converted_404_page(): void

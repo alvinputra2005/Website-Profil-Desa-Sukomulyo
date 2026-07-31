@@ -6394,6 +6394,9 @@ a.regulation-card:focus-visible .regulation-cover {
     display: grid;
     gap: 2px;
 }
+.letter-info-sidebar .administration-guide-widget {
+    grid-column: 1 / -1;
+}
 .letter-info-card {
     position: relative;
     overflow: hidden;

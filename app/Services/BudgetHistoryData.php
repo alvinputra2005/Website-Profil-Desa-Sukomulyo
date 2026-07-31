@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Apbdes;
+use Illuminate\Support\Facades\Schema;
 use JsonException;
 use RuntimeException;
 use UnexpectedValueException;
@@ -18,6 +20,15 @@ final class BudgetHistoryData
 
     public function history(): array
     {
+        if ($this->usesDatabase()) {
+            return Apbdes::query()
+                ->published()
+                ->orderByDesc('year')
+                ->get()
+                ->map(fn (Apbdes $budget): array => $budget->historyPayload())
+                ->all();
+        }
+
         $history = $this->load()['history'] ?? [];
 
         if (! is_array($history)) {
@@ -42,6 +53,14 @@ final class BudgetHistoryData
 
     public function detail(int $year): ?array
     {
+        if ($this->usesDatabase()) {
+            return Apbdes::query()
+                ->published()
+                ->where('year', $year)
+                ->first()
+                ?->publicPayload();
+        }
+
         if ($year < self::FIRST_PUBLIC_YEAR || $year > self::LATEST_PUBLIC_YEAR) {
             return null;
         }
@@ -59,10 +78,17 @@ final class BudgetHistoryData
 
     public function latest(): array
     {
-        return $this->detail(self::LATEST_PUBLIC_YEAR)
+        $latestYear = (int) (data_get($this->history(), '0.year') ?: self::LATEST_PUBLIC_YEAR);
+
+        return $this->detail($latestYear)
             ?? throw new UnexpectedValueException(
-                sprintf('Data APBDes tahun terbaru (%d) tidak tersedia.', self::LATEST_PUBLIC_YEAR),
+                sprintf('Data APBDes tahun terbaru (%d) tidak tersedia.', $latestYear),
             );
+    }
+
+    private function usesDatabase(): bool
+    {
+        return Schema::hasTable('apbdes') && Apbdes::query()->exists();
     }
 
     private function load(): array
