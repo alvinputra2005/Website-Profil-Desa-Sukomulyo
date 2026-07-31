@@ -1,5 +1,15 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| Legacy statistic page configuration
+|--------------------------------------------------------------------------
+|
+| Konfigurasi ini dipertahankan sementara hanya untuk kompatibilitas URL.
+| Navigasi dan data statistik resmi tidak boleh mengambil nilai dari file ini.
+|
+*/
+
 return [
     'population_menus' => [
         'agama' => 'population-religion',

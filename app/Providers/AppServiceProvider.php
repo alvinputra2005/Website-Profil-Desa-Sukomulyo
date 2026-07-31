@@ -14,6 +14,7 @@ use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Official;
 use App\Models\PopulationArea;
+use App\Models\PopulationStatisticIndicator;
 use App\Models\PopulationGroup;
 use App\Models\PopulationGroupMember;
 use App\Models\Publication;
@@ -88,6 +89,7 @@ class AppServiceProvider extends ServiceProvider
             Resident::class,
             FamilyCard::class,
             PopulationArea::class,
+            PopulationStatisticIndicator::class,
             ResidentEvent::class,
             StatisticCategory::class,
             StatisticDataset::class,

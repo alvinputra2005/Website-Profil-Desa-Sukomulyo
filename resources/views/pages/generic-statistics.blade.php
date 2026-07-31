@@ -6,6 +6,12 @@
     $showPercentage = $page['show_total'] && $latest['total'] > 0 && $page['unit'] !== 'data';
     $menu = (string) request('menu', '');
     $currentTitle = $page['current_title'] ?? $page['title'];
+    $displayMode = request('display') === 'table' ? 'table' : 'chart';
+    $displayQuery = request()->query();
+    $chartUrl = url()->current().'?'.http_build_query(array_merge($displayQuery, ['display' => 'chart']));
+    $tableUrl = url()->current().'?'.http_build_query(array_merge($displayQuery, ['display' => 'table']));
+    $chartLabel = $page['chart'] === 'pie' ? 'Grafik Komposisi' : 'Grafik Data';
+    $chartTypeLabel = $page['chart'] === 'pie' ? 'Pie Chart' : 'Bar Chart';
 @endphp
 
 <x-layouts.app :title="$page['title']" :description="$page['description']">
@@ -22,33 +28,6 @@
     <div class="container">
         <div id="sc_innerpage_wrap" class="population-statistics-wrap statistics-page-layout">
             <section class="sc_innerpage_contentbx population-statistics generic-statistics" data-generic-statistics>
-                @if(!empty($datasetOptions))
-                    <section class="statistics-dataset-picker" aria-labelledby="statistics-dataset-picker-title">
-                        <div>
-                            <span class="section-kicker">Indikator Statistik</span>
-                            <h2 id="statistics-dataset-picker-title">Pilih data yang ingin divisualisasikan</h2>
-                            <p>Grafik komposisi memakai data terbaru, sedangkan grafik garis membandingkan indikator yang sama antar tahun.</p>
-                        </div>
-                        <form method="get" action="{{ url()->current() }}" data-imported-dataset-selector>
-                            <label for="statistics-dataset">Dataset</label>
-                            <div class="statistics-dataset-picker__controls">
-                                <select id="statistics-dataset" name="dataset">
-                                    @foreach($datasetOptions as $option)
-                                        <option value="{{ $option['value'] }}" @selected($option['value'] === $selectedDataset)>
-                                            {{ $option['label'] }} ({{ implode(', ', $option['years']) }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button type="submit">Tampilkan Grafik</button>
-                                <a href="{{ $datasetDetailUrl }}">
-                                    <i class="fas fa-table" aria-hidden="true"></i>
-                                    Lihat Tabel Lengkap
-                                </a>
-                            </div>
-                        </form>
-                    </section>
-                @endif
-
                 <section class="population-chart-card" aria-labelledby="generic-current-title">
                     <header class="population-chart-card__heading population-statistics-heading">
                         <div class="population-statistics-heading__content">
@@ -59,7 +38,7 @@
                             </div>
                         </div>
 
-                        <div class="population-download-control">
+                        <div class="population-download-control" @if($displayMode === 'table') hidden @endif>
                             <button
                                 class="profile-print-button population-download-button"
                                 type="button"
@@ -91,7 +70,29 @@
 
                     <p class="population-statistics-heading__description">{{ $page['description'] }}</p>
 
-                    <div class="population-composition-grid">
+                    <div class="statistics-display-selector" aria-label="Pilih visualisasi atau tampilan data">
+                        <span class="statistics-display-selector__label">Pilih visualisasi / tampilan data</span>
+                        <div class="statistics-display-selector__options">
+                            <a
+                                class="statistics-display-option {{ $displayMode === 'chart' ? 'is-active' : '' }}"
+                                href="{{ $chartUrl }}"
+                                @if($displayMode === 'chart') aria-current="page" @endif
+                            >
+                                <i class="fas fa-chart-line" aria-hidden="true"></i>
+                                <span><strong>{{ $chartLabel }}</strong><small>{{ $chartTypeLabel }}</small></span>
+                            </a>
+                            <a
+                                class="statistics-display-option {{ $displayMode === 'table' ? 'is-active' : '' }}"
+                                href="{{ $tableUrl }}"
+                                @if($displayMode === 'table') aria-current="page" @endif
+                            >
+                                <i class="fas fa-table" aria-hidden="true"></i>
+                                <span><strong>Tabel Data</strong><small>Lihat data dalam tabel</small></span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="population-composition-grid statistics-view-panel" @if($displayMode !== 'chart') hidden @endif>
                         <div class="population-chart-card__canvas">
                             <div
                                 class="population-pie-chart"
@@ -106,7 +107,44 @@
                         </div>
                     </div>
 
-                    <div class="population-table-scroll population-summary-table-wrap">
+                    @if(isset($latestDataset))
+                    <div class="population-table-scroll population-summary-table-wrap statistics-view-panel" @if($displayMode !== 'table') hidden @endif>
+                        <table class="population-summary-table population-complete-table" data-generic-current-table>
+                            <caption class="screen-reader-text">{{ $latestDataset->title }}</caption>
+                            <x-statistic-table-header :columns="$latestDataset->columns_json ?? []" />
+                            <tbody>
+                                @forelse($latestDataset->rows as $row)
+                                    <tr>
+                                        @foreach($latestDataset->columns_json ?? [] as $column)
+                                            @php
+                                                $key = $column['key'];
+                                                $value = match ($key) {
+                                                    'area_code' => $row->area_code,
+                                                    'area_name' => $row->area_name,
+                                                    default => $row->values_json[$key] ?? null,
+                                                };
+                                            @endphp
+                                            <td class="{{ $key === 'area_name' ? 'statistics-area-name' : 'statistics-data-cell' }}">
+                                                @if($value === null || $value === '')
+                                                    &mdash;
+                                                @elseif(($column['type'] ?? null) === 'percentage' && is_numeric($value))
+                                                    {{ number_format((float) $value, 2, ',', '.') }}%
+                                                @elseif(($column['type'] ?? null) === 'integer' && is_numeric($value))
+                                                    {{ number_format((float) $value, 0, ',', '.') }}
+                                                @else
+                                                    {{ $value }}
+                                                @endif
+                                            </td>
+                                        @endforeach
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="{{ count($latestDataset->columns_json ?? []) }}">Data belum tersedia.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    @else
+                    <div class="population-table-scroll population-summary-table-wrap statistics-view-panel" @if($displayMode !== 'table') hidden @endif>
                         <table class="population-summary-table" data-generic-current-table>
                             <caption class="screen-reader-text">{{ $currentTitle }} tahun {{ $latest['year'] }}</caption>
                             <thead>
@@ -133,9 +171,10 @@
                             </tbody>
                         </table>
                     </div>
+                    @endif
                 </section>
 
-                <section class="population-trend-panel" data-generic-trend-panel aria-labelledby="generic-trend-title">
+                <section class="population-trend-panel" data-generic-trend-panel aria-labelledby="generic-trend-title" @if($displayMode !== 'chart') hidden @endif>
                     <div class="population-chart-card__heading">
                         <div>
                             <h2 id="generic-trend-title" class="population-trend-title" tabindex="-1">Perkembangan {{ $page['trend_title'] }} Tahunan</h2>
@@ -264,7 +303,7 @@
                 ]) !!}</script>
             </section>
 
-            <x-statistics-sidebar />
+            <x-statistics-sidebar :selected-dataset="$selectedDataset ?? null" />
         </div>
     </div>
 </x-layouts.app>

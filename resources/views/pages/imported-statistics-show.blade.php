@@ -25,7 +25,7 @@
                     </header>
 
                     <div class="population-table-scroll population-summary-table-wrap">
-                        <table class="population-summary-table">
+                        <table class="population-summary-table population-complete-table">
                             <caption class="screen-reader-text">{{ $dataset->title }}</caption>
                             <x-statistic-table-header :columns="$dataset->columns_json ?? []" />
                             <tbody>

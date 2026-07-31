@@ -1,5 +1,5 @@
 import * as echarts from 'echarts/core';
-import { LineChart, PieChart } from 'echarts/charts';
+import { BarChart, LineChart, PieChart } from 'echarts/charts';
 import {
     DataZoomComponent,
     DatasetComponent,
@@ -12,6 +12,7 @@ import { CanvasRenderer, SVGRenderer } from 'echarts/renderers';
 
 echarts.use([
     PieChart,
+    BarChart,
     LineChart,
     DatasetComponent,
     GridComponent,
@@ -446,7 +447,66 @@ export const initPopulationStatistics = () => {
     if (pieContainer && Number(summary.total) > 0) {
         pieEmpty?.setAttribute('hidden', '');
         pieChart = echarts.init(pieContainer, null, { renderer: 'canvas' });
-        pieChart.setOption({
+        const indicatorItems = Array.isArray(payload.items) ? payload.items : [];
+        const isGender = !payload.indicator || payload.indicator.key === 'gender';
+        const genericOption = payload.indicator?.chart_type === 'bar'
+            ? {
+                animation: !reducedMotion,
+                color: [COLORS.total],
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: (items) => `<strong>${items[0].name}</strong><br>${formatInteger(items[0].value)} ${payload.indicator.unit}`,
+                },
+                grid: { left: 64, right: 24, top: 24, bottom: 80 },
+                xAxis: {
+                    type: 'category',
+                    data: indicatorItems.map((item) => item.label),
+                    axisLabel: { color: COLORS.muted, interval: 0, rotate: indicatorItems.length > 4 ? 25 : 0 },
+                    axisLine: { lineStyle: { color: COLORS.grid } },
+                },
+                yAxis: {
+                    type: 'value',
+                    min: 0,
+                    name: payload.indicator.unit,
+                    axisLabel: { color: COLORS.muted, formatter: formatInteger },
+                    splitLine: { lineStyle: { color: COLORS.grid, type: 'dashed' } },
+                },
+                series: [{
+                    name: payload.indicator.label,
+                    type: 'bar',
+                    data: indicatorItems.map((item) => item.value),
+                    barMaxWidth: 56,
+                    itemStyle: { color: COLORS.total, borderRadius: [7, 7, 0, 0] },
+                    label: { show: true, position: 'top', color: COLORS.text, formatter: ({ value }) => formatInteger(value) },
+                }],
+            }
+            : {
+                animation: !reducedMotion,
+                color: [COLORS.male, COLORS.female, COLORS.total, '#d39b35', '#7559a8', '#45958c'],
+                tooltip: {
+                    trigger: 'item',
+                    formatter: (item) => [
+                        `<strong>${item.name}</strong>`,
+                        `${formatInteger(item.value)} ${payload.indicator?.unit || 'jiwa'}`,
+                        formatPercentage(item.percent),
+                        `Tahun ${summary.year}`,
+                    ].join('<br>'),
+                },
+                legend: { bottom: 0, selectedMode: true, textStyle: { color: COLORS.text } },
+                series: [{
+                    name: payload.indicator?.label || 'Komposisi Penduduk',
+                    type: 'pie',
+                    radius: '74%',
+                    center: ['50%', '44%'],
+                    stillShowZeroSum: false,
+                    avoidLabelOverlap: true,
+                    itemStyle: { borderColor: '#ffffff', borderWidth: 3, borderRadius: 7 },
+                    label: { formatter: ({ name, percent }) => `${name}\n${formatPercentage(percent)}`, color: COLORS.text, fontWeight: 600 },
+                    emphasis: { scale: true, scaleSize: 8, itemStyle: { shadowBlur: 14, shadowColor: 'rgba(38, 53, 42, .2)' } },
+                    data: indicatorItems.map((item) => ({ name: item.label, value: item.value })),
+                }],
+            };
+        pieChart.setOption(isGender ? {
             animation: !reducedMotion,
             color: [COLORS.male, COLORS.female],
             tooltip: {
@@ -490,7 +550,7 @@ export const initPopulationStatistics = () => {
                     { name: 'Perempuan', value: Number(summary.female) || 0 },
                 ],
             }],
-        });
+        } : genericOption);
         pieContainer.addEventListener('focus', () => {
             pieChart?.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: 0 });
             pieChart?.dispatchAction({ type: 'showTip', seriesIndex: 0, dataIndex: 0 });

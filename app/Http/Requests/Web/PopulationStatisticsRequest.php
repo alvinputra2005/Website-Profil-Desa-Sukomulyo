@@ -16,6 +16,7 @@ class PopulationStatisticsRequest extends FormRequest
     {
         return [
             'menu' => ['nullable', 'string', Rule::in(array_keys(config('statistic_pages.population_menus', [])))],
+            'indicator' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9_]+$/'],
         ];
     }
 }

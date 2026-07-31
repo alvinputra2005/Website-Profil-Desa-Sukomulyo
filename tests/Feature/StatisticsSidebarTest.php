@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Resident;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -9,33 +10,33 @@ class StatisticsSidebarTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_statistics_subpages_show_the_scrollable_accordion_sidebar(): void
+    public function test_statistics_subpages_show_available_datasets_in_an_accordion(): void
     {
+        Resident::query()->create([
+            'nik' => '3300000000000001',
+            'name' => 'Warga Uji',
+            'sex' => 'L',
+            'birth_date' => '2000-01-01',
+            'status' => 'active',
+        ]);
+
         $this->get(route('data-statistik.population'))
             ->assertOk()
             ->assertSee('aria-label="Navigasi data statistik"', false)
             ->assertSee('data-no-scroll-reveal', false)
             ->assertSee('data-sidebar-accordion', false)
-            ->assertSee('Statistik Penduduk')
-            ->assertSee('Statistik Keluarga')
-            ->assertDontSee('Statistik Bantuan')
+            ->assertSee('data-sidebar-accordion-toggle', false)
+            ->assertSee('Semua Dataset')
+            ->assertSee('Penduduk Terkini')
             ->assertSee('Rentang Umur')
-            ->assertSee('Pendidikan')
-            ->assertDontSee('Pendidikan Sedang Ditempuh')
-            ->assertDontSee('Penyakit Menahun')
+            ->assertSee('Jenis Kelamin')
+            ->assertDontSee('Agama')
+            ->assertDontSee('Akta Kelahiran')
+            ->assertDontSee('Golongan Darah')
             ->assertSee('Diperbarui 28 Juli 2026')
             ->assertSee('Pemerintah Desa Sukomulyo')
             ->assertSee('data-population-export-toggle="actual"', false)
             ->assertSee('Unduh Data Aktual');
-
-        $this->get(route('data-statistik.detail', ['section' => 'pendidikan']))
-            ->assertOk()
-            ->assertSee('aria-label="Navigasi data statistik"', false)
-            ->assertSee('data-generic-statistics', false)
-            ->assertSee('data-generic-series', false)
-            ->assertSee('Unduh Data Aktual')
-            ->assertSee('Unduh Data Tahunan')
-            ->assertDontSee('Statistik Bantuan');
     }
 
     public function test_statistics_landing_page_stays_full_width_without_the_sidebar(): void

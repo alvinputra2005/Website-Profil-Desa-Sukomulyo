@@ -1,147 +1,132 @@
-@props(['importedCategories' => null])
+@props([
+    'importedCategories' => null,
+    'populationIndicators' => null,
+    'selectedDataset' => null,
+])
 @php
-    $section = (string) request()->route('section', '');
-    $importedCategory = (string) (request()->route('category') ?? $section);
-    $importedDataset = (string) request()->route('dataset', '');
     $importedCategories ??= $importedStatisticCategories ?? collect();
-    $activeMenu = (string) request('menu', '');
-    $isFamilyPage = request()->routeIs('data-statistik.detail') && $section === 'keluarga';
-    $familyMenu = $isFamilyPage ? $activeMenu : '';
-    $populationExpanded = ! $isFamilyPage;
-    $familyExpanded = $isFamilyPage;
-    $populationUrl = fn (string $menu): string => route('data-statistik.population', ['menu' => $menu]);
+    $populationIndicators ??= $publicPopulationIndicators ?? collect();
+    $section = (string) request()->route('section', '');
+    $selectedDataset ??= (string) request('dataset', '');
+    $selectedIndicator = (string) request('indicator', $populationIndicators->first()?->key ?? '');
+    $display = request('display') === 'table' ? 'table' : 'chart';
 @endphp
 
 <aside id="sidebar" class="statistics-sidebar" aria-label="Navigasi data statistik" data-no-scroll-reveal>
     <nav class="statistics-sidebar__nav" data-sidebar-accordion>
-        <section class="statistics-sidebar__group">
-            <h2 class="statistics-sidebar__heading">
-                <button
-                    class="statistics-sidebar__toggle"
-                    type="button"
-                    aria-expanded="{{ $populationExpanded ? 'true' : 'false' }}"
-                    aria-controls="statistics-population-panel"
-                    data-sidebar-toggle
-                    data-sidebar-accordion-toggle
-                >
-                    <span class="statistics-sidebar__icon statistics-sidebar__icon--population" aria-hidden="true">
-                        <i class="fas fa-users"></i>
-                    </span>
-                    <span>Statistik Penduduk</span>
-                    <i class="fas fa-chevron-down statistics-sidebar__chevron" aria-hidden="true"></i>
-                </button>
-            </h2>
-
-            <div id="statistics-population-panel" class="statistics-sidebar__panel" @if (! $populationExpanded) hidden @endif>
-                <ul class="statistics-sidebar__list">
-                    <li>
-                        <a class="{{ $activeMenu === 'agama' ? 'is-active' : '' }}" href="{{ $populationUrl('agama') }}">
-                            Agama
-                        </a>
-                    </li>
-                    <li><a class="{{ $activeMenu === 'akte-kelahiran' ? 'is-active' : '' }}" href="{{ $populationUrl('akte-kelahiran') }}">Akte Kelahiran</a></li>
-                    <li><a class="{{ $activeMenu === 'akseptor-kb' ? 'is-active' : '' }}" href="{{ $populationUrl('akseptor-kb') }}">Akseptor KB</a></li>
-                    <li><a class="{{ $activeMenu === 'penyandang-cacat' ? 'is-active' : '' }}" href="{{ $populationUrl('penyandang-cacat') }}">Penyandang Cacat</a></li>
-                    <li><a class="{{ $activeMenu === 'golongan-darah' ? 'is-active' : '' }}" href="{{ $populationUrl('golongan-darah') }}">Golongan Darah</a></li>
-                    <li>
-                        <a class="{{ request()->routeIs('data-statistik.population') && $activeMenu === '' ? 'is-active' : '' }}" href="{{ route('data-statistik.population') }}">
-                            Jenis Kelamin
-                        </a>
-                    </li>
-                    <li>
-                        <a class="{{ request()->routeIs('data-statistik.detail') && $section === 'pendidikan' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'pendidikan']) }}">
-                            Pendidikan
-                        </a>
-                    </li>
-                    <li>
-                        <a class="{{ request()->routeIs('data-statistik.detail') && in_array($section, ['pekerjaan', 'ekonomi'], true) ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'pekerjaan']) }}">
-                            Pekerjaan
-                        </a>
-                    </li>
-                    <li><a class="{{ $activeMenu === 'status-penduduk' ? 'is-active' : '' }}" href="{{ $populationUrl('status-penduduk') }}">Status Penduduk</a></li>
-                    <li>
-                        <a class="{{ $activeMenu === 'status-perkawinan' ? 'is-active' : '' }}" href="{{ $populationUrl('status-perkawinan') }}">
-                            Status Perkawinan
-                        </a>
-                    </li>
-                    <li><a class="{{ $activeMenu === 'rentang-umur' ? 'is-active' : '' }}" href="{{ $populationUrl('rentang-umur') }}">Rentang Umur</a></li>
-                    <li>
-                        <a class="{{ $activeMenu === 'kategori-umur' ? 'is-active' : '' }}" href="{{ $populationUrl('kategori-umur') }}">
-                            Kategori Umur
-                        </a>
-                    </li>
-                    <li><a class="{{ $activeMenu === 'wajib-ktp' ? 'is-active' : '' }}" href="{{ $populationUrl('wajib-ktp') }}">Kepemilikan Wajib KTP</a></li>
-                    <li><a class="{{ $activeMenu === 'warga-negara' ? 'is-active' : '' }}" href="{{ $populationUrl('warga-negara') }}">Warga Negara</a></li>
-                </ul>
-            </div>
-        </section>
-
-        <section class="statistics-sidebar__group">
-            <h2 class="statistics-sidebar__heading">
-                <button
-                    class="statistics-sidebar__toggle"
-                    type="button"
-                    aria-expanded="{{ $familyExpanded ? 'true' : 'false' }}"
-                    aria-controls="statistics-family-panel"
-                    data-sidebar-toggle
-                    data-sidebar-accordion-toggle
-                >
-                    <span class="statistics-sidebar__icon statistics-sidebar__icon--family" aria-hidden="true">
-                        <i class="fas fa-home"></i>
-                    </span>
-                    <span>Statistik Keluarga</span>
-                    <i class="fas fa-chevron-down statistics-sidebar__chevron" aria-hidden="true"></i>
-                </button>
-            </h2>
-            <div id="statistics-family-panel" class="statistics-sidebar__panel" @if (! $familyExpanded) hidden @endif>
-                <ul class="statistics-sidebar__list">
-                    <li><a class="{{ $isFamilyPage && $familyMenu === '' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga']) }}">Ringkasan Keluarga</a></li>
-                    <li><a class="{{ $familyMenu === 'kepala-keluarga' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'kepala-keluarga']) }}">Kepala Keluarga</a></li>
-                    <li><a class="{{ $familyMenu === 'anggota-keluarga' ? 'is-active' : '' }}" href="{{ route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'anggota-keluarga']) }}">Anggota Keluarga</a></li>
-                </ul>
-            </div>
-        </section>
-
-        @foreach ($importedCategories as $category)
-            @php($categoryExpanded = $importedCategory === $category->slug)
+        @if ($populationIndicators->isNotEmpty())
+            @php
+                $populationOpen = request()->routeIs('data-statistik.population');
+            @endphp
             <section class="statistics-sidebar__group">
                 <h2 class="statistics-sidebar__heading">
                     <button
-                        class="statistics-sidebar__toggle"
+                        class="statistics-sidebar__toggle {{ $populationOpen ? 'is-active' : '' }}"
                         type="button"
-                        aria-expanded="{{ $categoryExpanded ? 'true' : 'false' }}"
-                        aria-controls="statistics-imported-category-{{ $category->id }}"
+                        aria-expanded="{{ $populationOpen ? 'true' : 'false' }}"
+                        aria-controls="statistics-sidebar-population"
                         data-sidebar-toggle
                         data-sidebar-accordion-toggle
                     >
-                        <span class="statistics-sidebar__icon" aria-hidden="true">
-                            <i class="fas {{ $category->icon ?: 'fa-table' }}"></i>
-                        </span>
-                        <span>{{ $category->name }}</span>
+                        <span class="statistics-sidebar__icon statistics-sidebar__icon--population" aria-hidden="true"><i class="fas fa-users"></i></span>
+                        <span>Penduduk Terkini</span>
                         <i class="fas fa-chevron-down statistics-sidebar__chevron" aria-hidden="true"></i>
                     </button>
                 </h2>
-                <div id="statistics-imported-category-{{ $category->id }}" class="statistics-sidebar__panel" @if (! $categoryExpanded) hidden @endif>
+                <div id="statistics-sidebar-population" class="statistics-sidebar__panel" data-sidebar-panel @if(! $populationOpen) hidden @endif>
+                    <strong class="statistics-sidebar__panel-title">Semua Dataset</strong>
                     <ul class="statistics-sidebar__list">
-                        <li>
-                            <a
-                                class="{{ $categoryExpanded && $importedDataset === '' ? 'is-active' : '' }}"
-                                href="{{ route('data-statistik.detail', ['section' => $category->slug]) }}"
-                            >
-                                Semua Dataset
-                            </a>
-                        </li>
-                        @foreach ($category->datasets as $dataset)
+                        @foreach($populationIndicators as $indicator)
                             <li>
                                 <a
-                                    class="{{ $importedDataset === $dataset->slug ? 'is-active' : '' }}"
-                                    href="{{ route('data-statistik.imported.show', ['category' => $category->slug, 'dataset' => $dataset->slug]) }}"
+                                    class="statistics-sidebar__dataset-link {{ $populationOpen && $selectedIndicator === $indicator->key ? 'is-active' : '' }}"
+                                    href="{{ route('data-statistik.population', ['indicator' => $indicator->key]) }}"
                                 >
-                                    {{ $dataset->short_title ?: $dataset->title }}
+                                    <span class="statistics-sidebar__radio" aria-hidden="true"></span>
+                                    <span>{{ $indicator->label }}</span>
                                 </a>
                             </li>
                         @endforeach
                     </ul>
+                    <a class="statistics-sidebar__see-all" href="{{ route('data-statistik.population') }}">
+                        <span>Lihat Semua</span>
+                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </section>
+        @endif
+
+        @foreach ($importedCategories as $category)
+            @php
+                $categoryOpen = $section === $category->slug;
+                $datasetGroups = $category->datasets
+                    ->groupBy(function ($dataset) {
+                        $identity = $dataset->family && $dataset->table_number
+                            ? $dataset->family.'-'.$dataset->table_number
+                            : (string) ($dataset->short_title ?: $dataset->title);
+
+                        return \Illuminate\Support\Str::slug($identity) ?: 'dataset-'.$dataset->id;
+                    })
+                    ->map(function ($datasets, $key) {
+                        $dataset = $datasets->sortBy('year')->last();
+                        $label = trim((string) ($dataset->short_title ?: $dataset->title));
+
+                        return [
+                            'key' => $key,
+                            'label' => mb_strtoupper($label) === $label
+                                ? \Illuminate\Support\Str::title(mb_strtolower($label))
+                                : $label,
+                            'years' => $datasets->pluck('year')->unique()->sort()->values()->all(),
+                        ];
+                    })
+                    ->values();
+                $activeDataset = $categoryOpen
+                    ? ($selectedDataset ?: (string) data_get($datasetGroups->first(), 'key', ''))
+                    : '';
+            @endphp
+            <section class="statistics-sidebar__group">
+                <h2 class="statistics-sidebar__heading">
+                    <button
+                        class="statistics-sidebar__toggle {{ $categoryOpen ? 'is-active' : '' }}"
+                        type="button"
+                        aria-expanded="{{ $categoryOpen ? 'true' : 'false' }}"
+                        aria-controls="statistics-sidebar-{{ $category->slug }}"
+                        data-sidebar-toggle
+                        data-sidebar-accordion-toggle
+                    >
+                        <span class="statistics-sidebar__icon" aria-hidden="true"><i class="fas {{ $category->icon ?: 'fa-table' }}"></i></span>
+                        <span>{{ $category->name }}</span>
+                        <i class="fas fa-chevron-down statistics-sidebar__chevron" aria-hidden="true"></i>
+                    </button>
+                </h2>
+                <div id="statistics-sidebar-{{ $category->slug }}" class="statistics-sidebar__panel" data-sidebar-panel @if(! $categoryOpen) hidden @endif>
+                    <strong class="statistics-sidebar__panel-title">Semua Dataset</strong>
+                    <ul class="statistics-sidebar__list">
+                        @foreach($datasetGroups as $dataset)
+                            <li>
+                                <a
+                                    class="statistics-sidebar__dataset-link {{ $categoryOpen && $activeDataset === $dataset['key'] ? 'is-active' : '' }}"
+                                    href="{{ route('data-statistik.detail', [
+                                        'section' => $category->slug,
+                                        'dataset' => $dataset['key'],
+                                        'display' => $display,
+                                    ]) }}"
+                                >
+                                    <span class="statistics-sidebar__radio" aria-hidden="true"></span>
+                                    <span>
+                                        {{ $dataset['label'] }}
+                                        @if(count($dataset['years']) > 1)
+                                            <small>{{ implode(', ', $dataset['years']) }}</small>
+                                        @endif
+                                    </span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <a class="statistics-sidebar__see-all" href="{{ route('data-statistik.detail', ['section' => $category->slug]) }}">
+                        <span>Lihat Semua</span>
+                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                    </a>
                 </div>
             </section>
         @endforeach

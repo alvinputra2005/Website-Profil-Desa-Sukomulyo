@@ -21,8 +21,8 @@
     <div class="box-body">
         <form method="get" action="{{ route('admin.statistics.categories.show', $category->slug) }}" class="statistics-category-filters">
             <div class="form-group">
-                <label for="data">Pilih Data Statistik</label>
-                <select id="data" name="data" class="form-control select2" onchange="this.form.submit()">
+                <label for="data">Jenis Data Statistik</label>
+                <select id="data" name="data" class="form-control select2" data-placeholder="Pilih Data Statistik">
                     @forelse ($types as $type)
                         <option value="{{ $type['key'] }}" @selected($selectedType === $type['key'])>{{ $type['label'] }}</option>
                     @empty
@@ -31,8 +31,8 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="period">Tahun/Periode</label>
-                <select id="period" name="period" class="form-control" onchange="this.form.submit()">
+                <label for="period">Periode</label>
+                <select id="period" name="period" class="form-control select2">
                     @forelse ($periods as $period)
                         <option value="{{ $period }}" @selected($selectedPeriod === (string) $period)>{{ $period }}</option>
                     @empty
@@ -42,7 +42,7 @@
             </div>
             <div class="form-group">
                 <label for="status">Status</label>
-                <select id="status" name="status" class="form-control" onchange="this.form.submit()">
+                <select id="status" name="status" class="form-control select2">
                     <option value="all" @selected($status === 'all')>Semua Status</option>
                     @foreach ($statusLabels as $value => $label)
                         <option value="{{ $value }}" @selected($status === $value)>{{ $label }}</option>
@@ -50,6 +50,7 @@
                 </select>
             </div>
             <div class="statistics-category-filter-action">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> Tampilkan Data</button>
                 <a href="{{ route('admin.statistics.categories.create', ['category' => $category->slug, 'template' => $dataset?->id]) }}" class="btn btn-success"><i class="fa fa-plus"></i> Tambah Periode</a>
             </div>
         </form>
@@ -130,6 +131,12 @@
     <div class="box box-warning"><div class="box-body empty-state statistics-empty-state">
         <i class="fa fa-filter"></i><h4>Data tidak ditemukan</h4>
         <p>@if ($datasets->isEmpty()) Belum ada dataset pada kategori {{ $category->name }}. Import data statistik untuk mulai mengelolanya. @else Tidak ada dataset yang cocok dengan kombinasi jenis data, periode, dan status tersebut. @endif</p>
+        @if ($datasets->isEmpty())
+            <p>
+                <a class="btn btn-primary" href="{{ route('admin.statistics.import.create') }}"><i class="fa fa-upload"></i> Import Data</a>
+                <a class="btn btn-default" href="{{ route('admin.statistics.categories.create', ['category' => $category->slug]) }}"><i class="fa fa-plus"></i> Tambah Data Manual</a>
+            </p>
+        @endif
     </div></div>
 @endif
 @endsection

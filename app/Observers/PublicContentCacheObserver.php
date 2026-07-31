@@ -12,6 +12,7 @@ use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Official;
 use App\Models\PopulationArea;
+use App\Models\PopulationStatisticIndicator;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
 use App\Models\Resident;
@@ -24,6 +25,7 @@ use App\Models\StatisticRow;
 use App\Models\StatisticValue;
 use App\Models\VillageProfileSection;
 use App\Services\SiteCache;
+use App\Services\Statistics\PopulationStatisticCache;
 use Illuminate\Database\Eloquent\Model;
 
 class PublicContentCacheObserver
@@ -52,12 +54,17 @@ class PublicContentCacheObserver
 
     private function invalidate(Model $model): void
     {
+        if ($model instanceof Resident || $model instanceof PopulationStatisticIndicator) {
+            PopulationStatisticCache::flush();
+        }
+
         match (true) {
             $model instanceof Setting => $this->cache->invalidateSettings(),
             $model instanceof VillageProfileSection => $this->cache->invalidateProfile(),
             $model instanceof Official => $this->cache->invalidateOfficials(),
             $model instanceof News, $model instanceof NewsCategory => $this->cache->invalidateNews(),
             $model instanceof Resident,
+            $model instanceof PopulationStatisticIndicator,
             $model instanceof FamilyCard,
             $model instanceof PopulationArea,
             $model instanceof ResidentEvent,

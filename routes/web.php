@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\PopulationGroupController;
 use App\Http\Controllers\Admin\PopulationGroupMemberController;
 use App\Http\Controllers\Admin\PopulationReportController;
 use App\Http\Controllers\Admin\PopulationStatisticsController;
+use App\Http\Controllers\Admin\PopulationStatisticController;
 use App\Http\Controllers\Admin\RegionController;
 use App\Http\Controllers\Admin\StatisticImportController;
 use App\Http\Controllers\Admin\StatisticDatasetController;
@@ -103,8 +104,11 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::get('/import/{import:public_id}/preview', [StatisticImportController::class, 'preview'])->name('import.preview');
         Route::post('/import/{import:public_id}/process', [StatisticImportController::class, 'processImport'])->name('import.process');
     });
-    Route::middleware('can:manage-data')->prefix('statistics')->name('statistics.categories.')->group(function () {
+    Route::middleware('can:manage-data')->prefix('statistics')->name('statistics.')->group(function () {
         Route::get('/', [StatisticDatasetController::class, 'index'])->name('index');
+        Route::get('/population', [PopulationStatisticController::class, 'show'])->name('population.show');
+    });
+    Route::middleware('can:manage-data')->prefix('statistics')->name('statistics.categories.')->group(function () {
         Route::get('/{category:slug}', [StatisticDatasetController::class, 'show'])->name('show');
         Route::get('/{category:slug}/create', [StatisticDatasetController::class, 'create'])->name('create');
         Route::post('/{category:slug}', [StatisticDatasetController::class, 'store'])->name('store');
@@ -123,7 +127,7 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::get('kelompok/{group}/anggota/{membership}/edit', [PopulationGroupMemberController::class, 'edit'])->name('groups.members.edit');
         Route::put('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'update'])->name('groups.members.update');
         Route::delete('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'destroy'])->name('groups.members.destroy');
-        Route::get('statistik', PopulationStatisticsController::class)->name('statistics');
+        Route::get('statistik', [PopulationStatisticController::class, 'show'])->name('statistics');
         Route::get('laporan-penduduk', [PopulationReportController::class, 'index'])->name('report');
         Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
     });

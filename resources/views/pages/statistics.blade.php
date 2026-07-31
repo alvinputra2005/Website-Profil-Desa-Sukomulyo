@@ -30,6 +30,7 @@
                         @endforeach
                     </section>
 
+                    @if ($livelihoods !== [])
                     <section id="statistik-ekonomi" class="data-panel">
                         <span class="section-kicker">Ekonomi</span>
                         <h2>Mata Pencaharian</h2>
@@ -44,6 +45,7 @@
                             </div>
                         @endforeach
                     </section>
+                    @endif
                 </div>
 
                 <div class="data-section-grid">
@@ -89,21 +91,36 @@
                     @endif
                 </section>
 
-                @if ($importedStatisticCategories->isNotEmpty())
-                    <section class="data-panel" aria-labelledby="imported-statistics-title">
-                        <span class="section-kicker">Data Sensus</span>
-                        <h2 id="imported-statistics-title">Dataset Statistik Terpublikasi</h2>
+                @if (!empty($statisticCards))
+                    <section class="data-panel" aria-labelledby="statistics-cards-title">
+                        <span class="section-kicker">Kategori Data</span>
+                        <h2 id="statistics-cards-title">Dataset Statistik Terpublikasi</h2>
                         <div class="statistics-grid">
-                            @foreach ($importedStatisticCategories as $category)
-                                <article class="statistic-card">
-                                    <i class="fas {{ $category->icon ?: 'fa-table' }}" aria-hidden="true"></i>
-                                    <div><strong>{{ $category->datasets->count() }}</strong><span>dataset</span></div>
-                                    <p>
-                                        <a href="{{ route('data-statistik.detail', ['section' => $category->slug]) }}">
-                                            {{ $category->name }}
-                                        </a>
-                                    </p>
-                                </article>
+                            @foreach ($statisticCards as $card)
+                                <details class="statistic-card statistic-card--dropdown">
+                                    <summary>
+                                        <i class="{{ $card['icon'] }}" aria-hidden="true"></i>
+                                        <span class="statistic-card__summary">
+                                            <strong>{{ $card['label'] }}</strong>
+                                            <span>{{ count($card['options']) }} opsi</span>
+                                        </span>
+                                        <span class="statistic-card__description">{{ $card['description'] }}</span>
+                                    </summary>
+
+                                    @if (!empty($card['options']))
+                                        <div class="statistic-card__dropdown">
+                                            <label class="screen-reader-text" for="statistic-card-{{ $card['key'] }}">Pilih data {{ $card['label'] }}</label>
+                                            <select id="statistic-card-{{ $card['key'] }}" class="form-control" onchange="if (this.value) window.location.href = this.value;">
+                                                <option value="">Pilih data</option>
+                                                @foreach ($card['options'] as $option)
+                                                    <option value="{{ $option['url'] }}">{{ $option['label'] }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @else
+                                        <p>Belum ada data tersedia.</p>
+                                    @endif
+                                </details>
                             @endforeach
                         </div>
                     </section>

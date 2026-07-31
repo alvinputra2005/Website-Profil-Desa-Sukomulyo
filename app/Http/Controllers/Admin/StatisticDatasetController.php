@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Services\Statistics\PopulationStatisticIndicatorService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\View\View;
 
@@ -21,23 +22,24 @@ class StatisticDatasetController extends Controller
 {
     public function __construct(private ActivityLogger $logger) {}
 
-    public function index(): RedirectResponse
+    public function index(PopulationStatisticIndicatorService $indicators): View
     {
         $this->authorize('viewAny', StatisticDataset::class);
 
-        $category = StatisticCategory::query()
+        $categories = StatisticCategory::query()
             ->where('is_active', true)
+            ->whereHas('datasets', fn ($query) => $query->whereHas('rows'))
             ->orderBy('display_order')
             ->orderBy('name')
-            ->first();
+            ->get();
+        $datasets = StatisticDataset::query()->whereHas('rows');
 
-        if (! $category) {
-            return redirect()
-                ->route('admin.statistics.import.create')
-                ->with('warning', 'Belum ada kategori statistik aktif. Jalankan seeder kategori terlebih dahulu.');
-        }
-
-        return redirect()->route('admin.statistics.categories.show', $category->slug);
+        return view('admin.statistics.index', [
+            'populationIndicatorCount' => $indicators->availableIndicators()->count(),
+            'categoryCount' => $categories->count(),
+            'datasetCount' => (clone $datasets)->count(),
+            'publishedCount' => (clone $datasets)->where('status', 'published')->count(),
+        ]);
     }
 
     public function show(Request $request, StatisticCategory $category): View

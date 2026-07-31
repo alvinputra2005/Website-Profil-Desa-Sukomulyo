@@ -64,14 +64,14 @@
                 <div class="sidebar-form">
                     <div class="input-group"><input type="text" id="cari-menu" class="form-control" placeholder="Pencarian..."><span class="input-group-btn"><button type="button" class="btn btn-flat"><i class="fa fa-search"></i></button></span></div>
                 </div>
-                @php($statisticCategoryItems=\Illuminate\Support\Facades\Schema::hasTable('statistic_categories')?\App\Models\StatisticCategory::query()->where('is_active',true)->orderBy('display_order')->orderBy('name')->get()->map(fn($category)=>[$category->name,'admin.statistics.categories.show',$category->slug])->all():[])
+                @php($statisticCategoryItems=app(\App\Services\Admin\AdminNavigationBuilder::class)->statisticItems())
                 @php($groups=[
                 ['label'=>'Beranda','icon'=>'fa-dashboard','ability'=>null,'items'=>[['Dashboard','admin.dashboard',null]]],
                 ['label'=>'Info Desa','icon'=>'fa-home','ability'=>'manage-content','items'=>[['Identitas Desa','admin.village-content.profile',null],['Visi Misi','admin.village-content.vision-mission.edit',null],['Sejarah Desa','admin.village-content.edit','history'],['Struktur Pemerintahan','admin.officials.index',null],['Potensi Desa','admin.village-content.edit','potential']]],
-                ['label'=>'Kependudukan','icon'=>'fa-users','ability'=>'manage-data','items'=>[['Penduduk','admin.population.residents.index',null],['Keluarga','admin.population.families.index',null],['Statistik Kependudukan','admin.population.statistics',null],['Laporan Penduduk','admin.population.report',null]]],
+                ['label'=>'Kependudukan','icon'=>'fa-users','ability'=>'manage-data','items'=>[['Penduduk','admin.population.residents.index',null],['Keluarga','admin.population.families.index',null],['Laporan Penduduk','admin.population.report',null]]],
                 ['label'=>'Admin Web','icon'=>'fa-desktop','ability'=>'manage-content','items'=>[['Artikel','admin.resources.index','news'],['Kategori Artikel','admin.resources.index','categories'],['Galeri','admin.resources.index','galleries']]],
                 ['label'=>'Informasi Publik','icon'=>'fa-file-text','ability'=>'manage-content','items'=>[['Dokumen & Pengumuman','admin.resources.index','publications'],['Lampiran Publikasi','admin.resources.index','publication-attachments']]],
-                ['label'=>'Data Desa','icon'=>'fa-bar-chart','ability'=>'manage-data','items'=>[['Import Statistik','admin.statistics.import.create',null],['Nilai Statistik','admin.resources.index','statistic-values'],['Indeks Desa Membangun','admin.resources.index','idm']]],
+                ['label'=>'Data Desa','icon'=>'fa-database','ability'=>'manage-data','items'=>[['Nilai Statistik Legacy','admin.resources.index','statistic-values'],['Indeks Desa Membangun','admin.resources.index','idm']]],
                 ['label'=>'Statistik','icon'=>'fa-bar-chart','ability'=>'manage-data','items'=>$statisticCategoryItems],
                 ['label'=>'Pemetaan','icon'=>'fa-map','ability'=>'manage-data','items'=>[['Layer Peta','admin.resources.index','map-layers'],['Fitur Peta','admin.resources.index','map-features']]],
                 ['label'=>'Pelayanan','icon'=>'fa-file-text-o','ability'=>'manage-letter-applications','items'=>[['Permohonan Surat','admin.letter-applications.index',null],['Jenis Surat & Persyaratan','admin.letter-services.index',null]]],

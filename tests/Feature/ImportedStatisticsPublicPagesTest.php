@@ -30,16 +30,33 @@ class ImportedStatisticsPublicPagesTest extends TestCase
             ->assertOk()
             ->assertSee('Dataset Penduduk Menurut RW')
             ->assertSee('data-generic-statistics', false)
-            ->assertSee('data-imported-dataset-selector', false)
+            ->assertDontSee('statistics-dataset-picker', false)
+            ->assertDontSee('data-imported-dataset-selector', false)
+            ->assertSee('Pilih visualisasi / tampilan data')
+            ->assertSee('Grafik Data')
+            ->assertSee('Tabel Data')
+            ->assertSee('data-sidebar-accordion', false)
+            ->assertSee('statistics-sidebar__dataset-link is-active', false)
             ->assertSee('data-generic-current-chart', false)
             ->assertSee('data-generic-trend-chart', false)
-            ->assertSee('Lihat Tabel Lengkap')
+            ->assertSee('data-generic-current-table', false)
+            ->assertSee('0101')
+            ->assertSee('BAKIR RW 01')
+            ->assertSee('1.234')
+            ->assertSee('42,50%')
+            ->assertDontSee('Lihat Tabel Lengkap')
             ->assertSee('Navigasi data statistik')
-            ->assertSee(route('data-statistik.imported.show', [
-                'category' => $category->slug,
-                'dataset' => $dataset->slug,
-            ]), false)
             ->assertDontSee('Dataset Draf');
+
+        $this->get(route('data-statistik.detail', [
+            'section' => $category->slug,
+            'dataset' => 'ik-1',
+            'display' => 'table',
+        ]))
+            ->assertOk()
+            ->assertSee('statistics-display-option is-active', false)
+            ->assertSee('population-summary-table-wrap statistics-view-panel" >', false)
+            ->assertSee('population-composition-grid statistics-view-panel"  hidden', false);
     }
 
     public function test_published_dataset_renders_generic_rows_and_keeps_draft_dataset_private(): void

@@ -95,10 +95,7 @@ class ImportedStatisticPageData
             'tableSort' => $filters['sort'] ?? 'asc',
             'datasetOptions' => $datasetOptions->all(),
             'selectedDataset' => $selectedDataset,
-            'datasetDetailUrl' => route('data-statistik.imported.show', [
-                'category' => $category->slug,
-                'dataset' => $latestDataset->slug,
-            ]),
+            'latestDataset' => $latestDataset,
             'categoryName' => $category->name,
         ];
     }

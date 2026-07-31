@@ -18,6 +18,9 @@ use App\Models\VillageComment;
 use App\Models\VillageProfileSection;
 use App\Services\PopulationStatistics as PopulationStatisticsService;
 use App\Services\SiteCache;
+use App\Services\Statistics\PopulationStatisticIndicatorService;
+use App\Services\Statistics\PopulationStatisticAggregator;
+use App\Models\PopulationStatisticIndicator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,6 +37,8 @@ class PublicSiteService
     public function __construct(
         private readonly SiteCache $cache,
         private readonly AdministrativeServicePage $administrativeServicePage,
+        private readonly PopulationStatisticIndicatorService $populationIndicators,
+        private readonly PopulationStatisticAggregator $populationAggregator,
     ) {}
 
     public function sitemap(): Response
@@ -285,7 +290,69 @@ class PublicSiteService
                     ? $populationStatistics->summary()
                     : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'areas' => 0];
                 $total = max($summary['residents'], 1);
-                $occupations = Schema::hasTable('residents') ? $populationStatistics->distribution('occupation') : [];
+                $populationIndicators = $this->populationIndicators->availableIndicators(true);
+                $importedCategories = $this->publishedStatisticCategories();
+                $indicatorResults = $populationIndicators
+                    ->map(fn (PopulationStatisticIndicator $indicator): array => [
+                        'title' => $indicator->label,
+                        'items' => collect($this->populationAggregator->aggregate($indicator)['items'])
+                            ->map(fn (array $item): array => $item + ['total' => $item['value']])
+                            ->all(),
+                    ]);
+                $baseCards = collect([
+                    [
+                        'key' => 'kependudukan',
+                        'label' => 'Kependudukan',
+                        'icon' => 'fas fa-users',
+                        'description' => 'Pilih indikator penduduk yang ingin dibuka.',
+                        'options' => $populationIndicators->map(fn (PopulationStatisticIndicator $indicator): array => [
+                            'label' => $indicator->label,
+                            'url' => route('data-statistik.population', ['indicator' => $indicator->key]),
+                        ])->all(),
+                    ],
+                    [
+                        'key' => 'keluarga',
+                        'label' => 'Keluarga',
+                        'icon' => 'fas fa-home',
+                        'description' => 'Data keluarga, kepala keluarga, dan anggota keluarga.',
+                        'options' => [
+                            ['label' => 'Jumlah Keluarga', 'url' => route('data-statistik.detail', ['section' => 'keluarga'])],
+                            ['label' => 'Kepala Keluarga', 'url' => route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'kepala-keluarga'])],
+                            ['label' => 'Anggota Keluarga', 'url' => route('data-statistik.detail', ['section' => 'keluarga', 'menu' => 'anggota-keluarga'])],
+                        ],
+                    ],
+                ])->keyBy('key');
+
+                foreach ($importedCategories as $category) {
+                    $importedOptions = collect([
+                        ['label' => 'Lihat semua '.$category->name, 'url' => route('data-statistik.detail', ['section' => $category->slug])],
+                    ])->concat($category->datasets->map(fn (StatisticDataset $dataset): array => [
+                        'label' => trim(($dataset->short_title ?: $dataset->title).' · '.($dataset->period ?: $dataset->year)),
+                        'url' => route('data-statistik.imported.show', [
+                            'category' => $category->slug,
+                            'dataset' => $dataset->slug,
+                        ]),
+                    ]))->all();
+
+                    if ($baseCards->has($category->slug)) {
+                        $card = $baseCards->get($category->slug);
+                        $card['options'] = collect($card['options'])->concat($importedOptions)->values()->all();
+                        $card['description'] = $card['description'].' '.$category->datasets->count().' dataset terpublikasi.';
+                        $baseCards->put($category->slug, $card);
+
+                        continue;
+                    }
+
+                    $baseCards->put($category->slug, [
+                        'key' => $category->slug,
+                        'label' => $category->name,
+                        'icon' => 'fas '.($category->icon ?: 'fa-table'),
+                        'description' => $category->datasets->count().' dataset terpublikasi.',
+                        'options' => $importedOptions,
+                    ]);
+                }
+
+                $statisticCards = $baseCards->values();
 
                 return [
                     'statistics' => [
@@ -297,20 +364,11 @@ class PublicSiteService
                         ['label' => 'Laki-laki', 'value' => $summary['male'], 'percentage' => round($summary['male'] / $total * 100, 2)],
                         ['label' => 'Perempuan', 'value' => $summary['female'], 'percentage' => round($summary['female'] / $total * 100, 2)],
                     ],
-                    'livelihoods' => collect($occupations)->take(6)->map(fn (array $row) => [
-                        'label' => $row['label'],
-                        'percentage' => $row['percentage'],
-                    ])->all(),
-                    'distributions' => collect([
-                        'kelompok-umur' => ['title' => 'Kelompok Umur', 'category' => 'age'],
-                        'statistik-pendidikan' => ['title' => 'Statistik Pendidikan', 'category' => 'education'],
-                        'statistik-pekerjaan' => ['title' => 'Statistik Pekerjaan', 'category' => 'occupation'],
-                        'agama' => ['title' => 'Agama', 'category' => 'religion'],
-                        'status-perkawinan' => ['title' => 'Status Perkawinan', 'category' => 'marital_status'],
-                    ])->map(fn (array $panel) => [
-                        'title' => $panel['title'],
-                        'items' => Schema::hasTable('residents') ? $populationStatistics->distribution($panel['category']) : [],
-                    ])->all(),
+                    'livelihoods' => [],
+                    'distributions' => $indicatorResults
+                        ->mapWithKeys(fn (array $panel, int $index): array => ['indikator-'.$index => $panel])
+                        ->all(),
+                    'statisticCards' => $statisticCards->all(),
                     'idm' => Schema::hasTable('idm_scores')
                         ? IdmScore::query()->latest('year')->first()?->only(['year', 'idm_score', 'iks_score', 'ike_score', 'ikl_score', 'status_label', 'source'])
                         : null,
@@ -363,19 +421,34 @@ class PublicSiteService
         return $this->render('pages.statistic-detail', compact('page', 'summary', 'panels', 'idm'));
     }
 
-    public function populationStatistics(PopulationStatisticsService $populationStatistics): View
+    public function populationStatistics(
+        Collection $indicators,
+        ?PopulationStatisticIndicator $selectedIndicator,
+        ?array $result,
+    ): View
     {
-        $genderSummary = $this->cache->remember(
-            SiteCache::PUBLIC_POPULATION_STATISTICS,
-            SiteCache::TEN_MINUTES,
-            fn (): array => $populationStatistics->genderSummary(),
-        );
+        $year = (int) config('village.population_year', now()->year);
+        $items = collect($result['items'] ?? []);
+        $genderSummary = [
+            'year' => $year,
+            'male' => (int) data_get($items->firstWhere('key', 'L'), 'value', 0),
+            'female' => (int) data_get($items->firstWhere('key', 'P'), 'value', 0),
+            'total' => (int) ($result['total'] ?? 0),
+            'male_percentage' => (float) data_get($items->firstWhere('key', 'L'), 'percentage', 0),
+            'female_percentage' => (float) data_get($items->firstWhere('key', 'P'), 'percentage', 0),
+            'updated_at' => null,
+            'source' => 'Administrasi Kependudukan Desa',
+        ];
+
         return $this->render('pages.population-statistics', [
             'page' => [
                 'title' => 'Statistik Penduduk',
                 'description' => 'Komposisi penduduk Desa Sukomulyo berdasarkan data administrasi kependudukan saat ini.',
             ],
             'genderSummary' => $genderSummary,
+            'populationIndicators' => $indicators,
+            'selectedIndicator' => $selectedIndicator,
+            'result' => $result,
         ]);
     }
 
@@ -867,6 +940,7 @@ class PublicSiteService
         return array_merge($layout, [
             'navigation' => $this->navigation(),
             'importedStatisticCategories' => $this->publishedStatisticCategories(),
+            'publicPopulationIndicators' => $this->populationIndicators->availableIndicators(true),
         ]);
     }
 
@@ -894,10 +968,12 @@ class PublicSiteService
             ->where('is_active', true)
             ->whereHas('datasets', fn ($query) => $query
                 ->whereNotNull('statistic_import_id')
-                ->where('status', 'published'))
+                ->where('status', 'published')
+                ->whereHas('rows'))
             ->with(['datasets' => fn ($query) => $query
                 ->whereNotNull('statistic_import_id')
                 ->where('status', 'published')
+                ->whereHas('rows')
                 ->withCount('rows')
                 ->orderBy('display_order')])
             ->orderBy('display_order')
@@ -906,6 +982,20 @@ class PublicSiteService
 
     private function navigation(): array
     {
+        $statisticChildren = [
+        ];
+        if ($this->populationIndicators->availableIndicators(true)->isNotEmpty()) {
+            $statisticChildren[] = ['label' => 'Penduduk Terkini', 'route' => 'data-statistik.population', 'active' => 'data-statistik.population'];
+        }
+        foreach ($this->publishedStatisticCategories() as $category) {
+            $statisticChildren[] = [
+                'label' => $category->name,
+                'route' => 'data-statistik.detail',
+                'active' => 'data-statistik.detail',
+                'parameters' => ['section' => $category->slug],
+            ];
+        }
+
         return [
             ['label' => 'Beranda', 'route' => 'beranda', 'active' => 'beranda'],
             ['label' => 'Pelayanan Surat', 'route' => 'letter-services.index', 'active' => 'letter-services.*'],
@@ -917,12 +1007,7 @@ class PublicSiteService
                 ['label' => 'Wilayah Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
                 ['label' => 'Potensi Desa', 'route' => 'potensi-desa', 'active' => 'potensi-desa'],
             ]],
-            ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => [
-                ['label' => 'Statistik Penduduk', 'route' => 'data-statistik.population', 'active' => 'data-statistik.population'],
-                ['label' => 'Statistik Keluarga', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'keluarga']],
-                ['label' => 'Statistik Ekonomi', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'ekonomi']],
-                ['label' => 'IDM (Indeks Desa Membangun)', 'route' => 'data-statistik.detail', 'active' => 'data-statistik.detail', 'parameters' => ['section' => 'idm']],
-            ]],
+            ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => $statisticChildren],
             ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
                 ['label' => 'Pengumuman Desa', 'route' => 'announcements.index', 'active' => 'announcements.*'],
                 ['label' => 'Layanan Administrasi', 'route' => 'informasi-desa.detail', 'active' => 'informasi-desa.detail', 'parameters' => ['section' => 'layanan-administrasi']],
