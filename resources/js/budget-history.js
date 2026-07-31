@@ -323,8 +323,18 @@ const initExportControls = (root, payload, chartMap) => {
                 ? root.querySelector('.budget-history-table')
                 : root.querySelector('[data-budget-export-table]');
             const year = payload.budget?.summary?.year;
-            const title = isHistory ? 'Riwayat APBDes Desa Sukomulyo 2017–2026' : `Detail APBDes Desa Sukomulyo Tahun ${year}`;
-            const filename = isHistory ? 'riwayat-apbdes-2017-2026' : `apbdes-sukomulyo-${year}`;
+            const historyYears = (payload.history || [])
+                .map((item) => Number(item.year))
+                .filter(Number.isFinite);
+            const firstYear = historyYears.length ? Math.min(...historyYears) : 2019;
+            const lastYear = historyYears.length ? Math.max(...historyYears) : 2025;
+            const periodLabel = `${firstYear}–${lastYear}`;
+            const title = isHistory
+                ? `Riwayat APBDes Desa Sukomulyo ${periodLabel}`
+                : `Detail APBDes Desa Sukomulyo Tahun ${year}`;
+            const filename = isHistory
+                ? `riwayat-apbdes-${firstYear}-${lastYear}`
+                : `apbdes-sukomulyo-${year}`;
 
             setOpen(control, false);
             button.disabled = true;
@@ -415,7 +425,9 @@ export const initBudgetHistory = () => {
         const { spending = [], quarters = [] } = payload.budget;
         chartMap.allocation = createAllocationChart(root.querySelector('[data-budget-allocation-chart]'), spending);
         chartMap.comparison = createComparisonChart(root.querySelector('[data-budget-comparison-chart]'), spending);
-        chartMap.quarter = createQuarterChart(root.querySelector('[data-budget-quarter-chart]'), quarters);
+        if (quarters.length > 0) {
+            chartMap.quarter = createQuarterChart(root.querySelector('[data-budget-quarter-chart]'), quarters);
+        }
         charts.push(chartMap.allocation, chartMap.comparison, chartMap.quarter);
     }
 

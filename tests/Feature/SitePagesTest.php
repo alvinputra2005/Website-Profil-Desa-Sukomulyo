@@ -129,15 +129,15 @@ class SitePagesTest extends TestCase
             ->assertSee('Laki-laki')
             ->assertSee('Perempuan')
             ->assertSee('Transparansi APBDes')
-            ->assertSee('Pendapatan APBDes 2026')
-            ->assertSee('Belanja APBDes 2026')
-            ->assertSee('Realisasi APBDes 2026')
+            ->assertSee('Pendapatan APBDes 2025')
+            ->assertSee('Belanja APBDes 2025')
+            ->assertSee('Realisasi APBDes 2025')
             ->assertSee('budget-progress-fill', false)
             ->assertSee('budget-progress-percent', false)
             ->assertSee(route('transparansi-apbdes'), false)
-            ->assertSee('Total Pendapatan APBDes 2026')
-            ->assertSee('Total Penggunaan Belanja APBDes 2026')
-            ->assertSee('Total Realisasi APBDes 2026');
+            ->assertSee('Total Pendapatan APBDes 2025')
+            ->assertSee('Total Penggunaan Belanja APBDes 2025')
+            ->assertSee('Total Realisasi APBDes 2025');
     }
 
     public function test_homepage_identity_link_opens_the_village_identity_page(): void
@@ -365,13 +365,15 @@ class SitePagesTest extends TestCase
             ->assertSee('Musyawarah Desa Penyusunan Program Kerja');
     }
 
-    public function test_budget_history_shows_ten_years_of_data(): void
+    public function test_budget_history_shows_public_data_through_2025(): void
     {
         $this->get(route('transparansi-apbdes'))
             ->assertOk()
-            ->assertSee('Riwayat APBDes 10 Tahun Terakhir')
-            ->assertSee('2017')
-            ->assertSee('2026')
+            ->assertSee('Riwayat APBDes 2019–2025')
+            ->assertSee(route('transparansi-apbdes.show', 2019), false)
+            ->assertSee(route('transparansi-apbdes.show', 2025), false)
+            ->assertDontSee(route('transparansi-apbdes.show', 2017), false)
+            ->assertDontSee(route('transparansi-apbdes.show', 2026), false)
             ->assertDontSee('data dummy');
     }
 

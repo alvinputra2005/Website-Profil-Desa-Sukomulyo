@@ -14,6 +14,7 @@ use App\Models\Publication;
 use App\Models\Setting;
 use App\Models\VillageComment;
 use App\Models\VillageProfileSection;
+use App\Services\BudgetHistoryData;
 use App\Services\PopulationStatistics as PopulationStatisticsService;
 use App\Services\SiteCache;
 use Illuminate\Http\JsonResponse;
@@ -32,6 +33,7 @@ class PublicSiteService
     public function __construct(
         private readonly SiteCache $cache,
         private readonly AdministrativeServicePage $administrativeServicePage,
+        private readonly BudgetHistoryData $budgetHistoryData,
     ) {}
 
     public function sitemap(): Response
@@ -89,6 +91,7 @@ class PublicSiteService
 
     public function home(PopulationStatisticsService $populationStatistics): View
     {
+        $apbdes = $this->homeApbdes($this->budgetHistoryData->latest());
         $populationSummary = $this->cache->remember(
             SiteCache::HOME_STATISTICS,
             SiteCache::TEN_MINUTES,
@@ -108,49 +111,64 @@ class PublicSiteService
                 ['label' => 'Laki-laki', 'value' => $populationSummary['male'], 'image' => 'assets/male-resident-avatar.jpg'],
                 ['label' => 'Perempuan', 'value' => $populationSummary['female'], 'image' => 'assets/female-resident-avatar.jpg'],
             ],
-            'apbdes' => [
-                'year' => 2026,
-                'panels' => [
-                    [
-                        'title' => 'Pendapatan APBDes 2026',
-                        'total' => 2485000000,
-                        'total_label' => 'Total Pendapatan APBDes 2026',
-                        'total_percentage' => 100,
-                        'items' => [
-                            ['label' => 'Dana Desa', 'value' => 1150000000],
-                            ['label' => 'Alokasi Dana Desa', 'value' => 850000000],
-                            ['label' => 'Bagi Hasil Pajak dan Retribusi', 'value' => 310000000],
-                            ['label' => 'Pendapatan Asli Desa', 'value' => 175000000],
-                        ],
-                    ],
-                    [
-                        'title' => 'Belanja APBDes 2026',
-                        'total' => 2350000000,
-                        'total_label' => 'Total Penggunaan Belanja APBDes 2026',
-                        'total_percentage' => 95,
-                        'items' => [
-                            ['label' => 'Penyelenggaraan Pemerintahan', 'value' => 720000000],
-                            ['label' => 'Pelaksanaan Pembangunan', 'value' => 930000000],
-                            ['label' => 'Pembinaan Kemasyarakatan', 'value' => 270000000],
-                            ['label' => 'Pemberdayaan Masyarakat', 'value' => 430000000],
-                        ],
-                    ],
-                    [
-                        'title' => 'Realisasi APBDes 2026',
-                        'total' => 1739000000,
-                        'total_label' => 'Total Realisasi APBDes 2026',
-                        'total_percentage' => 74,
-                        'items' => [
-                            ['label' => 'Penyelenggaraan Pemerintahan', 'value' => 520000000, 'percentage' => 72],
-                            ['label' => 'Pelaksanaan Pembangunan', 'value' => 690000000, 'percentage' => 74],
-                            ['label' => 'Pembinaan Kemasyarakatan', 'value' => 194000000, 'percentage' => 72],
-                            ['label' => 'Pemberdayaan Masyarakat', 'value' => 335000000, 'percentage' => 78],
-                        ],
-                    ],
-                ],
-            ],
+            'apbdes' => $apbdes,
             'galleryPhotos' => array_slice($this->galleryPhotos(), 0, 5),
         ]);
+    }
+
+    private function homeApbdes(array $budget): array
+    {
+        $year = (int) $budget['summary']['year'];
+        $income = (float) $budget['summary']['income'];
+        $spending = (float) $budget['summary']['spending'];
+
+        $composition = static fn (array $item, float $total): array => [
+            'label' => $item['short_name'] ?? $item['name'],
+            'value' => (float) ($item['budget'] ?? 0),
+            'percentage' => $total > 0
+                ? round((float) ($item['budget'] ?? 0) / $total * 100, 2)
+                : 0,
+        ];
+
+        return [
+            'year' => $year,
+            'panels' => [
+                [
+                    'title' => "Pendapatan APBDes {$year}",
+                    'total' => $income,
+                    'total_label' => "Total Pendapatan APBDes {$year}",
+                    'total_percentage' => 100,
+                    'items' => collect($budget['revenue'] ?? [])
+                        ->map(fn (array $item): array => $composition($item, $income))
+                        ->values()
+                        ->all(),
+                ],
+                [
+                    'title' => "Belanja APBDes {$year}",
+                    'total' => $spending,
+                    'total_label' => "Total Penggunaan Belanja APBDes {$year}",
+                    'total_percentage' => 100,
+                    'items' => collect($budget['spending'] ?? [])
+                        ->map(fn (array $item): array => $composition($item, $spending))
+                        ->values()
+                        ->all(),
+                ],
+                [
+                    'title' => "Realisasi APBDes {$year}",
+                    'total' => (float) $budget['summary']['realization'],
+                    'total_label' => "Total Realisasi APBDes {$year}",
+                    'total_percentage' => (float) $budget['summary']['percentage'],
+                    'items' => collect($budget['spending'] ?? [])
+                        ->map(fn (array $item): array => [
+                            'label' => $item['short_name'] ?? $item['name'],
+                            'value' => (float) ($item['realization'] ?? 0),
+                            'percentage' => (float) ($item['percentage'] ?? 0),
+                        ])
+                        ->values()
+                        ->all(),
+                ],
+            ],
+        ];
     }
 
     public function profile(): View
@@ -431,7 +449,7 @@ class PublicSiteService
     {
         return $this->render('pages.public-information', [
             'documents' => [
-                ['icon' => 'fas fa-file-pdf', 'title' => 'APBDes Desa Sukomulyo', 'category' => 'Keuangan Desa', 'year' => '2026'],
+                ['icon' => 'fas fa-file-pdf', 'title' => 'APBDes Desa Sukomulyo', 'category' => 'Keuangan Desa', 'year' => (string) BudgetHistoryData::LATEST_PUBLIC_YEAR],
                 ['icon' => 'fas fa-file-alt', 'title' => 'Rencana Kerja Pemerintah Desa', 'category' => 'Perencanaan', 'year' => '2026'],
                 ['icon' => 'fas fa-clipboard-list', 'title' => 'Laporan Penyelenggaraan Pemerintahan Desa', 'category' => 'Laporan', 'year' => '2025'],
                 ['icon' => 'fas fa-bullhorn', 'title' => 'Standar Pelayanan Publik Desa', 'category' => 'Pelayanan', 'year' => '2026'],
