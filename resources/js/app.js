@@ -52,6 +52,18 @@ const initPublicPage = () => {
     initGenericStatistics();
     initPublicTableCopy();
 
+    const governmentOrganization = document.querySelector('[data-government-organization-root]');
+    if (governmentOrganization && governmentOrganization.dataset.governmentOrganizationLoading !== 'true') {
+        governmentOrganization.dataset.governmentOrganizationLoading = 'true';
+        import('./government-organization').then(({ initGovernmentOrganization }) => {
+            initGovernmentOrganization();
+        }).catch(() => {
+            governmentOrganization.dataset.governmentOrganizationLoading = 'false';
+            const status = governmentOrganization.querySelector('[data-government-organization-status]');
+            if (status) status.textContent = 'Struktur interaktif belum dapat dimuat. Silakan muat ulang halaman.';
+        });
+    }
+
     const documentForm = document.querySelector('[data-r2-documents]');
     if (documentForm && documentForm.dataset.presigned === 'true' && documentForm.dataset.bound !== 'true') {
         const rows = [...documentForm.querySelectorAll('.letter-upload-row[data-requirement-key]')];

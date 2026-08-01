@@ -37,13 +37,19 @@
         </div>
 
         <div class="header_right">
+            @php
+                $whatsappNumber = (string) preg_replace('/\D+/', '', (string) $site['phone']);
+                if (str_starts_with($whatsappNumber, '0')) {
+                    $whatsappNumber = '62'.substr($whatsappNumber, 1);
+                }
+            @endphp
             <div class="infobox">
                 <i class="fas fa-envelope" aria-hidden="true"></i>
-                <span><span class="statictext">Email</span><a href="mailto:{{ $site['email'] }}">{{ $site['email'] }}</a></span>
+                <span><span class="statictext">Email</span><a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to={{ rawurlencode($site['email']) }}" target="_blank" rel="noopener noreferrer">{{ $site['email'] }}</a></span>
             </div>
             <div class="infobox left-right-border">
                 <i class="fas fa-phone" aria-hidden="true"></i>
-                <span><span class="statictext">Telepon</span>{{ $site['phone'] }}</span>
+                <span><span class="statictext">Telepon</span><a href="https://wa.me/{{ $whatsappNumber }}" target="_blank" rel="noopener noreferrer">{{ $site['phone'] }}</a></span>
             </div>
         </div>
     </div>

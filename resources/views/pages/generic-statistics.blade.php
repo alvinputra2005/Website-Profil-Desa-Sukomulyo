@@ -10,7 +10,7 @@
     $displayQuery = request()->query();
     $chartUrl = url()->current().'?'.http_build_query(array_merge($displayQuery, ['display' => 'chart']));
     $tableUrl = url()->current().'?'.http_build_query(array_merge($displayQuery, ['display' => 'table']));
-    $chartLabel = $page['chart'] === 'pie' ? 'Grafik Komposisi' : 'Grafik Data';
+    $chartLabel = $page['chart'] === 'pie' ? 'Grafik' : 'Grafik Data';
 @endphp
 
 <x-layouts.app :title="$page['title']" :description="$page['description']">
