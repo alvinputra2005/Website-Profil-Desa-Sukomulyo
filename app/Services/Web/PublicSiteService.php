@@ -888,8 +888,8 @@ class PublicSiteService
                     'site' => [
                         'name' => $setting('site.name', 'Desa Sukomulyo'),
                         'tagline' => $setting('site.tagline', 'Website Resmi Pemerintah Desa Sukomulyo'),
-                        'email' => $setting('site.email', 'pemdes@sukomulyo.desa.id'),
-                        'phone' => $setting('site.phone', '(0000) 123 456'),
+                        'email' => $setting('site.email', 'desasukomulyo2022@gmail.com'),
+                        'phone' => $setting('site.phone', '085731625435'),
                         'address' => $setting('site.address', 'Kantor Desa Sukomulyo, Indonesia'),
                     ],
                     'articles' => $this->latestArticles(),

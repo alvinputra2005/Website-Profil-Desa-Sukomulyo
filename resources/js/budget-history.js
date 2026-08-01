@@ -16,6 +16,7 @@ import {
     scalePdfLayout,
     svgToRaster,
 } from './population-statistics';
+import { bindStatisticsCopyButtons } from './statistics-copy';
 
 echarts.use([
     BarChart,
@@ -432,6 +433,7 @@ export const initBudgetHistory = () => {
     }
 
     initExportControls(root, payload, chartMap);
+    bindStatisticsCopyButtons({ root, charts: chartMap });
 
     if ('ResizeObserver' in window) {
         const observer = new ResizeObserver(() => charts.filter(Boolean).forEach((chart) => chart.resize()));

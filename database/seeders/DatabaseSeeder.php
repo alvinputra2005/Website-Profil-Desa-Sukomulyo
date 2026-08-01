@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
         $this->call(StatisticCategorySeeder::class);
         $this->call(PopulationStatisticIndicatorSeeder::class);
         $admin = User::firstOrCreate(['email' => 'admin@sukomulyo.desa.id'], ['role_id' => $roles['super_admin']->id, 'name' => 'Administrator Desa', 'password' => 'Sukomulyo123!', 'is_active' => true, 'email_verified_at' => now()]);
-        foreach (['site.name' => 'Desa Sukomulyo', 'site.tagline' => 'Website Resmi Pemerintah Desa Sukomulyo', 'site.email' => 'pemdes@sukomulyo.desa.id', 'site.phone' => '(0000) 123 456', 'site.address' => 'Kantor Desa Sukomulyo, Indonesia'] as $key => $value) {
+        foreach (['site.name' => 'Desa Sukomulyo', 'site.tagline' => 'Website Resmi Pemerintah Desa Sukomulyo', 'site.email' => 'desasukomulyo2022@gmail.com', 'site.phone' => '085731625435', 'site.address' => 'Kantor Desa Sukomulyo, Indonesia'] as $key => $value) {
             Setting::firstOrCreate(['key' => $key], ['value' => $value, 'type' => 'string', 'group' => 'identitas', 'is_public' => true, 'updated_by' => $admin->id]);
         }
         foreach ([

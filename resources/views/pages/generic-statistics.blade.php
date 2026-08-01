@@ -10,8 +10,7 @@
     $displayQuery = request()->query();
     $chartUrl = url()->current().'?'.http_build_query(array_merge($displayQuery, ['display' => 'chart']));
     $tableUrl = url()->current().'?'.http_build_query(array_merge($displayQuery, ['display' => 'table']));
-    $chartLabel = $page['chart'] === 'pie' ? 'Grafik Komposisi' : 'Grafik Data';
-    $chartTypeLabel = $page['chart'] === 'pie' ? 'Pie Chart' : 'Bar Chart';
+    $chartLabel = $page['chart'] === 'pie' ? 'Grafik' : 'Grafik Data';
 @endphp
 
 <x-layouts.app :title="$page['title']" :description="$page['description']">
@@ -69,7 +68,6 @@
                     </header>
 
                     <div class="statistics-display-selector" aria-label="Pilih visualisasi atau tampilan data">
-                        <span class="statistics-display-selector__label">Pilih visualisasi / tampilan data</span>
                         <div class="statistics-display-selector__options">
                             <a
                                 class="statistics-display-option {{ $displayMode === 'chart' ? 'is-active' : '' }}"
@@ -77,7 +75,7 @@
                                 @if($displayMode === 'chart') aria-current="page" @endif
                             >
                                 <i class="fas fa-chart-line" aria-hidden="true"></i>
-                                <span><strong>{{ $chartLabel }}</strong><small>{{ $chartTypeLabel }}</small></span>
+                                <span><strong>{{ $chartLabel }}</strong></span>
                             </a>
                             <a
                                 class="statistics-display-option {{ $displayMode === 'table' ? 'is-active' : '' }}"
@@ -85,7 +83,7 @@
                                 @if($displayMode === 'table') aria-current="page" @endif
                             >
                                 <i class="fas fa-table" aria-hidden="true"></i>
-                                <span><strong>Tabel Data</strong><small>Lihat data dalam tabel</small></span>
+                                <span><strong>Tabel Data</strong></span>
                             </a>
                         </div>
                     </div>

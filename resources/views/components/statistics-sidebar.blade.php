@@ -18,7 +18,7 @@
             @php
                 $populationOpen = request()->routeIs('data-statistik.population');
             @endphp
-            <section class="statistics-sidebar__group">
+            <section class="statistics-sidebar__group statistics-sidebar__group--population">
                 <h2 class="statistics-sidebar__heading">
                     <button
                         class="statistics-sidebar__toggle {{ $populationOpen ? 'is-active' : '' }}"
@@ -41,7 +41,6 @@
                                     class="statistics-sidebar__dataset-link {{ $populationOpen && $selectedIndicator === $indicator->key ? 'is-active' : '' }}"
                                     href="{{ route('data-statistik.population', ['indicator' => $indicator->key]) }}"
                                 >
-                                    <span class="statistics-sidebar__radio" aria-hidden="true"></span>
                                     <span>{{ $indicator->label }}</span>
                                 </a>
                             </li>
@@ -106,7 +105,6 @@
                                         'display' => $display,
                                     ]) }}"
                                 >
-                                    <span class="statistics-sidebar__radio" aria-hidden="true"></span>
                                     <span>
                                         {{ $dataset['label'] }}
                                         @if(count($dataset['years']) > 1)

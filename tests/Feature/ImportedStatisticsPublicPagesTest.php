@@ -32,7 +32,7 @@ class ImportedStatisticsPublicPagesTest extends TestCase
             ->assertSee('data-generic-statistics', false)
             ->assertDontSee('statistics-dataset-picker', false)
             ->assertDontSee('data-imported-dataset-selector', false)
-            ->assertSee('Pilih visualisasi / tampilan data')
+            ->assertDontSee('Pilih visualisasi / tampilan data')
             ->assertSee('Grafik Data')
             ->assertSee('Tabel Data')
             ->assertSee('data-statistics-copy="current-chart"', false)

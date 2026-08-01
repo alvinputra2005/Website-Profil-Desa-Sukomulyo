@@ -60,6 +60,13 @@
                 </header>
 
                 <section class="budget-chart-panel budget-history-chart-panel" aria-label="Grafik tren APBDes tahun {{ $historyFrom }} sampai {{ $historyTo }}">
+                    <button
+                        class="statistics-copy-button"
+                        type="button"
+                        title="Salin grafik"
+                        aria-label="Salin grafik tren APBDes"
+                        data-statistics-copy="history"
+                    ><i class="far fa-copy" aria-hidden="true"></i></button>
                     <div
                         class="budget-history-chart"
                         data-budget-trend-chart

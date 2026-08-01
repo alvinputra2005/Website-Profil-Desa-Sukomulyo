@@ -49,34 +49,35 @@ const pieLegend = (items, compact = false, containerWidth = 760) => {
         total > 0 ? (Number(item.value) || 0) / total * 100 : 0,
     ]));
     const nameWidth = compact
-        ? 72
-        : Math.max(130, Math.min(190, Math.round(containerWidth * 0.25)));
+        ? 84
+        : Math.max(110, Math.min(150, Math.round(containerWidth * 0.18)));
+    const legendLineHeight = compact ? 20 : 24;
 
     return {
         orient: 'vertical',
         right: '1%',
         top: 'middle',
-        width: '43%',
+        width: '38%',
         type: 'scroll',
-        itemWidth: compact ? 10 : 14,
-        itemHeight: compact ? 10 : 14,
-        itemGap: compact ? 10 : 17,
+        itemWidth: compact ? 12 : 18,
+        itemHeight: compact ? 12 : 18,
+        itemGap: compact ? 10 : 12,
         selectedMode: true,
         formatter: (name) => `{name|${name}}{value|${formatPercentage(percentages.get(name) || 0)}}`,
         textStyle: {
             color: COLORS.text,
-            fontSize: compact ? 10 : 12,
+            fontSize: compact ? 10 : 13,
             rich: {
                 name: {
                     width: nameWidth,
                     overflow: 'truncate',
-                    lineHeight: 19,
+                    lineHeight: legendLineHeight,
                 },
                 value: {
-                    width: compact ? 45 : 58,
+                    width: compact ? 50 : 70,
                     align: 'right',
-                    fontWeight: 600,
-                    lineHeight: 19,
+                    fontWeight: 700,
+                    lineHeight: legendLineHeight,
                 },
             },
         },
@@ -372,17 +373,17 @@ const chartToSvgAsset = (chart, container, preferredWidth = null) => {
                 left: null,
                 top: 'middle',
                 bottom: null,
-                width: '42%',
+                width: '38%',
                 itemWidth: 15,
                 itemHeight: 15,
-                itemGap: 19,
+                itemGap: 12,
                 formatter: (name) => `{name|${name}}{value|${formatPercentage(piePercentages.get(name) || 0)}}`,
                 textStyle: {
                     color: COLORS.text,
                     fontSize: 14,
                     rich: {
                         name: {
-                            width: 245,
+                            width: 170,
                             overflow: 'truncate',
                             lineHeight: 21,
                         },
