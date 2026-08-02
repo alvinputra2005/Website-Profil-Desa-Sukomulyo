@@ -71,10 +71,15 @@ export const initGenericStatistics = () => {
         maximumFractionDigits: decimals,
     });
     const formatValue = (value) => numberFormatter.format(Number(value) || 0);
-    const percentageFormatter = new Intl.NumberFormat('id-ID', {
+const percentageFormatter = new Intl.NumberFormat('id-ID', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
-    });
+});
+const truncateLegendName = (name, maxLength) => {
+    const value = String(name ?? '');
+
+    return value.length > maxLength ? `${Array.from(value).slice(0, maxLength - 1).join('')}…` : value;
+};
     const pieTotal = latest.items.reduce((total, item) => total + (Number(item.value) || 0), 0);
     const piePercentages = new Map(latest.items.map((item) => [
         item.label,
@@ -100,8 +105,8 @@ export const initGenericStatistics = () => {
     const historyTable = root.querySelector('[data-generic-history-table]');
     const compactPie = (currentContainer?.clientWidth || 0) < 640;
     const pieLegendNameWidth = compactPie
-        ? 84
-        : Math.max(110, Math.min(150, Math.round((currentContainer?.clientWidth || 760) * 0.18)));
+        ? 88
+        : Math.max(135, Math.min(185, Math.round((currentContainer?.clientWidth || 760) * 0.2)));
     const pieLegendLineHeight = compactPie ? 20 : 24;
     let currentChart = null;
     let trendChart = null;
@@ -141,7 +146,7 @@ export const initGenericStatistics = () => {
                     itemHeight: compactPie ? 12 : 18,
                     itemGap: compactPie ? 10 : 12,
                     selectedMode: true,
-                    formatter: (name) => `{name|${name}}{value|${percentageFormatter.format(piePercentages.get(name) || 0)}%}`,
+                    formatter: (name) => `{name|${truncateLegendName(name, compactPie ? 14 : 23)}}{value|${percentageFormatter.format(piePercentages.get(name) || 0)}%}`,
                     textStyle: {
                         color: '#26352a',
                         fontSize: compactPie ? 10 : 13,
@@ -149,6 +154,7 @@ export const initGenericStatistics = () => {
                             name: {
                                 width: pieLegendNameWidth,
                                 overflow: 'truncate',
+                                ellipsis: '…',
                                 lineHeight: pieLegendLineHeight,
                             },
                             value: {

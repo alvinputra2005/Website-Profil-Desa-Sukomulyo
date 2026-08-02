@@ -42,15 +42,19 @@ const percentageFormatter = new Intl.NumberFormat('id-ID', {
 
 const formatInteger = (value) => integerFormatter.format(Number(value) || 0);
 const formatPercentage = (value) => `${percentageFormatter.format(Number(value) || 0)}%`;
+const truncateLegendName = (name, maxLength) => {
+    const value = String(name ?? '');
+
+    return value.length > maxLength ? `${Array.from(value).slice(0, maxLength - 1).join('')}…` : value;
+};
 const pieLegend = (items, compact = false, containerWidth = 760) => {
     const total = items.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
     const percentages = new Map(items.map((item) => [
         item.name,
         total > 0 ? (Number(item.value) || 0) / total * 100 : 0,
     ]));
-    const nameWidth = compact
-        ? 84
-        : Math.max(110, Math.min(150, Math.round(containerWidth * 0.18)));
+    const nameWidth = compact ? 88 : Math.max(135, Math.min(185, Math.round(containerWidth * 0.2)));
+    const nameLength = compact ? 14 : 23;
     const legendLineHeight = compact ? 20 : 24;
 
     return {
@@ -63,7 +67,7 @@ const pieLegend = (items, compact = false, containerWidth = 760) => {
         itemHeight: compact ? 12 : 18,
         itemGap: compact ? 10 : 12,
         selectedMode: true,
-        formatter: (name) => `{name|${name}}{value|${formatPercentage(percentages.get(name) || 0)}}`,
+        formatter: (name) => `{name|${truncateLegendName(name, nameLength)}}{value|${formatPercentage(percentages.get(name) || 0)}}`,
         textStyle: {
             color: COLORS.text,
             fontSize: compact ? 10 : 13,
@@ -71,6 +75,7 @@ const pieLegend = (items, compact = false, containerWidth = 760) => {
                 name: {
                     width: nameWidth,
                     overflow: 'truncate',
+                    ellipsis: '…',
                     lineHeight: legendLineHeight,
                 },
                 value: {
@@ -377,14 +382,15 @@ const chartToSvgAsset = (chart, container, preferredWidth = null) => {
                 itemWidth: 15,
                 itemHeight: 15,
                 itemGap: 12,
-                formatter: (name) => `{name|${name}}{value|${formatPercentage(piePercentages.get(name) || 0)}}`,
+                formatter: (name) => `{name|${truncateLegendName(name, 25)}}{value|${formatPercentage(piePercentages.get(name) || 0)}}`,
                 textStyle: {
                     color: COLORS.text,
                     fontSize: 14,
                     rich: {
                         name: {
-                            width: 170,
+                            width: 190,
                             overflow: 'truncate',
+                            ellipsis: '…',
                             lineHeight: 21,
                         },
                         value: {

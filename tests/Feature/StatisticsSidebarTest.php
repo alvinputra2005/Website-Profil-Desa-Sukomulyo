@@ -3,7 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Resident;
+use App\Services\SiteCache;
+use App\Services\Statistics\PopulationStatisticCache;
+use Database\Seeders\PopulationStatisticIndicatorSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StatisticsSidebarTest extends TestCase
@@ -48,5 +53,42 @@ class StatisticsSidebarTest extends TestCase
             ->assertOk()
             ->assertDontSee('aria-label="Navigasi data statistik"', false)
             ->assertDontSee('data-sidebar-accordion', false);
+    }
+
+    public function test_statistics_landing_page_renders_normalized_census_gender_distribution(): void
+    {
+        Storage::fake('public');
+        Resident::query()->create([
+            'nik' => '3300000000000002',
+            'name' => 'Warga Sensus',
+            'sex' => 'L',
+            'birth_date' => '2000-01-01',
+            'status' => 'active',
+        ]);
+        Storage::disk('public')->put('statistics/sensus_normalized.json', json_encode([
+            'datasets' => [
+                [
+                    'dataset_id' => 'ik_tabel_4_2021',
+                    'rows' => [
+                        ['jumlah_individu_laki_laki_dalam_keluarga' => 12],
+                    ],
+                ],
+                [
+                    'dataset_id' => 'ik_tabel_5_2021',
+                    'rows' => [
+                        ['jumlah_individu_perempuan_dalam_keluarga' => 13],
+                    ],
+                ],
+            ],
+        ], JSON_THROW_ON_ERROR));
+        $this->seed(PopulationStatisticIndicatorSeeder::class);
+        Cache::forget(PopulationStatisticCache::PUBLIC_INDICATORS);
+        Cache::forget(SiteCache::PUBLIC_STATISTICS);
+
+        $this->get(route('data-desa-statistik'))
+            ->assertOk()
+            ->assertSee('Jenis Kelamin')
+            ->assertSee('12 jiwa')
+            ->assertSee('13 jiwa');
     }
 }

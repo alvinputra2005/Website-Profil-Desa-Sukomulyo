@@ -3,6 +3,7 @@
 namespace App\Services\Statistics;
 
 use App\Models\PopulationStatisticIndicator;
+use App\Services\PopulationStatistics;
 use Carbon\Carbon;
 use InvalidArgumentException;
 
@@ -10,12 +11,33 @@ final class PopulationStatisticAggregator
 {
     public function __construct(
         private readonly PopulationStatisticIndicatorService $indicators,
+        private readonly PopulationStatistics $populationStatistics,
     ) {}
 
     public function aggregate(PopulationStatisticIndicator $indicator): array
     {
         if (! $this->indicators->isAvailable($indicator)) {
             throw new InvalidArgumentException('Indikator statistik tidak tersedia.');
+        }
+
+        if ($indicator->key === 'gender') {
+            $census = $this->populationStatistics->censusGenderSummary();
+            if ($census) {
+                return [
+                    'indicator' => [
+                        'key' => $indicator->key,
+                        'label' => $indicator->label,
+                        'unit' => $indicator->unit,
+                        'chart_type' => $indicator->chart_type,
+                    ],
+                    'total' => $census['total'],
+                    'classified' => $census['total'],
+                    'items' => [
+                        ['key' => 'L', 'label' => 'Laki-laki', 'value' => $census['male'], 'percentage' => $census['male_percentage']],
+                        ['key' => 'P', 'label' => 'Perempuan', 'value' => $census['female'], 'percentage' => $census['female_percentage']],
+                    ],
+                ];
+            }
         }
 
         $items = match ($indicator->aggregation_type) {

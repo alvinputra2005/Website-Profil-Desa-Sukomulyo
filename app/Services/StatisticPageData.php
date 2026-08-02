@@ -6,6 +6,43 @@ use App\Models\StatisticDataset;
 
 class StatisticPageData
 {
+    public function voters2024(PopulationStatistics $populationStatistics): array
+    {
+        $summary = $populationStatistics->summary();
+        $latest = [
+            'year' => 2024,
+            'source' => 'Administrasi Kependudukan Desa',
+            'updated_at' => $populationStatistics->residents()->max('updated_at'),
+            'items' => [
+                ['label' => 'Laki-laki', 'value' => (float) $summary['male'], 'unit' => 'pemilih'],
+                ['label' => 'Perempuan', 'value' => (float) $summary['female'], 'unit' => 'pemilih'],
+            ],
+            'total' => (float) ($summary['male'] + $summary['female']),
+        ];
+
+        return [
+            'context' => 'jumlah-pemilih-2024',
+            'page' => [
+                'title' => 'Statistik Kependudukan',
+                'current_title' => 'Jumlah Pemilih',
+                'trend_title' => 'Jumlah Pemilih',
+                'description' => 'Jumlah pemilih Desa Sukomulyo tahun 2024 berdasarkan data administrasi kependudukan desa.',
+                'chart' => 'pie',
+                'unit' => 'pemilih',
+                'decimals' => 0,
+                'show_total' => true,
+            ],
+            'latest' => $latest,
+            'history' => [$latest],
+            'allHistory' => [$latest],
+            'availableYears' => [2024],
+            'defaultRange' => ['from' => 2024, 'to' => 2024],
+            'tableSort' => 'asc',
+            'selectedDataset' => 'jumlah-pemilih-2024',
+            'categoryName' => 'Kependudukan',
+        ];
+    }
+
     public function populationContext(?string $menu): ?string
     {
         return config('statistic_pages.population_menus.'.($menu ?? ''));

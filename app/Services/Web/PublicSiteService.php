@@ -104,6 +104,12 @@ class PublicSiteService
                 ? $populationStatistics->summary()
                 : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'areas' => 0, 'education_records' => 0, 'occupation_records' => 0]
         );
+        $censusGender = $populationStatistics->censusGenderSummary();
+        if ($censusGender) {
+            $populationSummary['male'] = $censusGender['male'];
+            $populationSummary['female'] = $censusGender['female'];
+            $populationSummary['residents'] = $censusGender['total'];
+        }
 
         return $this->render('pages.home', [
             'villageStatistics' => [
@@ -305,16 +311,30 @@ class PublicSiteService
                 $summary = Schema::hasTable('residents')
                     ? $populationStatistics->summary()
                     : ['residents' => 0, 'male' => 0, 'female' => 0, 'families' => 0, 'areas' => 0];
+                $censusGender = $populationStatistics->censusGenderSummary();
+                if ($censusGender) {
+                    $summary['male'] = $censusGender['male'];
+                    $summary['female'] = $censusGender['female'];
+                    $summary['residents'] = $censusGender['total'];
+                }
                 $total = max($summary['residents'], 1);
                 $populationIndicators = $this->populationIndicators->availableIndicators(true);
                 $importedCategories = $this->publishedStatisticCategories();
                 $indicatorResults = $populationIndicators
-                    ->map(fn (PopulationStatisticIndicator $indicator): array => [
-                        'title' => $indicator->label,
-                        'items' => collect($this->populationAggregator->aggregate($indicator)['items'])
-                            ->map(fn (array $item): array => $item + ['total' => $item['value']])
-                            ->all(),
-                    ]);
+                    ->map(function (PopulationStatisticIndicator $indicator) use ($censusGender): array {
+                        if ($censusGender && $indicator->key === 'gender') {
+                            $items = [
+                                ['key' => 'L', 'label' => 'Laki-laki', 'value' => $censusGender['male'], 'total' => $censusGender['male'], 'percentage' => $censusGender['male_percentage']],
+                                ['key' => 'P', 'label' => 'Perempuan', 'value' => $censusGender['female'], 'total' => $censusGender['female'], 'percentage' => $censusGender['female_percentage']],
+                            ];
+                        } else {
+                            $items = collect($this->populationAggregator->aggregate($indicator)['items'])
+                                ->map(fn (array $item): array => $item + ['total' => $item['value']])
+                                ->all();
+                        }
+
+                        return ['title' => $indicator->label, 'items' => $items];
+                    });
                 $baseCards = collect([
                     [
                         'key' => 'kependudukan',
@@ -444,17 +464,22 @@ class PublicSiteService
     ): View
     {
         $year = (int) config('village.population_year', now()->year);
+        $censusGender = app(PopulationStatisticsService::class)->censusGenderSummary();
         $items = collect($result['items'] ?? []);
         $genderSummary = [
-            'year' => $year,
+            'year' => $censusGender && $selectedIndicator?->key === 'gender' ? $censusGender['year'] : $year,
             'male' => (int) data_get($items->firstWhere('key', 'L'), 'value', 0),
             'female' => (int) data_get($items->firstWhere('key', 'P'), 'value', 0),
             'total' => (int) ($result['total'] ?? 0),
             'male_percentage' => (float) data_get($items->firstWhere('key', 'L'), 'percentage', 0),
             'female_percentage' => (float) data_get($items->firstWhere('key', 'P'), 'percentage', 0),
             'updated_at' => null,
-            'source' => 'Administrasi Kependudukan Desa',
+            'source' => $censusGender && $selectedIndicator?->key === 'gender' ? $censusGender['source'] : 'Administrasi Kependudukan Desa',
         ];
+
+        if ($censusGender && $selectedIndicator?->key === 'gender') {
+            $genderSummary = array_merge($genderSummary, $censusGender);
+        }
 
         return $this->render('pages.population-statistics', [
             'page' => [

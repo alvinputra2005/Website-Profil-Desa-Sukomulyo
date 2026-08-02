@@ -28,10 +28,15 @@ class VillageStatisticController extends Controller
         PublicSiteService $site,
         StatisticPageData $statisticPages,
         ImportedStatisticPageData $importedStatisticPages,
+        PopulationStatistics $populationStatistics,
         string $section,
     ): View|RedirectResponse {
         if ($section === 'penduduk') {
             return redirect()->route('data-statistik.population');
+        }
+
+        if ($section === 'kependudukan' && $request->query('dataset') === 'jumlah-pemilih-2024') {
+            return $site->genericStatistic($statisticPages->voters2024($populationStatistics));
         }
 
         if ($category = $site->findPublishedStatisticCategory($section)) {

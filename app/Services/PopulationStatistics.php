@@ -8,6 +8,7 @@ use App\Models\Resident;
 use App\Models\ResidentEvent;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class PopulationStatistics
 {
@@ -32,6 +33,43 @@ class PopulationStatistics
             'areas' => PopulationArea::distinct()->count('hamlet'),
             'education_records' => (clone $base)->whereNotNull('education')->where('education', '!=', '')->count(),
             'occupation_records' => (clone $base)->whereNotNull('occupation')->where('occupation', '!=', '')->count(),
+        ];
+    }
+
+    /**
+     * Return gender totals from the normalized census export.
+     */
+    public function censusGenderSummary(): ?array
+    {
+        $path = 'statistics/sensus_normalized.json';
+
+        if (! Storage::disk('public')->exists($path)) {
+            return null;
+        }
+
+        $payload = json_decode(Storage::disk('public')->get($path), true);
+        $datasets = collect($payload['datasets'] ?? [])->keyBy('dataset_id');
+        $maleRows = $datasets->get('ik_tabel_4_2021')['rows'] ?? null;
+        $femaleRows = $datasets->get('ik_tabel_5_2021')['rows'] ?? null;
+
+        if (! is_array($maleRows) || ! is_array($femaleRows)) {
+            return null;
+        }
+
+        $sum = static fn (array $rows, string $key): int => (int) collect($rows)
+            ->sum(fn (array $row): int => (int) ($row[$key] ?? 0));
+        $male = $sum($maleRows, 'jumlah_individu_laki_laki_dalam_keluarga');
+        $female = $sum($femaleRows, 'jumlah_individu_perempuan_dalam_keluarga');
+        $total = $male + $female;
+
+        return [
+            'male' => $male,
+            'female' => $female,
+            'total' => $total,
+            'male_percentage' => $total > 0 ? round($male / $total * 100, 2) : 0.0,
+            'female_percentage' => $total > 0 ? round($female / $total * 100, 2) : 0.0,
+            'year' => 2021,
+            'source' => 'Sensus normalized',
         ];
     }
 

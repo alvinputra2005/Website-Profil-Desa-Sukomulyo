@@ -74,6 +74,13 @@
                         ];
                     })
                     ->values();
+                if ($category->slug === 'kependudukan') {
+                    $datasetGroups->prepend([
+                        'key' => 'jumlah-pemilih-2024',
+                        'label' => 'Jumlah Pemilih 2024',
+                        'years' => [2024],
+                    ]);
+                }
                 $activeDataset = $categoryOpen
                     ? ($selectedDataset ?: (string) data_get($datasetGroups->first(), 'key', ''))
                     : '';
