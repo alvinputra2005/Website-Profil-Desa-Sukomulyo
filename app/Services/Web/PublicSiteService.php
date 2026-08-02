@@ -287,8 +287,8 @@ class PublicSiteService
                 'description' => 'Arah pembangunan dan cita-cita Pemerintah Desa Sukomulyo.',
                 'keys' => ['vision', 'mission'],
                 'fallback' => [
-                    ['title' => 'Visi Desa', 'content' => 'Terwujudnya desa yang maju, mandiri, transparan, dan sejahtera.'],
-                    ['title' => 'Misi Desa', 'content' => 'Meningkatkan pelayanan publik, ekonomi warga, dan pembangunan berkelanjutan.'],
+                    ['title' => 'Visi Desa', 'content' => 'Informasi visi desa sedang diperbarui.'],
+                    ['title' => 'Misi Desa', 'content' => 'Informasi misi desa sedang diperbarui.'],
                 ],
             ],
         ];

@@ -17,6 +17,7 @@ const initPublicTableCopy = () => {
         const previous = table.previousElementSibling;
         if (previous?.matches('.statistics-copy-button--table')) return;
         if (table.closest('[hidden]')) return;
+        if (table.closest('[data-disable-table-copy]')) return;
 
         const target = `public-table-${index++}`;
         const button = document.createElement('button');
