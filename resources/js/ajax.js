@@ -41,19 +41,29 @@ const confirmAction = async (element) => {
     const message = element.dataset.confirm;
     if (!message) return true;
 
-    if (window.Swal) {
+    const dialogApi = window.AdminDialog || window.Swal;
+    if (dialogApi) {
         const tone = element.dataset.confirmTone || 'warning';
-        const isDanger = tone === 'danger';
-        const result = await window.Swal.fire({
-            title: element.dataset.confirmTitle || 'Konfirmasi',
+        const isDestructive = element.matches('form') && (
+            (element.method || '').toLowerCase() === 'delete'
+            || element.querySelector('input[name="_method"][value="delete" i]')
+        );
+        const isDanger = tone === 'danger' || isDestructive;
+        const result = await dialogApi.fire({
+            title: element.dataset.confirmTitle || (isDanger ? 'Konfirmasi Penghapusan' : 'Konfirmasi'),
             text: message,
             icon: isDanger ? 'error' : 'warning',
             showCancelButton: true,
-            confirmButtonColor: isDanger ? '#b42318' : '#d68a00',
-            cancelButtonColor: '#6f7870',
-            confirmButtonText: element.dataset.confirmButton || 'Ya, lanjutkan',
+            customClass: {
+                popup: 'admin-dialog',
+                title: 'admin-dialog__title',
+                htmlContainer: 'admin-dialog__text',
+                actions: 'admin-dialog__actions',
+                confirmButton: `admin-dialog__button ${isDanger ? 'admin-dialog__button--danger' : 'admin-dialog__button--confirm'}`,
+                cancelButton: 'admin-dialog__button admin-dialog__button--cancel',
+            },
+            confirmButtonText: element.dataset.confirmButton || (isDanger ? 'Ya, hapus' : 'Ya, lanjutkan'),
             cancelButtonText: 'Batal',
-            reverseButtons: true,
             focusCancel: true,
         });
 
@@ -242,8 +252,8 @@ const submitForm = async (form, state, submitter = null) => {
     } catch (error) {
         if (error.name !== 'AbortError') {
             const message = 'Permintaan gagal dikirim. Periksa koneksi lalu coba lagi.';
-            if (window.Swal) {
-                window.Swal.fire({ title: 'Gagal', text: message, icon: 'error' });
+            if (window.AdminDialog || window.Swal) {
+                (window.AdminDialog || window.Swal).fire({ title: 'Gagal', text: message, icon: 'error' });
             } else {
                 window.alert(message);
             }

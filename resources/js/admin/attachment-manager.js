@@ -63,7 +63,7 @@ export const init = (root = document) => {
                 : oversized
                     ? 'Ukuran setiap PDF maksimal 10 MB.'
                     : 'Maksimal 10 PDF per sekali simpan.';
-            if (window.Swal) window.Swal.fire({ icon: 'error', title: 'Lampiran tidak valid', text: message });
+            if (window.AdminDialog || window.Swal) (window.AdminDialog || window.Swal).fire({ icon: 'error', title: 'Lampiran tidak valid', text: message });
             else window.alert(message);
             syncFiles();
             return;

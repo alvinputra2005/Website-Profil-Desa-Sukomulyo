@@ -32,6 +32,21 @@ class FamilyController extends PopulationController
         return view('admin.population.families.index', ['families' => $query->latest('id')->paginate(20)->withQueryString()]);
     }
 
+    public function archive(Request $request): View
+    {
+        $this->authorize('viewAny', FamilyCard::class);
+        $query = FamilyCard::onlyTrashed()->with(['head', 'area'])->withCount(['members' => fn ($builder) => $builder->where('status', 'active')]);
+        if ($search = trim((string) $request->query('q'))) $query->where('family_card_number', 'like', "%{$search}%");
+        return view('admin.population.families.archive', ['families' => $query->latest('deleted_at')->paginate(20)->withQueryString()]);
+    }
+
+    public function restore(FamilyCard $family): RedirectResponse
+    {
+        $this->authorize('delete', $family);
+        $family->restore();
+        return back()->with('success', 'Data keluarga berhasil dipulihkan.');
+    }
+
     public function create(): View
     {
         $this->authorize('create', FamilyCard::class);

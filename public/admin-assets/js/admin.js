@@ -46,22 +46,22 @@ if (
 
 // notifikasi swetalert
 function _error(pesan) {
-  Swal.fire({
+  (window.AdminDialog || Swal).fire({
     title: "Gagal!",
     html: pesan,
     icon: "error",
-    confirmButtonText: "OK",
-    timer: 5000,
+    confirmButtonText: "Oke",
+    customClass: { popup: "admin-dialog", title: "admin-dialog__title", htmlContainer: "admin-dialog__text", actions: "admin-dialog__actions", confirmButton: "admin-dialog__button admin-dialog__button--danger" },
   });
 }
 
 function _success(pesan) {
-  Swal.fire({
+  (window.AdminDialog || Swal).fire({
     title: "Berhasil!",
     html: pesan,
     icon: "success",
-    confirmButtonText: "OK",
-    timer: 5000,
+    confirmButtonText: "Oke",
+    customClass: { popup: "admin-dialog", title: "admin-dialog__title", htmlContainer: "admin-dialog__text", actions: "admin-dialog__actions", confirmButton: "admin-dialog__button admin-dialog__button--confirm" },
   });
 }
 

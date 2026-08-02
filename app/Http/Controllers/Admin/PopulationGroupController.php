@@ -34,6 +34,21 @@ class PopulationGroupController extends PopulationController
         ]);
     }
 
+    public function archive(Request $request): View
+    {
+        $this->authorize('viewAny', PopulationGroup::class);
+        $query = PopulationGroup::onlyTrashed()->with('chairperson')->withCount('memberships');
+        if ($search = trim((string) $request->query('q'))) $query->where(fn ($builder) => $builder->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%"));
+        return view('admin.population.groups.archive', ['groups' => $query->latest('deleted_at')->paginate(20)->withQueryString()]);
+    }
+
+    public function restore(PopulationGroup $group): RedirectResponse
+    {
+        $this->authorize('delete', $group);
+        $group->restore();
+        return back()->with('success', 'Kelompok berhasil dipulihkan.');
+    }
+
     public function create(): View
     {
         $this->authorize('create', PopulationGroup::class);

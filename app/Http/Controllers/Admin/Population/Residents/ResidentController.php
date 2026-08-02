@@ -40,6 +40,33 @@ class ResidentController extends PopulationController
         ]);
     }
 
+    public function archive(Request $request): View
+    {
+        $this->authorize('viewAny', Resident::class);
+        $query = Resident::onlyTrashed()->with(['family.head', 'area']);
+        if ($search = trim((string) $request->query('q'))) {
+            $query->where(fn ($builder) => $builder->where('name', 'like', "%{$search}%")->orWhere('nik', 'like', "%{$search}%"));
+        }
+        return view('admin.population.residents.archive', ['residents' => $query->latest('deleted_at')->paginate(20)->withQueryString()]);
+    }
+
+    public function restore(Resident $resident): RedirectResponse
+    {
+        $this->authorize('delete', $resident);
+        $resident->restore();
+        return back()->with('success', 'Data penduduk berhasil dipulihkan.');
+    }
+
+    public function forceDelete(Resident $resident): RedirectResponse
+    {
+        $this->authorize('delete', $resident);
+        if ($resident->headedFamilies()->exists() || $resident->chairedGroups()->exists() || $resident->groupMemberships()->exists() || $resident->events()->exists()) {
+            return back()->withErrors(['resident' => 'Penduduk masih memiliki riwayat atau relasi data. Pulihkan atau hapus relasinya terlebih dahulu.']);
+        }
+        $resident->forceDelete();
+        return back()->with('success', 'Data penduduk dihapus permanen.');
+    }
+
     public function create(ResidentFormQuery $form): View
     {
         $this->authorize('create', Resident::class);

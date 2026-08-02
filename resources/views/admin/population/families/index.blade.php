@@ -4,6 +4,7 @@
 @section('content')
 <div class="box box-info">
     <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-id-card"></i> Daftar Keluarga</h3><form id="bulk-delete-families" method="post" action="{{ route('admin.population.families.bulk-destroy') }}" class="inline-form" data-confirm="Arsipkan keluarga yang dipilih?" data-confirm-tone="danger" data-confirm-title="Arsipkan Keluarga Terpilih" data-confirm-button="Ya, arsipkan">@csrf @method('delete')<button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-archive"></i> Arsipkan Terpilih</button></form><div class="box-tools"><a href="{{ route('admin.population.families.create') }}" class="btn btn-social btn-info btn-sm"><i class="fa fa-plus"></i> Tambah Keluarga</a></div></div>
+    <div class="box-tools"><a href="{{ route('admin.population.families.archive') }}" class="btn btn-default btn-sm"><i class="fa fa-archive"></i> Arsip</a></div>
     <div class="box-body">
         <form method="get" class="population-filters population-filters-compact">
             <div class="form-group"><label>Cari No. KK / Kepala Keluarga</label><input name="q" class="form-control" value="{{ request('q') }}" placeholder="Nomor KK, NIK, atau nama"></div>

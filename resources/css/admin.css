@@ -233,6 +233,41 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 .form-control { border-color: #ccd3c8; }
 .form-control:focus, .select2-container--default.select2-container--focus .select2-selection--multiple { border-color: var(--admin-primary); box-shadow: none; }
 
+/* Satu bahasa visual untuk seluruh dialog konfirmasi, hapus, error, dan sukses. */
+.swal2-container {
+    padding: 20px;
+    background: rgba(25, 37, 42, .58) !important;
+}
+.swal2-popup.admin-dialog {
+    width: min(430px, calc(100vw - 32px));
+    padding: 28px 28px 24px;
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    color: var(--admin-ink);
+    box-shadow: 0 18px 55px rgba(25, 37, 42, .25);
+}
+.admin-dialog .swal2-icon { width: 58px; height: 58px; margin: 0 auto 14px; border-width: 3px; }
+.admin-dialog__title { margin: 0; padding: 0; color: var(--admin-ink); font-size: 21px; font-weight: 700; line-height: 1.25; }
+.admin-dialog__text { margin: 10px 0 0; color: var(--admin-muted); font-size: 14px; line-height: 1.55; white-space: pre-line; }
+.admin-dialog__actions { gap: 10px; margin: 24px 0 0; }
+.admin-dialog__button { min-width: 108px; margin: 0 !important; padding: 10px 16px !important; border: 1px solid transparent !important; border-radius: 5px !important; font-size: 13px !important; font-weight: 600 !important; transition: background .15s ease, border-color .15s ease, transform .15s ease; }
+.admin-dialog__button:hover { transform: translateY(-1px); }
+.admin-dialog__button--confirm { border-color: var(--admin-primary-dark) !important; background: var(--admin-primary) !important; color: #fff !important; }
+.admin-dialog__button--confirm:hover { background: var(--admin-primary-dark) !important; }
+.admin-dialog__button--danger { border-color: #96382f !important; background: #b4473d !important; color: #fff !important; }
+.admin-dialog__button--danger:hover { background: #96382f !important; }
+.admin-dialog__button--cancel { border-color: #ccd3c8 !important; background: #fff !important; color: var(--admin-muted) !important; }
+.admin-dialog__button--cancel:hover { border-color: #aeb9ad !important; background: #f3f4f1 !important; color: var(--admin-ink) !important; }
+.admin-dialog__button--deny { border-color: #96382f !important; background: #b4473d !important; color: #fff !important; }
+.admin-dialog .swal2-close { color: var(--admin-muted); }
+.admin-dialog .swal2-close:hover { color: var(--admin-ink); }
+
+@media (max-width: 480px) {
+    .swal2-popup.admin-dialog { padding: 24px 20px 20px; }
+    .admin-dialog__actions { flex-direction: column-reverse; }
+    .admin-dialog__button { width: 100%; }
+}
+
 /* Semua dropdown admin memakai jarak teks yang ringkas dan posisi vertikal seimbang. */
 .select2-container .select2-selection--single {
     display: flex;

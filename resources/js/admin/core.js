@@ -1,3 +1,27 @@
+const getAdminDialog = () => window.AdminDialog || window.Swal;
+
+const initAdminDialog = () => {
+    if (!window.Swal || window.AdminDialog) return getAdminDialog();
+
+    window.AdminDialog = window.Swal.mixin({
+        buttonsStyling: false,
+        customClass: {
+            popup: 'admin-dialog',
+            title: 'admin-dialog__title',
+            htmlContainer: 'admin-dialog__text',
+            actions: 'admin-dialog__actions',
+            confirmButton: 'admin-dialog__button admin-dialog__button--confirm',
+            cancelButton: 'admin-dialog__button admin-dialog__button--cancel',
+            denyButton: 'admin-dialog__button admin-dialog__button--deny',
+        },
+        confirmButtonColor: '#526b42',
+        cancelButtonColor: '#6f7870',
+        reverseButtons: true,
+    });
+
+    return window.AdminDialog;
+};
+
 const showSuccessDialog = (root) => {
     const dialog = root.querySelector('[data-success-dialog]');
     if (!dialog) return;
@@ -5,13 +29,13 @@ const showSuccessDialog = (root) => {
     const message = dialog.dataset.message || 'Perubahan berhasil disimpan.';
     dialog.remove();
 
-    if (window.Swal) {
-        window.Swal.fire({
+    const dialogApi = initAdminDialog();
+    if (dialogApi) {
+        dialogApi.fire({
             title: 'Berhasil!',
             text: message,
             icon: 'success',
             confirmButtonText: 'Oke',
-            confirmButtonColor: '#526b42',
             allowOutsideClick: false,
             returnFocus: false,
         });
@@ -19,6 +43,30 @@ const showSuccessDialog = (root) => {
     }
 
     window.alert(message);
+};
+
+const showErrorDialog = (root) => {
+    const dialog = root.querySelector('[data-error-dialog]');
+    if (!dialog) return;
+
+    const message = dialog.dataset.message || 'Data belum dapat diproses.';
+    const title = dialog.dataset.title || 'Data belum dapat diproses';
+    dialog.remove();
+
+    const dialogApi = initAdminDialog();
+    if (dialogApi) {
+        dialogApi.fire({
+            title,
+            text: message,
+            icon: 'error',
+            confirmButtonText: 'Oke',
+            allowOutsideClick: false,
+            returnFocus: false,
+        });
+        return;
+    }
+
+    window.alert(`${title}\n\n${message}`);
 };
 
 const initLegacyPlugins = (root) => {
@@ -66,6 +114,8 @@ const initLegacyPlugins = (root) => {
 };
 
 export const initAdminShell = (root = document) => {
+    initAdminDialog();
     showSuccessDialog(root);
+    showErrorDialog(root);
     initLegacyPlugins(root);
 };

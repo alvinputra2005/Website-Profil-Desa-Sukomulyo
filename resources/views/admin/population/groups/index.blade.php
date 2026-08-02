@@ -4,6 +4,7 @@
 @section('content')
 <div class="box box-info">
     <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-sitemap"></i> Daftar Kelompok</h3><form id="bulk-delete-groups" method="post" action="{{ route('admin.population.groups.bulk-destroy') }}" class="inline-form" data-confirm="Arsipkan kelompok yang dipilih?" data-confirm-tone="danger" data-confirm-title="Arsipkan Kelompok Terpilih" data-confirm-button="Ya, arsipkan">@csrf @method('delete')<button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-archive"></i> Arsipkan Terpilih</button></form><div class="box-tools"><a href="{{ route('admin.population.groups.create') }}" class="btn btn-social btn-info btn-sm"><i class="fa fa-plus"></i> Tambah Kelompok</a></div></div>
+    <div class="box-tools"><a href="{{ route('admin.population.groups.archive') }}" class="btn btn-default btn-sm"><i class="fa fa-archive"></i> Arsip</a></div>
     <div class="box-body">
         <form method="get" class="population-filters population-filters-compact">
             <div class="form-group"><label>Cari Kode / Nama</label><input name="q" class="form-control" value="{{ request('q') }}"></div>

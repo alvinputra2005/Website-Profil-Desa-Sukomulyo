@@ -136,10 +136,17 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::get('penduduk/template-import', [ResidentImportController::class, 'template'])->name('residents.import-template');
         Route::post('penduduk/import', [ResidentImportController::class, 'store'])->name('residents.import');
         Route::delete('penduduk/bulk', [ResidentController::class, 'bulkDestroy'])->name('residents.bulk-destroy');
+        Route::get('penduduk/arsip', [ResidentController::class, 'archive'])->name('residents.archive');
+        Route::patch('penduduk/arsip/{resident}/pulihkan', [ResidentController::class, 'restore'])->withTrashed()->name('residents.restore');
+        Route::delete('penduduk/arsip/{resident}', [ResidentController::class, 'forceDelete'])->withTrashed()->name('residents.force-delete');
         Route::resource('penduduk', ResidentController::class)->parameters(['penduduk' => 'resident'])->names('residents');
         Route::delete('keluarga/bulk', [FamilyController::class, 'bulkDestroy'])->name('families.bulk-destroy');
+        Route::get('keluarga/arsip', [FamilyController::class, 'archive'])->name('families.archive');
+        Route::patch('keluarga/arsip/{family}/pulihkan', [FamilyController::class, 'restore'])->withTrashed()->name('families.restore');
         Route::resource('keluarga', FamilyController::class)->parameters(['keluarga' => 'family'])->except('show')->names('families');
         Route::delete('kelompok/bulk', [PopulationGroupController::class, 'bulkDestroy'])->name('groups.bulk-destroy');
+        Route::get('kelompok/arsip', [PopulationGroupController::class, 'archive'])->name('groups.archive');
+        Route::patch('kelompok/arsip/{group}/pulihkan', [PopulationGroupController::class, 'restore'])->withTrashed()->name('groups.restore');
         Route::resource('kelompok', PopulationGroupController::class)->parameters(['kelompok' => 'group'])->names('groups');
         Route::get('kelompok/{group}/anggota/create', [PopulationGroupMemberController::class, 'create'])->name('groups.members.create');
         Route::post('kelompok/{group}/anggota', [PopulationGroupMemberController::class, 'store'])->name('groups.members.store');

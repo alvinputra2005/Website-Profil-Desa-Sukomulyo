@@ -1,0 +1,5 @@
+@extends('layouts.admin')
+@section('title','Arsip Keluarga')
+@section('content')
+<div class="box box-warning"><div class="box-header with-border"><h3 class="box-title"><i class="fa fa-archive"></i> Arsip Keluarga</h3><div class="box-tools"><a href="{{ route('admin.population.families.index') }}" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Data Aktif</a></div></div><div class="box-body"><div class="table-responsive"><table class="table table-striped"><thead><tr><th>Nomor KK</th><th>Kepala Keluarga</th><th>Diarsipkan</th><th>Aksi</th></tr></thead><tbody>@forelse($families as $family)<tr><td>{{ $family->family_card_number }}</td><td>{{ $family->head?->name ?? '—' }}</td><td>{{ $family->deleted_at?->format('d-m-Y H:i') }}</td><td><form method="post" action="{{ route('admin.population.families.restore',$family) }}">@csrf @method('patch')<button class="btn btn-success btn-xs"><i class="fa fa-undo"></i> Pulihkan</button></form></td></tr>@empty<tr><td colspan="4" class="empty-state">Belum ada arsip keluarga.</td></tr>@endforelse</tbody></table></div>{{ $families->links() }}</div></div>
+@endsection

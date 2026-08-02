@@ -12,6 +12,7 @@
                 <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-archive"></i> Arsipkan Terpilih</button>
             </form>
             <button type="button" class="btn btn-social btn-success btn-sm" data-toggle="modal" data-target="#import-residents"><i class="fa fa-file-excel-o"></i> Impor Excel</button>
+            <a href="{{ route('admin.population.residents.archive') }}" class="btn btn-default btn-sm"><i class="fa fa-archive"></i> Arsip</a>
             <a href="{{ route('admin.population.residents.create') }}" class="btn btn-social btn-info btn-sm"><i class="fa fa-plus"></i> Tambah Penduduk</a>
         </div>
     </div>
