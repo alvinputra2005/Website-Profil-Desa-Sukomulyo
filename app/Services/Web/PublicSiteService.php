@@ -722,7 +722,43 @@ class PublicSiteService
             return $this->notFound();
         }
 
-        return $this->render('news.show', ['article' => $article]);
+        $commentKey = $this->newsCommentKey($slug);
+        $commentsQuery = Schema::hasTable('village_comments')
+            ? VillageComment::query()->where('page_key', $commentKey)->where('status', 'approved')->where('is_visible', true)
+            : null;
+
+        return $this->render('news.show', [
+            'article' => $article,
+            'newsComments' => $commentsQuery ? (clone $commentsQuery)->latest()->limit(10)->get() : collect(),
+            'newsCommentCount' => $commentsQuery ? (clone $commentsQuery)->count() : 0,
+            'newsCommentKey' => $commentKey,
+        ]);
+    }
+
+    public function sendNewsComment(Request $request, string $slug): RedirectResponse|Response
+    {
+        $article = $this->articleData($slug, false);
+        if (! $article) return $this->notFound();
+
+        $comment = $request->validate([
+            'comment' => ['required', 'string', 'max:1500'],
+            'name' => ['required', 'string', 'max:100'],
+            'address' => ['required', 'string', 'max:300'],
+            'phone' => ['required', 'string', 'max:25', 'regex:/^[0-9+().\s-]{8,25}$/'],
+            'website' => ['nullable', 'max:0'],
+        ], ['comment.required' => 'Isi komentar wajib dituliskan.', 'name.required' => 'Nama wajib diisi.', 'address.required' => 'Alamat wajib diisi.', 'phone.required' => 'Nomor HP wajib diisi.', 'phone.regex' => 'Format nomor HP belum sesuai.']);
+        unset($comment['website']);
+        $comment['page_key'] = $this->newsCommentKey($slug);
+        $comment['status'] = 'pending';
+        $comment['is_visible'] = false;
+        VillageComment::create($comment);
+
+        return redirect()->to(route('berita-desa.show', $slug).'#komentar')->with('comment_success', 'Terima kasih. Komentar Anda sudah diterima dan akan ditinjau admin.');
+    }
+
+    private function newsCommentKey(string $slug): string
+    {
+        return 'berita-'.substr(sha1($slug), 0, 32);
     }
 
     public function category(Request $request, string $category): View|Response

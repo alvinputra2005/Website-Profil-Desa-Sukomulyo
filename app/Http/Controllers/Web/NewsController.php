@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Web\PublicSiteService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class NewsController extends Controller
@@ -18,6 +19,11 @@ class NewsController extends Controller
     public function show(PublicSiteService $site, string $slug): View|Response
     {
         return $site->article($slug);
+    }
+
+    public function comment(Request $request, PublicSiteService $site, string $slug): RedirectResponse|Response
+    {
+        return $site->sendNewsComment($request, $slug);
     }
 
     public function category(Request $request, PublicSiteService $site, string $category): View|Response

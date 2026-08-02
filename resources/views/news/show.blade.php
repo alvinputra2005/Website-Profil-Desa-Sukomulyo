@@ -39,6 +39,7 @@
                         <span class="post-date"><i class="far fa-calendar-alt" aria-hidden="true"></i>{{ $article['date'] }}</span>
                         <span class="post-author"><i class="far fa-user" aria-hidden="true"></i>Pemerintah Desa Sukomulyo</span>
                         <span class="post-views"><i class="far fa-eye" aria-hidden="true"></i>{{ number_format($article['view_count'] ?? 0, 0, ',', '.') }} kali dibaca</span>
+                        <button class="profile-print-button" type="button" data-print-article><i class="fas fa-print" aria-hidden="true"></i>Cetak Artikel</button>
                     </div>
                 </header>
 
@@ -72,6 +73,7 @@
                         <a href="{{ route('berita-desa.index') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Semua Berita</a>
                     </nav>
                 </div>
+                <x-news-comment-section :slug="$article['slug']" :comment-key="$newsCommentKey" :comments="$newsComments" :count="$newsCommentCount" />
             </article>
 
             @php

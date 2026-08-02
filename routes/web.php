@@ -295,6 +295,7 @@ Route::get('/berita-desa/kategori/{category}', [NewsController::class, 'category
 Route::get('/berita-desa/arsip/{year?}', [NewsController::class, 'archive'])->where('year', '[0-9]{4}')->name('berita-desa.archive');
 Route::get('/berita-desa/{slug}', [NewsController::class, 'show'])->name('berita-desa.show');
 Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('berita.legacy-show');
+Route::post('/berita-desa/{slug}/komentar', [NewsController::class, 'comment'])->middleware('throttle:5,1')->name('berita-desa.comment');
 Route::get('/pencarian-berita', [NewsController::class, 'search'])->name('berita-desa.search');
 
 Route::get('/kontak', [ContactController::class, 'create'])->name('kontak.index');
