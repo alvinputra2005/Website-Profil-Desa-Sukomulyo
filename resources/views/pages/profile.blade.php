@@ -11,8 +11,8 @@
         $shareText = 'Identitas Desa Sukomulyo - '.$site['name'];
         $profileSection = $profileSections->firstWhere('section_key', 'profile');
         $profileUpdatedAt = $profileSection?->updated_at ?? now();
-        $profileHero = $profileSection?->image?->url ?? asset('assets/village-rice-fields.jpg');
-        $profileHeroAlt = $profileSection?->image?->alt_text ?: 'Pemandangan wilayah Desa Sukomulyo';
+        $profileHero = asset('assets/balai-desa-sukomulyo.jpeg');
+        $profileHeroAlt = 'Balai Desa Sukomulyo';
     @endphp
 
     <div class="container news-detail-container profile-detail-container">

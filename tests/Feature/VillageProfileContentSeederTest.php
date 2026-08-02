@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
-use App\Models\Setting;
 use App\Models\User;
+use App\Models\VillageIdentity;
 use App\Models\VillageProfileSection;
 use App\Services\SiteCache;
 use Database\Seeders\VillageProfileContentSeeder;
@@ -24,17 +24,17 @@ class VillageProfileContentSeederTest extends TestCase
         $this->seed(VillageProfileContentSeeder::class);
 
         foreach ([
-            'site.name' => 'Desa Sukomulyo',
-            'village.code' => '35.07.26.2002',
-            'village.postal_code' => '65391',
-            'district.name' => 'Pujon',
-            'district.code' => '35.07.26',
-            'regency.name' => 'Kabupaten Malang',
-            'regency.code' => '35.07',
-            'province.name' => 'Jawa Timur',
-            'province.code' => '35',
-        ] as $key => $value) {
-            $this->assertDatabaseHas('settings', ['key' => $key, 'value' => $value]);
+            'site_name' => 'Desa Sukomulyo',
+            'village_code' => '35.07.26.2002',
+            'postal_code' => '65391',
+            'district_name' => 'Pujon',
+            'district_code' => '35.07.26',
+            'regency_name' => 'Kabupaten Malang',
+            'regency_code' => '35.07',
+            'province_name' => 'Jawa Timur',
+            'province_code' => '35',
+        ] as $column => $value) {
+            $this->assertDatabaseHas('village_identities', [$column => $value]);
         }
 
         $this->assertDatabaseCount('village_profile_sections', 4);
@@ -57,11 +57,12 @@ class VillageProfileContentSeederTest extends TestCase
         $this->assertStringNotContainsString('profile-hamlet-grid', $history->content);
         $this->assertStringNotContainsString('<ul>', $history->content);
         $this->assertStringContainsString('Berdasarkan cerita rakyat', $history->content);
-        $this->assertDatabaseMissing('settings', ['key' => 'village.bps_code']);
-        $this->assertDatabaseMissing('settings', ['key' => 'site.email']);
-        $this->assertDatabaseMissing('settings', ['key' => 'site.phone']);
-        $this->assertDatabaseMissing('settings', ['key' => 'village.mobile']);
-        $this->assertDatabaseMissing('settings', ['key' => 'site.url']);
+        $identity = VillageIdentity::query()->firstOrFail();
+        $this->assertNull($identity->village_bps_code);
+        $this->assertNull($identity->email);
+        $this->assertNull($identity->phone);
+        $this->assertNull($identity->mobile);
+        $this->assertNull($identity->website);
     }
 
     public function test_seeder_replaces_legacy_placeholders_but_preserves_admin_edits(): void
@@ -83,16 +84,13 @@ class VillageProfileContentSeederTest extends TestCase
             'display_order' => 10,
             'updated_by' => $admin->id,
         ]);
-        Setting::create([
-            'key' => 'site.address',
-            'value' => 'Alamat yang telah dikonfirmasi admin',
-            'type' => 'text',
-            'group' => 'identitas',
-            'is_public' => true,
+        VillageIdentity::create([
+            'site_name' => 'Desa Sukomulyo',
+            'address' => 'Alamat yang telah dikonfirmasi admin',
             'updated_by' => $admin->id,
         ]);
 
-        Cache::put(SiteCache::SETTINGS, ['stale' => true]);
+        Cache::put(SiteCache::VILLAGE_IDENTITY, ['stale' => true]);
         Cache::put(SiteCache::PROFILE, ['stale' => true]);
         $this->seed(VillageProfileContentSeeder::class);
 
@@ -106,9 +104,9 @@ class VillageProfileContentSeederTest extends TestCase
         );
         $this->assertSame(
             'Alamat yang telah dikonfirmasi admin',
-            Setting::where('key', 'site.address')->value('value'),
+            VillageIdentity::whereKey(1)->value('address'),
         );
-        $this->assertFalse(Cache::has(SiteCache::SETTINGS));
+        $this->assertFalse(Cache::has(SiteCache::VILLAGE_IDENTITY));
         $this->assertFalse(Cache::has(SiteCache::PROFILE));
     }
 

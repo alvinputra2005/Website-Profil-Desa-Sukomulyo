@@ -8,9 +8,8 @@
         $shareUrl = $commentContext['url'];
         $shareText = $page['title'].' Desa Sukomulyo - '.$site['name'];
         $detailUpdatedAt = $sections->max('updated_at') ?? now();
-        $detailHeroSection = $sections->first(fn ($section) => $section->image);
-        $detailHero = $detailHeroSection?->image?->url ?? asset('assets/village-rice-fields.jpg');
-        $detailHeroAlt = $detailHeroSection?->image?->alt_text ?: $page['title'].' Desa Sukomulyo';
+        $detailHero = asset('assets/balai-desa-sukomulyo.jpeg');
+        $detailHeroAlt = 'Balai Desa Sukomulyo - '.$page['title'];
     @endphp
 
     <div class="container news-detail-container profile-detail-container">

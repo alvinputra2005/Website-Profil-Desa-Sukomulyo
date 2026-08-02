@@ -56,7 +56,7 @@ class VillageProfileContentSeeder extends Seeder
             }
 
             $this->seedSection('profile', [
-                'title' => 'Ringkasan Identitas Desa Sukomulyo',
+                'title' => 'Desa Sukomulyo',
                 'content' => <<<'HTML'
 <p>Desa Sukomulyo merupakan desa yang berada di Kecamatan Pujon, Kabupaten Malang, Provinsi Jawa Timur, dengan kode pos 65391. Berada di kawasan dataran tinggi Kecamatan Pujon, desa ini menjadi ruang hidup masyarakat yang tumbuh dengan karakter perdesaan yang kuat, keterikatan sosial antarmasyarakat, serta semangat gotong royong dalam menjalankan kehidupan sehari-hari. Letaknya berbatasan dengan Desa Ngabab di sebelah utara, Desa Bendosari di sebelah barat, kawasan hutan atau Gunung Kawi di sebelah selatan, serta Desa Pujon Kidul di sebelah timur.</p>
 
