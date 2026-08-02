@@ -5,12 +5,12 @@
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title"><i class="fa fa-users"></i> Daftar Penduduk</h3>
-        <form id="bulk-delete-residents" method="post" action="{{ route('admin.population.residents.bulk-destroy') }}" class="inline-form" data-confirm="Arsipkan data penduduk yang dipilih?" data-confirm-tone="danger" data-confirm-title="Arsipkan Penduduk Terpilih" data-confirm-button="Ya, arsipkan">
-            @csrf
-            @method('delete')
-            <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-archive"></i> Arsipkan Terpilih</button>
-        </form>
         <div class="box-tools">
+            <form id="bulk-delete-residents" method="post" action="{{ route('admin.population.residents.bulk-destroy') }}" class="inline-form" data-confirm="Arsipkan data penduduk yang dipilih?" data-confirm-tone="danger" data-confirm-title="Arsipkan Penduduk Terpilih" data-confirm-button="Ya, arsipkan">
+                @csrf
+                @method('delete')
+                <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-archive"></i> Arsipkan Terpilih</button>
+            </form>
             <button type="button" class="btn btn-social btn-success btn-sm" data-toggle="modal" data-target="#import-residents"><i class="fa fa-file-excel-o"></i> Impor Excel</button>
             <a href="{{ route('admin.population.residents.create') }}" class="btn btn-social btn-info btn-sm"><i class="fa fa-plus"></i> Tambah Penduduk</a>
         </div>
