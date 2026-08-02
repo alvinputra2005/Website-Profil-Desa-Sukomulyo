@@ -10,7 +10,7 @@
             <ol class="letter-steps" aria-label="Tahapan pengajuan layanan">
                 @foreach(['Pilih Jenis Surat', 'Isi Data Pemohon', 'Unggah Dokumen', 'Konfirmasi'] as $step)
                     <li @class(['is-active' => $loop->iteration <= 2]) @if($loop->iteration === 2) aria-current="step" @endif>
-                        <span>{{ $loop->iteration }}</span><strong>{{ $step }}</strong>
+                        <span>@if($loop->first)<i class="fas fa-check" aria-hidden="true"></i>@else{{ $loop->iteration }}@endif</span><strong>{{ $step }}</strong>
                     </li>
                 @endforeach
             </ol>

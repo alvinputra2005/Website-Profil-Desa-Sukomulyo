@@ -10,7 +10,7 @@ return [
         [
             'id' => 'surat-keterangan',
             'title' => 'Surat Keterangan',
-            'icon' => 'fas fa-file-signature',
+            'icon' => 'fas fa-file-alt',
             'keywords' => ['surat keterangan', 'sktm', 'surat keterangan tidak mampu', 'tidak mampu'],
             'requirements' => [
                 'KTP-el asli.',
@@ -269,7 +269,7 @@ return [
             'actor' => 'Ketua RT',
             'title' => 'Menyiapkan surat pengantar',
             'description' => 'Ketua RT mengisi surat sesuai keperluan pemohon, menandatangani surat, dan memberikan stempel.',
-            'icon' => 'fas fa-file-signature',
+            'icon' => 'fas fa-file-alt',
         ],
         [
             'number' => 3,

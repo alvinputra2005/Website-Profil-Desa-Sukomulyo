@@ -23,6 +23,7 @@ class AdministrativeServicePageTest extends TestCase
             ->assertSee('fas fa-venus-mars', false)
             ->assertSee('SKCK')
             ->assertSee('Surat Keterangan')
+            ->assertSee('fas fa-file-alt', false)
             ->assertDontSee('Pengajuan SKTM dapat dilakukan melalui layanan')
             ->assertSee('Pengajuan KTP-el')
             ->assertSee('KTP-el Baru / Pemula')

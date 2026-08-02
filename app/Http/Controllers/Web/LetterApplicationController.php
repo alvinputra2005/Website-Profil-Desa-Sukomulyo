@@ -49,7 +49,14 @@ class LetterApplicationController extends Controller
             ->filter()
             ->values()
             ->all();
-        $hamlets = collect($defaultHamlets)->concat($hamlets)->unique()->values()->all();
+        $hamlets = collect($defaultHamlets)
+            ->concat($hamlets)
+            ->map(fn ($hamlet): string => mb_convert_case(trim((string) $hamlet), MB_CASE_TITLE, 'UTF-8'))
+            ->filter()
+            ->reject(fn (string $hamlet): bool => $hamlet === 'Sukomulyo')
+            ->unique(fn (string $hamlet): string => mb_strtolower($hamlet))
+            ->values()
+            ->all();
 
         return view('pages.letters.create', [
             'letterService' => $letterService,

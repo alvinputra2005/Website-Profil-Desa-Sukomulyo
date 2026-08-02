@@ -34,8 +34,6 @@
                                         <strong>{{ $service->name }}</strong>
                                         @if ($service->code === 'SKTM')
                                             <small>Untuk SKTM dan kebutuhan administrasi lainnya.</small>
-                                        @elseif ($service->code === 'KTP')
-                                            <small>Untuk KTP-el baru, hilang, rusak, perubahan data, atau pindah datang.</small>
                                         @endif
                                     </span>
                                     <i class="fas fa-chevron-right letter-choice-arrow" aria-hidden="true"></i>
