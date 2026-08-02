@@ -326,6 +326,8 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
 
 /* Komponen CMS. */
 .box-tools form { display: inline-block; }
+.admin-list-actions { display: inline-flex; align-items: center; gap: 6px; vertical-align: middle; }
+.admin-list-actions .inline-form { margin: 0; }
 .population-header-actions { display: flex; align-items: center; gap: 6px; }
 .population-header-actions .inline-form { margin: 0; }
 .table-actions { white-space: nowrap; }
@@ -598,6 +600,7 @@ a:hover, a:focus { color: var(--admin-primary-dark); }
     .content-header > h1 > small { display: block; margin: 5px 0 0; }
     .content-header > .breadcrumb { position: static; float: none; margin-top: 10px; }
     .box-header > .box-tools { position: static; margin-top: 10px; }
+    .admin-list-actions { flex-wrap: wrap; }
     .population-header-actions { flex-wrap: wrap; }
     .table-responsive { border: 0; }
     .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }

@@ -7,22 +7,24 @@
 @php($bulkFormId = $isStatistics ? 'statistics-bulk-delete-form' : 'bulk-delete-'.$resource)
 <div class="box box-info">
     <div class="box-header with-border">
-        <a href="{{ route('admin.resources.create', $createParams) }}" class="btn btn-social btn-info btn-sm">
-            <i class="fa fa-plus"></i> Tambah {{ $config['title'] }}
-        </a>
-        @if ($isStatistics)
+        <div class="admin-list-actions">
+            <a href="{{ route('admin.resources.create', $createParams) }}" class="btn btn-social btn-info btn-sm">
+                <i class="fa fa-plus"></i> Tambah {{ $config['title'] }}
+            </a>
+            @if ($isStatistics)
             <form id="{{ $bulkFormId }}" method="post" action="{{ route('admin.statistics.bulk-destroy') }}" class="inline-form" data-confirm="Hapus semua dataset statistik yang dipilih? Data akan disembunyikan dari halaman publik." data-confirm-tone="danger" data-confirm-title="Hapus Dataset Terpilih" data-confirm-button="Ya, hapus">
                 @csrf
                 @method('delete')
                 <button class="btn btn-danger btn-sm" type="submit" data-statistics-bulk-delete disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
             </form>
-        @else
+            @else
             <form id="{{ $bulkFormId }}" method="post" action="{{ route('admin.resources.bulk-destroy', $resource) }}" class="inline-form" data-confirm="Hapus {{ strtolower($config['title']) }} yang dipilih? Data yang dihapus akan diproses sesuai aturan masing-masing resource." data-confirm-tone="danger" data-confirm-title="Hapus Terpilih" data-confirm-button="Ya, hapus">
                 @csrf
                 @method('delete')
                 <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
             </form>
-        @endif
+            @endif
+        </div>
         <div class="box-tools">
             <form method="get">
                 @if(request('type'))<input type="hidden" name="type" value="{{ request('type') }}">@endif
