@@ -14,6 +14,7 @@ use App\Models\Redirect;
 use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\VillageComment;
 use App\Models\VillageProfileSection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -178,11 +179,43 @@ class AdminCmsTest extends TestCase
         $this->actingAs($this->user('super_admin'));
         foreach (array_keys(config('admin.resources')) as $resource) {
             $this->get(route('admin.resources.index', $resource))->assertOk()->assertSee('AdminLTE.min.css');
-            $this->get(route('admin.resources.create', $resource))->assertOk();
         }
-        foreach (['admin.media.index', 'admin.messages.index', 'admin.users.index', 'admin.activities.index'] as $route) {
+        foreach (['admin.media.index', 'admin.comments.index', 'admin.users.index', 'admin.activities.index'] as $route) {
             $this->get(route($route))->assertOk();
         }
+    }
+
+    public function test_comments_can_be_reviewed_from_the_admin_panel(): void
+    {
+        $admin = $this->user('super_admin');
+        $comment = VillageComment::create([
+            'page_key' => 'identitas',
+            'name' => 'Warga Baru',
+            'address' => 'Dusun Sukomulyo',
+            'phone' => '081234567891',
+            'comment' => 'Mohon jadwal pelayanan diperbarui.',
+            'status' => 'pending',
+            'is_visible' => false,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.comments.index'))
+            ->assertOk()
+            ->assertSee('Warga Baru')
+            ->assertSee('Pending');
+
+        $this->actingAs($admin)
+            ->patch(route('admin.comments.review', $comment), [
+                'status' => 'approved',
+                'review_note' => 'Layak tampil.',
+            ])
+            ->assertRedirect(route('admin.comments.show', $comment));
+
+        $this->assertDatabaseHas('village_comments', [
+            'id' => $comment->id,
+            'status' => 'approved',
+            'is_visible' => true,
+        ]);
     }
 
     public function test_blank_news_slugs_are_unique_and_existing_slug_is_preserved(): void

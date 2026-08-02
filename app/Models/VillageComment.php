@@ -14,6 +14,10 @@ class VillageComment extends Model
         'comment',
         'like_count',
         'is_visible',
+        'status',
+        'reviewed_at',
+        'reviewed_by',
+        'review_note',
     ];
 
     protected function casts(): array
@@ -21,6 +25,7 @@ class VillageComment extends Model
         return [
             'is_visible' => 'boolean',
             'like_count' => 'integer',
+            'reviewed_at' => 'datetime',
         ];
     }
 }

@@ -28,6 +28,7 @@ use App\Models\StatisticImport;
 use App\Models\StatisticRow;
 use App\Models\StatisticValue;
 use App\Models\User;
+use App\Models\VillageComment;
 use App\Models\VillageProfileSection;
 use App\Observers\PublicContentCacheObserver;
 use App\Policies\AdminResourcePolicy;
@@ -40,6 +41,7 @@ use App\Policies\OfficialPolicy;
 use App\Policies\PopulationGroupMemberPolicy;
 use App\Policies\PopulationGroupPolicy;
 use App\Policies\ResidentPolicy;
+use App\Policies\VillageCommentPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
@@ -133,5 +135,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Apbdes::class, DataResourcePolicy::class);
         Gate::policy(LetterApplication::class, LetterApplicationPolicy::class);
         Gate::policy(LetterService::class, LetterServicePolicy::class);
+        Gate::policy(VillageComment::class, VillageCommentPolicy::class);
     }
 }

@@ -198,14 +198,30 @@ class SitePagesTest extends TestCase
             'name' => 'Warga Sukomulyo',
             'phone' => '081234567890',
             'comment' => 'Mohon data kode pos desa diperbarui.',
+            'status' => 'pending',
+            'is_visible' => false,
         ]);
 
         $this->get(route('profile-desa'))
             ->assertOk()
-            ->assertSee('Warga Sukomulyo')
-            ->assertSee('Mohon data kode pos desa diperbarui.')
+            ->assertDontSee('Warga Sukomulyo')
+            ->assertDontSee('Mohon data kode pos desa diperbarui.')
             ->assertDontSee('Dusun Sukomakmur RT 02')
             ->assertDontSee('081234567890');
+
+        $comment = \App\Models\VillageComment::query()->where('name', 'Warga Sukomulyo')->firstOrFail();
+        $role = \App\Models\Role::create(['name' => 'Admin Konten', 'code' => 'admin_konten']);
+        $admin = User::factory()->create(['role_id' => $role->id, 'is_active' => true]);
+
+        $this->actingAs($admin)->patch(route('admin.comments.review', $comment), [
+            'status' => 'approved',
+            'review_note' => 'Layak ditampilkan.',
+        ])->assertRedirect(route('admin.comments.show', $comment));
+
+        $this->get(route('profile-desa'))
+            ->assertOk()
+            ->assertSee('Warga Sukomulyo')
+            ->assertSee('Mohon data kode pos desa diperbarui.');
     }
 
     public function test_profile_comments_can_be_viewed_and_liked(): void

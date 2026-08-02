@@ -2,12 +2,21 @@
 
 namespace Tests\Feature;
 
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ProfilePageLayoutTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function adminUser(): User
+    {
+        $role = Role::create(['name' => 'Admin Konten', 'code' => 'admin_konten']);
+
+        return User::factory()->create(['role_id' => $role->id, 'is_active' => true]);
+    }
 
     public function test_article_profile_pages_share_the_sidebar_and_comment_layout(): void
     {
@@ -82,11 +91,26 @@ class ProfilePageLayoutTest extends TestCase
         $this->get(route('potensi-desa'))
             ->assertOk()
             ->assertSee('Tulis Komentar')
-            ->assertSee('<strong>1</strong>', false);
+            ->assertSee('<strong>0</strong>', false);
 
         $this->get(route('profile-desa.section-comments', 'potensi-desa'))
             ->assertOk()
             ->assertSee('Komentar Potensi Desa')
+            ->assertDontSee('Warga Potensi');
+
+        $comment = \App\Models\VillageComment::query()->where('name', 'Warga Potensi')->firstOrFail();
+
+        $this->actingAs($this->adminUser())->patch(route('admin.comments.review', $comment), [
+            'status' => 'approved',
+            'review_note' => 'Disetujui.',
+        ])->assertRedirect(route('admin.comments.show', $comment));
+
+        $this->get(route('potensi-desa'))
+            ->assertOk()
+            ->assertSee('<strong>1</strong>', false);
+
+        $this->get(route('profile-desa.section-comments', 'potensi-desa'))
+            ->assertOk()
             ->assertSee('Warga Potensi');
 
         $this->get(route('profile-desa.section-comments', 'sejarah'))

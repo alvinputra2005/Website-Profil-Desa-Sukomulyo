@@ -25,12 +25,12 @@
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
                         <!-- <li><a href="{{ route('beranda') }}" target="_blank" title="Lihat website"><i class="fa fa-globe"></i><span class="hidden-xs"> Website</span></a></li> -->
-                        <li class="dropdown notifications-menu"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell-o"></i>@php($messageCount=\App\Models\ContactMessage::count())@if($messageCount)<span class="label label-warning">{{ $messageCount }}</span>@endif</a>
+                        <li class="dropdown notifications-menu"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell-o"></i>@php($commentCount=\App\Models\VillageComment::where('status','pending')->count())@if($commentCount)<span class="label label-warning">{{ $commentCount }}</span>@endif</a>
                             <ul class="dropdown-menu">
-                                <li class="header">{{ $messageCount ? "$messageCount pesan masuk" : 'Tidak ada pesan baru' }}</li>
+                                <li class="header">{{ $commentCount ? "$commentCount komentar menunggu tinjauan" : 'Tidak ada komentar baru' }}</li>
                                 <li>
                                     <ul class="menu">
-                                        <li><a href="{{ route('admin.messages.index') }}"><i class="fa fa-envelope text-aqua"></i> Buka kotak masuk</a></li>
+                                        <li><a href="{{ route('admin.comments.index') }}"><i class="fa fa-comments text-aqua"></i> Buka komentar</a></li>
                                     </ul>
                                 </li>
                             </ul>
@@ -74,7 +74,7 @@
                 ['label'=>'Data Desa','icon'=>'fa-database','ability'=>'manage-data','items'=>array_merge([['Indeks Desa Membangun','admin.resources.index','idm']], $statisticCategoryItems)],
                 ['label'=>'Inventaris','icon'=>'fa-archive','ability'=>'manage-data','items'=>[['Laporan Semua Aset','admin.inventory.report',null],['Tanah','admin.inventory.index','tanah'],['Peralatan dan Mesin','admin.inventory.index','peralatan'],['Gedung dan Bangunan','admin.inventory.index','gedung'],['Jalan, Irigasi, Jaringan','admin.inventory.index','jalan'],['Aset Tetap Lainnya','admin.inventory.index','aset-lain'],['Konstruksi dalam Pengerjaan','admin.inventory.index','konstruksi']]],
                 ['label'=>'Pelayanan','icon'=>'fa-file-text-o','ability'=>'manage-letter-applications','items'=>[['Permohonan Surat','admin.letter-applications.index',null],['Jenis Surat & Persyaratan','admin.letter-services.index',null]]],
-                ['label'=>'Layanan Masyarakat','icon'=>'fa-envelope','ability'=>'manage-content','items'=>[['Pesan Masuk','admin.messages.index',null]]],
+                ['label'=>'Komentar Masyarakat','icon'=>'fa-comments','ability'=>'manage-content','items'=>[['Komentar Masuk','admin.comments.index',null]]],
                 ['label'=>'Pengaturan','icon'=>'fa-cogs','ability'=>'manage-users','items'=>[['Pengguna','admin.users.index',null],['Pengaturan Aplikasi','admin.resources.index','settings'],['Redirect URL','admin.resources.index','redirects'],['Log Aktivitas','admin.activities.index',null]]],
                 ])
                 <ul class="sidebar-menu" data-widget="tree">

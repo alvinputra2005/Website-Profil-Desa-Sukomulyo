@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\BulkDeleteStatisticDatasetController;
 use App\Http\Controllers\Admin\ApbdesController;
+use App\Http\Controllers\Admin\VillageCommentController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\InventoryMutationController;
 use App\Http\Controllers\Admin\InventoryReportController;
@@ -103,6 +104,12 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::patch('/officials/{official}/status', ToggleOfficialStatusController::class)->name('officials.toggle-status');
         Route::patch('/officials/{official}/move/{direction}', MoveOfficialController::class)->where('direction', 'up|down')->name('officials.move');
         Route::resource('officials', OfficialController::class)->except('show');
+        Route::delete('/komentar/bulk', [VillageCommentController::class, 'bulkDestroy'])->name('comments.bulk-destroy');
+        Route::patch('/komentar/{comment}/review', [VillageCommentController::class, 'review'])->name('comments.review');
+        Route::resource('komentar', VillageCommentController::class)
+            ->parameters(['komentar' => 'comment'])
+            ->only(['index', 'show', 'destroy'])
+            ->names('comments');
     });
     Route::middleware('can:manage-data')->prefix('statistik')->name('statistics.')->group(function () {
         Route::get('/import', [StatisticImportController::class, 'create'])->name('import.create');

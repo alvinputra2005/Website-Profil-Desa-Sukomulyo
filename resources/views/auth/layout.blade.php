@@ -31,7 +31,7 @@
                     Selamat Datang
                     <span>di Panel Admin</span>
                 </h1>
-                <p>Kelola informasi desa, berita, galeri, data kependudukan, dan layanan masyarakat dari satu panel terintegrasi.</p>
+                <p>Kelola informasi desa, berita, galeri, data kependudukan, dan komentar warga dari satu panel terintegrasi.</p>
             </div>
         </section>
 

@@ -227,13 +227,15 @@ class PublicSiteService
         ]);
 
         unset($comment['website']);
+        $comment['status'] = 'pending';
+        $comment['is_visible'] = false;
         VillageComment::create($comment);
 
         $page = $this->profilePages()[$comment['page_key']];
 
         return redirect()
             ->to($page['url'].'#komentar')
-            ->with('comment_success', 'Terima kasih. Komentar Anda sudah berhasil dikirim.');
+            ->with('comment_success', 'Terima kasih. Komentar Anda sudah diterima dan akan ditinjau admin.');
     }
 
     public function profileComments(): View
@@ -254,7 +256,7 @@ class PublicSiteService
         $comments = Schema::hasTable('village_comments')
             ? VillageComment::query()
                 ->where('page_key', $pageKey)
-                ->where('is_visible', true)
+                ->where('status', 'approved')
                 ->latest()
                 ->paginate(12)
             : new LengthAwarePaginator([], 0, 12);
@@ -264,7 +266,7 @@ class PublicSiteService
 
     public function likeProfileComment(VillageComment $comment): RedirectResponse
     {
-        abort_unless($comment->is_visible, 404);
+        abort_unless($comment->status === 'approved' && $comment->is_visible, 404);
 
         $comment->increment('like_count');
 
@@ -1665,7 +1667,7 @@ class PublicSiteService
     {
         $page = $this->profilePages()[$pageKey];
         $commentsQuery = Schema::hasTable('village_comments')
-            ? VillageComment::query()->where('page_key', $pageKey)->where('is_visible', true)
+            ? VillageComment::query()->where('page_key', $pageKey)->where('status', 'approved')->where('is_visible', true)
             : null;
 
         return [

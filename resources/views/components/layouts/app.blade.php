@@ -9,8 +9,18 @@
     'structuredData' => null,
 ])
 @php
-    $metaTitle = $title ? $title.' | '.$site['name'] : $site['name'];
-    $metaDescription = $description ?: $site['tagline'];
+    $site = $site ?? [
+        'name' => config('app.name', 'Desa Sukomulyo'),
+        'tagline' => config('app.name', 'Desa Sukomulyo'),
+        'address' => '',
+        'phone' => '',
+        'email' => '',
+    ];
+    $navigation = $navigation ?? [];
+    $articles = $articles ?? [];
+    $categories = $categories ?? [];
+    $metaTitle = $title ? $title.' | '.($site['name'] ?? config('app.name')) : ($site['name'] ?? config('app.name'));
+    $metaDescription = $description ?: ($site['tagline'] ?? config('app.name'));
     $canonicalUrl = $canonical ?: request()->url();
     $socialImage = $ogImage ?: asset('assets/village-rice-fields.jpg');
     $socialImage = preg_match('~^https?://~i', $socialImage) ? $socialImage : url($socialImage);
