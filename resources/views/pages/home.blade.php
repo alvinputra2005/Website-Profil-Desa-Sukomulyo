@@ -42,7 +42,7 @@
         <div class="container about-grid">
             <div class="aboutus_contentcol">
                 <h2>Mengenal Desa Sukomulyo</h2>
-                <p>Desa Sukomulyo tumbuh melalui semangat gotong royong yang kuat, pelayanan publik yang terbuka dan responsif, serta pengembangan potensi masyarakat secara berkelanjutan. Dengan dukungan warga dan pemerintah desa, Sukomulyo terus berupaya mewujudkan lingkungan yang maju, mandiri, nyaman, dan sejahtera bagi seluruh masyarakat.</p>
+                <p>Desa Sukomulyo merupakan salah satu desa yang berada di Kecamatan Pujon, Kabupaten Malang, Provinsi Jawa Timur. Desa ini berkembang melalui semangat gotong royong masyarakat, pelayanan publik yang terbuka dan responsif, serta pengelolaan potensi desa secara berkelanjutan. Bersama pemerintah desa dan seluruh masyarakat, Desa Sukomulyo terus berupaya meningkatkan pembangunan, pemberdayaan warga, dan kualitas pelayanan untuk mewujudkan desa yang maju, mandiri, nyaman, serta sejahtera.</p>
                 <a class="learnmore" href="{{ route('profile-desa') }}">Lihat Identitas Desa <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </div>
             <div class="aboutus_thumbox">
