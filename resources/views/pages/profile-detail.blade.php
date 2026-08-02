@@ -7,6 +7,10 @@
     @php
         $shareUrl = $commentContext['url'];
         $shareText = $page['title'].' Desa Sukomulyo - '.$site['name'];
+        $detailUpdatedAt = $sections->max('updated_at') ?? now();
+        $detailHeroSection = $sections->first(fn ($section) => $section->image);
+        $detailHero = $detailHeroSection?->image?->url ?? asset('assets/village-rice-fields.jpg');
+        $detailHeroAlt = $detailHeroSection?->image?->alt_text ?: $page['title'].' Desa Sukomulyo';
     @endphp
 
     <div class="container news-detail-container profile-detail-container">
@@ -15,7 +19,7 @@
                 <header class="entry-header">
                     <h1 class="entry-title">{{ $page['title'] }}</h1>
                     <div class="postmeta" aria-label="Informasi artikel">
-                        <span class="post-date"><i class="far fa-calendar-alt" aria-hidden="true"></i>Diperbarui {{ now()->translatedFormat('d F Y') }}</span>
+                        <span class="post-date"><i class="far fa-calendar-alt" aria-hidden="true"></i>Diperbarui {{ $detailUpdatedAt->translatedFormat('d F Y') }}</span>
                         <span class="post-author"><i class="far fa-user" aria-hidden="true"></i>Pemerintah Desa Sukomulyo</span>
                         <button class="profile-print-button" type="button" data-print-article>
                             <i class="fas fa-print" aria-hidden="true"></i>Cetak Artikel
@@ -24,24 +28,32 @@
                 </header>
 
                 <figure class="news-detail-hero profile-detail-hero">
-                    <img src="{{ asset('assets/village-rice-fields.jpg') }}" alt="{{ $page['title'] }} Desa Sukomulyo">
+                    <img src="{{ $detailHero }}" alt="{{ $detailHeroAlt }}">
                     <figcaption>{{ $page['description'] }}</figcaption>
                 </figure>
 
                 <div class="article-reading-body">
-                    <div class="entry-content">
+                    <div class="entry-content profile-detail-content profile-detail-content--{{ $commentContext['page_key'] }}">
                         @forelse ($sections as $section)
-                            <section class="profile-article-section">
-                                <h2>{{ $section->title }}</h2>
+                            <section
+                                class="profile-article-section profile-article-section--{{ $section->section_key }}"
+                                data-profile-section="{{ $section->section_key }}"
+                                @if($section->section_key === 'history') data-disable-table-copy @endif
+                            >
+                                @if($section->section_key !== 'history')
+                                    <h2>{{ $section->title }}</h2>
+                                @endif
                                 @if ($section->image)
                                     <img class="profile-section-image" src="{{ $section->image->url }}" alt="{{ $section->image->alt_text ?: $section->title }}">
                                 @endif
-                                <div>{!! $section->content !!}</div>
+                                <div class="profile-cms-content">{!! $section->content !!}</div>
                             </section>
                         @empty
                             @foreach ($page['fallback'] as $section)
-                                <section class="profile-article-section">
-                                    <h2>{{ $section['title'] }}</h2>
+                                <section class="profile-article-section profile-article-section--fallback">
+                                    @if($commentContext['page_key'] !== 'sejarah')
+                                        <h2>{{ $section['title'] }}</h2>
+                                    @endif
                                     <p>{{ $section['content'] }}</p>
                                 </section>
                             @endforeach

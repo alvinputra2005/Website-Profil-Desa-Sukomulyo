@@ -54,7 +54,7 @@ class UpdateVillageIdentityAction
                     'updated_by' => auth()->id(),
                 ]);
             }
-            $this->writer->save('profile', 'Profil Desa', $data['profile_content'], $data['status'], 0, $imageId);
+            $this->writer->save('profile', 'Gambaran Umum Desa Sukomulyo', $data['profile_content'], $data['status'], 0, $imageId);
         });
     }
 }

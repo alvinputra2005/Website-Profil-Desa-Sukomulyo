@@ -215,7 +215,7 @@
 @elseif($page==='vision-mission')
 <div class="box box-info">
     <div class="box-header with-border">
-        <h3 class="box-title">Visi Desa</h3>
+        <h3 class="box-title">Visi Desa Sukomulyo</h3>
         <div class="box-tools pull-right">
             <button type="button" class="btn btn-box-tool" data-widget="collapse" aria-label="Buka atau tutup form visi desa">
                 <i class="fa fa-minus"></i>
@@ -229,7 +229,7 @@
 
 <div class="box box-info">
     <div class="box-header with-border">
-        <h3 class="box-title">Misi Desa</h3>
+        <h3 class="box-title">Misi Desa Sukomulyo</h3>
         <div class="box-tools pull-right">
             <button type="button" class="btn btn-box-tool" data-widget="collapse" aria-label="Buka atau tutup form misi desa">
                 <i class="fa fa-minus"></i>

@@ -8,7 +8,6 @@ use App\Models\Role;
 use App\Models\Setting;
 use App\Models\StatisticDataset;
 use App\Models\User;
-use App\Models\VillageProfileSection;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -27,9 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->call(StatisticCategorySeeder::class);
         $this->call(PopulationStatisticIndicatorSeeder::class);
         $admin = User::firstOrCreate(['email' => 'admin@sukomulyo.desa.id'], ['role_id' => $roles['super_admin']->id, 'name' => 'Administrator Desa', 'password' => 'Sukomulyo123!', 'is_active' => true, 'email_verified_at' => now()]);
-        foreach (['site.name' => 'Desa Sukomulyo', 'site.tagline' => 'Website Resmi Pemerintah Desa Sukomulyo', 'site.email' => 'desasukomulyo2022@gmail.com', 'site.phone' => '085731625435', 'site.address' => 'Kantor Desa Sukomulyo, Indonesia'] as $key => $value) {
-            Setting::firstOrCreate(['key' => $key], ['value' => $value, 'type' => 'string', 'group' => 'identitas', 'is_public' => true, 'updated_by' => $admin->id]);
-        }
+        $this->call(VillageProfileContentSeeder::class);
         foreach ([
             'letter_service.whatsapp_number' => env('VILLAGE_WHATSAPP_NUMBER', ''),
             'letter_service.office_hours' => env('LETTER_OFFICE_HOURS', 'Senin-Jumat, 08.00-14.00 WIB'),
@@ -38,9 +35,6 @@ class DatabaseSeeder extends Seeder
             'letter_service.enabled' => true,
         ] as $key => $value) {
             Setting::firstOrCreate(['key' => $key], ['value' => (string) $value, 'type' => is_bool($value) ? 'boolean' : 'string', 'group' => 'pelayanan_surat', 'is_public' => false, 'updated_by' => $admin->id]);
-        }
-        foreach ([['history', 'Sejarah Desa', 'Desa Sukomulyo tumbuh melalui semangat gotong royong masyarakat.'], ['vision', 'Visi Desa', 'Terwujudnya desa yang maju, mandiri, transparan, dan sejahtera.'], ['mission', 'Misi Desa', 'Meningkatkan pelayanan publik, ekonomi warga, dan pembangunan berkelanjutan.']] as [$key,$title,$content]) {
-            VillageProfileSection::firstOrCreate(['section_key' => $key], ['title' => $title, 'content' => '<p>'.$content.'</p>', 'status' => 'published', 'display_order' => 0, 'updated_by' => $admin->id]);
         }
         $this->call(GovernmentOfficialSeeder::class);
         $this->call(NewsSeeder::class);

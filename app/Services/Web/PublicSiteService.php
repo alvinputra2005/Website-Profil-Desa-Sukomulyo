@@ -274,15 +274,15 @@ class PublicSiteService
                 'title' => 'Sejarah Desa',
                 'description' => 'Asal-usul dan perkembangan Desa Sukomulyo dari masa ke masa.',
                 'keys' => ['history'],
-                'fallback' => [['title' => 'Sejarah Desa Sukomulyo', 'content' => 'Desa Sukomulyo tumbuh melalui semangat gotong royong, kebersamaan, dan kerja keras masyarakat.']],
+                'fallback' => [['title' => 'Sejarah Desa Sukomulyo', 'content' => 'Informasi sejarah desa sedang diperbarui.']],
             ],
             'visi-misi' => [
                 'title' => 'Visi dan Misi',
                 'description' => 'Arah pembangunan dan cita-cita Pemerintah Desa Sukomulyo.',
                 'keys' => ['vision', 'mission'],
                 'fallback' => [
-                    ['title' => 'Visi Desa', 'content' => 'Terwujudnya desa yang maju, mandiri, transparan, dan sejahtera.'],
-                    ['title' => 'Misi Desa', 'content' => 'Meningkatkan pelayanan publik, ekonomi warga, dan pembangunan berkelanjutan.'],
+                    ['title' => 'Visi Desa', 'content' => 'Informasi visi desa sedang diperbarui.'],
+                    ['title' => 'Misi Desa', 'content' => 'Informasi misi desa sedang diperbarui.'],
                 ],
             ],
         ];

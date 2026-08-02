@@ -9,9 +9,10 @@
     @php
         $shareUrl = route('profile-desa');
         $shareText = 'Identitas Desa Sukomulyo - '.$site['name'];
-        $villageRows = collect($identityGroups)->flatMap(fn ($group) => $group['rows'])->keyBy('label');
-        $villageAddress = $villageRows->get('Alamat Kantor Desa')['value'] ?? $site['address'];
-        $villageHead = $villageRows->get('Nama Kepala Desa')['value'] ?? $villageLeader['name'];
+        $profileSection = $profileSections->firstWhere('section_key', 'profile');
+        $profileUpdatedAt = $profileSection?->updated_at ?? now();
+        $profileHero = $profileSection?->image?->url ?? asset('assets/village-rice-fields.jpg');
+        $profileHeroAlt = $profileSection?->image?->alt_text ?: 'Pemandangan wilayah Desa Sukomulyo';
     @endphp
 
     <div class="container news-detail-container profile-detail-container">
@@ -20,7 +21,7 @@
                 <header class="entry-header">
                     <h1 class="entry-title">Identitas Desa Sukomulyo</h1>
                     <div class="postmeta" aria-label="Informasi artikel">
-                        <span class="post-date"><i class="far fa-calendar-alt" aria-hidden="true"></i>Diperbarui {{ now()->translatedFormat('d F Y') }}</span>
+                        <span class="post-date"><i class="far fa-calendar-alt" aria-hidden="true"></i>Diperbarui {{ $profileUpdatedAt->translatedFormat('d F Y') }}</span>
                         <span class="post-author"><i class="far fa-user" aria-hidden="true"></i>Pemerintah Desa Sukomulyo</span>
                         <button class="profile-print-button" type="button" data-print-article>
                             <i class="fas fa-print" aria-hidden="true"></i>Cetak Artikel
@@ -29,20 +30,23 @@
                 </header>
 
                 <figure class="news-detail-hero profile-detail-hero">
-                    <img src="{{ asset('assets/village-rice-fields.jpg') }}" alt="Pemandangan wilayah Desa Sukomulyo">
+                    <img src="{{ $profileHero }}" alt="{{ $profileHeroAlt }}">
                     <figcaption>Gambaran wilayah dan kehidupan masyarakat Desa Sukomulyo.</figcaption>
                 </figure>
 
                 <div class="article-reading-body">
-                    <div class="entry-content">
-                        <h2>Gambaran Umum Desa</h2>
-                        <p>
-                            Desa Sukomulyo adalah kesatuan masyarakat hukum yang memiliki batas wilayah dan berwenang mengatur kepentingan masyarakat setempat berdasarkan prakarsa masyarakat serta ketentuan peraturan perundang-undangan. Pusat pelayanan pemerintahan desa beralamat di {{ $villageAddress ?: 'Kantor Desa Sukomulyo' }}.
-                        </p>
-                        <p>
-                            Pemerintahan desa dipimpin oleh {{ $villageHead ?: 'Kepala Desa Sukomulyo' }} bersama perangkat desa. Pelayanan diarahkan agar warga memperoleh informasi, administrasi, dan pendampingan secara ramah, terbuka, serta dapat dipertanggungjawabkan.
-                        </p>
-
+                    <div class="entry-content profile-overview-content">
+                        @if($profileSection)
+                            <section class="profile-article-section profile-article-section--overview" data-profile-section="profile">
+                                <h2>{{ $profileSection->title }}</h2>
+                                <div class="profile-cms-content">{!! $profileSection->content !!}</div>
+                            </section>
+                        @else
+                            <section class="profile-article-section profile-article-section--overview">
+                                <h2>Gambaran Umum Desa Sukomulyo</h2>
+                                <p>Informasi profil desa sedang diperbarui.</p>
+                            </section>
+                        @endif
                     </div>
                 </div>
 
