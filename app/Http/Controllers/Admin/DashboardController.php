@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
-use App\Models\ContactMessage;
 use App\Models\LetterApplication;
 use App\Models\News;
 use App\Models\SiteVisit;
@@ -54,9 +53,18 @@ class DashboardController extends Controller
                 ->all();
         };
 
+        $latestApplications = collect();
+        if (Schema::hasTable('letter_applications') && auth()->user()->can('manage-letter-applications')) {
+            $latestApplications = LetterApplication::query()
+                ->with('service')
+                ->latest('submitted_at')
+                ->limit(5)
+                ->get();
+        }
+
         return view('admin.dashboard', [
             'stats' => $stats,
-            'messages' => ContactMessage::latest()->limit(5)->get(),
+            'latestApplications' => $latestApplications,
             'activities' => ActivityLog::with('user')
                 ->whereDate('created_at', today())
                 ->latest('created_at')

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\ActivityLog;
 use App\Models\Gallery;
 use App\Models\GalleryItem;
+use App\Models\LetterApplication;
 use App\Models\Media;
 use App\Models\News;
 use App\Models\NewsCategory;
@@ -83,6 +84,44 @@ class AdminCmsTest extends TestCase
             ->assertSee('Aktivitas 1')
             ->assertDontSee('Aktivitas Kemarin')
             ->assertDontSee('Aktivitas 4');
+    }
+
+    public function test_dashboard_shows_latest_letter_applications_instead_of_messages(): void
+    {
+        $admin = $this->user('super_admin');
+        $older = LetterApplication::factory()->create([
+            'application_number' => 'PS-LAMA-001',
+            'applicant_name' => 'Pemohon Lama',
+            'submitted_at' => now()->subDay(),
+        ]);
+        $latest = LetterApplication::factory()->create([
+            'application_number' => 'PS-BARU-002',
+            'applicant_name' => 'Pemohon Baru',
+            'submitted_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin');
+
+        $response->assertOk()
+            ->assertSee('Permohonan Terbaru')
+            ->assertDontSee('Pesan Terbaru')
+            ->assertSeeInOrder([$latest->application_number, $older->application_number])
+            ->assertSee(route('admin.letter-applications.show', $latest), false);
+    }
+
+    public function test_dashboard_does_not_expose_latest_applications_to_content_admin(): void
+    {
+        $application = LetterApplication::factory()->create([
+            'application_number' => 'PS-RAHASIA-001',
+            'applicant_name' => 'Pemohon Rahasia',
+        ]);
+
+        $this->actingAs($this->user('admin_konten'))
+            ->get('/admin')
+            ->assertOk()
+            ->assertDontSee('Permohonan Terbaru')
+            ->assertDontSee($application->application_number)
+            ->assertDontSee($application->applicant_name);
     }
 
     public function test_roles_are_restricted_to_their_domain(): void

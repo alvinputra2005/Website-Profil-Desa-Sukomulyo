@@ -38,35 +38,39 @@
     @endforeach
 </div>
 <div class="row">
+    @can('manage-letter-applications')
     <div class="col-md-8">
         <div class="box box-info">
             <div class="box-header with-border">
-                <h3 class="box-title"><i class="fa fa-envelope"></i> Pesan Terbaru</h3>
-                <div class="box-tools"><a href="{{ route('admin.messages.index') }}" class="btn btn-box-tool">Lihat Semua</a></div>
+                <h3 class="box-title"><i class="fa fa-file-text-o"></i> Permohonan Terbaru</h3>
+                <div class="box-tools"><a href="{{ route('admin.letter-applications.index') }}" class="btn btn-box-tool">Lihat Semua</a></div>
             </div>
             <div class="box-body no-padding">
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Pengirim</th>
-                                <th>Pesan</th>
+                                <th>Nomor / Pemohon</th>
+                                <th>Layanan</th>
                                 <th>Waktu</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody>@forelse($messages as $message)<tr>
-                                <td><a href="{{ route('admin.messages.show',$message) }}"><strong>{{ $message->name }}</strong></a><br><small>{{ $message->email }}</small></td>
-                                <td>{{ Str::limit($message->message,70) }}</td>
-                                <td><span class="label label-info">{{ $message->created_at->diffForHumans() }}</span></td>
+                        <tbody>@forelse($latestApplications as $application)<tr>
+                                <td><a href="{{ route('admin.letter-applications.show',$application) }}"><strong>{{ $application->application_number }}</strong></a><br><small>{{ $application->applicant_name }}</small></td>
+                                <td>{{ $application->service->name }}</td>
+                                <td>{{ $application->submitted_at->diffForHumans() }}</td>
+                                <td><span class="label {{ $application->status->badgeClass() }}">{{ $application->status->label() }}</span></td>
                             </tr>@empty<tr>
-                                <td colspan="3" class="empty-state">Belum ada pesan masuk.</td>
+                                <td colspan="4" class="empty-state">Belum ada permohonan.</td>
                             </tr>@endforelse</tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    @endcan
+    <div class="@can('manage-letter-applications') col-md-4 @else col-md-12 @endcan">
 
         <div class="box box-danger">
             <div class="box-header with-border">
