@@ -24,8 +24,8 @@
                 </header>
 
                 <figure class="news-detail-hero profile-detail-hero">
-                    <img src="{{ asset('assets/village-rice-fields.jpg') }}" alt="{{ $page['title'] }} Desa Sukomulyo">
-                    <figcaption>{{ $page['description'] }}</figcaption>
+                    <img src="{{ asset('assets/balai-desa-sukomulyo.jpeg') }}" alt="Balai Desa Sukomulyo - {{ $page['title'] }}">
+                    <figcaption>Balai Desa Sukomulyo — {{ $page['description'] }}</figcaption>
                 </figure>
 
                 <div class="article-reading-body">

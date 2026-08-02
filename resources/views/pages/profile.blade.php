@@ -29,8 +29,8 @@
                 </header>
 
                 <figure class="news-detail-hero profile-detail-hero">
-                    <img src="{{ asset('assets/village-rice-fields.jpg') }}" alt="Pemandangan wilayah Desa Sukomulyo">
-                    <figcaption>Gambaran wilayah dan kehidupan masyarakat Desa Sukomulyo.</figcaption>
+                    <img src="{{ asset('assets/balai-desa-sukomulyo.jpeg') }}" alt="Balai Desa Sukomulyo">
+                    <figcaption>Balai Desa Sukomulyo, pusat pelayanan pemerintahan dan masyarakat desa.</figcaption>
                 </figure>
 
                 <div class="article-reading-body">
