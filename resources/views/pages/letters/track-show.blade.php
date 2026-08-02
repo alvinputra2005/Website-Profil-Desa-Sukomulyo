@@ -19,7 +19,6 @@
                         <p class="letter-application-label">Nomor permohonan</p>
                         <p class="letter-application-number">{{ $application->application_number }}</p>
                     </div>
-                    <span class="letter-status-badge">{{ $application->status->label() }}</span>
                 </div>
 
                 <ol class="letter-steps letter-steps--complete" aria-label="Tahapan pengajuan layanan selesai">
@@ -38,8 +37,7 @@
                                 <i class="fas fa-check-circle"></i>
                                 <div>
                                     <h3>Permohonan berhasil disimpan</h3>
-                                    <p>Simpan nomor permohonan dan PIN ini. PIN hanya ditampilkan sekarang.</p>
-                                    <p class="letter-pin">{{ session('tracking_pin') }}</p>
+                                    <p>Simpan nomor permohonan ini untuk melacak status pengajuan.</p>
                                     <p>Agar petugas segera mengetahui pengajuan Anda, buka WhatsApp Desa dan kirim pesan yang telah disiapkan.</p>
                                 </div>
                             </div>
@@ -49,7 +47,7 @@
                             <div class="letter-notice success">{{ session('success') }}</div>
                         @endif
 
-                        @if($application->public_note)
+                        @if($application->public_note && !($application->status === \App\Enums\LetterApplicationStatus::Cancelled && $application->public_note === 'Dibatalkan oleh pemohon.'))
                             <div class="letter-notice warning">
                                 <strong>Catatan petugas</strong>
                                 <p>{{ $application->public_note }}</p>
@@ -63,6 +61,7 @@
                             <p><strong>Estimasi:</strong> {{ $application->service_snapshot_json['processing_days'] }} hari kerja</p>
                             <p><strong>Pengambilan:</strong> {{ $settings->pickupAddress() }}</p>
                             <p><strong>Jam:</strong> {{ $settings->officeHours() }}</p>
+                            <p><strong>Perihal:</strong> {{ $application->service_snapshot_json['name'] ?? $application->service->name }}</p>
 
                             @if($application->status === \App\Enums\LetterApplicationStatus::ReadyForPickup)
                                 <div class="letter-notice success">Surat siap diambil. Bawa dokumen asli dan nomor permohonan.</div>
@@ -78,38 +77,39 @@
                                     </form>
 
                                     @if($application->status->canTransitionTo(\App\Enums\LetterApplicationStatus::Cancelled))
-                                        <form method="post" action="{{ route('letter-services.application.cancel', $token) }}" onsubmit="return confirm('Batalkan permohonan ini?')">
+                                        <form method="post" action="{{ route('letter-services.application.cancel', $token) }}" onsubmit="return confirm('Batalkan permohonan ini?')" data-prevent-double-submit>
                                             @csrf
                                             @method('PATCH')
                                             <button class="letter-button danger" type="submit">Batalkan Permohonan</button>
                                         </form>
                                     @endif
                                 </div>
-                                <small>WhatsApp dibuka di tab baru. Jika tidak terbuka, izinkan pop-up untuk situs ini. Anda tetap harus menekan tombol Kirim di WhatsApp.</small>
                             @endif
 
                             @if($token && $application->canBeEditedByApplicant())
                                 <a class="letter-button secondary" href="{{ route('letter-services.application.edit', $token) }}">Perbaiki Permohonan</a>
                             @endif
 
-                            <p class="letter-no-download">Surat tidak tersedia dalam bentuk file dan tidak dapat diunduh.</p>
                         </div>
                     </div>
 
                     <aside class="letter-card letter-status-history">
                         <h3>Riwayat status</h3>
                         <ol class="letter-timeline">
+                            @php($lastTimelineStatus = null)
                             @foreach($application->statusHistories as $history)
+                                @continue($history->to_status === $lastTimelineStatus)
                                 <li>
                                     <span></span>
                                     <div>
                                         <strong>{{ $history->to_status->label() }}</strong>
                                         <small>{{ $history->created_at->timezone('Asia/Jakarta')->translatedFormat('d F Y, H.i') }} WIB</small>
-                                        @if($history->public_note)
+                                        @if($history->public_note && $history->public_note !== 'Dibatalkan oleh pemohon.')
                                             <p>{{ $history->public_note }}</p>
                                         @endif
                                     </div>
                                 </li>
+                                @php($lastTimelineStatus = $history->to_status)
                             @endforeach
                         </ol>
                     </aside>

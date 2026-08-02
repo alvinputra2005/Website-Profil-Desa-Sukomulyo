@@ -60,7 +60,7 @@ class AdministrativeServicePageTest extends TestCase
             ->assertSee('submission-guide-flow', false)
             ->assertSee('Isi formulir data pemohon dan keperluan sesuai dokumen resmi')
             ->assertSee('Unggah seluruh dokumen wajib dalam format JPG, PNG, atau PDF')
-            ->assertSee('simpan nomor permohonan dan PIN pelacakan')
+            ->assertSee('simpan nomor pelacakan')
             ->assertSee('Konfirmasi melalui WhatsApp Desa dan pantau status permohonan')
             ->assertSee('ambil surat fisik di kantor desa')
             ->assertDontSee('Datang ke Kantor Desa Sukomulyo pada jam pelayanan.')
@@ -68,10 +68,11 @@ class AdministrativeServicePageTest extends TestCase
             ->assertSee('Jam Layanan')
             ->assertSee('Hari dan jam pelayanan')
             ->assertSee(app(LetterSettings::class)->officeHours())
-            ->assertSee('Pengajuan Layanan Surat')
-            ->assertSee('Siap Mengajukan Surat?')
-            ->assertSee('Mulai Pengajuan')
-            ->assertSee('href="'.route('letter-services.index').'"', false)
+            ->assertSee('Butuh Bantuan?')
+            ->assertSee('Hubungi petugas Desa Sukomulyo melalui WhatsApp untuk informasi lebih lanjut.')
+            ->assertSee('Hubungi via WhatsApp')
+            ->assertSee('https://wa.me/', false)
+            ->assertDontSee('Siap Mengajukan Surat?')
             ->assertSee('administration-application-cta', false)
             ->assertSee('data-static-application-cta', false)
             ->assertDontSee('service-flow-actor', false)
@@ -87,7 +88,7 @@ class AdministrativeServicePageTest extends TestCase
         $this->assertStringNotContainsString('aria-expanded', $applicationCtaHtml);
         $this->assertStringNotContainsString(' hidden', $applicationCtaHtml);
         $this->assertLessThan(
-            strpos($html, 'letter-office-hours-heading'),
+            strpos($html, 'letter-info-card--hours'),
             strpos($html, 'administration-application-cta'),
         );
     }

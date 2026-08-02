@@ -46,6 +46,8 @@
                 </section>
 
                 <aside class="letter-info-sidebar" aria-label="Panduan dan informasi pelayanan surat" data-sidebar-accordion>
+                    @include('pages.letters.partials.tracking-card')
+
                     @include('administrative-services.partials.submission-guide', [
                         'submissionGuidePanelId' => 'letter-index-submission-guide',
                         'submissionGuideAsFlow' => true,

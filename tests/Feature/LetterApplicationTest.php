@@ -74,12 +74,15 @@ class LetterApplicationTest extends TestCase
             ->assertSee('Tata Cara Pengajuan')
             ->assertSee('Isi formulir data pemohon dan keperluan sesuai dokumen resmi')
             ->assertSee('Unggah seluruh dokumen wajib dalam format JPG, PNG, atau PDF')
-            ->assertSee('simpan nomor permohonan dan PIN pelacakan')
+            ->assertSee('simpan nomor pelacakan')
+            ->assertSeeInOrder(['Lacak Status Pengajuan', 'Tata Cara Pengajuan'])
+            ->assertSee('name="application_number"', false)
+            ->assertDontSee('name="pin"', false)
             ->assertSee('Butuh Bantuan?')
             ->assertSee('Jam Layanan');
         preg_match('/<aside class="letter-info-sidebar".*?<\/aside>/s', $letterIndex->getContent(), $sidebar);
         $sidebarHtml = $sidebar[0] ?? '';
-        $this->assertSame(2, substr_count($sidebarHtml, 'data-static-info-card'));
+        $this->assertSame(3, substr_count($sidebarHtml, 'data-static-info-card'));
         $this->assertStringContainsString('data-sidebar-toggle', $sidebarHtml);
         $this->assertStringContainsString('data-sidebar-panel', $sidebarHtml);
         $this->assertStringContainsString('letter-index-submission-guide', $sidebarHtml);
@@ -100,6 +103,26 @@ class LetterApplicationTest extends TestCase
             ->assertStatus(303)
             ->assertRedirectContains('https://wa.me/');
         $this->assertNotNull($application->refresh()->whatsapp_confirmation_opened_at);
+    }
+
+    public function test_quick_tracking_form_opens_the_matching_database_application(): void
+    {
+        $application = LetterApplication::factory()->create([
+            'application_number' => 'PS-SKU-20260802-ABC123',
+            'tracking_expires_at' => now()->addDay(),
+        ]);
+
+        $this->from(route('letter-services.index'))
+            ->post(route('letter-services.track.store'), [
+                'application_number' => strtolower($application->application_number),
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('letter-services.track.session', $application));
+
+        $this->get(route('letter-services.track.session', $application))
+            ->assertOk()
+            ->assertSee($application->application_number)
+            ->assertSee($application->maskedName());
     }
 
     public function test_status_update_can_open_prefilled_whatsapp_notification_for_applicant(): void
@@ -191,6 +214,29 @@ class LetterApplicationTest extends TestCase
             ->assertRedirect(route('letter-services.track.token', $token));
 
         $this->assertSame(LetterApplicationStatus::Submitted, $application->refresh()->status);
+
+        $this->post(route('letter-services.application.documents.upload', $token))
+            ->assertStatus(409);
+
+        $this->assertSame(1, $application->statusHistories()
+            ->where('to_status', LetterApplicationStatus::Submitted->value)
+            ->count());
+    }
+
+    public function test_tracking_hides_duplicate_consecutive_statuses(): void
+    {
+        $token = str_repeat('c', 64);
+        $application = LetterApplication::factory()->create([
+            'tracking_token_hash' => hash('sha256', $token),
+            'status' => LetterApplicationStatus::Submitted,
+        ]);
+        $application->statusHistories()->create(['to_status' => LetterApplicationStatus::Draft, 'created_at' => now()->subMinute()]);
+        $application->statusHistories()->create(['from_status' => LetterApplicationStatus::Draft, 'to_status' => LetterApplicationStatus::Submitted, 'created_at' => now()]);
+        $application->statusHistories()->create(['from_status' => LetterApplicationStatus::Submitted, 'to_status' => LetterApplicationStatus::Submitted, 'created_at' => now()->addSecond()]);
+
+        $response = $this->get(route('letter-services.track.token', $token))->assertOk();
+
+        $this->assertSame(1, substr_count($response->getContent(), 'Permohonan Dikirim'));
     }
 
     private function user(string $roleCode): User

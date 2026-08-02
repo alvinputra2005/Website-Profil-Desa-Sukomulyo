@@ -305,8 +305,8 @@ return [
         'Pilih jenis surat yang ingin diajukan dan periksa dokumen persyaratannya.',
         'Isi formulir data pemohon dan keperluan sesuai dokumen resmi, lalu nyatakan bahwa data sudah benar.',
         'Unggah seluruh dokumen wajib dalam format JPG, PNG, atau PDF dengan ukuran maksimal 5 MB per file.',
-        'Kirim pengajuan, lalu simpan nomor permohonan dan PIN pelacakan yang ditampilkan.',
-        'Konfirmasi melalui WhatsApp Desa dan pantau status permohonan menggunakan nomor permohonan serta PIN.',
+        'Kirim pengajuan, lalu simpan nomor pelacakan yang ditampilkan.',
+        'Konfirmasi melalui WhatsApp Desa dan pantau status permohonan menggunakan nomor pelacakan.',
         'Jika diminta, perbaiki data sesuai catatan petugas. Setelah surat siap, ambil surat fisik di kantor desa dengan membawa dokumen asli dan nomor permohonan.',
     ],
 

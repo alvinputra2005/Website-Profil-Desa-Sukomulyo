@@ -18,6 +18,6 @@ class TrackLetterApplicationRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['application_number' => ['required', 'string', 'max:40'], 'pin' => ['required', 'digits:6']];
+        return ['application_number' => ['required', 'string', 'max:40']];
     }
 }

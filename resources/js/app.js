@@ -117,6 +117,25 @@ const initPublicPage = () => {
         });
     }
 
+    document.querySelectorAll('form[data-prevent-double-submit]').forEach((form) => {
+        if (form.dataset.doubleSubmitBound === 'true') return;
+
+        form.dataset.doubleSubmitBound = 'true';
+        form.addEventListener('submit', (event) => {
+            if (event.defaultPrevented) return;
+            if (form.dataset.submitting === 'true') {
+                event.preventDefault();
+                return;
+            }
+
+            form.dataset.submitting = 'true';
+            form.querySelectorAll('button[type="submit"]').forEach((button) => {
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
+            });
+        });
+    });
+
     const letterSelector = document.querySelector('[data-letter-selector]');
 
     if (letterSelector && letterSelector.dataset.bound !== 'true') {
