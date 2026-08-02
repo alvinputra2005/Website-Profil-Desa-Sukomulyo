@@ -6,7 +6,7 @@
     <div class="col-md-4">
         <div class="box box-success">
             <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-upload"></i> Unggah Media</h3></div>
-            <form method="post" action="{{ route('admin.media.store') }}" enctype="multipart/form-data">
+            <form method="post" action="{{ route('admin.media.store') }}" enctype="multipart/form-data" data-image-preparation>
                 @csrf
                 <div class="box-body">
                     <div class="form-group">
