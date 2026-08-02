@@ -72,25 +72,6 @@
                     @endforeach
                 </div>
 
-                <section id="idm" class="data-panel">
-                    <span class="section-kicker">Indeks Desa Membangun</span>
-                    <h2>IDM Desa Sukomulyo</h2>
-                    @if ($idm)
-                        <div class="statistics-grid">
-                            @foreach ([['IDM', $idm['idm_score']], ['IKS', $idm['iks_score']], ['IKE', $idm['ike_score']], ['IKL', $idm['ikl_score']]] as [$label, $value])
-                                <article class="statistic-card">
-                                    <i class="fas fa-chart-line" aria-hidden="true"></i>
-                                    <div><strong>{{ number_format((float) $value, 4, ',', '.') }}</strong></div>
-                                    <p>{{ $label }}</p>
-                                </article>
-                            @endforeach
-                        </div>
-                        <p>Status tahun {{ $idm['year'] }}: <strong>{{ $idm['status_label'] }}</strong>@if($idm['source']) · Sumber: {{ $idm['source'] }}@endif</p>
-                    @else
-                        <p>Data IDM belum tersedia.</p>
-                    @endif
-                </section>
-
                 @if (!empty($statisticCards))
                     <section class="data-panel" aria-labelledby="statistics-cards-title">
                         <span class="section-kicker">Kategori Data</span>

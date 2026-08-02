@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Gallery;
-use App\Models\IdmScore;
 use App\Models\Role;
 use App\Models\StatisticDataset;
 use App\Models\User;
@@ -45,7 +44,6 @@ class DatabaseSeeder extends Seeder
         $this->call(LetterServiceSeeder::class);
         Gallery::firstOrCreate(['slug' => 'kegiatan-desa'], ['title' => 'Kegiatan Desa', 'description' => 'Dokumentasi kegiatan warga Desa Sukomulyo.', 'status' => 'published', 'created_by' => $admin->id]);
         StatisticDataset::firstOrCreate(['slug' => 'jumlah-penduduk'], ['category' => 'penduduk', 'title' => 'Jumlah Penduduk', 'description' => 'Statistik jumlah penduduk desa.', 'year' => now()->year, 'unit' => 'jiwa', 'visualization_type' => 'bar', 'status' => 'published', 'display_order' => 0, 'created_by' => $admin->id]);
-        IdmScore::firstOrCreate(['year' => now()->year], ['idm_score' => 0.7500, 'iks_score' => 0.7600, 'ike_score' => 0.7300, 'ikl_score' => 0.7600, 'status_label' => 'Maju', 'source' => 'Data awal desa']);
         if (app()->environment(['local', 'testing'])) {
             $this->call(PopulationStatisticsDemoSeeder::class);
             $this->call(VillageStatisticDemoSeeder::class);

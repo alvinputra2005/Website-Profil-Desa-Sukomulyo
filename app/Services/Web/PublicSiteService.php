@@ -5,7 +5,6 @@ namespace App\Services\Web;
 use App\Http\Requests\Web\StoreContactMessageRequest;
 use App\Models\ContactMessage;
 use App\Models\Gallery;
-use App\Models\IdmScore;
 use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Official;
@@ -408,9 +407,6 @@ class PublicSiteService
                         ->mapWithKeys(fn (array $panel, int $index): array => ['indikator-'.$index => $panel])
                         ->all(),
                     'statisticCards' => $statisticCards->all(),
-                    'idm' => Schema::hasTable('idm_scores')
-                        ? IdmScore::query()->latest('year')->first()?->only(['year', 'idm_score', 'iks_score', 'ike_score', 'ikl_score', 'status_label', 'source'])
-                        : null,
                 ];
             }
         );
@@ -432,7 +428,6 @@ class PublicSiteService
             'pendidikan' => ['title' => 'Statistik Pendidikan', 'description' => 'Jumlah penduduk berdasarkan jenjang pendidikan.', 'categories' => ['education']],
             'pekerjaan' => ['title' => 'Statistik Pekerjaan', 'description' => 'Sebaran pekerjaan dan mata pencaharian masyarakat.', 'categories' => ['occupation']],
             'ekonomi' => ['title' => 'Statistik Ekonomi', 'description' => 'Gambaran aktivitas dan potensi ekonomi masyarakat desa.', 'categories' => ['occupation']],
-            'idm' => ['title' => 'IDM (Indeks Desa Membangun)', 'description' => 'Indeks Ketahanan Sosial, Ekonomi, dan Lingkungan desa.', 'categories' => [], 'is_idm' => true],
             'visualisasi' => ['title' => 'Visualisasi Data', 'description' => 'Ringkasan data desa dalam tabel, grafik, dan angka.', 'categories' => ['age', 'education', 'occupation'], 'summary' => true],
         ];
         abort_unless(isset($dataPages[$section]), 404);
@@ -453,11 +448,7 @@ class PublicSiteService
             'title' => $categoryLabels[$category],
             'items' => $hasResidents ? $populationStatistics->distribution($category) : [],
         ])->all();
-        $idm = $section === 'idm' && Schema::hasTable('idm_scores')
-            ? IdmScore::query()->latest('year')->first()?->only(['year', 'idm_score', 'iks_score', 'ike_score', 'ikl_score', 'status_label', 'source'])
-            : null;
-
-        return $this->render('pages.statistic-detail', compact('page', 'summary', 'panels', 'idm'));
+        return $this->render('pages.statistic-detail', compact('page', 'summary', 'panels'));
     }
 
     public function populationStatistics(

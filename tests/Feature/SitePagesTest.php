@@ -8,6 +8,7 @@ use App\Models\Media;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class SitePagesTest extends TestCase
@@ -30,7 +31,6 @@ class SitePagesTest extends TestCase
             route('data-statistik.detail', ['section' => 'pendidikan']) => 'Statistik Pendidikan',
             route('data-statistik.detail', ['section' => 'pekerjaan']) => 'Statistik Pekerjaan',
             route('data-statistik.detail', ['section' => 'ekonomi']) => 'Statistik Ekonomi',
-            route('data-statistik.detail', ['section' => 'idm']) => 'IDM (Indeks Desa Membangun)',
             route('data-statistik.detail', ['section' => 'visualisasi']) => 'Visualisasi Data',
             route('informasi-publik-desa') => 'Informasi Publik Desa',
             route('informasi-desa.detail', ['section' => 'pengumuman']) => 'Pengumuman Desa',
@@ -102,6 +102,20 @@ class SitePagesTest extends TestCase
         $this->get('/berita-desa/artikel-tidak-ada')
             ->assertNotFound()
             ->assertSee('Halaman Tidak Ditemukan');
+    }
+
+    public function test_idm_feature_is_not_available_on_public_pages(): void
+    {
+        $this->assertArrayNotHasKey('idm', config('admin.resources'));
+        $this->assertFalse(Schema::hasTable('idm_scores'));
+
+        $this->get(route('data-statistik.detail', ['section' => 'idm']))
+            ->assertNotFound();
+
+        $this->get(route('data-desa-statistik'))
+            ->assertOk()
+            ->assertDontSee('Indeks Desa Membangun')
+            ->assertDontSee('IDM Desa Sukomulyo');
     }
 
     public function test_removed_population_pages_are_not_accessible_or_listed_in_navigation(): void

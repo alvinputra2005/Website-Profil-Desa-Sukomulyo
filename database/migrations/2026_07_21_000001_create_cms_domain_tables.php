@@ -160,17 +160,6 @@ return new class extends Migration
             $t->unique(['dataset_id', 'label']);
             $t->index(['dataset_id', 'display_order']);
         });
-        Schema::create('idm_scores', function (Blueprint $t) {
-            $t->id();
-            $t->year('year')->unique();
-            $t->decimal('idm_score', 8, 4);
-            $t->decimal('iks_score', 8, 4);
-            $t->decimal('ike_score', 8, 4);
-            $t->decimal('ikl_score', 8, 4);
-            $t->string('status_label', 100);
-            $t->string('source')->nullable();
-            $t->timestamps();
-        });
         Schema::create('map_layers', function (Blueprint $t) {
             $t->id();
             $t->string('name');
@@ -249,7 +238,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('contact_messages', fn (Blueprint $t) => $t->dropIndex(['created_at']));
-        foreach (['activity_logs', 'gallery_items', 'galleries', 'map_features', 'map_layers', 'idm_scores', 'statistic_values', 'statistic_datasets', 'publication_attachments', 'publications', 'news', 'news_categories', 'officials', 'village_profile_sections', 'village_identities', 'media'] as $table) {
+        foreach (['activity_logs', 'gallery_items', 'galleries', 'map_features', 'map_layers', 'statistic_values', 'statistic_datasets', 'publication_attachments', 'publications', 'news', 'news_categories', 'officials', 'village_profile_sections', 'village_identities', 'media'] as $table) {
             Schema::dropIfExists($table);
         }
     }

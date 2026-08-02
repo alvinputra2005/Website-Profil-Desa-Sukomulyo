@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\IdmScore;
 use App\Models\StatisticDataset;
 use App\Models\StatisticValue;
 use App\Models\User;
@@ -87,27 +86,6 @@ class VillageStatisticDemoSeeder extends Seeder
                         ],
                     );
                 }
-            }
-        }
-
-        $idmDefinition = $contexts['idm'] ?? null;
-        if ($idmDefinition) {
-            foreach (range($firstYear, $currentYear) as $year) {
-                $offset = $year - $firstYear;
-                $values = collect($idmDefinition['values'])->mapWithKeys(
-                    fn (array $item): array => [$item[0] => round($item[1] + ($item[2] * $offset), 4)],
-                );
-                IdmScore::query()->updateOrCreate(
-                    ['year' => $year],
-                    [
-                        'idm_score' => $values['IDM'],
-                        'iks_score' => $values['IKS'],
-                        'ike_score' => $values['IKE'],
-                        'ikl_score' => $values['IKL'],
-                        'status_label' => $values['IDM'] >= .75 ? 'Maju' : 'Berkembang',
-                        'source' => self::SOURCE,
-                    ],
-                );
             }
         }
 

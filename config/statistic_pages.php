@@ -34,7 +34,6 @@ return [
         'pendidikan' => ['' => 'education-family'],
         'pekerjaan' => ['' => 'occupation'],
         'ekonomi' => ['' => 'economy'],
-        'idm' => ['' => 'idm'],
         'visualisasi' => ['' => 'visualization'],
     ],
 
@@ -245,21 +244,6 @@ return [
                 ['UMKM Olahan', 6, 1],
                 ['Jasa', 5, 1],
                 ['Peternakan', 4, 0],
-            ],
-        ],
-        'idm' => [
-            'title' => 'IDM (Indeks Desa Membangun)',
-            'trend_title' => 'IDM',
-            'description' => 'Perkembangan Indeks Ketahanan Sosial, Ekonomi, Lingkungan, dan nilai IDM desa.',
-            'unit' => 'indeks',
-            'chart' => 'bar',
-            'decimals' => 4,
-            'show_total' => false,
-            'values' => [
-                ['IDM', 0.6900, 0.0150],
-                ['IKS', 0.7100, 0.0125],
-                ['IKE', 0.6600, 0.0175],
-                ['IKL', 0.7000, 0.0150],
             ],
         ],
         'visualization' => [
