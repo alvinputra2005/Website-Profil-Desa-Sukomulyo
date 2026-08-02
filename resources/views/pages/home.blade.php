@@ -50,9 +50,9 @@
                     class="about-video-thumb"
                     type="button"
                     data-about-video-open
-                    data-video-src="https://www.youtube.com/embed/-yoqib77rIE?autoplay=1&rel=0"
+                    data-video-src="https://www.youtube.com/embed/7UwgGG87k3Y?autoplay=1&rel=0"
                     aria-label="Putar video profil Desa Sukomulyo">
-                    <img src="https://img.youtube.com/vi/-yoqib77rIE/maxresdefault.jpg" alt="Thumbnail video profil Desa Sukomulyo">
+                    <img src="https://img.youtube.com/vi/7UwgGG87k3Y/maxresdefault.jpg" alt="Thumbnail video profil Desa Sukomulyo">
                     <span class="about-video-play" aria-hidden="true"><i class="fas fa-play"></i></span>
                 </button>
             </div>
