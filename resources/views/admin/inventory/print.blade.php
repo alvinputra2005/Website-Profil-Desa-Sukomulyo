@@ -1,0 +1,11 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><title>Laporan Inventaris Desa Sukomulyo</title><style>
+body{font-family:Arial,sans-serif;font-size:11px;color:#111;margin:24px}h1,h2,p{text-align:center;margin:4px}.meta{margin:20px 0 10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #333;padding:5px;vertical-align:top}th{background:#eee}.num{text-align:right}.no-border td{border:0}.sign{margin-top:35px;width:100%}.sign td{border:0;text-align:center;width:50%;height:100px}@media print{.no-print{display:none}body{margin:0}@page{size:landscape;margin:12mm}}
+</style></head><body>
+<button class="no-print" onclick="window.print()">Cetak laporan</button>
+<h2>PEMERINTAH DESA SUKOMULYO</h2><h1>BUKU INVENTARIS DAN KEKAYAAN DESA</h1><p>Dicetak pada {{ now()->translatedFormat('d F Y H:i') }}</p>
+<div class="meta"><strong>Jumlah register:</strong> {{ number_format($summary['count'],0,',','.') }} &nbsp; <strong>Total unit:</strong> {{ number_format($summary['quantity'],0,',','.') }} &nbsp; <strong>Total nilai:</strong> Rp{{ number_format($summary['value'],2,',','.') }}</div>
+<table><thead><tr><th>No.</th><th>Jenis Barang</th><th>Nama Barang</th><th>Kode / Register</th><th>Tahun</th><th>Asal-usul</th><th>Jumlah</th><th>Kondisi</th><th>Status</th><th>Nilai (Rp)</th><th>Keterangan</th></tr></thead><tbody>
+@forelse($items as $item)<tr><td>{{ $loop->iteration }}</td><td>{{ \App\Support\InventoryCategory::label($item->category) }}</td><td>{{ $item->name }}</td><td>{{ $item->item_code }}<br>{{ $item->register_number }}</td><td>{{ $item->acquisition_year }}</td><td>{{ $item->origin }}</td><td class="num">{{ $item->quantity }}</td><td>{{ $item->condition }}</td><td>{{ $item->status }}</td><td class="num">{{ number_format((float)$item->value,2,',','.') }}</td><td>{{ $item->notes }}</td></tr>@empty<tr><td colspan="11" style="text-align:center">Tidak ada data.</td></tr>@endforelse
+</tbody><tfoot><tr><th colspan="9" class="num">TOTAL</th><th class="num">{{ number_format($summary['value'],2,',','.') }}</th><th></th></tr></tfoot></table>
+<table class="sign"><tr><td>Mengetahui,<br>Kepala Desa Sukomulyo<br><br><br><br><strong>(____________________)</strong></td><td>Sukomulyo, {{ now()->translatedFormat('d F Y') }}<br>Pengurus Barang<br><br><br><br><strong>(____________________)</strong></td></tr></table>
+</body></html>

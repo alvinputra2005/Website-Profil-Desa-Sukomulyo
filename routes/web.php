@@ -3,6 +3,9 @@
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\BulkDeleteStatisticDatasetController;
 use App\Http\Controllers\Admin\ApbdesController;
+use App\Http\Controllers\Admin\InventoryController;
+use App\Http\Controllers\Admin\InventoryMutationController;
+use App\Http\Controllers\Admin\InventoryReportController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\CrudController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -136,6 +139,23 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::get('laporan-penduduk/export', [PopulationReportController::class, 'export'])->name('report.export');
     });
     Route::middleware('can:manage-data')->group(function () {
+        Route::prefix('inventaris')->name('inventory.')->group(function () {
+            Route::get('/laporan', [InventoryReportController::class, 'index'])->name('report');
+            Route::get('/laporan/cetak', [InventoryReportController::class, 'print'])->name('report.print');
+            Route::get('/laporan/csv', [InventoryReportController::class, 'csv'])->name('report.csv');
+            Route::get('/{category}', [InventoryController::class, 'index'])->name('index');
+            Route::get('/{category}/create', [InventoryController::class, 'create'])->name('create');
+            Route::post('/{category}', [InventoryController::class, 'store'])->name('store');
+            Route::get('/{category}/{item}', [InventoryController::class, 'show'])->name('show');
+            Route::get('/{category}/{item}/edit', [InventoryController::class, 'edit'])->name('edit');
+            Route::put('/{category}/{item}', [InventoryController::class, 'update'])->name('update');
+            Route::delete('/{category}/{item}', [InventoryController::class, 'destroy'])->name('destroy');
+            Route::get('/{category}/{item}/mutasi/create', [InventoryMutationController::class, 'create'])->name('mutations.create');
+            Route::post('/{category}/{item}/mutasi', [InventoryMutationController::class, 'store'])->name('mutations.store');
+            Route::get('/{category}/{item}/mutasi/{mutation}/edit', [InventoryMutationController::class, 'edit'])->name('mutations.edit');
+            Route::put('/{category}/{item}/mutasi/{mutation}', [InventoryMutationController::class, 'update'])->name('mutations.update');
+            Route::delete('/{category}/{item}/mutasi/{mutation}', [InventoryMutationController::class, 'destroy'])->name('mutations.destroy');
+        });
         Route::patch('/apbdes/{apbdes}/publikasi', [ApbdesController::class, 'togglePublication'])->name('apbdes.toggle-publication');
         Route::resource('apbdes', ApbdesController::class)
             ->parameters(['apbdes' => 'apbdes'])
