@@ -15,7 +15,6 @@ class ProfilePageLayoutTest extends TestCase
             route('profile-desa') => true,
             route('profile-desa.detail', 'sejarah') => true,
             route('profile-desa.detail', 'visi-misi') => true,
-            route('peta-desa') => true,
             route('potensi-desa') => true,
         ];
 

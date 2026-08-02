@@ -10,7 +10,6 @@ use App\Http\Controllers\Admin\Village\VillageSectionController;
 use App\Http\Controllers\Admin\Village\VisionMissionController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\NewsController;
-use App\Http\Controllers\Web\VillageMapController;
 use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
@@ -27,7 +26,8 @@ class ModularControllerRoutingTest extends TestCase
     {
         $this->assertSame(HomeController::class, Route::getRoutes()->getByName('beranda')->getActionName());
         $this->assertSame(NewsController::class.'@index', Route::getRoutes()->getByName('berita-desa.index')->getActionName());
-        $this->assertSame(VillageMapController::class.'@geoJson', Route::getRoutes()->getByName('peta-desa.geojson')->getActionName());
+        $this->assertNull(Route::getRoutes()->getByName('peta-desa'));
+        $this->assertNull(Route::getRoutes()->getByName('peta-desa.geojson'));
     }
 
     public function test_admin_routes_use_modular_domain_controllers(): void

@@ -2,8 +2,12 @@
 @section('title',($item->exists?'Ubah ':'Tambah ').$config['title'])
 @section('page-description','Lengkapi formulir berikut')
 @section('content')
+@php
+    $isVillageRegulation = ($config['publication_type'] ?? null) === 'regulation';
+@endphp
 <form method="post" enctype="multipart/form-data" action="{{ $item->exists?route('admin.resources.update',[$resource,$item]):route('admin.resources.store',$resource) }}" data-dirty-form>
 @csrf @if($item->exists)@method('put')@endif
+@if($isVillageRegulation)<input type="hidden" name="type" value="regulation">@endif
 <div class="box box-info"><div class="box-header with-border"><h3 class="box-title">Form {{ $config['title'] }}</h3></div><div class="box-body">
 @foreach($config['fields'] as $name=>$field)
 @if($name !== 'slug')
@@ -60,17 +64,29 @@
 @endif
 @endforeach
 @if($resource==='publications')
-<div class="publication-attachment-manager" data-publication-attachments>
+<div class="publication-attachment-manager" @if(!$isVillageRegulation) data-publication-attachments @endif>
     <hr>
     <h4><i class="fa fa-file-pdf-o text-red"></i> Lampiran PDF</h4>
+    @if($isVillageRegulation)
+    <p class="help-block">Unggah satu file PDF maksimal 10 MB. Mengunggah file baru saat mengubah data akan menggantikan lampiran lama.</p>
+    @else
     <p class="help-block">Unggah maksimal 10 PDF per sekali simpan, masing-masing maksimal 10 MB. Lampiran pertama menjadi PDF utama pada daftar pengumuman.</p>
+    @endif
     <div class="form-group {{ $errors->has('attachment_uploads.*')?'has-error':'' }}">
-        <label for="attachment_uploads">Tambah lampiran PDF</label>
-        <input id="attachment_uploads" type="file" name="attachment_uploads[]" class="form-control" accept="application/pdf,.pdf" multiple data-attachment-files>
+        <label for="attachment_uploads">{{ $isVillageRegulation && $item->exists ? 'Ganti lampiran PDF' : 'Tambah lampiran PDF' }}</label>
+        <input id="attachment_uploads" type="file" name="attachment_uploads[]" class="form-control" accept="application/pdf,.pdf" @if(!$isVillageRegulation) multiple data-attachment-files @elseif(!$item->exists || $publicationAttachments->isEmpty()) required @endif>
         @error('attachment_uploads')<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
         @error('attachment_uploads.*')<span class="field-error"><i class="fa fa-times-circle-o"></i> {{ $message }}</span>@enderror
     </div>
     <div class="publication-attachment-list" data-attachment-list>
+        @if($isVillageRegulation)
+        @foreach($publicationAttachments->take(1) as $attachment)
+        <div class="publication-attachment-row">
+            <i class="fa fa-file-pdf-o text-red publication-attachment-file-icon"></i>
+            <div class="publication-attachment-fields"><strong>{{ $attachment->media?->original_name }}</strong></div>
+        </div>
+        @endforeach
+        @else
         @foreach($publicationAttachments as $attachment)
         <div class="publication-attachment-row" data-attachment-row data-existing-attachment>
             <span class="publication-attachment-handle" title="Urutkan lampiran"><i class="fa fa-bars"></i></span>
@@ -88,6 +104,7 @@
             </div>
         </div>
         @endforeach
+        @endif
     </div>
 </div>
 @endif

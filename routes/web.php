@@ -49,7 +49,6 @@ use App\Http\Controllers\Web\LetterWhatsAppConfirmationController;
 use App\Http\Controllers\Web\NewsController;
 use App\Http\Controllers\Web\PublicationController;
 use App\Http\Controllers\Web\SeoController;
-use App\Http\Controllers\Web\VillageMapController;
 use App\Http\Controllers\Web\VillageProfileController;
 use App\Http\Controllers\Web\VillageStatisticController;
 use Illuminate\Support\Facades\Route;
@@ -209,7 +208,7 @@ Route::post('/profile-desa/komentar', [VillageProfileController::class, 'storeCo
 Route::get('/profile-desa/komentar-identitas-desa', [VillageProfileController::class, 'comments'])->name('profile-desa.comments');
 Route::post('/profile-desa/komentar-identitas-desa/{comment}/suka', [VillageProfileController::class, 'likeComment'])->middleware('throttle:30,1')->name('profile-desa.comments.like');
 Route::get('/profile-desa/{section}/komentar', [VillageProfileController::class, 'sectionComments'])
-    ->where('section', 'sejarah|visi-misi|struktur-pemerintahan|wilayah-desa|potensi-desa')
+    ->where('section', 'sejarah|visi-misi|struktur-pemerintahan|potensi-desa')
     ->name('profile-desa.section-comments');
 Route::get('/profile-desa/{section}', [VillageProfileController::class, 'show'])->where('section', 'sejarah|visi-misi')->name('profile-desa.detail');
 Route::get('/pemerintahan-desa', [VillageProfileController::class, 'government'])->name('pemerintahan-desa');
@@ -240,8 +239,6 @@ Route::prefix('informasi-desa/dokumen')->name('publications.attachments.')->grou
         ->name('download');
 });
 Route::get('/informasi-desa/{section}', [PublicationController::class, 'show'])->where('section', 'layanan-administrasi|agenda|bantuan-sosial|informasi-publik')->name('informasi-desa.detail');
-Route::get('/peta-desa', [VillageMapController::class, 'index'])->name('peta-desa');
-Route::get('/peta-desa/geojson', [VillageMapController::class, 'geoJson'])->middleware('throttle:60,1')->name('peta-desa.geojson');
 Route::get('/galeri-desa', [GalleryController::class, 'index'])->name('galeri-desa');
 
 Route::get('/berita-desa', [NewsController::class, 'index'])->name('berita-desa.index');

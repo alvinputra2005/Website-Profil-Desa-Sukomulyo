@@ -241,24 +241,28 @@ class AnnouncementTest extends TestCase
     {
         Storage::fake('public');
 
+        $this->actingAs($this->author)
+            ->get(route('admin.resources.create', ['resource' => 'publications', 'type' => 'regulation']))
+            ->assertOk()
+            ->assertSee('name="title"', false)
+            ->assertSee('name="attachment_uploads[]"', false)
+            ->assertDontSee('name="content"', false)
+            ->assertDontSee('name="status"', false)
+            ->assertDontSee('name="published_at"', false);
+
         $response = $this->actingAs($this->author)->post(route('admin.resources.store', 'publications'), [
             'type' => 'regulation',
             'title' => 'Peraturan Desa tentang APBDes',
-            'slug' => 'peraturan-desa-apbdes',
-            'excerpt' => 'Ringkasan peraturan desa.',
-            'content' => '<p>Isi peraturan desa.</p>',
-            'status' => 'published',
-            'published_at' => now()->format('Y-m-d H:i:s'),
             'attachment_uploads' => [
                 UploadedFile::fake()->create('perdes-apbdes.pdf', 100, 'application/pdf'),
             ],
-            'attachment_upload_titles' => ['Perdes APBDes'],
-            'attachment_sequence' => ['new:0'],
         ]);
 
         $response->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertStringContainsString('/admin/publications/', (string) $response->headers->get('Location'));
 
-        $regulation = Publication::where('slug', 'peraturan-desa-apbdes')->firstOrFail();
+        $regulation = Publication::where('title', 'Peraturan Desa tentang APBDes')->firstOrFail();
+        $this->assertSame('peraturan-desa-tentang-apbdes', $regulation->slug);
         $attachment = $regulation->attachments()->with('media')->firstOrFail();
 
         $this->assertSame('regulation', $regulation->type);
@@ -271,6 +275,20 @@ class AnnouncementTest extends TestCase
         $this->get(route('informasi-publik-desa'))
             ->assertOk()
             ->assertDontSee('Peraturan Desa tentang APBDes');
+    }
+
+    public function test_village_regulation_requires_a_pdf_attachment(): void
+    {
+        $this->actingAs($this->author)
+            ->post(route('admin.resources.store', 'publications'), [
+                'type' => 'regulation',
+                'title' => 'Peraturan Desa Tanpa Lampiran',
+            ])
+            ->assertSessionHasErrors('attachment_uploads');
+
+        $this->assertDatabaseMissing('publications', [
+            'title' => 'Peraturan Desa Tanpa Lampiran',
+        ]);
     }
 
     private function publication(array $attributes = []): Publication

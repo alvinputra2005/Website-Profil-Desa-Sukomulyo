@@ -155,40 +155,6 @@
         </div>
     </section>
 
-    <section class="home-map-section" aria-labelledby="home-map-title">
-        <div class="container">
-            <header class="home-section-heading home-map-heading">
-                <div>
-                    <h2 class="section-title" id="home-map-title">Peta Desa Sukomulyo</h2>
-                </div>
-            </header>
-
-            <div class="map-layout">
-                <div class="map-frame">
-                    <iframe
-                        src="https://www.google.com/maps?q=Desa%20Sukomulyo&output=embed"
-                        title="Peta lokasi Desa Sukomulyo"
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade"
-                        allowfullscreen>
-                    </iframe>
-                </div>
-
-                <aside class="map-information">
-                    <span class="section-kicker">Informasi Lokasi</span>
-                    <h2>Kantor {{ $site['name'] }}</h2>
-                    <p>Peta membantu masyarakat menemukan kantor desa dan mengenali posisi wilayah Desa Sukomulyo.</p>
-                    <ul>
-                        <li><i class="fas fa-map-marker-alt" aria-hidden="true"></i><span><strong>Alamat Kantor Desa</strong>{{ $site['address'] }}</span></li>
-                        <li><i class="fas fa-phone" aria-hidden="true"></i><span><strong>Telepon</strong>{{ $site['phone'] }}</span></li>
-                        <li><i class="fas fa-envelope" aria-hidden="true"></i><span><strong>Email</strong>{{ $site['email'] }}</span></li>
-                    </ul>
-                    <a class="learnmore" href="https://www.google.com/maps/search/?api=1&query=Desa+Sukomulyo" target="_blank" rel="noopener noreferrer">Buka di Google Maps <i class="fas fa-location-arrow" aria-hidden="true"></i></a>
-                </aside>
-            </div>
-        </div>
-    </section>
-
     <dialog class="gallery-dialog" data-gallery-dialog aria-labelledby="gallery-dialog-title">
         <div class="gallery-dialog-layout">
             <div class="dialog-caption">

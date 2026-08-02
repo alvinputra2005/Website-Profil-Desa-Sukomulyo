@@ -5,8 +5,6 @@ namespace App\Observers;
 use App\Models\FamilyCard;
 use App\Models\Gallery;
 use App\Models\GalleryItem;
-use App\Models\MapFeature;
-use App\Models\MapLayer;
 use App\Models\Media;
 use App\Models\News;
 use App\Models\NewsCategory;
@@ -73,7 +71,6 @@ class PublicContentCacheObserver
             $model instanceof StatisticImport,
             $model instanceof StatisticRow,
             $model instanceof StatisticValue => $this->cache->invalidatePopulationStatistics(),
-            $model instanceof MapLayer, $model instanceof MapFeature => $this->cache->invalidateMap(),
             $model instanceof Gallery, $model instanceof GalleryItem => $this->cache->invalidateGallery(),
             $model instanceof Publication,
             $model instanceof PublicationAttachment => $this->cache->invalidatePublications(),

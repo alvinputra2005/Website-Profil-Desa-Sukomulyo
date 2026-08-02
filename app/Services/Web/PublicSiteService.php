@@ -6,7 +6,6 @@ use App\Http\Requests\Web\StoreContactMessageRequest;
 use App\Models\ContactMessage;
 use App\Models\Gallery;
 use App\Models\IdmScore;
-use App\Models\MapLayer;
 use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Official;
@@ -22,7 +21,6 @@ use App\Services\SiteCache;
 use App\Services\Statistics\PopulationStatisticIndicatorService;
 use App\Services\Statistics\PopulationStatisticAggregator;
 use App\Models\PopulationStatisticIndicator;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -48,7 +46,7 @@ class PublicSiteService
         $urls = $this->cache->remember(SiteCache::SEO_SITEMAP, SiteCache::ONE_HOUR, function (): array {
             $staticRoutes = [
                 'beranda', 'profile-desa', 'pemerintahan-desa', 'potensi-desa',
-                'data-desa-statistik', 'informasi-publik-desa', 'peta-desa',
+                'data-desa-statistik', 'informasi-publik-desa',
                 'announcements.index', 'galeri-desa', 'berita-desa.index', 'kontak.index',
             ];
             $urls = collect($staticRoutes)->map(fn (string $route) => [
@@ -636,59 +634,6 @@ class PublicSiteService
         return $this->render($view, $data);
     }
 
-    public function map(): View
-    {
-        return $this->render('pages.map', $this->profilePageData('wilayah-desa'));
-    }
-
-    public function mapGeoJson(): JsonResponse
-    {
-        $geoJson = $this->cache->remember(
-            SiteCache::MAP_GEOJSON,
-            SiteCache::THIRTY_MINUTES,
-            function (): array {
-                if (! Schema::hasTable('map_layers') || ! Schema::hasTable('map_features')) {
-                    return ['type' => 'FeatureCollection', 'features' => []];
-                }
-
-                $layers = MapLayer::query()
-                    ->where('is_visible', true)
-                    ->with(['features' => fn ($query) => $query
-                        ->where('is_visible', true)
-                        ->with('photo')
-                        ->orderBy('id')])
-                    ->orderBy('display_order')
-                    ->get();
-
-                return [
-                    'type' => 'FeatureCollection',
-                    'features' => $layers->flatMap(fn (MapLayer $layer) => $layer->features->map(
-                        fn ($feature) => [
-                            'type' => 'Feature',
-                            'id' => $feature->id,
-                            'geometry' => $feature->geometry_json,
-                            'properties' => array_merge($feature->properties_json ?? [], [
-                                'name' => $feature->name,
-                                'description' => $feature->description,
-                                'photo_url' => $feature->photo?->url,
-                                'layer' => [
-                                    'id' => $layer->id,
-                                    'name' => $layer->name,
-                                    'slug' => $layer->slug,
-                                    'style' => $layer->style_json ?? [],
-                                ],
-                            ]),
-                        ]
-                    ))->values()->all(),
-                ];
-            }
-        );
-
-        return response()
-            ->json($geoJson)
-            ->header('Cache-Control', 'public, max-age='.SiteCache::THIRTY_MINUTES);
-    }
-
     public function government(): View
     {
         return $this->render('pages.government', array_merge(
@@ -1013,7 +958,6 @@ class PublicSiteService
                 ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
                 ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
                 ['label' => 'Struktur Pemerintahan', 'route' => 'pemerintahan-desa', 'active' => 'pemerintahan-desa'],
-                ['label' => 'Wilayah Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
             ]],
             ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => $statisticChildren],
             ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
@@ -1661,11 +1605,6 @@ class PublicSiteService
                 'title' => 'Struktur Pemerintahan',
                 'url' => route('pemerintahan-desa'),
                 'comments_url' => route('profile-desa.section-comments', ['section' => 'struktur-pemerintahan']),
-            ],
-            'wilayah-desa' => [
-                'title' => 'Wilayah Desa',
-                'url' => route('peta-desa'),
-                'comments_url' => route('profile-desa.section-comments', ['section' => 'wilayah-desa']),
             ],
             'potensi-desa' => [
                 'title' => 'Potensi Desa',

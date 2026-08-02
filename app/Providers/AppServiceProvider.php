@@ -8,8 +8,6 @@ use App\Models\Gallery;
 use App\Models\GalleryItem;
 use App\Models\LetterApplication;
 use App\Models\LetterService;
-use App\Models\MapFeature;
-use App\Models\MapLayer;
 use App\Models\Media;
 use App\Models\News;
 use App\Models\NewsCategory;
@@ -99,8 +97,6 @@ class AppServiceProvider extends ServiceProvider
             StatisticImport::class,
             StatisticRow::class,
             StatisticValue::class,
-            MapLayer::class,
-            MapFeature::class,
             Gallery::class,
             GalleryItem::class,
             Publication::class,

@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\MapFeature;
-use App\Models\MapLayer;
 use App\Models\{Media, News};
 use App\Models\NewsCategory;
 use App\Models\Setting;
@@ -168,51 +166,4 @@ class SiteCacheTest extends TestCase
             ], false);
     }
 
-    public function test_geojson_only_contains_visible_content_and_is_invalidated_after_update(): void
-    {
-        $visibleLayer = MapLayer::create([
-            'name' => 'Fasilitas Umum',
-            'slug' => 'fasilitas-umum',
-            'geometry_type' => 'Point',
-            'style_json' => ['color' => '#15803d'],
-            'display_order' => 1,
-            'is_visible' => true,
-        ]);
-        $hiddenLayer = MapLayer::create([
-            'name' => 'Layer Internal',
-            'slug' => 'layer-internal',
-            'geometry_type' => 'Point',
-            'is_visible' => false,
-        ]);
-        $feature = MapFeature::create([
-            'layer_id' => $visibleLayer->id,
-            'name' => 'Balai Desa',
-            'geometry_json' => ['type' => 'Point', 'coordinates' => [112.1, -7.1]],
-            'is_visible' => true,
-        ]);
-        MapFeature::create([
-            'layer_id' => $hiddenLayer->id,
-            'name' => 'Data Internal',
-            'geometry_json' => ['type' => 'Point', 'coordinates' => [112.2, -7.2]],
-            'is_visible' => true,
-        ]);
-
-        Cache::flush();
-
-        $this->getJson(route('peta-desa.geojson'))
-            ->assertOk()
-            ->assertHeader('Cache-Control', 'max-age=1800, public')
-            ->assertJsonPath('type', 'FeatureCollection')
-            ->assertJsonPath('features.0.properties.name', 'Balai Desa')
-            ->assertJsonMissing(['name' => 'Data Internal']);
-
-        $this->assertTrue(Cache::has(SiteCache::MAP_GEOJSON));
-
-        $feature->update(['name' => 'Kantor Desa']);
-
-        $this->assertFalse(Cache::has(SiteCache::MAP_GEOJSON));
-        $this->getJson(route('peta-desa.geojson'))
-            ->assertOk()
-            ->assertJsonPath('features.0.properties.name', 'Kantor Desa');
-    }
 }

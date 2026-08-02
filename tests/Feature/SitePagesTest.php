@@ -38,7 +38,6 @@ class SitePagesTest extends TestCase
             route('informasi-desa.detail', ['section' => 'agenda']) => 'Agenda Desa',
             route('informasi-desa.detail', ['section' => 'bantuan-sosial']) => 'Informasi Bantuan Sosial',
             route('informasi-desa.detail', ['section' => 'informasi-publik']) => 'Informasi Publik',
-            route('peta-desa') => 'Peta Desa',
             route('galeri-desa') => 'Galeri Desa',
             route('berita-desa.index') => 'Berita Desa',
             route('berita-desa.category', 'pemerintahan') => 'Kategori: Pemerintahan',
@@ -226,7 +225,7 @@ class SitePagesTest extends TestCase
         ]);
     }
 
-    public function test_homepage_shows_four_news_five_gallery_items_and_village_map(): void
+    public function test_homepage_shows_four_news_and_five_gallery_items_without_village_map(): void
     {
         $response = $this->get(route('beranda'))
             ->assertOk()
@@ -238,15 +237,27 @@ class SitePagesTest extends TestCase
             ->assertSee('data-carousel-position="0"', false)
             ->assertSee('data-gallery-next', false)
             ->assertDontSee('data-gallery-status', false)
-            ->assertSee('Peta Desa Sukomulyo')
+            ->assertDontSee('Peta Desa Sukomulyo')
             ->assertSee(route('berita-desa.index'), false)
             ->assertSee(route('galeri-desa'), false)
-            ->assertSee('https://www.google.com/maps?q=Desa%20Sukomulyo&output=embed', false)
+            ->assertDontSee('https://www.google.com/maps?q=Desa%20Sukomulyo&output=embed', false)
             ->assertDontSee('data-home-location-map', false)
             ->assertDontSee('router.project-osrm.org', false);
 
         $this->assertSame(4, substr_count($response->getContent(), '<article class="article-card"'));
         $this->assertSame(5, substr_count($response->getContent(), 'data-gallery-item'));
+    }
+
+    public function test_village_map_feature_is_not_accessible_or_listed(): void
+    {
+        $this->get('/peta-desa')->assertNotFound();
+        $this->get('/peta-desa/geojson')->assertNotFound();
+
+        $html = $this->get(route('beranda'))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('Pemetaan', $html);
+        $this->assertStringNotContainsString('Peta Desa', $html);
+        $this->assertStringNotContainsString('/peta-desa', $html);
     }
 
     public function test_homepage_gallery_uses_published_gallery_items_from_cms(): void

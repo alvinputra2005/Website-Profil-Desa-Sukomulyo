@@ -2,11 +2,27 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Publication;
 use App\Support\ImageUploadRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CmsResourceRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        if (! $this->isVillageRegulation()) {
+            return;
+        }
+
+        $publication = $this->existingPublication();
+        $this->merge([
+            'type' => 'regulation',
+            'content' => $publication?->content ?: (string) $this->input('title'),
+            'status' => 'published',
+            'published_at' => $publication?->published_at?->format('Y-m-d H:i:s') ?: now()->format('Y-m-d H:i:s'),
+        ]);
+    }
+
     public function authorize(): bool
     {
         $config = $this->resourceConfig();
@@ -87,6 +103,13 @@ class CmsResourceRequest extends FormRequest
                 'attachment_sequence' => ['nullable', 'array'],
                 'attachment_sequence.*' => ['string', 'regex:/^(existing|new):[0-9]+$/'],
             ];
+
+            if ($this->isVillageRegulation()) {
+                $hasExistingPdf = $this->existingPublication()?->attachments()
+                    ->whereHas('media', fn ($query) => $query->where('mime_type', 'application/pdf'))
+                    ->exists() ?? false;
+                $rules['attachment_uploads'] = [$hasExistingPdf ? 'nullable' : 'required', 'array', 'max:1'];
+            }
         }
 
         return $rules;
@@ -101,7 +124,8 @@ class CmsResourceRequest extends FormRequest
             'gallery_item_uploads.*.image' => 'File ke-:position bukan gambar yang valid.',
             'gallery_item_uploads.*.mimes' => 'Gambar ke-:position harus berformat JPG, PNG, atau WebP.',
             'published_at.required_if' => 'Waktu terbit wajib diisi ketika status publikasi adalah Terbit.',
-            'attachment_uploads.max' => 'Maksimal 10 PDF dapat diunggah per sekali simpan.',
+            'attachment_uploads.max' => 'Jumlah lampiran PDF melebihi batas yang diizinkan.',
+            'attachment_uploads.required' => 'Lampiran PDF wajib diunggah.',
             'attachment_uploads.*.mimes' => 'Lampiran ke-:position harus berupa PDF.',
             'attachment_uploads.*.mimetypes' => 'Isi file lampiran ke-:position bukan PDF yang valid.',
             'attachment_uploads.*.max' => 'Lampiran ke-:position berukuran lebih dari 10 MB.',
@@ -123,5 +147,18 @@ class CmsResourceRequest extends FormRequest
     private function imageBase(string $name): string
     {
         return str_ends_with($name, '_id') ? substr($name, 0, -3) : $name;
+    }
+
+    private function isVillageRegulation(): bool
+    {
+        return $this->route('resource') === 'publications'
+            && ($this->input('type') === 'regulation' || $this->existingPublication()?->type === 'regulation');
+    }
+
+    private function existingPublication(): ?Publication
+    {
+        $id = $this->route('id');
+
+        return $id === null ? null : Publication::find($id);
     }
 }

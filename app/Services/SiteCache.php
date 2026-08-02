@@ -37,8 +37,6 @@ class SiteCache
 
     public const PUBLICATIONS = 'publications.public';
 
-    public const MAP_GEOJSON = 'map.geojson.public';
-
     public const SEO_SITEMAP = 'seo.sitemap';
 
     public const ONE_HOUR = 3600;
@@ -99,11 +97,6 @@ class SiteCache
         Cache::forget(self::PUBLIC_POPULATION_STATISTICS);
     }
 
-    public function invalidateMap(): void
-    {
-        Cache::forget(self::MAP_GEOJSON);
-    }
-
     public function invalidateGallery(): void
     {
         Cache::forget(self::GALLERY);
@@ -122,7 +115,6 @@ class SiteCache
         $this->invalidateProfile();
         $this->invalidateOfficials();
         $this->invalidateGallery();
-        $this->invalidateMap();
         $this->invalidatePublications();
     }
 
