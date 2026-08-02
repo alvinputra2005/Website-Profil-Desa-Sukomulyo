@@ -6,8 +6,10 @@ use App\Models\FamilyCard;
 use App\Models\PopulationArea;
 use App\Models\Resident;
 use App\Models\ResidentEvent;
+use App\Models\StatisticDataset;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class PopulationStatistics
@@ -41,6 +43,41 @@ class PopulationStatistics
      */
     public function censusGenderSummary(): ?array
     {
+        // Keep the public/homepage figures in sync with the imported
+        // Kependudukan datasets shown in the statistics dropdown (IK:4/IK:5).
+        // The normalized JSON is only a compatibility fallback for installs
+        // that have not processed the import into the database yet.
+        $datasets = Schema::hasTable('statistic_datasets')
+            ? StatisticDataset::query()
+                ->where('category', 'kependudukan')
+                ->where('family', 'IK')
+                ->whereIn('table_number', ['4', '5'])
+                ->where('status', 'published')
+                ->orderByDesc('year')
+                ->orderByDesc('id')
+                ->get()
+                ->groupBy('table_number')
+            : collect();
+
+        $maleDataset = $datasets->get('4')?->first();
+        $femaleDataset = $datasets->get('5')?->first();
+
+        if ($maleDataset && $femaleDataset && (int) $maleDataset->year === (int) $femaleDataset->year) {
+            $male = $this->datasetTotal($maleDataset, 'jumlah_individu_laki_laki_dalam_keluarga');
+            $female = $this->datasetTotal($femaleDataset, 'jumlah_individu_perempuan_dalam_keluarga');
+            $total = $male + $female;
+
+            return [
+                'male' => $male,
+                'female' => $female,
+                'total' => $total,
+                'male_percentage' => $total > 0 ? round($male / $total * 100, 2) : 0.0,
+                'female_percentage' => $total > 0 ? round($female / $total * 100, 2) : 0.0,
+                'year' => (int) $maleDataset->year,
+                'source' => 'Statistik Kependudukan (IK:4/IK:5)',
+            ];
+        }
+
         $path = 'statistics/sensus_normalized.json';
 
         if (! Storage::disk('public')->exists($path)) {
@@ -71,6 +108,18 @@ class PopulationStatistics
             'year' => 2021,
             'source' => 'Sensus normalized',
         ];
+    }
+
+    private function datasetTotal(StatisticDataset $dataset, string $column): int
+    {
+        $total = data_get($dataset->totals_json, $column);
+        if (is_numeric($total)) {
+            return (int) $total;
+        }
+
+        return (int) $dataset->rows()->get()->sum(
+            fn ($row): int => (int) data_get($row->values_json, $column, 0),
+        );
     }
 
     public function genderSummary(): array
