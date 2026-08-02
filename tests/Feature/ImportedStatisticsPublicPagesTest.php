@@ -44,6 +44,8 @@ class ImportedStatisticsPublicPagesTest extends TestCase
             ->assertSee('data-generic-current-chart', false)
             ->assertSee('data-generic-trend-chart', false)
             ->assertSee('data-generic-current-table', false)
+            ->assertDontSee('<th scope="col">Sumber</th>', false)
+            ->assertDontSee('sensus-uji.json')
             ->assertSee('0101')
             ->assertSee('BAKIR RW 01')
             ->assertSee('1.234')

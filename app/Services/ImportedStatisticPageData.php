@@ -119,7 +119,7 @@ class ImportedStatisticPageData
     }
 
     /**
-     * @return array{year: int, source: string, updated_at: ?string, items: array<int, array<string, mixed>>, total: float}
+     * @return array{year: int, updated_at: ?string, items: array<int, array<string, mixed>>, total: float}
      */
     private function datasetRow(StatisticCategory $category, StatisticDataset $dataset): array
     {
@@ -147,11 +147,6 @@ class ImportedStatisticPageData
 
         return [
             'year' => (int) $dataset->year,
-            'source' => data_get(
-                $dataset->source_metadata_json,
-                'primary_file',
-                $dataset->source ?: 'Pemerintah Desa Sukomulyo',
-            ),
             'updated_at' => $dataset->updated_at?->toAtomString(),
             'items' => $items->all(),
             'total' => (float) $items->sum('value'),

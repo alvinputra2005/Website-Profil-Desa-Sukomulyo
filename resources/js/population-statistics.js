@@ -839,7 +839,7 @@ export const initPopulationStatistics = () => {
         if (tableRows.length === 0) {
             const row = document.createElement('tr');
             const cell = createCell('td', 'Belum ada data tahunan yang dipublikasikan pada rentang ini.');
-            cell.colSpan = 7;
+            cell.colSpan = 6;
             row.append(cell);
             historyBody.append(row);
             return;
@@ -853,14 +853,6 @@ export const initPopulationStatistics = () => {
             const totalStrong = document.createElement('strong');
             totalStrong.textContent = total.textContent;
             total.replaceChildren(totalStrong);
-            const source = createCell('td', item.source || 'Sumber belum dicantumkan');
-
-            if (item.reference_date) {
-                const reference = document.createElement('small');
-                const date = new Date(`${item.reference_date}T00:00:00`);
-                reference.textContent = `per ${new Intl.DateTimeFormat('id-ID').format(date)}`;
-                source.append(document.createElement('br'), reference);
-            }
 
             row.append(
                 year,
@@ -869,7 +861,6 @@ export const initPopulationStatistics = () => {
                 total,
                 createCell('td', signedInteger(item.change)),
                 createCell('td', signedPercentage(item.growth_percentage)),
-                source,
             );
             historyBody.append(row);
         });

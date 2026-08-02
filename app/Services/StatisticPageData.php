@@ -11,7 +11,6 @@ class StatisticPageData
         $summary = $populationStatistics->summary();
         $latest = [
             'year' => 2024,
-            'source' => 'Administrasi Kependudukan Desa',
             'updated_at' => $populationStatistics->residents()->max('updated_at'),
             'items' => [
                 ['label' => 'Laki-laki', 'value' => (float) $summary['male'], 'unit' => 'pemilih'],
@@ -113,7 +112,6 @@ class StatisticPageData
                 ? $this->datasetRow($latest, $definition)
                 : [
                     'year' => $maximumYear,
-                    'source' => 'Data belum tersedia',
                     'updated_at' => null,
                     'items' => [],
                     'total' => 0,
@@ -137,7 +135,6 @@ class StatisticPageData
 
         return [
             'year' => (int) $dataset->year,
-            'source' => $dataset->source ?: 'Pemerintah Desa Sukomulyo',
             'updated_at' => $dataset->updated_at?->toAtomString(),
             'items' => $items->all(),
             'total' => $items->sum('value'),

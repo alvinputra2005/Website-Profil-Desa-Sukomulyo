@@ -299,7 +299,6 @@
                                     <th scope="col">Tahun</th>
                                     @foreach($labels as $label)<th scope="col">{{ $label }}</th>@endforeach
                                     @if($page['show_total'])<th scope="col">Total</th>@endif
-                                    <th scope="col">Sumber</th>
                                 </tr>
                             </thead>
                             <tbody data-generic-history-body>
@@ -312,10 +311,9 @@
                                             <td>{{ $item ? number_format($item['value'], $page['decimals'], ',', '.').' '.$item['unit'] : '—' }}</td>
                                         @endforeach
                                         @if($page['show_total'])<td><strong>{{ number_format($row['total'], $page['decimals'], ',', '.') }}</strong></td>@endif
-                                        <td>{{ $row['source'] }}</td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="{{ $labels->count() + ($page['show_total'] ? 3 : 2) }}">Data tahunan belum tersedia.</td></tr>
+                                    <tr><td colspan="{{ $labels->count() + ($page['show_total'] ? 2 : 1) }}">Data tahunan belum tersedia.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
