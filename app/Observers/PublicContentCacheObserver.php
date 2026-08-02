@@ -15,12 +15,12 @@ use App\Models\Publication;
 use App\Models\PublicationAttachment;
 use App\Models\Resident;
 use App\Models\ResidentEvent;
-use App\Models\Setting;
 use App\Models\StatisticCategory;
 use App\Models\StatisticDataset;
 use App\Models\StatisticImport;
 use App\Models\StatisticRow;
 use App\Models\StatisticValue;
+use App\Models\VillageIdentity;
 use App\Models\VillageProfileSection;
 use App\Services\SiteCache;
 use App\Services\Statistics\PopulationStatisticCache;
@@ -57,7 +57,7 @@ class PublicContentCacheObserver
         }
 
         match (true) {
-            $model instanceof Setting => $this->cache->invalidateSettings(),
+            $model instanceof VillageIdentity => $this->cache->invalidateVillageIdentity(),
             $model instanceof VillageProfileSection => $this->cache->invalidateProfile(),
             $model instanceof Official => $this->cache->invalidateOfficials(),
             $model instanceof News, $model instanceof NewsCategory => $this->cache->invalidateNews(),

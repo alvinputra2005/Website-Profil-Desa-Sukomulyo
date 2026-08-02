@@ -9,18 +9,18 @@ use App\Models\IdmScore;
 use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Official;
+use App\Models\PopulationStatisticIndicator;
 use App\Models\Publication;
-use App\Models\Setting;
 use App\Models\StatisticCategory;
 use App\Models\StatisticDataset;
 use App\Models\VillageComment;
+use App\Models\VillageIdentity;
 use App\Models\VillageProfileSection;
 use App\Services\BudgetHistoryData;
 use App\Services\PopulationStatistics as PopulationStatisticsService;
 use App\Services\SiteCache;
-use App\Services\Statistics\PopulationStatisticIndicatorService;
 use App\Services\Statistics\PopulationStatisticAggregator;
-use App\Models\PopulationStatisticIndicator;
+use App\Services\Statistics\PopulationStatisticIndicatorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -463,8 +463,7 @@ class PublicSiteService
         Collection $indicators,
         ?PopulationStatisticIndicator $selectedIndicator,
         ?array $result,
-    ): View
-    {
+    ): View {
         $year = (int) config('village.population_year', now()->year);
         $censusGender = app(PopulationStatisticsService::class)->censusGenderSummary();
         $items = collect($result['items'] ?? []);
@@ -576,6 +575,7 @@ class PublicSiteService
                     ->first(fn ($item) => $item->media && $item->media->mime_type === 'application/pdf');
 
                 $year = (string) ($publication->start_date?->year ?? $publication->published_at?->year ?? now()->year);
+
                 return [
                     'icon' => 'fas fa-file-pdf',
                     'title' => $publication->title,
@@ -642,12 +642,12 @@ class PublicSiteService
                 ->latest('published_at')
                 ->get()
                 ->map(fn (Publication $publication) => [
-                'title' => $publication->title,
-                'content' => $publication->content,
-                'excerpt' => $publication->excerpt,
-                'html' => true,
-                'date' => $publication->start_date?->translatedFormat('d F Y') ?? $publication->published_at?->translatedFormat('d F Y'),
-            ]);
+                    'title' => $publication->title,
+                    'content' => $publication->content,
+                    'excerpt' => $publication->excerpt,
+                    'html' => true,
+                    'date' => $publication->start_date?->translatedFormat('d F Y') ?? $publication->published_at?->translatedFormat('d F Y'),
+                ]);
         }
         if ($items->isEmpty()) {
             $items = collect($page['fallback']);
@@ -897,16 +897,16 @@ class PublicSiteService
             SiteCache::PUBLIC_LAYOUT,
             SiteCache::TEN_MINUTES,
             function (): array {
-                $settings = $this->publicSettings();
-                $setting = fn (string $key, string $fallback): string => (string) ($settings->get($key) ?: $fallback);
+                $identity = $this->villageIdentityValues();
+                $value = fn (string $key, string $fallback): string => (string) ($identity->get($key) ?: $fallback);
 
                 return [
                     'site' => [
-                        'name' => $setting('site.name', 'Desa Sukomulyo'),
-                        'tagline' => $setting('site.tagline', 'Website Resmi Pemerintah Desa Sukomulyo'),
-                        'email' => $setting('site.email', 'desasukomulyo2022@gmail.com'),
-                        'phone' => $setting('site.phone', '085731625435'),
-                        'address' => $setting('site.address', 'Kantor Desa Sukomulyo, Indonesia'),
+                        'name' => $value('site.name', 'Desa Sukomulyo'),
+                        'tagline' => $value('site.tagline', 'Website Resmi Pemerintah Desa Sukomulyo'),
+                        'email' => $value('site.email', 'desasukomulyo2022@gmail.com'),
+                        'phone' => $value('site.phone', '085731625435'),
+                        'address' => $value('site.address', 'Kantor Desa Sukomulyo, Indonesia'),
                     ],
                     'articles' => $this->latestArticles(),
                     'categories' => $this->newsCategories(),
@@ -926,13 +926,13 @@ class PublicSiteService
         ]);
     }
 
-    private function publicSettings(): Collection
+    private function villageIdentityValues(): Collection
     {
         return $this->cache->remember(
-            SiteCache::SETTINGS,
+            SiteCache::VILLAGE_IDENTITY,
             SiteCache::ONE_HOUR,
-            fn () => Schema::hasTable('settings')
-                ? Setting::query()->where('is_public', true)->pluck('value', 'key')
+            fn () => Schema::hasTable('village_identities')
+                ? (VillageIdentity::query()->first()?->keyedValues() ?? collect())
                 : collect()
         );
     }
@@ -1003,8 +1003,8 @@ class PublicSiteService
 
     private function villageIdentity(): array
     {
-        $settings = $this->publicSettings();
-        $value = fn (string $key, string $fallback = ''): string => (string) ($settings->get($key) ?: $fallback);
+        $identity = $this->villageIdentityValues();
+        $value = fn (string $key, string $fallback = ''): string => (string) ($identity->get($key) ?: $fallback);
         $villageHead = Schema::hasTable('officials')
             ? Official::where('position', 'Kepala Desa')->where('is_active', true)->orderBy('display_order')->first()
             : null;

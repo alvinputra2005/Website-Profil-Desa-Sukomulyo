@@ -11,8 +11,8 @@ use App\Http\Controllers\Admin\Village\VisionMissionController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\NewsController;
 use App\Models\Role;
-use App\Models\Setting;
 use App\Models\User;
+use App\Models\VillageIdentity;
 use App\Models\VillageProfileSection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
@@ -93,7 +93,7 @@ class ModularControllerRoutingTest extends TestCase
             ->assertRedirect(route('admin.village-content.profile'))
             ->assertSessionHasNoErrors();
 
-        $this->assertSame('35.25.04.2008', Setting::where('key', 'village.code')->value('value'));
+        $this->assertSame('35.25.04.2008', VillageIdentity::query()->value('village_code'));
         $profile = VillageProfileSection::where('section_key', 'profile')->firstOrFail();
         $this->assertStringContainsString('Profil diperbarui.', $profile->content);
         $this->assertStringNotContainsString('<script', $profile->content);

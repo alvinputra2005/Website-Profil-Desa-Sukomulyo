@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Middleware\EnsureActiveUser;
-use App\Http\Middleware\HandleCmsRedirects;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TrackSiteVisit;
 use App\Services\Web\PublicSiteService;
@@ -24,7 +23,6 @@ return Application::configure(basePath: dirname(__DIR__))
             SecurityHeaders::class,
         ]);
         $middleware->web(append: [
-            HandleCmsRedirects::class,
             TrackSiteVisit::class,
         ]);
     })

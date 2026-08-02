@@ -10,15 +10,15 @@ use App\Models\Media;
 use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Official;
-use App\Models\Redirect;
 use App\Models\Role;
-use App\Models\Setting;
 use App\Models\User;
 use App\Models\VillageComment;
+use App\Models\VillageIdentity;
 use App\Models\VillageProfileSection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -168,12 +168,6 @@ class AdminCmsTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_configured_redirect_is_applied_to_public_get_request(): void
-    {
-        Redirect::create(['old_path' => '/alamat-lama', 'new_path' => '/profil-desa', 'status_code' => 301]);
-        $this->get('/alamat-lama')->assertRedirect('/profil-desa')->assertStatus(301);
-    }
-
     public function test_all_admin_opensid_screens_render_for_super_admin(): void
     {
         $this->actingAs($this->user('super_admin'));
@@ -183,6 +177,17 @@ class AdminCmsTest extends TestCase
         foreach (['admin.media.index', 'admin.comments.index', 'admin.users.index', 'admin.activities.index'] as $route) {
             $this->get(route($route))->assertOk();
         }
+    }
+
+    public function test_application_settings_and_url_redirect_features_are_removed(): void
+    {
+        $this->assertFalse(Schema::hasTable('settings'));
+        $this->assertFalse(Schema::hasTable('redirects'));
+
+        $this->actingAs($this->user('super_admin'));
+        $this->get('/admin/settings')->assertNotFound();
+        $this->get('/admin/redirects')->assertNotFound();
+        $this->get('/alamat-lama')->assertNotFound();
     }
 
     public function test_comments_can_be_reviewed_from_the_admin_panel(): void
@@ -568,9 +573,9 @@ class AdminCmsTest extends TestCase
 
         $response->assertSessionHasNoErrors();
         $response->assertRedirect(route('admin.village-content.profile'));
-        $this->assertSame('35.25.04.2008', Setting::where('key', 'village.code')->value('value'));
-        $this->assertSame('Kecamatan Contoh', Setting::where('key', 'district.name')->value('value'));
-        $this->assertSame('Jawa Timur', Setting::where('key', 'province.name')->value('value'));
+        $this->assertSame('35.25.04.2008', VillageIdentity::query()->value('village_code'));
+        $this->assertSame('Kecamatan Contoh', VillageIdentity::query()->value('district_name'));
+        $this->assertSame('Jawa Timur', VillageIdentity::query()->value('province_name'));
 
         $profile = VillageProfileSection::where('section_key', 'profile')->firstOrFail();
         $this->assertStringContainsString('Profil desa yang diperbarui.', $profile->content);

@@ -2,10 +2,9 @@
 
 namespace App\Queries\Village;
 
-use App\Actions\Village\UpdateVillageIdentityAction;
 use App\Models\Media;
 use App\Models\Official;
-use App\Models\Setting;
+use App\Models\VillageIdentity;
 use App\Models\VillageProfileSection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -29,21 +28,20 @@ class VillageContentQuery
             ->with('image')
             ->get()
             ->keyBy('section_key');
-        $settings = Setting::whereIn('key', array_keys(UpdateVillageIdentityAction::SETTINGS))
-            ->pluck('value', 'key');
+        $identity = VillageIdentity::query()->first()?->keyedValues() ?? collect();
         $villageHead = Official::where('position', 'Kepala Desa')
             ->where('is_active', true)
             ->orderBy('display_order')
             ->first();
 
         return view('admin.village-content.profile', [
-            'identityGroups' => $this->identityGroups($settings, $villageHead),
+            'identityGroups' => $this->identityGroups($identity, $villageHead),
             'profileSection' => $sections->get('profile'),
-            'siteName' => (string) ($settings->get('site.name') ?: 'Desa Sukomulyo'),
+            'siteName' => (string) ($identity->get('site.name') ?: 'Desa Sukomulyo'),
             'location' => collect([
-                $settings->get('district.name'),
-                $settings->get('regency.name'),
-                $settings->get('province.name'),
+                $identity->get('district.name'),
+                $identity->get('regency.name'),
+                $identity->get('province.name'),
             ])->filter()->implode(', '),
         ]);
     }
@@ -64,8 +62,7 @@ class VillageContentQuery
         $sections = VillageProfileSection::whereIn('section_key', $this->sectionKeys($page))
             ->with('image')->get()->keyBy('section_key');
 
-        $settings = Setting::whereIn('key', array_keys(UpdateVillageIdentityAction::SETTINGS))
-            ->pluck('value', 'key');
+        $settings = VillageIdentity::query()->first()?->keyedValues() ?? collect();
 
         $latestMedia = Media::where('mime_type', 'like', 'image/%')->latest()->limit(100)->get();
         $media = $sections->pluck('image')->filter()->concat($latestMedia)->unique('id')->values();

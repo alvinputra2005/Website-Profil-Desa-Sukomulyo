@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteCache
 {
-    public const SETTINGS = 'site.settings.public';
+    public const VILLAGE_IDENTITY = 'site.village-identity.public';
 
     public const PUBLIC_LAYOUT = 'site.layout.public';
 
@@ -55,9 +55,9 @@ class SiteCache
         return 'news.detail.v'.$this->newsDetailVersion().'.'.sha1($slug);
     }
 
-    public function invalidateSettings(): void
+    public function invalidateVillageIdentity(): void
     {
-        Cache::forget(self::SETTINGS);
+        Cache::forget(self::VILLAGE_IDENTITY);
         Cache::forget(self::PUBLIC_LAYOUT);
         Cache::forget(self::PROFILE);
     }

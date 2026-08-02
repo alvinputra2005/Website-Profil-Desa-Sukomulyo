@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Media, News};
+use App\Models\Media;
+use App\Models\News;
 use App\Models\NewsCategory;
-use App\Models\Setting;
 use App\Models\User;
+use App\Models\VillageIdentity;
 use App\Services\SiteCache;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -23,7 +24,7 @@ class SiteCacheTest extends TestCase
         $this->get(route('beranda'))->assertOk();
 
         foreach ([
-            SiteCache::SETTINGS,
+            SiteCache::VILLAGE_IDENTITY,
             SiteCache::PUBLIC_LAYOUT,
             SiteCache::HOME_STATISTICS,
             SiteCache::LATEST_NEWS,
@@ -41,7 +42,7 @@ class SiteCacheTest extends TestCase
         $this->get(route('beranda'))->assertOk();
 
         $contentQueries = collect($queries)->filter(
-            fn (string $sql) => preg_match('/\b(settings|news|news_categories|residents|families|households|population_areas)\b/i', $sql)
+            fn (string $sql) => preg_match('/\b(village_identities|news|news_categories|residents|families|households|population_areas)\b/i', $sql)
         );
 
         $this->assertCount(0, $contentQueries, $contentQueries->implode(PHP_EOL));
@@ -63,15 +64,11 @@ class SiteCacheTest extends TestCase
             ->assertSee('Pengumuman Desa');
     }
 
-    public function test_setting_change_invalidates_public_settings_and_profile_cache(): void
+    public function test_village_identity_change_invalidates_layout_and_profile_cache(): void
     {
         $user = User::factory()->create();
-        $setting = Setting::create([
-            'key' => 'site.name',
-            'value' => 'Desa Lama',
-            'type' => 'string',
-            'group' => 'identitas',
-            'is_public' => true,
+        $identity = VillageIdentity::create([
+            'site_name' => 'Desa Lama',
             'updated_by' => $user->id,
         ]);
 
@@ -79,11 +76,11 @@ class SiteCacheTest extends TestCase
         Cache::put(SiteCache::PROFILE, ['stale' => true], SiteCache::ONE_HOUR);
 
         $this->get(route('beranda'))->assertOk()->assertSee('Desa Lama');
-        $this->assertTrue(Cache::has(SiteCache::SETTINGS));
+        $this->assertTrue(Cache::has(SiteCache::VILLAGE_IDENTITY));
 
-        $setting->update(['value' => 'Desa Baru']);
+        $identity->update(['site_name' => 'Desa Baru']);
 
-        $this->assertFalse(Cache::has(SiteCache::SETTINGS));
+        $this->assertFalse(Cache::has(SiteCache::VILLAGE_IDENTITY));
         $this->assertFalse(Cache::has(SiteCache::PROFILE));
         $this->get(route('beranda'))->assertOk()->assertSee('Desa Baru');
     }
@@ -165,5 +162,4 @@ class SiteCacheTest extends TestCase
                 '<p>Isi berita berada setelah gambar utama.</p>',
             ], false);
     }
-
 }

@@ -11,7 +11,7 @@
 <body>
     <div class="actions"><a href="{{ route('admin.officials.index') }}">Kembali</a> <button onclick="window.print()">Cetak</button></div>
     <h2>BUKU PEMERINTAH DESA</h2>
-    <h1>{{ strtoupper(\App\Models\Setting::where('key', 'site.name')->value('value') ?: 'DESA SUKOMULYO') }}</h1>
+    <h1>{{ strtoupper(\App\Models\VillageIdentity::query()->value('site_name') ?: 'DESA SUKOMULYO') }}</h1>
     <p>Daftar Perangkat Desa</p>
     <table>
         <thead><tr><th>No</th><th>Nama / Identitas</th><th>Tempat, Tanggal Lahir</th><th>JK</th><th>Agama</th><th>Pangkat / Golongan</th><th>Jabatan</th><th>Pendidikan</th><th>SK Pengangkatan</th><th>SK Pemberhentian</th><th>Masa Jabatan</th></tr></thead>

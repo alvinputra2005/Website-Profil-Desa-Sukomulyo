@@ -13,15 +13,14 @@ use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Official;
 use App\Models\PopulationArea;
-use App\Models\PopulationStatisticIndicator;
-use App\Models\PopulationYearlySnapshot;
 use App\Models\PopulationGroup;
 use App\Models\PopulationGroupMember;
+use App\Models\PopulationStatisticIndicator;
+use App\Models\PopulationYearlySnapshot;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
 use App\Models\Resident;
 use App\Models\ResidentEvent;
-use App\Models\Setting;
 use App\Models\StatisticCategory;
 use App\Models\StatisticDataset;
 use App\Models\StatisticImport;
@@ -29,6 +28,7 @@ use App\Models\StatisticRow;
 use App\Models\StatisticValue;
 use App\Models\User;
 use App\Models\VillageComment;
+use App\Models\VillageIdentity;
 use App\Models\VillageProfileSection;
 use App\Observers\PublicContentCacheObserver;
 use App\Policies\AdminResourcePolicy;
@@ -83,7 +83,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         foreach ([
-            Setting::class,
+            VillageIdentity::class,
             Apbdes::class,
             VillageProfileSection::class,
             Official::class,

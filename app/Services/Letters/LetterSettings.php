@@ -2,38 +2,31 @@
 
 namespace App\Services\Letters;
 
-use App\Models\Setting;
-use Illuminate\Support\Facades\Schema;
-
 class LetterSettings
 {
     public function get(string $key, mixed $fallback = null): mixed
     {
-        if (! Schema::hasTable('settings')) {
-            return $fallback;
-        }
-
-        return Setting::query()->where('key', 'letter_service.'.$key)->value('value') ?? $fallback;
+        return config('village.letter_service.'.$key, $fallback);
     }
 
     public function whatsappNumber(): string
     {
-        return $this->normalizePhone((string) $this->get('whatsapp_number', env('VILLAGE_WHATSAPP_NUMBER', '')));
+        return $this->normalizePhone((string) $this->get('whatsapp_number', ''));
     }
 
     public function officeHours(): string
     {
-        return (string) $this->get('office_hours', env('LETTER_OFFICE_HOURS', 'Senin–Jumat, 08.00–14.00 WIB'));
+        return (string) $this->get('office_hours', 'Senin-Jumat, 08.00-14.00 WIB');
     }
 
     public function pickupAddress(): string
     {
-        return (string) $this->get('pickup_address', env('LETTER_PICKUP_ADDRESS', 'Kantor Desa Sukomulyo'));
+        return (string) $this->get('pickup_address', 'Kantor Desa Sukomulyo');
     }
 
     public function retentionDays(): int
     {
-        return max(1, (int) $this->get('tracking_retention_days', env('LETTER_TRACKING_RETENTION_DAYS', 90)));
+        return max(1, (int) $this->get('tracking_retention_days', 90));
     }
 
     public function enabled(): bool
