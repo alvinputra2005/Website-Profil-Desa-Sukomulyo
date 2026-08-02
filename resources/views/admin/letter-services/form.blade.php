@@ -55,7 +55,7 @@
     $selectedIcon = old('icon', $letterService->icon ?: config('letter_services.default_icon'));
 @endphp
 
-<div class="box box-primary letter-service-form">
+<div class="box box-primary letter-service-form" data-letter-service-form>
     <div class="box-header with-border">
         <h3 class="box-title">{{ $letterService->exists ? 'Perbarui Jenis Surat' : 'Buat Jenis Surat Baru' }}</h3>
         <div class="box-tools pull-right">
@@ -209,7 +209,7 @@
 </template>
 @endsection
 
-@push('scripts')
+@if(false) @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const list = document.getElementById('requirements-list');
@@ -257,4 +257,4 @@ document.addEventListener('DOMContentLoaded', function () {
     updateRows();
 });
 </script>
-@endpush
+@endpush @endif

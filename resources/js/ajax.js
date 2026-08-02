@@ -83,6 +83,16 @@ const updateDocumentMetadata = (incomingDocument) => {
     }
 };
 
+const syncPageHeadStyles = (incomingDocument) => {
+    document.head.querySelectorAll('style[data-ajax-head-style]').forEach((style) => style.remove());
+
+    incomingDocument.head.querySelectorAll('style').forEach((style) => {
+        const clone = style.cloneNode(true);
+        clone.dataset.ajaxHeadStyle = '';
+        document.head.append(clone);
+    });
+};
+
 const renderPageResponse = async (response, state, historyMode = 'push', requestedUrl = null, scrollTarget = null, rootSelector = state.rootSelector) => {
     const contentType = response.headers.get('content-type') || '';
     const finalUrl = response.url || window.location.href;
@@ -108,6 +118,7 @@ const renderPageResponse = async (response, state, historyMode = 'push', request
         detail: { url: finalUrl, status: response.status },
     }));
 
+    syncPageHeadStyles(incomingDocument);
     incomingRoot.setAttribute('data-ajax-root', '');
     currentRoot.replaceWith(incomingRoot);
     if (incomingRoot.dataset.pageTitle) {

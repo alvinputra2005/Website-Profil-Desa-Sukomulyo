@@ -84,7 +84,7 @@
 @endpush
 
 @section('content')
-<div class="letter-application-detail">
+<div class="letter-application-detail" data-letter-application-detail>
     <div class="box box-primary">
         <div class="application-header">
             <div>
@@ -191,7 +191,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@if(false) @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modal = $('#document-viewer');
@@ -296,4 +296,4 @@ document.addEventListener('DOMContentLoaded', function () {
     modal.on('hidden.bs.modal', resetViewer);
 });
 </script>
-@endpush
+@endpush @endif

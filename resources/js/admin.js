@@ -31,6 +31,14 @@ const featureLoaders = [
         load: () => import('./admin/attachment-manager'),
     },
     {
+        selector: '[data-letter-application-detail]',
+        load: () => import('./admin/letter-application-detail'),
+    },
+    {
+        selector: '[data-letter-service-form]',
+        load: () => import('./admin/letter-service-form'),
+    },
+    {
         selector: 'textarea[data-tinymce]',
         load: () => import('./admin/rich-editor'),
     },
