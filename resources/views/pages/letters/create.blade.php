@@ -20,6 +20,12 @@
                     <form class="letter-form letter-card" method="post" action="{{ route('letter-services.application.store', $letterService) }}">
                         @csrf
                         <input type="hidden" name="submission_key" value="{{ $submissionKey }}">
+                        @if ($letterService->code === 'KTP')
+                            <div class="letter-notice">
+                                <strong>Fasilitasi pengajuan KTP-el</strong>
+                                <p>Desa membantu pemeriksaan dan penerusan berkas. Perekaman biometrik serta penerbitan KTP-el tetap dilakukan oleh Disdukcapil Kabupaten Malang.</p>
+                            </div>
+                        @endif
                         @include('pages.letters.partials.form-fields', ['application' => null, 'hamlets' => $hamlets])
                         <label class="letter-check"><input type="checkbox" name="declaration" value="1" @checked(old('declaration')) required><span>Saya menyatakan data yang diisi benar dan bersedia membawa dokumen asli saat diperlukan.</span></label>
                         <div class="letter-honeypot" aria-hidden="true"><label for="website">Website</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></div>

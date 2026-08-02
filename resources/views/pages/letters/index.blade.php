@@ -28,9 +28,16 @@
                     @if($services->isNotEmpty())
                         <div class="letter-choice-grid" role="radiogroup" aria-label="Jenis surat">
                             @foreach($services as $service)
-                                <a class="letter-choice {{ $loop->first ? 'is-selected' : '' }}" href="{{ route('letter-services.application.create', $service) }}">
+                                <a class="letter-choice {{ $loop->first ? 'is-selected' : '' }} {{ $service->code === 'SKTM' ? 'letter-choice--featured' : '' }}" href="{{ route('letter-services.application.create', $service) }}">
                                     <span class="letter-choice-icon"><i class="fas {{ $service->icon ?: config('letter_services.default_icon') }}" aria-hidden="true"></i></span>
-                                    <span class="letter-choice-copy"><strong>{{ $service->name }}</strong></span>
+                                    <span class="letter-choice-copy">
+                                        <strong>{{ $service->name }}</strong>
+                                        @if ($service->code === 'SKTM')
+                                            <small>Untuk SKTM dan kebutuhan administrasi lainnya.</small>
+                                        @elseif ($service->code === 'KTP')
+                                            <small>Untuk KTP-el baru, hilang, rusak, perubahan data, atau pindah datang.</small>
+                                        @endif
+                                    </span>
                                     <i class="fas fa-chevron-right letter-choice-arrow" aria-hidden="true"></i>
                                 </a>
                             @endforeach

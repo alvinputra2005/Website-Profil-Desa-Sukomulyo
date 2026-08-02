@@ -12,29 +12,36 @@ class ProfilePageLayoutTest extends TestCase
     public function test_article_profile_pages_share_the_sidebar_and_comment_layout(): void
     {
         $pages = [
-            route('profile-desa') => true,
-            route('profile-desa.detail', 'sejarah') => true,
-            route('profile-desa.detail', 'visi-misi') => true,
-            route('peta-desa') => true,
-            route('potensi-desa') => true,
+            route('profile-desa') => ['printable' => true, 'sidebar' => true],
+            route('profile-desa.detail', 'sejarah') => ['printable' => true, 'sidebar' => true],
+            route('profile-desa.detail', 'visi-misi') => ['printable' => true, 'sidebar' => true],
+            route('peta-desa') => ['printable' => true, 'sidebar' => true],
+            route('potensi-desa') => ['printable' => false, 'sidebar' => false],
         ];
 
-        foreach ($pages as $url => $isPrintable) {
+        foreach ($pages as $url => $expectations) {
             $response = $this->get($url)->assertOk();
             $html = $response->getContent();
 
-            $response
-                ->assertSee('Profil Pimpinan')
-                ->assertSee('Peraturan Desa')
-                ->assertSee('Kantor Desa')
-                ->assertSee('Komentar Terbaru')
-                ->assertSee('Lihat Komentar')
-                ->assertSee('Kirim Komentar');
+            $response->assertSee('Lihat Komentar')->assertSee('Kirim Komentar');
 
-            $this->assertSame(4, substr_count($html, 'data-profile-widget-toggle'));
+            if ($expectations['sidebar']) {
+                $response
+                    ->assertSee('Profil Pimpinan')
+                    ->assertSee('Peraturan Desa')
+                    ->assertSee('Kantor Desa')
+                    ->assertSee('Komentar Terbaru');
+            } else {
+                $response
+                    ->assertDontSee('Profil Pimpinan')
+                    ->assertDontSee('Peraturan Desa')
+                    ->assertDontSee('Komentar Terbaru');
+            }
+
+            $this->assertSame($expectations['sidebar'] ? 4 : 0, substr_count($html, 'data-profile-widget-toggle'));
             $this->assertStringNotContainsString('class="profile-comments-link"', $html);
 
-            if ($isPrintable) {
+            if ($expectations['printable']) {
                 $this->assertStringContainsString('data-print-article', $html);
             } else {
                 $this->assertStringNotContainsString('data-print-article', $html);
@@ -75,8 +82,7 @@ class ProfilePageLayoutTest extends TestCase
 
         $this->get(route('potensi-desa'))
             ->assertOk()
-            ->assertSee('Warga Potensi')
-            ->assertSee('Mohon potensi UMKM terus diperbarui.')
+            ->assertSee('Tulis Komentar')
             ->assertSee('<strong>1</strong>', false);
 
         $this->get(route('profile-desa.section-comments', 'potensi-desa'))
@@ -87,5 +93,26 @@ class ProfilePageLayoutTest extends TestCase
         $this->get(route('profile-desa.section-comments', 'sejarah'))
             ->assertOk()
             ->assertDontSee('Warga Potensi');
+    }
+
+    public function test_potential_page_lists_two_alternating_tourism_sections_with_static_images_and_location_links(): void
+    {
+        $response = $this->get(route('potensi-desa'))
+            ->assertOk()
+            ->assertSee('Taman Merak Pujon')
+            ->assertSee('Coban Manan')
+            ->assertSee('Dusun Bakir, Desa Sukomulyo')
+            ->assertSee('Dusun Talasan, Desa Sukomulyo')
+            ->assertSee('village-tourism-section--reversed', false)
+            ->assertSee('potensi-taman-merak-gambar', false)
+            ->assertSee('potensi-coban-manan-gambar', false)
+            ->assertSee('village-tourism-static-toggle', false)
+            ->assertSee('village-tourism-location-below', false)
+            ->assertSee('https://www.google.com/maps/search/', false);
+
+        $response->assertDontSee('data-share-native', false);
+        $this->assertSame(2, substr_count($response->getContent(), 'class="village-tourism-section '));
+        $this->assertSame(2, substr_count($response->getContent(), 'village-tourism-static-toggle'));
+        $this->assertStringNotContainsString('data-sidebar-accordion-toggle', $response->getContent());
     }
 }

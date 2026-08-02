@@ -108,6 +108,15 @@
                         <div><dt>Tempat, tanggal lahir</dt><dd>{{ $application->birth_place }}@if($application->birth_date), {{ $application->birth_date->format('d-m-Y') }}@endif</dd></div>
                         <div><dt>Alamat</dt><dd>{{ $application->address }}, Dusun {{ $application->hamlet }}, RT {{ $application->rt }}/RW {{ $application->rw }}</dd></div>
                         <div><dt>Keperluan</dt><dd>{{ $application->purpose }}</dd></div>
+                        @foreach(($application->form_data_json ?? []) as $key => $formValue)
+                            @php
+                                $formField = $formFields->get($key);
+                                $displayValue = data_get($formField, 'options.'.$formValue, $formValue);
+                            @endphp
+                            @if($formField)
+                                <div><dt>{{ $formField['label'] }}</dt><dd>{{ $displayValue }}</dd></div>
+                            @endif
+                        @endforeach
                     </dl>
                 </div>
             </section>

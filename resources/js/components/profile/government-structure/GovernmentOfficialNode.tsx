@@ -59,6 +59,12 @@ const GovernmentOfficialNode = ({ data, selected }: NodeProps<GovernmentOfficial
             </button>
 
             <Handle id="source-bottom" type="source" position={Position.Bottom} style={hiddenHandleStyle} />
+            <Handle
+                id="source-bottom-kaur"
+                type="source"
+                position={Position.Bottom}
+                style={{ ...hiddenHandleStyle, left: 80 }}
+            />
             <Handle id="source-left" type="source" position={Position.Left} style={hiddenHandleStyle} />
             <Handle id="source-right" type="source" position={Position.Right} style={hiddenHandleStyle} />
         </div>

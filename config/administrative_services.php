@@ -8,6 +8,88 @@ return [
 
     'services' => [
         [
+            'id' => 'surat-keterangan',
+            'title' => 'Surat Keterangan',
+            'icon' => 'fas fa-file-signature',
+            'keywords' => ['surat keterangan', 'sktm', 'surat keterangan tidak mampu', 'tidak mampu'],
+            'requirements' => [
+                'KTP-el asli.',
+                'Kartu Keluarga asli.',
+            ],
+            'notes' => [],
+        ],
+        [
+            'id' => 'ktp-elektronik',
+            'title' => 'Pengajuan KTP-el',
+            'icon' => 'fas fa-id-card',
+            'keywords' => ['ktp', 'ktp-el', 'kartu tanda penduduk', 'pemula', 'hilang', 'rusak', 'perubahan data'],
+            'children' => [
+                [
+                    'id' => 'ktp-baru',
+                    'title' => 'KTP-el Baru / Pemula',
+                    'keywords' => ['baru', 'pemula', '17 tahun', 'perekaman'],
+                    'requirements' => [
+                        'Telah berusia 17 tahun, sudah kawin, atau pernah kawin.',
+                        'Kartu Keluarga asli.',
+                    ],
+                    'notes' => [],
+                ],
+                [
+                    'id' => 'ktp-hilang',
+                    'title' => 'KTP-el Hilang',
+                    'keywords' => ['hilang', 'surat kehilangan', 'kepolisian'],
+                    'requirements' => [
+                        'Kartu Keluarga asli.',
+                        'Surat keterangan kehilangan dari kepolisian.',
+                    ],
+                    'notes' => [],
+                ],
+                [
+                    'id' => 'ktp-rusak',
+                    'title' => 'KTP-el Rusak',
+                    'keywords' => ['rusak', 'penggantian'],
+                    'requirements' => [
+                        'Kartu Keluarga asli.',
+                        'KTP-el yang rusak.',
+                    ],
+                    'notes' => [],
+                ],
+                [
+                    'id' => 'ktp-perubahan-data',
+                    'title' => 'Perubahan Data KTP-el',
+                    'keywords' => ['perubahan data', 'ubah data', 'pekerjaan', 'status', 'alamat'],
+                    'requirements' => [
+                        'Kartu Keluarga asli.',
+                        'KTP-el lama.',
+                        'Surat keterangan atau bukti pendukung perubahan data.',
+                    ],
+                    'notes' => [],
+                ],
+                [
+                    'id' => 'ktp-pindah-datang',
+                    'title' => 'KTP-el karena Pindah Datang',
+                    'keywords' => ['pindah', 'datang', 'domisili'],
+                    'requirements' => [
+                        'Kartu Keluarga asli.',
+                        'Surat keterangan pindah dari Disdukcapil daerah asal.',
+                    ],
+                    'notes' => [],
+                ],
+            ],
+        ],
+        [
+            'id' => 'izin-survei-penelitian',
+            'title' => 'Surat Izin Survei/Penelitian',
+            'icon' => 'fas fa-search',
+            'keywords' => ['izin survei', 'izin penelitian', 'riset', 'kampus', 'mahasiswa', 'proposal'],
+            'requirements' => [
+                'Surat pengantar resmi dari kampus atau instansi.',
+                'KTP atau kartu mahasiswa pemohon.',
+                'Proposal survei atau penelitian.',
+            ],
+            'notes' => [],
+        ],
+        [
             'id' => 'kartu-keluarga',
             'title' => 'Pengajuan Kartu Keluarga',
             'icon' => 'far fa-address-card',
@@ -121,14 +203,28 @@ return [
             'title' => 'Pindah Tempat (Masuk/Keluar)',
             'icon' => 'fas fa-exchange-alt',
             'keywords' => ['pindah', 'masuk', 'keluar', 'domisili'],
-            'requirements' => [
-                'Surat pengantar RT/RW.',
-                'Kartu Keluarga lama asli.',
-                'KTP asli.',
-                'Materai.',
-            ],
-            'notes' => [
-                'Minta atau bawa surat pindah dari desa yang bersangkutan.',
+            'children' => [
+                [
+                    'id' => 'pindah-pergi',
+                    'title' => 'Permohonan Pindah Pergi',
+                    'keywords' => ['pindah pergi', 'pindah keluar', 'skpwni'],
+                    'requirements' => [
+                        'Kartu Keluarga asli.',
+                        'KTP-el pemohon.',
+                    ],
+                    'notes' => [],
+                ],
+                [
+                    'id' => 'pindah-masuk',
+                    'title' => 'Permohonan Pindah Masuk',
+                    'keywords' => ['pindah masuk', 'pindah datang', 'skpwni'],
+                    'requirements' => [
+                        'Surat Keterangan Pindah WNI dari daerah asal.',
+                        'Kartu Keluarga dari daerah asal.',
+                        'KTP-el pemohon.',
+                    ],
+                    'notes' => [],
+                ],
             ],
         ],
         [

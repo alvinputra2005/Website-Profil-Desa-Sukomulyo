@@ -10,6 +10,7 @@ use App\Models\LetterService;
 use App\Models\Resident;
 use App\Models\User;
 use App\Queries\Letters\AdminLetterApplicationIndexQuery;
+use App\Services\Letters\LetterFormSchemaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,12 +26,17 @@ class LetterApplicationController extends Controller
         return view('admin.letter-applications.index', ['applications' => $query->paginate($request), 'services' => LetterService::orderBy('name')->get(), 'officers' => User::whereHas('role', fn ($q) => $q->where('code', 'admin_data'))->get()]);
     }
 
-    public function show(LetterApplication $application): View
+    public function show(LetterApplication $application, LetterFormSchemaService $schemas): View
     {
         $this->authorize('view', $application);
         $application->load(['service', 'assignee', 'resident', 'statusHistories.actor', 'documents']);
 
-        return view('admin.letter-applications.show', ['application' => $application, 'residents' => Resident::query()->orderBy('name')->limit(100)->get(), 'requirementLabels' => collect($application->service->requirements_json ?? [])->pluck('label', 'key')]);
+        return view('admin.letter-applications.show', [
+            'application' => $application,
+            'residents' => Resident::query()->orderBy('name')->limit(100)->get(),
+            'requirementLabels' => collect($application->service->requirements_json ?? [])->pluck('label', 'key'),
+            'formFields' => collect($schemas->fields($application->service))->keyBy('key'),
+        ]);
     }
 
     public function document(LetterApplication $application, int $document)

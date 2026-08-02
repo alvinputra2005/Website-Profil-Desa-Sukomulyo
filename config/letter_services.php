@@ -25,5 +25,16 @@ return [
         'fa-id-card' => 'Identitas',
         'fa-address-card' => 'Kartu identitas',
         'fa-certificate' => 'Keterangan resmi',
+        'fa-exchange-alt' => 'Perpindahan',
+        'fa-search' => 'Survei atau penelitian',
+    ],
+
+    'field_types' => [
+        'text' => 'Teks singkat',
+        'textarea' => 'Teks panjang',
+        'date' => 'Tanggal',
+        'number' => 'Angka',
+        'select' => 'Pilihan dropdown',
+        'radio' => 'Pilihan tunggal',
     ],
 ];

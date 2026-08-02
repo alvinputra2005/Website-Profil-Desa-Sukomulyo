@@ -60,20 +60,60 @@ class LetterServiceController extends Controller
     private function data(SaveLetterServiceRequest $request): array
     {
         $validated = $request->validated();
-
-        return [
-            ...collect($validated)->only(['name', 'description', 'icon', 'processing_days', 'fee_information', 'pickup_instructions', 'display_order'])->all(),
-            'slug' => $request->route('letterService')?->slug ?: $this->uniqueSlug($validated['name']),
-            'code' => Str::upper($validated['code']),
-            'requirements_json' => collect($validated['requirements'])->values()->map(fn (array $requirement, int $index) => [
+        $requirements = collect($validated['requirements'])->values()->map(function (array $requirement, int $index): array {
+            $conditionField = trim((string) ($requirement['condition_field'] ?? ''));
+            $conditionValues = $this->conditionValues((string) ($requirement['condition_values'] ?? ''));
+            $normalized = [
                 'key' => Str::slug($requirement['code']),
                 'label' => trim(strip_tags($requirement['label'])),
                 'description' => trim(strip_tags($requirement['description'] ?? '')),
-                'required' => (bool) ($requirement['required'] ?? false),
+                'required' => $conditionField === '' && (bool) ($requirement['required'] ?? false),
                 'display_order' => $index,
-            ])->all(),
+            ];
+
+            if ($conditionField !== '' && $conditionValues !== []) {
+                $normalized['required_when'] = [
+                    'field' => $conditionField,
+                    'values' => $conditionValues,
+                ];
+            }
+
+            return $normalized;
+        })->all();
+
+        $data = [
+            ...collect($validated)->only(['name', 'description', 'icon', 'processing_days', 'fee_information', 'pickup_instructions', 'display_order'])->all(),
+            'slug' => $request->route('letterService')?->slug ?: $this->uniqueSlug($validated['name']),
+            'code' => Str::upper($validated['code']),
+            'requirements_json' => $requirements,
             'is_active' => $request->boolean('is_active'),
         ];
+
+        if ($request->boolean('form_fields_present')) {
+            $data['form_schema_json'] = collect($validated['form_fields'] ?? [])->values()->map(function (array $field): array {
+                $normalized = [
+                    'key' => $field['key'],
+                    'label' => trim(strip_tags($field['label'])),
+                    'type' => $field['type'],
+                    'required' => (bool) ($field['required'] ?? false),
+                ];
+
+                $supportsLimits = in_array($field['type'], ['text', 'textarea', 'number'], true);
+                if ($supportsLimits && isset($field['min']) && $field['min'] !== null && $field['min'] !== '') {
+                    $normalized['min'] = (int) $field['min'];
+                }
+                if ($supportsLimits && isset($field['max']) && $field['max'] !== null && $field['max'] !== '') {
+                    $normalized['max'] = (int) $field['max'];
+                }
+                if (in_array($field['type'], ['select', 'radio'], true)) {
+                    $normalized['options'] = $this->formOptions((string) ($field['options'] ?? ''));
+                }
+
+                return $normalized;
+            })->all();
+        }
+
+        return $data;
     }
 
     private function uniqueSlug(string $name): string
@@ -87,5 +127,22 @@ class LetterServiceController extends Controller
         }
 
         return $slug;
+    }
+
+    private function conditionValues(string $raw): array
+    {
+        return collect(explode(',', $raw))->map(fn (string $value): string => trim($value))->filter()->unique()->values()->all();
+    }
+
+    private function formOptions(string $raw): array
+    {
+        return collect(preg_split('/\r\n|\r|\n/', trim($raw)) ?: [])
+            ->filter(fn (string $line): bool => trim($line) !== '')
+            ->mapWithKeys(function (string $line): array {
+                [$value, $label] = array_map('trim', explode('=', $line, 2));
+
+                return [$value => trim(strip_tags($label))];
+            })
+            ->all();
     }
 }

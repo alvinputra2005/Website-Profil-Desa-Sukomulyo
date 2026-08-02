@@ -969,7 +969,7 @@ class PublicSiteService
                 ['label' => 'Sejarah Desa', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'sejarah']],
                 ['label' => 'Visi dan Misi', 'route' => 'profile-desa.detail', 'active' => 'profile-desa.detail', 'parameters' => ['section' => 'visi-misi']],
                 ['label' => 'Struktur Pemerintahan', 'route' => 'pemerintahan-desa', 'active' => 'pemerintahan-desa'],
-                ['label' => 'Wilayah Desa', 'route' => 'peta-desa', 'active' => 'peta-desa'],
+                ['label' => 'Potensi Desa', 'route' => 'potensi-desa', 'active' => 'potensi-desa'],
             ]],
             ['label' => 'Data Statistik', 'route' => 'data-desa-statistik', 'active' => 'data-*', 'children' => $statisticChildren],
             ['label' => 'Informasi Desa', 'route' => 'informasi-publik-desa', 'active' => 'informasi-*', 'children' => [
@@ -1473,13 +1473,34 @@ class PublicSiteService
 
     private function potentialsData(): array
     {
-        $image = '/assets/village-rice-fields.jpg';
-
         return [
-            ['title' => 'Pertanian Produktif', 'description' => 'Lahan pertanian menjadi penggerak ekonomi dan sumber pangan masyarakat.', 'image' => $image, 'icon' => 'fas fa-seedling'],
-            ['title' => 'UMKM Lokal', 'description' => 'Produk olahan dan kerajinan warga memiliki peluang pasar yang terus berkembang.', 'image' => $image, 'icon' => 'fas fa-store'],
-            ['title' => 'Seni dan Budaya', 'description' => 'Tradisi lokal terus dirawat melalui kegiatan dan partisipasi lintas generasi.', 'image' => $image, 'icon' => 'fas fa-drum'],
-            ['title' => 'Wisata Desa', 'description' => 'Lingkungan dan kehidupan desa menawarkan pengalaman wisata berbasis masyarakat.', 'image' => $image, 'icon' => 'fas fa-map-marked-alt'],
+            [
+                'slug' => 'taman-merak',
+                'category' => 'Wisata Alam & Perkemahan',
+                'title' => 'Taman Merak Pujon',
+                'description' => 'Taman Merak Pujon menawarkan suasana sejuk di antara pepohonan dengan area terbuka di tepi aliran sungai. Kawasan ini cocok untuk menikmati piknik, berkemah, outbound, dan kegiatan luar ruang bersama keluarga maupun komunitas.',
+                'highlights' => ['Area perkemahan', 'Piknik dan outbound', 'Suasana hutan dan sungai'],
+                'address' => 'Dusun Bakir, Desa Sukomulyo, Kecamatan Pujon, Kabupaten Malang',
+                'image' => '/assets/potensi-taman-merak.webp',
+                'image_alt' => 'Ilustrasi area perkemahan Taman Merak Pujon di antara hutan pinus dan aliran sungai',
+                'image_caption' => 'Ilustrasi visual suasana alam Taman Merak Pujon.',
+                'map_embed_url' => 'https://www.google.com/maps?q=Taman%20Merak%20Pujon%2C%20Bakir%2C%20Sukomulyo%2C%20Pujon%2C%20Malang&output=embed',
+                'directions_url' => 'https://www.google.com/maps/search/?api=1&query=Taman+Merak+Pujon%2C+Bakir%2C+Sukomulyo%2C+Pujon%2C+Malang',
+            ],
+            [
+                'slug' => 'coban-manan',
+                'category' => 'Wisata Air Terjun',
+                'title' => 'Coban Manan',
+                'alternate_name' => 'Coban Lembah Ayu',
+                'description' => 'Coban Manan, yang juga dikenal sebagai Coban Lembah Ayu, merupakan wisata air terjun bernuansa alami dengan jalur menuju lokasi yang cukup menantang. Perjalanan melewati lingkungan perkebunan, hutan, sungai kecil, dan jalan berbatu menjadi bagian dari pengalaman berkunjung.',
+                'highlights' => ['Air terjun alami', 'Jalur petualangan', 'Panorama hutan dan perkebunan'],
+                'address' => 'Dusun Talasan, Desa Sukomulyo, Kecamatan Pujon, Kabupaten Malang',
+                'image' => '/assets/potensi-coban-manan.webp',
+                'image_alt' => 'Ilustrasi Coban Manan berupa air terjun di tengah hutan tropis Desa Sukomulyo',
+                'image_caption' => 'Ilustrasi visual suasana alam Coban Manan.',
+                'map_embed_url' => 'https://www.google.com/maps?q=Coban%20Manan%2C%20Talasan%2C%20Sukomulyo%2C%20Pujon%2C%20Malang&output=embed',
+                'directions_url' => 'https://www.google.com/maps/search/?api=1&query=Coban+Manan%2C+Talasan%2C+Sukomulyo%2C+Pujon%2C+Malang',
+            ],
         ];
     }
 
@@ -1546,7 +1567,7 @@ class PublicSiteService
             ['name' => 'Catur Yulianto', 'position' => 'Kaur Tata Usaha dan Umum', 'superior_id' => 5],
             ['name' => 'Bambang S', 'position' => 'Kasun Bakir', 'superior_id' => 1],
             ['name' => 'Sispanaji', 'position' => 'Kasun Biyan', 'superior_id' => 1],
-            ['name' => 'Nikita F Z', 'position' => 'Kasun Cumul', 'superior_id' => 1],
+            ['name' => 'Nikita F Z', 'position' => 'Kasun Gumul', 'superior_id' => 1],
             ['name' => 'Fendi Priyo S', 'position' => 'Kasun Kedungrejo', 'superior_id' => 1],
             ['name' => 'Cahyo Utomo', 'position' => 'Kasun Talasan', 'superior_id' => 1],
         ];

@@ -43,15 +43,15 @@ const edge = (data: GovernmentOrganizationEdgeData, values: Partial<Edge> = {}):
 });
 
 const organizationEdges: Edge[] = [
-    edge({ route: 'left-main', trunkX: 400 }, {
+    edge({ route: 'left-main', trunkX: 315 }, {
         id: 'kepala-desa-kasi-pemerintahan', source: 'kepala-desa', sourceHandle: 'source-left',
         target: 'kasi-pemerintahan', targetHandle: 'target-right',
     }),
-    edge({ route: 'left-branch', trunkX: 400, trunkY: 233 }, {
+    edge({ route: 'left-branch', trunkX: 315, trunkY: 233 }, {
         id: 'left-trunk-kasi-pelayanan', source: 'kepala-desa', sourceHandle: 'source-left',
         target: 'kasi-pelayanan', targetHandle: 'target-right',
     }),
-    edge({ route: 'left-branch', trunkX: 400, trunkY: 233 }, {
+    edge({ route: 'left-branch', trunkX: 315, trunkY: 233 }, {
         id: 'left-trunk-kasi-kesejahteraan', source: 'kepala-desa', sourceHandle: 'source-left',
         target: 'kasi-kesejahteraan', targetHandle: 'target-right',
     }),
@@ -60,20 +60,20 @@ const organizationEdges: Edge[] = [
         target: 'sekretaris-desa', targetHandle: 'target-left',
     }),
     edge({ route: 'right-main', trunkX: 1160 }, {
-        id: 'sekretaris-desa-kaur-keuangan', source: 'sekretaris-desa', sourceHandle: 'source-bottom',
-        target: 'kaur-keuangan', targetHandle: 'target-top',
+        id: 'sekretaris-desa-kaur-keuangan', source: 'sekretaris-desa', sourceHandle: 'source-bottom-kaur',
+        target: 'kaur-keuangan', targetHandle: 'target-left',
     }),
-    edge({ route: 'right-branch', trunkX: 1160, trunkY: 300 }, {
+    edge({ route: 'right-branch', trunkX: 1160, trunkY: 283 }, {
         id: 'right-trunk-kaur-perencanaan', source: 'sekretaris-desa', sourceHandle: 'source-bottom',
-        target: 'kaur-perencanaan', targetHandle: 'target-top',
+        target: 'kaur-perencanaan', targetHandle: 'target-left',
     }),
-    edge({ route: 'right-branch', trunkX: 1160, trunkY: 300 }, {
+    edge({ route: 'right-branch', trunkX: 1160, trunkY: 283 }, {
         id: 'right-trunk-kaur-tu-umum', source: 'sekretaris-desa', sourceHandle: 'source-bottom',
-        target: 'kaur-tu-umum', targetHandle: 'target-top',
+        target: 'kaur-tu-umum', targetHandle: 'target-left',
     }),
     edge({ route: 'bottom-main', trunkX: 740, trunkY: 610, trunkStartX: 225, trunkEndX: 1225 }, {
-        id: 'kepala-desa-kasun-gumuk', source: 'kepala-desa', sourceHandle: 'source-bottom',
-        target: 'kasun-gumuk', targetHandle: 'target-top',
+        id: 'kepala-desa-kasun-gumul', source: 'kepala-desa', sourceHandle: 'source-bottom',
+        target: 'kasun-gumul', targetHandle: 'target-top',
     }),
     ...([
         ['kasun-bakir', 225], ['kasun-biyan', 475], ['kasun-kedungrejo', 975], ['kasun-talasan', 1225],
@@ -142,7 +142,7 @@ const GovernmentOrganizationFlow = () => {
             }
 
             void instance.fitView({
-                padding: 0.12,
+                padding: 0.02,
                 minZoom: 0.45,
                 maxZoom: 1,
                 duration: 0,
@@ -179,6 +179,7 @@ const GovernmentOrganizationFlow = () => {
                     selectionKeyCode={null}
                     multiSelectionKeyCode={null}
                     panOnDrag={false}
+                    panOnScroll={false}
                     zoomOnPinch={false}
                     zoomOnScroll={false}
                     zoomOnDoubleClick={false}
@@ -192,11 +193,6 @@ const GovernmentOrganizationFlow = () => {
                     }}
                 />
             </div>
-
-            <p className="government-organization-chart__hint">
-                <i className="fas fa-hand-pointer" aria-hidden="true" />
-                Klik perangkat desa untuk melihat informasi. Geser untuk melihat bagian lain dari struktur.
-            </p>
 
             {compact && (
                 <button
