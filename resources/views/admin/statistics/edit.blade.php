@@ -10,7 +10,7 @@
 <form method="post" action="{{ $isCreate ? route('admin.statistics.categories.store', $category->slug) : route('admin.statistics.categories.update', ['category' => $category->slug, 'dataset' => $dataset->slug]) }}" class="statistics-edit-form">
     @csrf @unless($isCreate) @method('put') @endunless
     @if($isCreate && $templateId)<input type="hidden" name="template_id" value="{{ $templateId }}">@endif
-    @if($isCreate && $templateId)<div class="callout callout-info"><h4>Periode baru</h4><p>Struktur tabel dan daftar RW disalin dari periode sebelumnya. Semua nilai statistik dan total telah dikosongkan; isi data baru sebelum menerbitkannya.</p></div>@endif
+    @if($isCreate && $templateId)<div class="callout callout-info"><h4>Periode baru</h4><p>Struktur tabel, daftar RW, nilai statistik, dan total disalin dari periode sebelumnya. Periksa dan sesuaikan isian sebelum menerbitkannya.</p></div>@endif
     <div class="box box-success">
         <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-info-circle"></i> Informasi Dataset</h3><div class="box-tools">
             <a href="{{ $isCreate ? route('admin.statistics.categories.show', $category->slug) : route('admin.statistics.categories.show', ['category' => $category->slug, 'data' => ($dataset->family && $dataset->table_number ? $dataset->family.':'.$dataset->table_number : 'dataset:'.$dataset->id), 'period' => $dataset->period]) }}" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i> Kembali</a>

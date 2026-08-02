@@ -170,7 +170,6 @@ class StatisticDatasetController extends Controller
         $template = $category->datasets()
             ->with('rows')
             ->find($request->integer('template'));
-        $columns = collect($template?->columns_json ?? [])->keyBy('key');
 
         $dataset = new StatisticDataset([
             'title' => $template?->title,
@@ -183,13 +182,13 @@ class StatisticDatasetController extends Controller
             'status' => 'draft',
             'visualization_type' => $template?->visualization_type ?? 'table',
             'columns_json' => $template?->columns_json ?? [],
-            'totals_json' => $this->emptyStatisticValues($columns),
+            'totals_json' => $template?->totals_json ?? [],
         ]);
         $dataset->setRelation('rows', $template
             ? $template->rows->map(fn (StatisticRow $row): StatisticRow => new StatisticRow([
                 'area_code' => $row->area_code,
                 'area_name' => $row->area_name,
-                'values_json' => $this->emptyStatisticValues($columns),
+                'values_json' => $row->values_json ?? [],
             ]))
             : collect());
 
@@ -375,18 +374,6 @@ class StatisticDatasetController extends Controller
         $value = trim((string) $value);
 
         return $value === '' ? null : $value;
-    }
-
-    /**
-     * @param  Collection<string, array<string, mixed>>  $columns
-     * @return array<string, null>
-     */
-    private function emptyStatisticValues(Collection $columns): array
-    {
-        return $columns
-            ->except(['area_code', 'area_name'])
-            ->mapWithKeys(fn (array $_column, string $key): array => [$key => null])
-            ->all();
     }
 
     private function uniqueSlug(string $title, string $period): string

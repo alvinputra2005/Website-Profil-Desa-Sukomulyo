@@ -117,7 +117,11 @@ class AdminStatisticDatasetManagementTest extends TestCase
             ->assertOk()
             ->assertSee('Tambah Periode Statistik')
             ->assertSee('BAKIR RW 01')
-            ->assertSee('Semua nilai statistik dan total telah dikosongkan');
+            ->assertSee('nilai statistik, dan total disalin dari periode sebelumnya')
+            ->assertSee('name="rows[0][under_15]" value="3"', false)
+            ->assertSee('name="rows[0][age_15_19]" value="5"', false)
+            ->assertSee('name="totals[under_15]" value="7"', false)
+            ->assertSee('name="totals[age_15_19]" value="11"', false);
 
         $this->actingAs($admin)
             ->post(route('admin.statistics.categories.store', $category->slug), [
