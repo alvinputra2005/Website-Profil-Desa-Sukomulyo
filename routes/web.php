@@ -75,8 +75,10 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('/media', [MediaController::class, 'index'])->name('media.index');
     Route::post('/media', [MediaController::class, 'store'])->name('media.store');
+    Route::delete('/media/bulk', [MediaController::class, 'bulkDestroy'])->name('media.bulk-destroy');
     Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
     Route::post('/media/editor-upload', [MediaController::class, 'editorUpload'])->name('media.editor-upload');
+    Route::delete('/messages/bulk', [ContactMessageController::class, 'bulkDestroy'])->name('messages.bulk-destroy');
     Route::resource('messages', ContactMessageController::class)->only(['index', 'show', 'destroy']);
     Route::resource('users', UserController::class)->except(['show', 'destroy']);
     Route::get('/activities', ActivityController::class)->name('activities.index');
@@ -126,11 +128,15 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
     Route::middleware('can:manage-data')->prefix('kependudukan')->name('population.')->group(function () {
         Route::get('penduduk/template-import', [ResidentImportController::class, 'template'])->name('residents.import-template');
         Route::post('penduduk/import', [ResidentImportController::class, 'store'])->name('residents.import');
+        Route::delete('penduduk/bulk', [ResidentController::class, 'bulkDestroy'])->name('residents.bulk-destroy');
         Route::resource('penduduk', ResidentController::class)->parameters(['penduduk' => 'resident'])->names('residents');
+        Route::delete('keluarga/bulk', [FamilyController::class, 'bulkDestroy'])->name('families.bulk-destroy');
         Route::resource('keluarga', FamilyController::class)->parameters(['keluarga' => 'family'])->except('show')->names('families');
+        Route::delete('kelompok/bulk', [PopulationGroupController::class, 'bulkDestroy'])->name('groups.bulk-destroy');
         Route::resource('kelompok', PopulationGroupController::class)->parameters(['kelompok' => 'group'])->names('groups');
         Route::get('kelompok/{group}/anggota/create', [PopulationGroupMemberController::class, 'create'])->name('groups.members.create');
         Route::post('kelompok/{group}/anggota', [PopulationGroupMemberController::class, 'store'])->name('groups.members.store');
+        Route::delete('kelompok/{group}/anggota/bulk', [PopulationGroupMemberController::class, 'bulkDestroy'])->name('groups.members.bulk-destroy');
         Route::get('kelompok/{group}/anggota/{membership}/edit', [PopulationGroupMemberController::class, 'edit'])->name('groups.members.edit');
         Route::put('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'update'])->name('groups.members.update');
         Route::delete('kelompok/{group}/anggota/{membership}', [PopulationGroupMemberController::class, 'destroy'])->name('groups.members.destroy');
@@ -143,6 +149,7 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
             Route::get('/laporan', [InventoryReportController::class, 'index'])->name('report');
             Route::get('/laporan/cetak', [InventoryReportController::class, 'print'])->name('report.print');
             Route::get('/laporan/csv', [InventoryReportController::class, 'csv'])->name('report.csv');
+            Route::delete('/{category}/bulk', [InventoryController::class, 'bulkDestroy'])->name('bulk-destroy');
             Route::get('/{category}', [InventoryController::class, 'index'])->name('index');
             Route::get('/{category}/create', [InventoryController::class, 'create'])->name('create');
             Route::post('/{category}', [InventoryController::class, 'store'])->name('store');
@@ -152,11 +159,13 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
             Route::delete('/{category}/{item}', [InventoryController::class, 'destroy'])->name('destroy');
             Route::get('/{category}/{item}/mutasi/create', [InventoryMutationController::class, 'create'])->name('mutations.create');
             Route::post('/{category}/{item}/mutasi', [InventoryMutationController::class, 'store'])->name('mutations.store');
+            Route::delete('/{category}/{item}/mutasi/bulk', [InventoryMutationController::class, 'bulkDestroy'])->name('mutations.bulk-destroy');
             Route::get('/{category}/{item}/mutasi/{mutation}/edit', [InventoryMutationController::class, 'edit'])->name('mutations.edit');
             Route::put('/{category}/{item}/mutasi/{mutation}', [InventoryMutationController::class, 'update'])->name('mutations.update');
             Route::delete('/{category}/{item}/mutasi/{mutation}', [InventoryMutationController::class, 'destroy'])->name('mutations.destroy');
         });
         Route::patch('/apbdes/{apbdes}/publikasi', [ApbdesController::class, 'togglePublication'])->name('apbdes.toggle-publication');
+        Route::delete('/apbdes/bulk', [ApbdesController::class, 'bulkDestroy'])->name('apbdes.bulk-destroy');
         Route::resource('apbdes', ApbdesController::class)
             ->parameters(['apbdes' => 'apbdes'])
             ->except('show');
@@ -176,21 +185,27 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
         Route::get('/', [AdminLetterServiceController::class, 'index'])->name('index');
         Route::get('/create', [AdminLetterServiceController::class, 'create'])->name('create');
         Route::post('/', [AdminLetterServiceController::class, 'store'])->name('store');
+        Route::delete('/bulk', [AdminLetterServiceController::class, 'bulkDestroy'])->name('bulk-destroy');
         Route::get('/{letterService:slug}/edit', [AdminLetterServiceController::class, 'edit'])->name('edit');
         Route::put('/{letterService:slug}', [AdminLetterServiceController::class, 'update'])->name('update');
         Route::delete('/{letterService:slug}', [AdminLetterServiceController::class, 'destroy'])->name('destroy');
     });
     Route::get('/news-trash', [CrudController::class, 'trash'])->name('news.trash');
+    Route::patch('/news-trash/bulk-restore', [CrudController::class, 'bulkRestore'])->name('news.bulk-restore');
+    Route::delete('/news-trash/bulk-force', [CrudController::class, 'bulkForceDelete'])->name('news.bulk-force-delete');
     Route::patch('/news-trash/{id}/restore', [CrudController::class, 'restore'])->name('news.restore');
     Route::delete('/news-trash/{id}/force', [CrudController::class, 'forceDelete'])->name('news.force-delete');
     Route::delete('/news-trash', [CrudController::class, 'emptyTrash'])->name('news.empty-trash');
     Route::patch('/news/{id}/archive', [CrudController::class, 'archive'])->name('news.archive');
     Route::get('/gallery-trash', [CrudController::class, 'galleryTrash'])->name('galleries.trash');
+    Route::patch('/gallery-trash/bulk-restore', [CrudController::class, 'bulkRestoreGallery'])->name('galleries.bulk-restore');
+    Route::delete('/gallery-trash/bulk-force', [CrudController::class, 'bulkForceDeleteGallery'])->name('galleries.bulk-force-delete');
     Route::patch('/gallery-trash/{id}/restore', [CrudController::class, 'restoreGallery'])->name('galleries.restore');
     Route::delete('/gallery-trash/{id}/force', [CrudController::class, 'forceDeleteGallery'])->name('galleries.force-delete');
     Route::delete('/gallery-trash', [CrudController::class, 'emptyGalleryTrash'])->name('galleries.empty-trash');
     Route::patch('/galleries/{id}/archive', [CrudController::class, 'archiveGallery'])->name('galleries.archive');
     Route::delete('/statistics/bulk', BulkDeleteStatisticDatasetController::class)->name('statistics.bulk-destroy');
+    Route::delete('/{resource}/bulk', [CrudController::class, 'bulkDestroy'])->name('resources.bulk-destroy');
     Route::get('/{resource}', [CrudController::class, 'index'])->name('resources.index');
     Route::get('/{resource}/create', [CrudController::class, 'create'])->name('resources.create');
     Route::post('/{resource}', [CrudController::class, 'store'])->name('resources.store');

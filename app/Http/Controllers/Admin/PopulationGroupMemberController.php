@@ -9,7 +9,9 @@ use App\Models\Resident;
 use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class PopulationGroupMemberController extends PopulationController
@@ -83,6 +85,31 @@ class PopulationGroupMemberController extends PopulationController
         $membership->delete();
 
         return back()->with('success', 'Anggota kelompok berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request, PopulationGroup $group): RedirectResponse
+    {
+        $this->authorize('update', $group);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', Rule::exists('population_group_members', 'id')->where('group_id', $group->id)],
+        ]);
+
+        $memberships = PopulationGroupMember::where('group_id', $group->id)->whereKey($data['ids'])->get();
+        if ($memberships->contains(fn (PopulationGroupMember $membership): bool => $membership->resident_id === $group->chairperson_id)) {
+            throw ValidationException::withMessages(['ids' => 'Ketua kelompok tidak dapat dihapus. Pilih ketua baru terlebih dahulu.']);
+        }
+
+        DB::transaction(function () use ($memberships): void {
+            $memberships->each(function (PopulationGroupMember $membership): void {
+                $this->authorize('delete', $membership);
+                $this->logger->log('deleted', 'anggota_kelompok', $membership);
+                $membership->delete();
+            });
+        });
+
+        return back()->with('success', $memberships->count().' anggota kelompok berhasil dihapus.');
     }
 
 }

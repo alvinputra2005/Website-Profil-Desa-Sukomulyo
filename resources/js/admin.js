@@ -19,7 +19,7 @@ const featureLoaders = [
         load: () => import('./admin/official-form'),
     },
     {
-        selector: '[data-check-all-officials], [data-statistics-select-all]',
+        selector: '[data-check-all-officials], [data-statistics-select-all], [data-bulk-select-all]',
         load: () => import('./admin/bulk-selection'),
     },
     {

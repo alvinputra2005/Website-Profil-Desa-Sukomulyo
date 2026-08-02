@@ -5,6 +5,11 @@
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title"><i class="fa fa-money"></i> Data APBDes Desa Sukomulyo</h3>
+        <form id="bulk-delete-apbdes" method="post" action="{{ route('admin.apbdes.bulk-destroy') }}" class="inline-form" data-confirm="Hapus APBDes yang dipilih?" data-confirm-tone="danger" data-confirm-title="Hapus APBDes Terpilih" data-confirm-button="Ya, hapus">
+            @csrf
+            @method('delete')
+            <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
+        </form>
         <div class="box-tools">
             <a href="{{ route('admin.apbdes.create') }}" class="btn btn-social btn-info btn-sm">
                 <i class="fa fa-plus"></i> Tambah APBDes
@@ -20,6 +25,7 @@
             <table class="table table-striped table-hover apbdes-index-table">
                 <thead>
                     <tr>
+                        <th style="width:38px"><input type="checkbox" aria-label="Pilih semua APBDes pada halaman ini" data-bulk-select-all></th>
                         <th>Tahun</th>
                         <th>Target Pendapatan</th>
                         <th>Anggaran Belanja</th>
@@ -38,6 +44,7 @@
                             $percentage = $spending > 0 ? $realization / $spending * 100 : 0;
                         @endphp
                         <tr>
+                            <td><input type="checkbox" name="ids[]" value="{{ $budget->id }}" form="bulk-delete-apbdes" aria-label="Pilih APBDes {{ $budget->year }}" data-bulk-item></td>
                             <td>
                                 <strong>{{ $budget->year }}</strong>
                                 @if ($budget->is_partial_year)
@@ -87,7 +94,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="empty-state">
+                            <td colspan="9" class="empty-state">
                                 <i class="fa fa-money"></i><br>
                                 Belum ada data APBDes. Tambahkan tahun anggaran pertama.
                             </td>

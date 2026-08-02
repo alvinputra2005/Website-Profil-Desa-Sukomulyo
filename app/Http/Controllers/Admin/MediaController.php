@@ -10,7 +10,9 @@ use App\Models\News;
 use App\Services\ActivityLogger;
 use App\Services\ImageProcessor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 
 class MediaController extends Controller
@@ -61,19 +63,38 @@ return view('admin.media.index', ['items' => $q->latest()->paginate(24)->withQue
     public function destroy(Media $media)
     {
         $this->authorize('delete', $media);
-        $used = collect(['village_profile_sections.image_id', 'officials.photo_id', 'news.featured_image_id', 'publications.featured_image_id', 'publication_attachments.media_id', 'map_features.photo_id', 'galleries.cover_media_id', 'gallery_items.media_id'])->contains(function ($ref) use ($media) {
-            [$table,$column] = explode('.', $ref);
-
-            return \DB::table($table)->where($column, $media->id)->exists();
-        });
-        $inlineUsed = News::withTrashed()->where('content', 'like', '%/storage/'.addcslashes($media->storage_path, '%_\\').'%')->exists();
-        if ($used || $inlineUsed) {
+        if ($this->isUsed($media)) {
             return back()->withErrors(['media' => 'Media masih digunakan dan tidak dapat dihapus.']);
-        }Storage::disk($media->disk)->delete(array_filter([$media->storage_path, $media->medium_path, $media->thumbnail_path]));
-        $this->logger->log('deleted', 'media', $media);
-        $media->delete();
+        }
+        $this->deleteMedia($media);
 
         return back()->with('success', 'Media dihapus.');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $this->authorize('viewAny', Media::class);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', 'exists:media,id'],
+        ]);
+
+        $items = Media::whereKey($data['ids'])->get();
+        $blocked = $items->first(fn (Media $media): bool => $this->isUsed($media));
+
+        if ($blocked) {
+            throw ValidationException::withMessages(['ids' => 'Ada media terpilih yang masih digunakan dan tidak dapat dihapus.']);
+        }
+
+        DB::transaction(function () use ($items): void {
+            $items->each(function (Media $media): void {
+                $this->authorize('delete', $media);
+                $this->deleteMedia($media);
+            });
+        });
+
+        return back()->with('success', $items->count().' media dihapus.');
     }
 
     private function mediaDisk(): string
@@ -96,5 +117,24 @@ return view('admin.media.index', ['items' => $q->latest()->paginate(24)->withQue
         $path = $file->store($directory, $disk);
 
         return ['stored_name' => basename($path), 'storage_path' => $path, 'mime_type' => $file->getMimeType(), 'extension' => strtolower($file->extension()), 'file_size' => $file->getSize(), 'width' => null, 'height' => null];
+    }
+
+    private function isUsed(Media $media): bool
+    {
+        $used = collect(['village_profile_sections.image_id', 'officials.photo_id', 'news.featured_image_id', 'publications.featured_image_id', 'publication_attachments.media_id', 'map_features.photo_id', 'galleries.cover_media_id', 'gallery_items.media_id'])->contains(function ($ref) use ($media) {
+            [$table, $column] = explode('.', $ref);
+
+            return DB::table($table)->where($column, $media->id)->exists();
+        });
+        $inlineUsed = News::withTrashed()->where('content', 'like', '%/storage/'.addcslashes($media->storage_path, '%_\\').'%')->exists();
+
+        return $used || $inlineUsed;
+    }
+
+    private function deleteMedia(Media $media): void
+    {
+        Storage::disk($media->disk)->delete(array_filter([$media->storage_path, $media->medium_path, $media->thumbnail_path]));
+        $this->logger->log('deleted', 'media', $media);
+        $media->delete();
     }
 }

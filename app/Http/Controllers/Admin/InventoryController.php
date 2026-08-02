@@ -9,6 +9,8 @@ use App\Services\ActivityLogger;
 use App\Support\InventoryCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class InventoryController extends Controller
@@ -74,6 +76,27 @@ class InventoryController extends Controller
         $this->logger->log('hapus', 'inventaris', $item, $old);
         $item->delete();
         return redirect()->route('admin.inventory.index', $category)->with('success', 'Data inventaris dan riwayat mutasinya berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request, string $category): RedirectResponse
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', Rule::exists('inventory_items', 'id')],
+        ]);
+
+        $items = InventoryItem::where('category', $category)->whereKey($data['ids'])->get();
+
+        DB::transaction(function () use ($items, $category): void {
+            $items->each(function (InventoryItem $item) use ($category): void {
+                $this->ensureCategory($category, $item);
+                $old = $item->toArray();
+                $this->logger->log('hapus', 'inventaris', $item, $old);
+                $item->delete();
+            });
+        });
+
+        return redirect()->route('admin.inventory.index', $category)->with('success', $items->count().' data inventaris berhasil dihapus.');
     }
 
     private function payload(SaveInventoryItemRequest $request, string $category): array

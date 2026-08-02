@@ -9,6 +9,7 @@ use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class FamilyController extends PopulationController
@@ -86,6 +87,31 @@ class FamilyController extends PopulationController
         $family->delete();
 
         return back()->with('success', 'Data keluarga diarsipkan.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $this->authorize('viewAny', FamilyCard::class);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', 'exists:family_cards,id'],
+        ]);
+
+        $families = FamilyCard::whereKey($data['ids'])->get();
+
+        DB::transaction(function () use ($families): void {
+            foreach ($families as $family) {
+                $this->authorize('delete', $family);
+                if ($family->members()->exists()) {
+                    throw ValidationException::withMessages(['ids' => 'Masih ada keluarga terpilih yang memiliki anggota. Pindahkan anggota terlebih dahulu.']);
+                }
+                $this->logger->log('archived', 'keluarga', $family);
+                $family->delete();
+            }
+        });
+
+        return redirect()->route('admin.population.families.index')->with('success', $families->count().' data keluarga diarsipkan.');
     }
 
     private function familyData(array $data): array

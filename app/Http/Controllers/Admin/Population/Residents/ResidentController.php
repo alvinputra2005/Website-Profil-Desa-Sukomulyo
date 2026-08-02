@@ -13,6 +13,7 @@ use App\Models\Resident;
 use App\Queries\Population\ResidentFormQuery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ResidentController extends PopulationController
@@ -84,5 +85,26 @@ class ResidentController extends PopulationController
         $action->execute($resident);
 
         return redirect()->route('admin.population.residents.index')->with('success', 'Data penduduk diarsipkan.');
+    }
+
+    public function bulkDestroy(Request $request, DeleteResidentAction $action): RedirectResponse
+    {
+        $this->authorize('viewAny', Resident::class);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', 'exists:residents,id'],
+        ]);
+
+        $residents = Resident::whereKey($data['ids'])->get();
+
+        DB::transaction(function () use ($residents, $action): void {
+            $residents->each(function (Resident $resident) use ($action): void {
+                $this->authorize('delete', $resident);
+                $action->execute($resident);
+            });
+        });
+
+        return redirect()->route('admin.population.residents.index')->with('success', $residents->count().' data penduduk diarsipkan.');
     }
 }

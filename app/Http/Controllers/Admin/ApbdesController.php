@@ -7,7 +7,9 @@ use App\Http\Requests\Admin\SaveApbdesRequest;
 use App\Models\Apbdes;
 use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ApbdesController extends Controller
@@ -99,6 +101,31 @@ class ApbdesController extends Controller
         return redirect()
             ->route('admin.apbdes.index')
             ->with('success', 'Data APBDes tahun '.$year.' berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $this->authorize('viewAny', Apbdes::class);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', Rule::exists('apbdes', 'id')],
+        ]);
+
+        $budgets = Apbdes::whereKey($data['ids'])->get();
+
+        DB::transaction(function () use ($budgets): void {
+            $budgets->each(function (Apbdes $apbdes): void {
+                $this->authorize('delete', $apbdes);
+                $old = $apbdes->toArray();
+                $this->logger->log('deleted', 'apbdes', $apbdes, $old);
+                $apbdes->delete();
+            });
+        });
+
+        return redirect()
+            ->route('admin.apbdes.index')
+            ->with('success', $budgets->count().' data APBDes berhasil dihapus.');
     }
 
     public function togglePublication(Apbdes $apbdes): RedirectResponse

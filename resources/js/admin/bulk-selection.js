@@ -4,10 +4,10 @@ const bindBulkSelection = (root, { selectAll, item, button }) => {
     master.dataset.bulkBound = 'true';
 
     const checkboxes = [...root.querySelectorAll(item)];
-    const bulkButton = root.querySelector(button);
+    const bulkButtons = [...root.querySelectorAll(button)];
     const update = () => {
         const checked = checkboxes.filter((checkbox) => checkbox.checked).length;
-        if (bulkButton) bulkButton.disabled = checked === 0;
+        bulkButtons.forEach((bulkButton) => { bulkButton.disabled = checked === 0; });
         master.checked = checkboxes.length > 0 && checked === checkboxes.length;
         master.indeterminate = checked > 0 && checked < checkboxes.length;
     };
@@ -21,6 +21,11 @@ const bindBulkSelection = (root, { selectAll, item, button }) => {
 };
 
 export const init = (root = document) => {
+    bindBulkSelection(root, {
+        selectAll: '[data-bulk-select-all]',
+        item: '[data-bulk-item]',
+        button: '[data-bulk-button]',
+    });
     bindBulkSelection(root, {
         selectAll: '[data-check-all-officials]',
         item: '[data-official-check]',

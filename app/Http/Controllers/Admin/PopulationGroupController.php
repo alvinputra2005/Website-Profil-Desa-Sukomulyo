@@ -92,6 +92,28 @@ class PopulationGroupController extends PopulationController
         return redirect()->route('admin.population.groups.index')->with('success', 'Kelompok diarsipkan.');
     }
 
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $this->authorize('viewAny', PopulationGroup::class);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', 'exists:population_groups,id'],
+        ]);
+
+        $groups = PopulationGroup::whereKey($data['ids'])->get();
+
+        DB::transaction(function () use ($groups): void {
+            $groups->each(function (PopulationGroup $group): void {
+                $this->authorize('delete', $group);
+                $this->logger->log('archived', 'kelompok', $group);
+                $group->delete();
+            });
+        });
+
+        return redirect()->route('admin.population.groups.index')->with('success', $groups->count().' kelompok diarsipkan.');
+    }
+
     private function groupData(array $data): array
     {
         return collect($data)->only(['code', 'name', 'category', 'establishment_decree', 'chairperson_id', 'description'])

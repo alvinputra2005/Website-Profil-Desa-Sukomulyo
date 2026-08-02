@@ -9,7 +9,9 @@ use App\Models\InventoryMutation;
 use App\Services\ActivityLogger;
 use App\Support\InventoryCategory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class InventoryMutationController extends Controller
@@ -61,6 +63,29 @@ class InventoryMutationController extends Controller
             $this->syncFromLatest($item);
         });
         return redirect()->route('admin.inventory.show', [$category, $item])->with('success', 'Catatan mutasi berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request, string $category, InventoryItem $item): RedirectResponse
+    {
+        $this->ensure($category, $item);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', Rule::exists('inventory_mutations', 'id')->where('inventory_item_id', $item->id)],
+        ]);
+
+        $mutations = InventoryMutation::where('inventory_item_id', $item->id)->whereKey($data['ids'])->get();
+
+        DB::transaction(function () use ($item, $mutations): void {
+            $mutations->each(function (InventoryMutation $mutation): void {
+                $old = $mutation->toArray();
+                $this->logger->log('hapus', 'mutasi inventaris', $mutation, $old);
+                $mutation->delete();
+            });
+            $this->syncFromLatest($item);
+        });
+
+        return redirect()->route('admin.inventory.show', [$category, $item])->with('success', $mutations->count().' catatan mutasi berhasil dihapus.');
     }
 
     private function syncFromLatest(InventoryItem $item): void

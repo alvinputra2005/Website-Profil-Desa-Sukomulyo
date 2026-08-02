@@ -6,6 +6,11 @@
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title"><i class="fa {{ $categoryData['icon'] }}"></i> Daftar {{ $categoryData['label'] }}</h3>
+        <form id="bulk-delete-inventory" method="post" action="{{ route('admin.inventory.bulk-destroy', $category) }}" class="inline-form" data-confirm="Hapus inventaris yang dipilih beserta seluruh riwayat mutasinya?" data-confirm-tone="danger" data-confirm-title="Hapus Inventaris Terpilih" data-confirm-button="Ya, hapus">
+            @csrf
+            @method('delete')
+            <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
+        </form>
         <div class="box-tools"><a href="{{ route('admin.inventory.create',$category) }}" class="btn btn-social btn-info btn-sm"><i class="fa fa-plus"></i> Tambah Data</a></div>
     </div>
     <div class="box-body">
@@ -17,10 +22,11 @@
         </form>
         <div class="table-responsive">
             <table class="table table-striped table-hover">
-                <thead><tr><th>No.</th><th>Nama / Kode Barang</th><th>Register</th><th>Tahun</th><th>Asal-usul</th><th>Kondisi</th><th>Nilai</th><th>Status</th><th>Aksi</th></tr></thead>
+                <thead><tr><th style="width:38px"><input type="checkbox" aria-label="Pilih semua inventaris pada halaman ini" data-bulk-select-all></th><th>No.</th><th>Nama / Kode Barang</th><th>Register</th><th>Tahun</th><th>Asal-usul</th><th>Kondisi</th><th>Nilai</th><th>Status</th><th>Aksi</th></tr></thead>
                 <tbody>
                 @forelse($items as $item)
                     <tr>
+                        <td><input type="checkbox" name="ids[]" value="{{ $item->id }}" form="bulk-delete-inventory" aria-label="Pilih {{ $item->name }}" data-bulk-item></td>
                         <td>{{ $items->firstItem()+$loop->index }}</td>
                         <td><strong>{{ $item->name }}</strong><br><small class="text-muted">{{ $item->item_code }} · {{ number_format($item->quantity,0,',','.') }} unit</small></td>
                         <td>{{ $item->register_number }}</td><td>{{ $item->acquisition_year }}</td><td>{{ $item->origin }}</td>
@@ -34,7 +40,7 @@
                             <form method="post" action="{{ route('admin.inventory.destroy',[$category,$item]) }}" data-confirm="Hapus {{ $item->name }} beserta seluruh riwayat mutasinya?" data-confirm-tone="danger">@csrf @method('delete')<button class="btn btn-xs btn-danger" title="Hapus"><i class="fa fa-trash"></i></button></form>
                         </td>
                     </tr>
-                @empty<tr><td colspan="9" class="empty-state"><i class="fa {{ $categoryData['icon'] }}"></i><br>Belum ada data {{ strtolower($categoryData['label']) }}.</td></tr>@endforelse
+                @empty<tr><td colspan="10" class="empty-state"><i class="fa {{ $categoryData['icon'] }}"></i><br>Belum ada data {{ strtolower($categoryData['label']) }}.</td></tr>@endforelse
                 </tbody>
             </table>
         </div>

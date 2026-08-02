@@ -40,11 +40,19 @@
         <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">Daftar Media</h3>
+                <form id="bulk-delete-media" method="post" action="{{ route('admin.media.bulk-destroy') }}" class="inline-form" data-confirm="Hapus media yang dipilih? Media yang masih digunakan tidak dapat dihapus." data-confirm-tone="danger" data-confirm-title="Hapus Media Terpilih" data-confirm-button="Ya, hapus">
+                    @csrf
+                    @method('delete')
+                    <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
+                </form>
                 <div class="box-tools"><form><div class="input-group input-group-sm" style="width:220px"><input class="form-control" name="q" value="{{ request('q') }}" placeholder="Cari file..."><span class="input-group-btn"><button class="btn btn-default"><i class="fa fa-search"></i></button></span></div></form></div>
             </div>
-            <div class="box-body"><div class="media-grid">
+            <div class="box-body">
+                <label class="checkbox-inline" style="margin-bottom:12px"><input type="checkbox" aria-label="Pilih semua media pada halaman ini" data-bulk-select-all> Pilih semua media di halaman ini</label>
+                <div class="media-grid">
                 @forelse($items as $item)
                     <div class="media-card">
+                        <label class="media-card-check"><input type="checkbox" name="ids[]" value="{{ $item->id }}" form="bulk-delete-media" aria-label="Pilih {{ $item->original_name }}" data-bulk-item></label>
                         <div class="media-preview">@if(str_starts_with($item->mime_type, 'image/'))<img src="{{ $item->url }}" alt="{{ $item->alt_text }}">@else<i class="fa fa-file-o fa-4x text-muted"></i>@endif</div>
                         <div class="media-info">
                             <strong title="{{ $item->original_name }}">{{ $item->original_name }}</strong>

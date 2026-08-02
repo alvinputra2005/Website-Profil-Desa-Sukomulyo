@@ -18,6 +18,7 @@ const shouldSkipLink = (link, event) => {
 };
 
 const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.content || '';
+const formDataFor = (form, submitter) => (submitter ? new FormData(form, submitter) : new FormData(form));
 
 const setBusy = (busy) => {
     const root = document.querySelector('[data-ajax-root]');
@@ -195,7 +196,7 @@ const fetchPage = async (url, state, options = {}, historyMode = 'push', scrollT
     }
 };
 
-const submitForm = async (form, state) => {
+const submitForm = async (form, state, submitter = null) => {
     if (form.dataset.ajaxSubmitting === 'true') return;
     if (!(await confirmAction(form))) return;
 
@@ -205,8 +206,8 @@ const submitForm = async (form, state) => {
     const submitButtons = [...form.querySelectorAll('button[type="submit"], input[type="submit"]')];
     submitButtons.forEach((button) => { button.disabled = true; });
 
-    const method = (form.getAttribute('method') || 'get').toUpperCase();
-    const action = new URL(form.getAttribute('action') || window.location.href, window.location.href);
+    const method = (submitter?.getAttribute('formmethod') || form.getAttribute('method') || 'get').toUpperCase();
+    const action = new URL(submitter?.getAttribute('formaction') || form.getAttribute('action') || window.location.href, window.location.href);
     const rootSelector = form.closest('[data-ajax-scope]')?.dataset.ajaxScope || state.rootSelector;
     state.controller?.abort();
     const controller = new AbortController();
@@ -215,7 +216,7 @@ const submitForm = async (form, state) => {
     try {
         if (method === 'GET') {
             const query = new URLSearchParams();
-            new FormData(form).forEach((value, key) => {
+            formDataFor(form, submitter).forEach((value, key) => {
                 if (typeof value === 'string' && value !== '') query.append(key, value);
             });
             action.search = query.toString();
@@ -223,7 +224,7 @@ const submitForm = async (form, state) => {
             return;
         }
 
-        const body = new FormData(form);
+        const body = formDataFor(form, submitter);
         const response = await fetch(action.href, {
             method,
             body,
@@ -293,7 +294,7 @@ export const initAjaxNavigation = ({ rootSelector, onRender, explicitOnly = fals
         if (!isSameOrigin(new URL(form.action || window.location.href, window.location.href))) return;
 
         event.preventDefault();
-        submitForm(form, state);
+        submitForm(form, state, event.submitter || null);
     });
 
     window.addEventListener('popstate', () => {

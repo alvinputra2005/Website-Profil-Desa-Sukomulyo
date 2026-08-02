@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SaveLetterServiceRequest;
 use App\Models\LetterService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class LetterServiceController extends Controller
@@ -55,6 +58,30 @@ class LetterServiceController extends Controller
         $letterService->delete();
 
         return back()->with('success', 'Layanan surat dihapus.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $this->authorize('viewAny', LetterService::class);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', 'exists:letter_services,id'],
+        ]);
+
+        $services = LetterService::whereKey($data['ids'])->withCount('applications')->get();
+        if ($services->contains(fn (LetterService $service): bool => $service->applications_count > 0)) {
+            throw ValidationException::withMessages(['ids' => 'Ada layanan terpilih yang sudah memiliki permohonan dan tidak dapat dihapus.']);
+        }
+
+        DB::transaction(function () use ($services): void {
+            $services->each(function (LetterService $service): void {
+                $this->authorize('delete', $service);
+                $service->delete();
+            });
+        });
+
+        return back()->with('success', $services->count().' layanan surat dihapus.');
     }
 
     private function data(SaveLetterServiceRequest $request): array
