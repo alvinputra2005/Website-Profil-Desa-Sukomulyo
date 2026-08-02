@@ -168,7 +168,7 @@ class SitePagesTest extends TestCase
             ->assertSee('Cetak Artikel')
             ->assertSee('data-print-article', false)
             ->assertSee('Profil Pimpinan')
-            ->assertSee('Peraturan Desa')
+            ->assertDontSee('Peraturan Desa')
             ->assertSee('Kantor Desa')
             ->assertSee('Street View 360 derajat Kantor Desa Sukomulyo')
             ->assertSee('Lihat Street View &amp; Rute', false)
@@ -178,10 +178,10 @@ class SitePagesTest extends TestCase
             ->assertDontSee('Cari berita')
             ->assertDontSee('Berita Populer');
 
-        $this->assertSame(3, substr_count($response->getContent(), 'class="regulation-card'));
+        $this->assertSame(0, substr_count($response->getContent(), 'class="regulation-card'));
         $this->assertStringContainsString('data-profile-accordion', $response->getContent());
-        $this->assertSame(4, substr_count($response->getContent(), 'data-profile-widget-toggle'));
-        $this->assertSame(4, substr_count($response->getContent(), 'class="profile-widget-panel" hidden'));
+        $this->assertSame(3, substr_count($response->getContent(), 'data-profile-widget-toggle'));
+        $this->assertSame(3, substr_count($response->getContent(), 'class="profile-widget-panel" hidden'));
     }
 
     public function test_resident_can_submit_a_profile_comment_without_exposing_private_fields(): void

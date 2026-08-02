@@ -231,6 +231,14 @@ Route::prefix('informasi-desa/pengumuman')->name('announcements.')->group(functi
         ->name('attachments.download');
     Route::get('/{publication:slug}', [AnnouncementController::class, 'show'])->name('show');
 });
+Route::prefix('informasi-desa/dokumen')->name('publications.attachments.')->group(function () {
+    Route::get('/{publication:slug}/lampiran/{attachment}/lihat', [AnnouncementAttachmentController::class, 'preview'])
+        ->middleware('throttle:120,1')
+        ->name('preview');
+    Route::get('/{publication:slug}/lampiran/{attachment}/unduh', [AnnouncementAttachmentController::class, 'download'])
+        ->middleware('throttle:60,1')
+        ->name('download');
+});
 Route::get('/informasi-desa/{section}', [PublicationController::class, 'show'])->where('section', 'layanan-administrasi|agenda|bantuan-sosial|informasi-publik')->name('informasi-desa.detail');
 Route::get('/peta-desa', [VillageMapController::class, 'index'])->name('peta-desa');
 Route::get('/peta-desa/geojson', [VillageMapController::class, 'geoJson'])->middleware('throttle:60,1')->name('peta-desa.geojson');

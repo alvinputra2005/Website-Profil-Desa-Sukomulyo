@@ -25,13 +25,13 @@ class ProfilePageLayoutTest extends TestCase
 
             $response
                 ->assertSee('Profil Pimpinan')
-                ->assertSee('Peraturan Desa')
+                ->assertDontSee('Peraturan Desa')
                 ->assertSee('Kantor Desa')
                 ->assertSee('Komentar Terbaru')
                 ->assertSee('Lihat Komentar')
                 ->assertSee('Kirim Komentar');
 
-            $this->assertSame(4, substr_count($html, 'data-profile-widget-toggle'));
+            $this->assertSame(3, substr_count($html, 'data-profile-widget-toggle'));
             $this->assertStringNotContainsString('class="profile-comments-link"', $html);
 
             if ($isPrintable) {

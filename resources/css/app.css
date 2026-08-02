@@ -3673,8 +3673,10 @@ h3.widget-title { background: var(--primary); }
 .document-icon { display: grid; width: 52px; height: 52px; place-items: center; border-radius: 8px; background: rgba(82,107,66,.12); color: var(--primary); font-size: 22px; }
 .document-card p { margin: 0 0 3px !important; color: var(--primary); font-size: 13px; font-weight: 700; }
 .document-card h3 { margin: 0; font-size: 18px; }
-.document-card button { display: flex; padding: 10px 15px; align-items: center; gap: 8px; border: 1px solid var(--primary); border-radius: 22px; background: #fff; color: var(--primary); }
-.document-card button:hover { background: var(--primary); color: #fff; }
+.document-card button, .document-actions a { display: flex; padding: 10px 15px; align-items: center; gap: 8px; border: 1px solid var(--primary); border-radius: 22px; background: #fff; color: var(--primary); }
+.document-card button:hover, .document-actions a:hover { background: var(--primary); color: #fff; }
+.document-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.document-actions a { text-decoration: none; }
 .information-services { margin-top: 65px; padding: 48px; border-radius: var(--radius); background: var(--surface); text-align: center; }
 .information-services .value-grid { grid-template-columns: repeat(2, 1fr); }
 .map-layout { display: grid; grid-template-columns: 1.6fr .8fr; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
@@ -4099,7 +4101,7 @@ h3.widget-title { background: var(--primary); }
     .public-period-filter select, .public-period-filter button { width: 100%; }
     .public-info-intro { align-items: flex-start; flex-direction: column; }
     .document-card { grid-template-columns: auto 1fr; }
-    .document-card button { grid-column: 1 / -1; justify-self: start; }
+    .document-card button, .document-actions { grid-column: 1 / -1; justify-self: start; }
     .information-services { padding: 35px 24px; }
     .map-frame, .map-frame iframe { min-height: 380px; }
     .not-found-actions { align-items: center; flex-direction: column; }

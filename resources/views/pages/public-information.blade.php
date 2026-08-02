@@ -21,9 +21,20 @@
                                 <p>{{ $document['category'] }} · {{ $document['year'] }}</p>
                                 <h3>{{ $document['title'] }}</h3>
                             </div>
-                            <button type="button" aria-label="Dokumen {{ $document['title'] }} belum tersedia" title="Dokumen akan ditambahkan setelah data resmi tersedia">
-                                <i class="fas fa-download" aria-hidden="true"></i><span>Unduh</span>
-                            </button>
+                            @if (!empty($document['download_url']))
+                                <div class="document-actions">
+                                    <a href="{{ $document['preview_url'] }}" target="_blank" rel="noopener noreferrer">
+                                        <i class="fas fa-eye" aria-hidden="true"></i><span>Lihat</span>
+                                    </a>
+                                    <a href="{{ $document['download_url'] }}">
+                                        <i class="fas fa-download" aria-hidden="true"></i><span>Unduh</span>
+                                    </a>
+                                </div>
+                            @else
+                                <button type="button" aria-label="Dokumen {{ $document['title'] }} belum tersedia" title="Dokumen akan ditambahkan setelah data resmi tersedia">
+                                    <i class="fas fa-clock" aria-hidden="true"></i><span>Belum tersedia</span>
+                                </button>
+                            @endif
                         </article>
                     @endforeach
                 </div>

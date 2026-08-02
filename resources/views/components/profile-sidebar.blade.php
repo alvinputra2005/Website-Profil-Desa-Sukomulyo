@@ -6,6 +6,7 @@
 
 @php
     $comments = collect($latestComments)->take(3);
+    $regulations = collect($regulations);
 @endphp
 
 <aside id="sidebar" class="profile-article-sidebar" aria-label="Informasi profil desa" data-profile-accordion>
@@ -35,6 +36,7 @@
         </div>
     </section>
 
+    @if ($regulations->isNotEmpty())
     <section class="profile-side-widget regulation-widget">
         <h2 class="profile-side-title profile-widget-heading">
             <button
@@ -71,6 +73,7 @@
             </div>
         </div>
     </section>
+    @endif
 
     <section class="profile-side-widget village-office-widget">
         <h2 class="profile-side-title profile-widget-heading">

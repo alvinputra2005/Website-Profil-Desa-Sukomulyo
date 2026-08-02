@@ -112,6 +112,7 @@ class SiteCache
     public function invalidatePublications(): void
     {
         Cache::forget(self::PUBLICATIONS);
+        Cache::forget(self::PROFILE);
         Cache::forget(self::SEO_SITEMAP);
     }
 

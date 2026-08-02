@@ -522,15 +522,52 @@ class PublicSiteService
     public function publicInformation(): View
     {
         $latestBudgetYear = (string) data_get($this->budgetHistoryData->latest(), 'summary.year', BudgetHistoryData::LATEST_PUBLIC_YEAR);
+        $documents = $this->publicInformationDocuments();
 
         return $this->render('pages.public-information', [
-            'documents' => [
+            'documents' => $documents ?: [
                 ['icon' => 'fas fa-file-pdf', 'title' => 'APBDes Desa Sukomulyo', 'category' => 'Keuangan Desa', 'year' => $latestBudgetYear],
                 ['icon' => 'fas fa-file-alt', 'title' => 'Rencana Kerja Pemerintah Desa', 'category' => 'Perencanaan', 'year' => '2026'],
                 ['icon' => 'fas fa-clipboard-list', 'title' => 'Laporan Penyelenggaraan Pemerintahan Desa', 'category' => 'Laporan', 'year' => '2025'],
                 ['icon' => 'fas fa-bullhorn', 'title' => 'Standar Pelayanan Publik Desa', 'category' => 'Pelayanan', 'year' => '2026'],
             ],
         ]);
+    }
+
+    private function publicInformationDocuments(): array
+    {
+        if (! Schema::hasTable('publications') || ! Schema::hasTable('publication_attachments')) {
+            return [];
+        }
+
+        return Publication::query()
+            ->published()
+            ->with(['attachments.media'])
+            ->where('type', 'document')
+            ->latest('published_at')
+            ->get()
+            ->map(function (Publication $publication): array {
+                $attachment = $publication->attachments
+                    ->first(fn ($item) => $item->media && $item->media->mime_type === 'application/pdf');
+
+                $year = (string) ($publication->start_date?->year ?? $publication->published_at?->year ?? now()->year);
+                return [
+                    'icon' => 'fas fa-file-pdf',
+                    'title' => $publication->title,
+                    'category' => 'Dokumen Publik',
+                    'year' => $year,
+                    'preview_url' => $attachment ? route('publications.attachments.preview', [
+                        'publication' => $publication->slug,
+                        'attachment' => $attachment->id,
+                    ]) : null,
+                    'download_url' => $attachment ? route('publications.attachments.download', [
+                        'publication' => $publication->slug,
+                        'attachment' => $attachment->id,
+                    ]) : null,
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     public function informationDetail(string $section): View
@@ -560,11 +597,10 @@ class PublicSiteService
             ],
             'informasi-publik' => [
                 'title' => 'Informasi Publik',
-                'description' => 'Program kerja, peraturan desa, dan dokumen publik.',
+                'description' => 'Program kerja dan dokumen publik.',
                 'type' => 'document',
                 'fallback' => [
                     ['title' => 'Program Kerja Desa', 'content' => 'Informasi program kerja pemerintah desa tersedia untuk mendukung keterbukaan publik.'],
-                    ['title' => 'Peraturan Desa', 'content' => 'Dokumen peraturan desa akan ditampilkan setelah dipublikasikan secara resmi.'],
                 ],
             ],
         ];
@@ -572,7 +608,15 @@ class PublicSiteService
         $page = $pages[$section];
         $items = collect();
         if (isset($page['type']) && Schema::hasTable('publications')) {
-            $items = Publication::published()->where('type', $page['type'])->latest('published_at')->get()->map(fn (Publication $publication) => [
+            $items = Publication::published()
+                ->when(
+                    is_array($page['type']),
+                    fn ($query) => $query->whereIn('type', $page['type']),
+                    fn ($query) => $query->where('type', $page['type']),
+                )
+                ->latest('published_at')
+                ->get()
+                ->map(fn (Publication $publication) => [
                 'title' => $publication->title,
                 'content' => $publication->content,
                 'excerpt' => $publication->excerpt,
@@ -1670,40 +1714,15 @@ class PublicSiteService
 
     private function villageRegulations(): array
     {
-        $fallbacks = collect([
-            [
-                'title' => 'Peraturan Desa tentang Rencana Kerja Pemerintah Desa',
-                'number' => 'Perdes No. 1',
-                'year' => '2026',
-                'url' => null,
-            ],
-            [
-                'title' => 'Peraturan Desa tentang Anggaran Pendapatan dan Belanja Desa',
-                'number' => 'Perdes No. 2',
-                'year' => '2026',
-                'url' => null,
-            ],
-            [
-                'title' => 'Peraturan Desa tentang Lingkungan dan Gotong Royong',
-                'number' => 'Perdes No. 3',
-                'year' => '2026',
-                'url' => null,
-            ],
-        ]);
-
-        if (! Schema::hasTable('publications')) {
-            return $fallbacks->all();
+        if (! Schema::hasTable('publications') || ! Schema::hasTable('publication_attachments')) {
+            return [];
         }
 
-        $published = Publication::query()
+        return Publication::query()
             ->published()
             ->with(['attachments.media'])
-            ->where(function ($query) {
-                $query->where('type', 'regulation')
-                    ->orWhere(function ($documentQuery) {
-                        $documentQuery->where('type', 'document')->where('title', 'like', '%Peraturan%');
-                    });
-            })
+            ->where('type', 'regulation')
+            ->whereHas('attachments.media', fn ($query) => $query->where('mime_type', 'application/pdf'))
             ->latest('published_at')
             ->limit(3)
             ->get()
@@ -1717,12 +1736,8 @@ class PublicSiteService
                     'year' => (string) ($publication->published_at?->year ?? $publication->start_date?->year ?? now()->year),
                     'url' => $attachment?->media?->url,
                 ];
-            });
-
-        return $published
-            ->concat($fallbacks)
-            ->unique('title')
-            ->take(3)
+            })
+            ->filter(fn (array $regulation) => filled($regulation['url']))
             ->values()
             ->all();
     }

@@ -106,6 +106,7 @@ class AdminCmsTest extends TestCase
             ->assertSee('Permohonan Terbaru')
             ->assertDontSee('Pesan Terbaru')
             ->assertSeeInOrder([$latest->application_number, $older->application_number])
+            ->assertSee('Lihat Detail')
             ->assertSee(route('admin.letter-applications.show', $latest), false);
     }
 

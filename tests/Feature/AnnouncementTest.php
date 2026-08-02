@@ -237,6 +237,42 @@ class AnnouncementTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_publish_village_regulation_in_profile_sidebar_only(): void
+    {
+        Storage::fake('public');
+
+        $response = $this->actingAs($this->author)->post(route('admin.resources.store', 'publications'), [
+            'type' => 'regulation',
+            'title' => 'Peraturan Desa tentang APBDes',
+            'slug' => 'peraturan-desa-apbdes',
+            'excerpt' => 'Ringkasan peraturan desa.',
+            'content' => '<p>Isi peraturan desa.</p>',
+            'status' => 'published',
+            'published_at' => now()->format('Y-m-d H:i:s'),
+            'attachment_uploads' => [
+                UploadedFile::fake()->create('perdes-apbdes.pdf', 100, 'application/pdf'),
+            ],
+            'attachment_upload_titles' => ['Perdes APBDes'],
+            'attachment_sequence' => ['new:0'],
+        ]);
+
+        $response->assertSessionHasNoErrors()->assertRedirect();
+
+        $regulation = Publication::where('slug', 'peraturan-desa-apbdes')->firstOrFail();
+        $attachment = $regulation->attachments()->with('media')->firstOrFail();
+
+        $this->assertSame('regulation', $regulation->type);
+        $this->get(route('profile-desa'))
+            ->assertOk()
+            ->assertSee('Peraturan Desa tentang APBDes')
+            ->assertSee('profile-regulations-panel', false)
+            ->assertSee($attachment->media->url, false);
+
+        $this->get(route('informasi-publik-desa'))
+            ->assertOk()
+            ->assertDontSee('Peraturan Desa tentang APBDes');
+    }
+
     private function publication(array $attributes = []): Publication
     {
         return Publication::create(array_merge([

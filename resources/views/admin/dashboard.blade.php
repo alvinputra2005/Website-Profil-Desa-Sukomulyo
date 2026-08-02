@@ -54,6 +54,7 @@
                                 <th>Layanan</th>
                                 <th>Waktu</th>
                                 <th>Status</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>@forelse($latestApplications as $application)<tr>
@@ -61,8 +62,9 @@
                                 <td>{{ $application->service->name }}</td>
                                 <td>{{ $application->submitted_at->diffForHumans() }}</td>
                                 <td><span class="label {{ $application->status->badgeClass() }}">{{ $application->status->label() }}</span></td>
+                                <td><a href="{{ route('admin.letter-applications.show',$application) }}" class="btn btn-xs btn-primary"><i class="fa fa-eye"></i> Lihat Detail</a></td>
                             </tr>@empty<tr>
-                                <td colspan="4" class="empty-state">Belum ada permohonan.</td>
+                                <td colspan="5" class="empty-state">Belum ada permohonan.</td>
                             </tr>@endforelse</tbody>
                     </table>
                 </div>

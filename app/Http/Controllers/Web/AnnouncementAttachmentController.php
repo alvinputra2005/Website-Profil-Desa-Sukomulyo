@@ -31,8 +31,12 @@ class AnnouncementAttachmentController extends Controller
         PublicationAttachment $attachment,
         bool $download,
     ): StreamedResponse {
+        $allowedTypes = request()->routeIs('announcements.*')
+            ? ['announcement']
+            : ['document', 'regulation'];
+
         abort_unless(
-            $publication->type === 'announcement'
+            in_array($publication->type, $allowedTypes, true)
                 && $publication->status === 'published'
                 && ($publication->published_at === null || $publication->published_at->isPast()),
             404,
@@ -53,7 +57,7 @@ class AnnouncementAttachmentController extends Controller
         }
 
         $fallbackName = Str::slug(pathinfo($media->original_name, PATHINFO_FILENAME))
-            ?: 'lampiran-pengumuman';
+            ?: 'lampiran-publikasi';
         $fileName = $fallbackName.'.pdf';
         $disposition = HeaderUtils::makeDisposition(
             $download ? HeaderUtils::DISPOSITION_ATTACHMENT : HeaderUtils::DISPOSITION_INLINE,
