@@ -10,8 +10,12 @@ use App\Models\Publication;
 use App\Models\StatisticDataset;
 use App\Models\StatisticValue;
 use App\Models\VillageProfileSection;
+use App\Models\VillagePotential;
 
 return ['resources' => [
+    'potentials' => ['model' => VillagePotential::class, 'title' => 'Potensi Desa', 'ability' => 'manage-content', 'search' => ['title', 'slug', 'category', 'description'], 'columns' => ['title' => 'Nama Potensi', 'category' => 'Kategori', 'status' => 'Status', 'display_order' => 'Urutan'], 'fields' => [
+        'title' => ['label' => 'Nama potensi', 'rules' => 'required|string|max:255'], 'slug' => ['label' => 'Slug', 'rules' => 'nullable|string|max:255|unique:village_potentials,slug,{id}'], 'category' => ['label' => 'Kategori', 'rules' => 'nullable|string|max:255'], 'alternate_name' => ['label' => 'Nama lain', 'rules' => 'nullable|string|max:255'], 'description' => ['label' => 'Deskripsi', 'type' => 'editor', 'rules' => 'required|string|max:100000'], 'highlights_json' => ['label' => 'Keunggulan (JSON)', 'type' => 'textarea', 'rules' => 'nullable|json'], 'address' => ['label' => 'Alamat', 'type' => 'textarea', 'rules' => 'nullable|string|max:2000'], 'map_embed_url' => ['label' => 'URL peta sematan', 'rules' => 'nullable|url|max:500'], 'directions_url' => ['label' => 'URL petunjuk arah', 'rules' => 'nullable|url|max:500'], 'image_id' => ['label' => 'Gambar', 'type' => 'image', 'relation' => 'image', 'media_category' => 'banners', 'rules' => 'nullable|exists:media,id'], 'status' => ['label' => 'Status', 'type' => 'select', 'options' => ['draft' => 'Draf', 'published' => 'Terbit'], 'rules' => 'required|in:draft,published'], 'display_order' => ['label' => 'Urutan tampil', 'type' => 'number', 'rules' => 'required|integer|min:0'],
+    ]],
     'news' => ['model' => News::class, 'title' => 'Berita', 'ability' => 'manage-content', 'search' => ['title', 'slug', 'excerpt'], 'columns' => ['title' => 'Judul', 'status' => 'Status', 'published_at' => 'Terbit'], 'fields' => [
         'category_id' => ['label' => 'Kategori', 'type' => 'relation', 'model' => NewsCategory::class, 'display' => 'name', 'rules' => 'required|exists:news_categories,id'], 'title' => ['label' => 'Judul', 'rules' => 'required|string|min:5|max:255'],
         'slug' => ['label' => 'Slug', 'rules' => 'nullable|string|max:255|unique:news,slug,{id}'], 'excerpt' => ['label' => 'Ringkasan', 'type' => 'textarea', 'rules' => 'nullable|string|max:1000'], 'content' => ['label' => 'Isi berita', 'type' => 'editor', 'rules' => 'required|string|max:100000'],

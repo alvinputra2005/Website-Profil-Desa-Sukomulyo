@@ -16,6 +16,7 @@ use App\Models\StatisticDataset;
 use App\Models\VillageComment;
 use App\Models\VillageIdentity;
 use App\Models\VillageProfileSection;
+use App\Models\VillagePotential;
 use App\Services\BudgetHistoryData;
 use App\Services\PopulationStatistics as PopulationStatisticsService;
 use App\Services\SiteCache;
@@ -1489,6 +1490,16 @@ class PublicSiteService
 
     private function potentialsData(): array
     {
+        $stored = VillagePotential::query()->with('image')->where('status', 'published')->orderBy('display_order')->orderBy('id')->get();
+        if ($stored->isNotEmpty()) {
+            return $stored->map(fn (VillagePotential $p) => [
+                'slug'=>$p->slug, 'category'=>$p->category, 'title'=>$p->title, 'alternate_name'=>$p->alternate_name,
+                'description'=>strip_tags($p->description), 'highlights'=>$p->highlights_json ?: [], 'address'=>$p->address,
+                'image'=>$p->image?->url ?: '/assets/'.($p->slug === 'coban-manan' ? 'potensi-coban-manan.webp' : 'potensi-taman-merak.webp'),
+                'image_alt'=>$p->title, 'image_caption'=>$p->title, 'map_embed_url'=>$p->map_embed_url,
+                'directions_url'=>$p->directions_url ?: '#',
+            ])->all();
+        }
         return [
             [
                 'slug' => 'taman-merak',
