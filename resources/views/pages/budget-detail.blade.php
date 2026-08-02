@@ -320,6 +320,68 @@
                     </section>
                 @endif
 
+                @php
+                    $problemItems = preg_split('/\r\n|\r|\n/', (string) ($budget['problems'] ?? '')) ?: [];
+                    $solutionItems = preg_split('/\r\n|\r|\n/', (string) ($budget['solutions'] ?? '')) ?: [];
+                    $problemItems = array_values(array_filter(array_map('trim', $problemItems)));
+                    $solutionItems = array_values(array_filter(array_map('trim', $solutionItems)));
+                    $qualityItems = $budget['data_quality'] ?? [];
+                    $sourceReference = $budget['source_reference'] ?? [];
+                @endphp
+
+                @if ($problemItems !== [] || $solutionItems !== [] || $qualityItems !== [])
+                    <section class="budget-data-section" aria-labelledby="budget-notes-title">
+                        <header class="budget-section-heading">
+                            <div>
+                                <h2 id="budget-notes-title">Catatan Pelaksanaan Anggaran</h2>
+                                <p>Permasalahan, upaya penyelesaian, dan catatan kualitas data dari dokumen sumber.</p>
+                            </div>
+                        </header>
+                        <div class="budget-notes-grid">
+                            @if ($problemItems !== [])
+                                <div class="budget-note-card">
+                                    <h3>Permasalahan Pelaksanaan</h3>
+                                    <ul>
+                                        @foreach ($problemItems as $problem)
+                                            <li>{{ $problem }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                            @if ($solutionItems !== [])
+                                <div class="budget-note-card">
+                                    <h3>Upaya Penyelesaian</h3>
+                                    <ul>
+                                        @foreach ($solutionItems as $solution)
+                                            <li>{{ $solution }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                            @if ($qualityItems !== [])
+                                <div class="budget-note-card">
+                                    <h3>Catatan Kualitas Data</h3>
+                                    <ul>
+                                        @foreach ($qualityItems as $quality)
+                                            <li>{{ $quality }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                        </div>
+                    </section>
+                @endif
+
+                @if (($sourceReference['document'] ?? null) || ($sourceReference['pages'] ?? null))
+                    <aside class="budget-source-note">
+                        <strong>Sumber data:</strong>
+                        {{ $sourceReference['document'] ?? 'Dokumen APBDes Desa Sukomulyo' }}
+                        @if ($sourceReference['pages'] ?? null)
+                            <span>({{ $sourceReference['pages'] }})</span>
+                        @endif
+                    </aside>
+                @endif
+
                 <section class="budget-data-section" aria-labelledby="budget-financing-title">
                     <header class="budget-section-heading"><div><h2 id="budget-financing-title">Pembiayaan Desa</h2><p>Penerimaan dan pengeluaran pembiayaan di luar komponen pendapatan dan belanja.</p></div></header>
                     <div class="budget-history-table-wrap" tabindex="0" aria-label="Tabel pembiayaan desa dapat digulir secara horizontal">
