@@ -25,7 +25,7 @@ enum LetterApplicationStatus: string
             self::ReadyForPickup => 'Siap Diambil',
             self::Completed => 'Surat Telah Diambil',
             self::Rejected => 'Permohonan Ditolak',
-            self::Cancelled => 'Permohonan Ditolak',
+            self::Cancelled => 'Permohonan Dibatalkan',
         };
     }
 

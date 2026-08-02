@@ -34,8 +34,6 @@
                                         <strong>{{ $service->name }}</strong>
                                         @if ($service->code === 'SKTM')
                                             <small>Untuk SKTM dan kebutuhan administrasi lainnya.</small>
-                                        @elseif ($service->code === 'KTP')
-                                            <small>Untuk KTP-el baru, hilang, rusak, perubahan data, atau pindah datang.</small>
                                         @endif
                                     </span>
                                     <i class="fas fa-chevron-right letter-choice-arrow" aria-hidden="true"></i>
@@ -48,6 +46,8 @@
                 </section>
 
                 <aside class="letter-info-sidebar" aria-label="Panduan dan informasi pelayanan surat" data-sidebar-accordion>
+                    @include('pages.letters.partials.tracking-card')
+
                     @include('administrative-services.partials.submission-guide', [
                         'submissionGuidePanelId' => 'letter-index-submission-guide',
                         'submissionGuideAsFlow' => true,

@@ -1,27 +1,20 @@
 <section
-    class="administration-sidebar-widget administration-application-cta"
+    class="letter-info-card letter-info-card--help administration-application-cta"
     data-static-application-cta
 >
-    <h2 class="administration-sidebar-heading">
-        <span class="administration-sidebar-toggle administration-application-cta__heading">
-            <span>Pengajuan Layanan Surat</span>
-        </span>
-    </h2>
-    <div class="administration-sidebar-content administration-application-cta__content">
-        <span class="administration-application-cta__icon" aria-hidden="true">
-            <i class="fas fa-file-alt"></i>
-        </span>
-        <span class="administration-application-cta__copy">
-            <strong>Siap Mengajukan Surat?</strong>
-            <span>Pilih jenis surat dan lengkapi dokumen persyaratan secara online.</span>
-            <a
-                class="administration-application-cta__button"
-                href="{{ route('letter-services.index') }}"
-                aria-label="Mulai pengajuan layanan surat"
-            >
-                Mulai Pengajuan
-                <i class="fas fa-chevron-right" aria-hidden="true"></i>
-            </a>
-        </span>
+    <header class="letter-info-card__heading">
+        <h2>Butuh Bantuan?</h2>
+    </header>
+    <div class="letter-info-card__content">
+        <p>Hubungi petugas Desa Sukomulyo melalui WhatsApp untuk informasi lebih lanjut.</p>
+        <a
+            href="{{ $whatsappUrl }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Hubungi petugas Desa melalui WhatsApp"
+        >
+            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+            Hubungi via WhatsApp
+        </a>
     </div>
 </section>

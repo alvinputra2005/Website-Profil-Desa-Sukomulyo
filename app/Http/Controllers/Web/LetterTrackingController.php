@@ -8,7 +8,6 @@ use App\Models\LetterApplication;
 use App\Services\Letters\LetterSettings;
 use App\Services\Web\PublicSiteService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -24,8 +23,8 @@ class LetterTrackingController extends Controller
     public function store(TrackLetterApplicationRequest $request): RedirectResponse
     {
         $application = LetterApplication::query()->where('application_number', $request->validated('application_number'))->first();
-        if (! $application || $application->isTrackingExpired() || ! Hash::check($request->validated('pin'), $application->tracking_pin_hash)) {
-            throw ValidationException::withMessages(['application_number' => 'Data pelacakan tidak ditemukan atau tidak sesuai.']);
+        if (! $application || $application->isTrackingExpired()) {
+            throw ValidationException::withMessages(['application_number' => 'Nomor pelacakan tidak ditemukan atau sudah kedaluwarsa.']);
         }
         session(["letter_tracking.{$application->public_id}" => now()->addMinutes(30)->timestamp]);
 

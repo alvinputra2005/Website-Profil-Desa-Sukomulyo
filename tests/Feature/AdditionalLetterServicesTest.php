@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\LetterApplication;
 use App\Models\LetterService;
+use App\Models\PopulationArea;
 use App\Services\Letters\LetterDocumentRequirementService;
 use Database\Seeders\LetterServiceSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -50,6 +51,36 @@ class AdditionalLetterServicesTest extends TestCase
             LetterService::orderBy('display_order')->limit(9)->pluck('code')->all(),
         );
         $this->assertNull(LetterService::where('code', 'KTP')->value('pickup_instructions'));
+    }
+
+    public function test_hamlet_selector_removes_case_insensitive_duplicates(): void
+    {
+        foreach (['BAKIR', 'BIYAN', 'GUMUL', 'SUKOMULYO'] as $hamlet) {
+            PopulationArea::create(['hamlet' => $hamlet, 'rw' => '', 'rt' => '']);
+        }
+
+        $html = $this->get(route('letter-services.application.create', LetterService::where('code', 'SKTM')->firstOrFail()))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(1, substr_count($html, '<option value="Bakir"'));
+        $this->assertSame(1, substr_count($html, '<option value="Biyan"'));
+        $this->assertSame(1, substr_count($html, '<option value="Gumul"'));
+        $this->assertStringNotContainsString('value="Sukomulyo"', $html);
+        $this->assertStringNotContainsString('value="BAKIR"', $html);
+        $this->assertStringNotContainsString('value="BIYAN"', $html);
+        $this->assertStringNotContainsString('value="GUMUL"', $html);
+    }
+
+    public function test_surat_keterangan_requires_an_rt_rw_cover_letter(): void
+    {
+        $requirements = collect(LetterService::where('code', 'SKTM')->firstOrFail()->requirements_json);
+
+        $this->assertSame(
+            ['KTP asli', 'Kartu Keluarga', 'Surat Pengantar RT/RW'],
+            $requirements->pluck('label')->all(),
+        );
+        $this->assertTrue((bool) $requirements->last()['required']);
     }
 
     public function test_survey_end_date_cannot_be_before_start_date(): void

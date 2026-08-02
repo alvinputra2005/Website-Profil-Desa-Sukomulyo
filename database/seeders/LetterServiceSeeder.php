@@ -12,7 +12,16 @@ class LetterServiceSeeder extends Seeder
     {
         // Persyaratan awal ini wajib diverifikasi kembali oleh perangkat Desa Sukomulyo.
         $services = [
-            ['SKTM', 'Surat Keterangan', 'fa-heart', ['KTP asli', 'Kartu Keluarga']],
+            ['SKTM', 'Surat Keterangan', 'fa-heart', [
+                'KTP asli',
+                'Kartu Keluarga',
+                [
+                    'key' => 'surat-pengantar-rt-rw',
+                    'label' => 'Surat Pengantar RT/RW',
+                    'description' => 'Surat pengantar yang telah ditandatangani oleh pengurus RT/RW setempat.',
+                    'required' => true,
+                ],
+            ]],
             [
                 'KTP',
                 'Pengajuan KTP-el',

@@ -32,8 +32,10 @@ class StoreLetterApplicationRequest extends FormRequest
             'hamlet' => ['required', 'string', Rule::in(
                 collect(['Gumul', 'Talasan', 'Bakir', 'Kedungrejo', 'Biyan'])
                     ->concat(PopulationArea::query()->whereNotNull('hamlet')->distinct()->pluck('hamlet'))
+                    ->map(fn ($hamlet): string => mb_convert_case(trim((string) $hamlet), MB_CASE_TITLE, 'UTF-8'))
                     ->filter()
-                    ->unique()
+                    ->reject(fn (string $hamlet): bool => $hamlet === 'Sukomulyo')
+                    ->unique(fn (string $hamlet): string => mb_strtolower($hamlet))
                     ->values()
                     ->all()
             )],

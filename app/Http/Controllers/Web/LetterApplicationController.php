@@ -20,10 +20,11 @@ use App\Services\Letters\LetterSettings;
 use App\Services\Web\PublicSiteService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 class LetterApplicationController extends Controller
 {
@@ -49,7 +50,14 @@ class LetterApplicationController extends Controller
             ->filter()
             ->values()
             ->all();
-        $hamlets = collect($defaultHamlets)->concat($hamlets)->unique()->values()->all();
+        $hamlets = collect($defaultHamlets)
+            ->concat($hamlets)
+            ->map(fn ($hamlet): string => mb_convert_case(trim((string) $hamlet), MB_CASE_TITLE, 'UTF-8'))
+            ->filter()
+            ->reject(fn (string $hamlet): bool => $hamlet === 'Sukomulyo')
+            ->unique(fn (string $hamlet): string => mb_strtolower($hamlet))
+            ->values()
+            ->all();
 
         return view('pages.letters.create', [
             'letterService' => $letterService,
@@ -77,7 +85,6 @@ class LetterApplicationController extends Controller
         }
 
         return redirect()->route('letter-services.application.documents', $created->trackingToken)
-            ->with('tracking_pin', $created->trackingPin)
             ->with('new_application', true);
     }
 
@@ -101,9 +108,14 @@ class LetterApplicationController extends Controller
     ): RedirectResponse
     {
         $application = $this->fromToken($token);
+        abort_unless($application->status === LetterApplicationStatus::Draft, 409);
         $requirements = $documentRequirements->forApplication($application);
+        $uploadedRequirementKeys = $application->documents()
+            ->where('upload_status', 'uploaded')
+            ->pluck('requirement_key');
         foreach ($requirements as $index => $requirement) {
-            if (($requirement['required'] ?? true) && !$request->hasFile("documents.{$index}")) {
+            $key = $requirement['key'] ?? 'requirement_'.($index + 1);
+            if (($requirement['required'] ?? true) && !$request->hasFile("documents.{$index}") && !$uploadedRequirementKeys->contains($key)) {
                 throw ValidationException::withMessages(["documents.{$index}" => 'Dokumen '.($requirement['label'] ?? 'persyaratan').' wajib diunggah.']);
             }
         }
@@ -118,8 +130,13 @@ class LetterApplicationController extends Controller
                 ['public_id' => (string) Str::ulid(), 'label' => $requirement['label'] ?? 'Dokumen persyaratan', 'disk' => $disk, 'path' => $path, 'original_name' => $file->getClientOriginalName(), 'stored_extension' => $file->extension(), 'mime_type' => $file->getMimeType(), 'file_size' => $file->getSize(), 'size_bytes' => $file->getSize(), 'upload_status' => 'uploaded', 'review_status' => 'pending_review', 'review_note' => null, 'reviewed_by' => null, 'reviewed_at' => null, 'uploaded_at' => now(), 'checksum_sha256' => hash_file('sha256', $file->getRealPath())]
             );
         }
-        $application->forceFill(['status' => LetterApplicationStatus::Submitted, 'submitted_at' => now()])->save();
-        $application->statusHistories()->create(['from_status' => LetterApplicationStatus::Draft, 'to_status' => LetterApplicationStatus::Submitted, 'created_at' => now()]);
+        DB::transaction(function () use ($application) {
+            $locked = LetterApplication::query()->whereKey($application->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless($locked->status === LetterApplicationStatus::Draft, 409);
+
+            $locked->forceFill(['status' => LetterApplicationStatus::Submitted, 'submitted_at' => now()])->save();
+            $locked->statusHistories()->create(['from_status' => LetterApplicationStatus::Draft, 'to_status' => LetterApplicationStatus::Submitted, 'created_at' => now()]);
+        });
         return redirect()->route('letter-services.track.token', $token)->with('success', 'Dokumen berhasil diunggah dan menunggu verifikasi petugas.');
     }
 
@@ -153,7 +170,6 @@ class LetterApplicationController extends Controller
     public function completeDocument(
         Request $request,
         string $token,
-        LetterDocumentRequirementService $documentRequirements,
     ): \Illuminate\Http\JsonResponse
     {
         $application = $this->fromToken($token);
@@ -163,13 +179,6 @@ class LetterApplicationController extends Controller
         $actualSize = $disk->size($document->path);
         abort_unless($actualSize <= 5242880 && $actualSize > 0, 422, 'Ukuran file tidak valid.');
         $document->update(['upload_status' => 'uploaded', 'uploaded_at' => now(), 'file_size' => $actualSize, 'size_bytes' => $actualSize]);
-        $requiredKeys = $documentRequirements->forApplication($application)
-            ->filter(fn (array $requirement) => $requirement['required'] ?? true)
-            ->pluck('key')
-            ->filter();
-        if ($requiredKeys->isEmpty() || $application->documents()->whereIn('requirement_key', $requiredKeys)->where('upload_status', 'uploaded')->distinct('requirement_key')->count('requirement_key') >= $requiredKeys->count()) {
-            $application->forceFill(['status' => LetterApplicationStatus::Submitted, 'submitted_at' => now()])->save();
-        }
         return response()->json(['document' => ['id' => $document->public_id, 'name' => $document->original_name, 'size' => $actualSize, 'preview_url' => route('letter-services.application.documents.preview', [$token, $document->public_id])]]);
     }
 
@@ -201,7 +210,7 @@ class LetterApplicationController extends Controller
     public function cancel(string $token, ChangeLetterApplicationStatusAction $action): RedirectResponse
     {
         $application = $this->fromToken($token);
-        $action->execute($application, LetterApplicationStatus::Cancelled, ['public_note' => 'Dibatalkan oleh pemohon.']);
+        $action->execute($application, LetterApplicationStatus::Cancelled, []);
 
         return redirect()->route('letter-services.track.token', $token)->with('success', 'Permohonan berhasil dibatalkan.');
     }
