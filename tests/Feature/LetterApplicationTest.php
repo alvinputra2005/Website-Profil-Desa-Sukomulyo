@@ -24,15 +24,23 @@ class LetterApplicationTest extends TestCase
             'applicant_name' => 'Budi Santoso',
             'applicant_nik' => '3514123456789012',
             'applicant_phone' => '081234567890',
+            'birth_place' => 'Malang',
+            'birth_date' => '1995-05-12',
+            'sex' => 'L',
+            'hamlet' => 'Gumul',
+            'rt' => '1',
+            'rw' => '1',
             'address' => 'Dusun Sukomulyo RT 001 RW 001',
             'purpose' => 'Mengurus administrasi usaha',
             'declaration' => '1',
             'website' => '',
         ]);
 
-        $application = LetterApplication::firstOrFail();
+        $response->assertSessionHasNoErrors();
         $response->assertRedirect();
-        $this->assertSame(LetterApplicationStatus::Submitted, $application->status);
+        $application = LetterApplication::firstOrFail();
+        $this->assertSame(LetterApplicationStatus::Draft, $application->status);
+        $this->assertNull($application->submitted_at);
         $this->assertSame('3514123456789012', $application->applicant_nik);
         $this->assertSame('6281234567890', $application->applicant_phone);
         $this->assertNotSame('3514123456789012', $application->getRawOriginal('applicant_nik'));

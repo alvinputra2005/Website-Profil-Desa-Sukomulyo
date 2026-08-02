@@ -15,6 +15,7 @@ use App\Models\LetterApplicationDocument;
 use App\Models\LetterService;
 use App\Models\PopulationArea;
 use App\Services\Letters\LetterFormSchemaService;
+use App\Services\Letters\LetterDocumentRequirementService;
 use App\Services\Letters\LetterSettings;
 use App\Services\Web\PublicSiteService;
 use Illuminate\Http\RedirectResponse;
@@ -80,17 +81,27 @@ class LetterApplicationController extends Controller
             ->with('new_application', true);
     }
 
-    public function documents(string $token, PublicSiteService $site): View
+    public function documents(
+        string $token,
+        PublicSiteService $site,
+        LetterDocumentRequirementService $documentRequirements,
+    ): View
     {
         $application = $this->fromToken($token);
         $site->shareLayout();
-        return view('pages.letters.documents', compact('application', 'token'));
+        $requirements = $documentRequirements->forApplication($application);
+
+        return view('pages.letters.documents', compact('application', 'token', 'requirements'));
     }
 
-    public function uploadDocuments(UploadLetterDocumentsRequest $request, string $token): RedirectResponse
+    public function uploadDocuments(
+        UploadLetterDocumentsRequest $request,
+        string $token,
+        LetterDocumentRequirementService $documentRequirements,
+    ): RedirectResponse
     {
         $application = $this->fromToken($token);
-        $requirements = collect($application->service->requirements_json ?? []);
+        $requirements = $documentRequirements->forApplication($application);
         foreach ($requirements as $index => $requirement) {
             if (($requirement['required'] ?? true) && !$request->hasFile("documents.{$index}")) {
                 throw ValidationException::withMessages(["documents.{$index}" => 'Dokumen '.($requirement['label'] ?? 'persyaratan').' wajib diunggah.']);
@@ -139,7 +150,11 @@ class LetterApplicationController extends Controller
         return response()->json(['document_id' => $document->public_id, 'upload_url' => $url, 'upload_headers' => $headers, 'expires_at' => now()->addMinutes(10)->toIso8601String()]);
     }
 
-    public function completeDocument(Request $request, string $token): \Illuminate\Http\JsonResponse
+    public function completeDocument(
+        Request $request,
+        string $token,
+        LetterDocumentRequirementService $documentRequirements,
+    ): \Illuminate\Http\JsonResponse
     {
         $application = $this->fromToken($token);
         $document = $application->documents()->where('public_id', $request->input('document_id'))->firstOrFail();
@@ -148,7 +163,7 @@ class LetterApplicationController extends Controller
         $actualSize = $disk->size($document->path);
         abort_unless($actualSize <= 5242880 && $actualSize > 0, 422, 'Ukuran file tidak valid.');
         $document->update(['upload_status' => 'uploaded', 'uploaded_at' => now(), 'file_size' => $actualSize, 'size_bytes' => $actualSize]);
-        $requiredKeys = collect($application->service->requirements_json ?? [])
+        $requiredKeys = $documentRequirements->forApplication($application)
             ->filter(fn (array $requirement) => $requirement['required'] ?? true)
             ->pluck('key')
             ->filter();

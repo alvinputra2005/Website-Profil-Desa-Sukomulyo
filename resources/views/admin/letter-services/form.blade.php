@@ -25,7 +25,7 @@
     .letter-service-form .icon-picker__content span { font-size: 12px; font-weight: 600; line-height: 1.25; }
     .letter-service-form .icon-picker__option input:checked + .icon-picker__content { border-color: var(--letter-green); background: #f5f8f2; box-shadow: 0 0 0 2px rgba(82, 107, 66, .15); }
     .letter-service-form .icon-picker__option input:focus + .icon-picker__content { outline: 2px solid #72a4d4; outline-offset: 2px; }
-    .letter-service-form .requirement-table { margin-bottom: 0; min-width: 820px; }
+    .letter-service-form .requirement-table { margin-bottom: 0; min-width: 1320px; }
     .letter-service-form .requirement-table > thead > tr > th { padding: 11px 12px; border-bottom: 2px solid var(--letter-green); background: #f2f5ef; color: var(--admin-ink, #252a31); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; vertical-align: middle; }
     .letter-service-form .requirement-table > tbody > tr > td { padding: 12px; border-color: #e7eeea; vertical-align: top; }
     .letter-service-form .requirement-table .form-group { margin: 0; }
@@ -34,6 +34,10 @@
     .letter-service-form .requirements-scroll { overflow-x: auto; border: 1px solid var(--letter-border); border-radius: 2px; }
     .letter-service-form .requirements-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
     .letter-service-form .requirements-count { color: #607168; font-size: 13px; }
+    .letter-service-form .form-field-table { min-width: 1180px; }
+    .letter-service-form .form-field-table textarea { min-width: 220px; resize: vertical; }
+    .letter-service-form .condition-input { min-width: 150px; }
+    .letter-service-form .field-options-help { display: block; margin-top: 4px; color: #758078; font-size: 11px; line-height: 1.35; }
     .letter-service-form .service-status { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 12px; border: 1px solid #cbd7c4; border-radius: 2px; background: #f3f7ef; color: #3d5032; }
     .letter-service-form .service-status input { width: 17px; height: 17px; margin: 0; }
     .letter-service-form .footer-actions { display: flex; justify-content: flex-end; gap: 10px; }
@@ -49,9 +53,35 @@
         ['code' => 'ktp-pemohon', 'label' => 'Fotokopi KTP Pemohon', 'description' => 'KTP pemohon yang masih berlaku', 'required' => true],
         ['code' => 'kartu-keluarga', 'label' => 'Fotokopi Kartu Keluarga', 'description' => 'Kartu Keluarga (KK)', 'required' => true],
     ];
-    $requirements = old('requirements', $letterService->requirements_json ?: $defaultRequirements);
+    $rawRequirements = old('requirements', $letterService->requirements_json ?: $defaultRequirements);
+    $requirements = collect($rawRequirements)->map(function (array $requirement) {
+        $requiredWhen = $requirement['required_when'] ?? null;
+        $legacyRequiredFor = $requirement['required_for'] ?? null;
+        $conditionField = $requirement['condition_field'] ?? data_get($requiredWhen, 'field');
+        $conditionValues = $requirement['condition_values'] ?? data_get($requiredWhen, 'values');
+        if (! $conditionField && is_array($legacyRequiredFor)) {
+            $conditionField = 'jenis_pengajuan_ktp';
+            $conditionValues = $legacyRequiredFor;
+        }
+
+        return [
+            ...$requirement,
+            'condition_field' => $conditionField ?? '',
+            'condition_values' => is_array($conditionValues) ? implode(', ', $conditionValues) : ($conditionValues ?? ''),
+        ];
+    })->values()->all();
+    $storedFormFields = collect($letterService->form_schema_json ?? [])->map(function (array $field) {
+        return [
+            ...$field,
+            'options' => is_array($field['options'] ?? null)
+                ? collect($field['options'])->map(fn ($label, $value) => $value.'='.$label)->implode("\n")
+                : ($field['options'] ?? ''),
+        ];
+    })->values()->all();
+    $formFields = old('form_fields_present') ? old('form_fields', []) : $storedFormFields;
     $isActive = old('is_active', $letterService->exists ? $letterService->is_active : true);
     $iconOptions = config('letter_services.icons', []);
+    $fieldTypeOptions = config('letter_services.field_types', []);
     $selectedIcon = old('icon', $letterService->icon ?: config('letter_services.default_icon'));
 @endphp
 
@@ -137,7 +167,7 @@
                     <span class="form-section__icon"><i class="fa fa-files-o" aria-hidden="true"></i></span>
                     <div>
                         <h3 id="document-requirements-heading">Persyaratan Dokumen</h3>
-                        <p>Tentukan dokumen yang harus diunggah warga untuk jenis surat ini.</p>
+                        <p>Tentukan dokumen yang harus diunggah warga. Kondisi dapat digunakan agar dokumen hanya muncul untuk pilihan tertentu.</p>
                     </div>
                 </div>
                 <div class="form-section__body">
@@ -146,9 +176,11 @@
                         <table class="table requirement-table" aria-describedby="requirements-help">
                             <thead>
                                 <tr>
-                                    <th style="width: 20%">Kode dokumen <span class="required-mark">*</span></th>
-                                    <th style="width: 27%">Nama persyaratan <span class="required-mark">*</span></th>
+                                    <th style="width: 16%">Kode dokumen <span class="required-mark">*</span></th>
+                                    <th style="width: 22%">Nama persyaratan <span class="required-mark">*</span></th>
                                     <th>Keterangan untuk warga</th>
+                                    <th style="width: 15%">Field kondisi</th>
+                                    <th style="width: 16%">Nilai kondisi</th>
                                     <th style="width: 105px">Status</th>
                                     <th class="text-center" style="width: 62px"><span class="sr-only">Aksi</span></th>
                                 </tr>
@@ -159,6 +191,8 @@
                                         <td><div class="form-group {{ $errors->has("requirements.$index.code") ? 'has-error' : '' }}"><label class="sr-only" for="requirement-code-{{ $index }}">Kode dokumen</label><input id="requirement-code-{{ $index }}" class="form-control" name="requirements[{{ $index }}][code]" value="{{ $requirement['key'] ?? $requirement['code'] ?? '' }}" required maxlength="50" pattern="[A-Za-z0-9-]+" placeholder="contoh: ktp-pemohon">@error("requirements.$index.code") <p class="help-block">{{ $message }}</p> @enderror</div></td>
                                         <td><div class="form-group {{ $errors->has("requirements.$index.label") ? 'has-error' : '' }}"><label class="sr-only" for="requirement-label-{{ $index }}">Nama persyaratan</label><input id="requirement-label-{{ $index }}" class="form-control" name="requirements[{{ $index }}][label]" value="{{ $requirement['label'] ?? '' }}" required maxlength="150" placeholder="Contoh: Fotokopi KTP Pemohon">@error("requirements.$index.label") <p class="help-block">{{ $message }}</p> @enderror</div></td>
                                         <td><div class="form-group {{ $errors->has("requirements.$index.description") ? 'has-error' : '' }}"><label class="sr-only" for="requirement-description-{{ $index }}">Keterangan dokumen</label><input id="requirement-description-{{ $index }}" class="form-control" name="requirements[{{ $index }}][description]" value="{{ $requirement['description'] ?? '' }}" maxlength="500" placeholder="Contoh: KTP pemohon yang masih berlaku">@error("requirements.$index.description") <p class="help-block">{{ $message }}</p> @enderror</div></td>
+                                        <td><div class="form-group {{ $errors->has("requirements.$index.condition_field") ? 'has-error' : '' }}"><label class="sr-only" for="requirement-condition-field-{{ $index }}">Field kondisi</label><input id="requirement-condition-field-{{ $index }}" class="form-control condition-input" name="requirements[{{ $index }}][condition_field]" value="{{ $requirement['condition_field'] ?? '' }}" maxlength="100" pattern="[a-z][a-z0-9_]*" placeholder="contoh: jenis_pengajuan_ktp">@error("requirements.$index.condition_field") <p class="help-block">{{ $message }}</p> @enderror</div></td>
+                                        <td><div class="form-group {{ $errors->has("requirements.$index.condition_values") ? 'has-error' : '' }}"><label class="sr-only" for="requirement-condition-values-{{ $index }}">Nilai kondisi</label><input id="requirement-condition-values-{{ $index }}" class="form-control condition-input" name="requirements[{{ $index }}][condition_values]" value="{{ $requirement['condition_values'] ?? '' }}" maxlength="1000" placeholder="hilang, rusak"><small class="field-options-help">Pisahkan beberapa nilai dengan koma.</small>@error("requirements.$index.condition_values") <p class="help-block">{{ $message }}</p> @enderror</div></td>
                                         <td><div class="checkbox"><input type="hidden" name="requirements[{{ $index }}][required]" value="0"><label><input type="checkbox" name="requirements[{{ $index }}][required]" value="1" @checked($requirement['required'] ?? false)> Wajib</label></div></td>
                                         <td class="text-center"><button type="button" class="btn btn-default btn-remove-requirement" title="Hapus persyaratan" aria-label="Hapus persyaratan"><i class="fa fa-trash text-danger" aria-hidden="true"></i></button></td>
                                     </tr>
@@ -169,6 +203,54 @@
                     <div class="requirements-actions">
                         <p id="requirements-help" class="requirements-count" aria-live="polite">{{ count($requirements) }} persyaratan dokumen ditambahkan.</p>
                         <button type="button" class="btn btn-success" id="add-requirement"><i class="fa fa-plus" aria-hidden="true"></i> Tambah Dokumen</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section" aria-labelledby="form-fields-heading">
+                <div class="form-section__heading">
+                    <span class="form-section__icon"><i class="fa fa-list-alt" aria-hidden="true"></i></span>
+                    <div>
+                        <h3 id="form-fields-heading">Formulir Tambahan</h3>
+                        <p>Atur data khusus yang harus diisi warga setelah data identitas umum. Bagian ini boleh dikosongkan.</p>
+                    </div>
+                </div>
+                <div class="form-section__body">
+                    <input type="hidden" name="form_fields_present" value="1">
+                    @error('form_fields') <div class="alert alert-danger" role="alert">{{ $message }}</div> @enderror
+                    <div class="requirements-scroll">
+                        <table class="table requirement-table form-field-table" aria-describedby="form-fields-help">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%">Kunci field <span class="required-mark">*</span></th>
+                                    <th style="width: 19%">Label untuk warga <span class="required-mark">*</span></th>
+                                    <th style="width: 14%">Jenis <span class="required-mark">*</span></th>
+                                    <th>Opsi pilihan</th>
+                                    <th style="width: 85px">Min.</th>
+                                    <th style="width: 85px">Maks.</th>
+                                    <th style="width: 90px">Status</th>
+                                    <th class="text-center" style="width: 62px"><span class="sr-only">Aksi</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="form-fields-list">
+                                @foreach($formFields as $index => $field)
+                                    <tr class="form-field-row">
+                                        <td><div class="form-group {{ $errors->has("form_fields.$index.key") ? 'has-error' : '' }}"><label class="sr-only" for="form-field-key-{{ $index }}">Kunci field</label><input id="form-field-key-{{ $index }}" class="form-control" name="form_fields[{{ $index }}][key]" value="{{ $field['key'] ?? '' }}" required maxlength="100" pattern="[a-z][a-z0-9_]*" placeholder="contoh: jenis_pengajuan">@error("form_fields.$index.key") <p class="help-block">{{ $message }}</p> @enderror</div></td>
+                                        <td><div class="form-group {{ $errors->has("form_fields.$index.label") ? 'has-error' : '' }}"><label class="sr-only" for="form-field-label-{{ $index }}">Label field</label><input id="form-field-label-{{ $index }}" class="form-control" name="form_fields[{{ $index }}][label]" value="{{ $field['label'] ?? '' }}" required maxlength="150" placeholder="Contoh: Jenis pengajuan">@error("form_fields.$index.label") <p class="help-block">{{ $message }}</p> @enderror</div></td>
+                                        <td><div class="form-group {{ $errors->has("form_fields.$index.type") ? 'has-error' : '' }}"><label class="sr-only" for="form-field-type-{{ $index }}">Jenis field</label><select id="form-field-type-{{ $index }}" class="form-control" name="form_fields[{{ $index }}][type]" required data-form-field-type>@foreach($fieldTypeOptions as $type => $label)<option value="{{ $type }}" @selected(($field['type'] ?? 'text') === $type)>{{ $label }}</option>@endforeach</select>@error("form_fields.$index.type") <p class="help-block">{{ $message }}</p> @enderror</div></td>
+                                        <td><div class="form-group {{ $errors->has("form_fields.$index.options") ? 'has-error' : '' }}"><label class="sr-only" for="form-field-options-{{ $index }}">Opsi pilihan</label><textarea id="form-field-options-{{ $index }}" class="form-control" name="form_fields[{{ $index }}][options]" rows="3" maxlength="5000" placeholder="baru=Baru&#10;hilang=Hilang" data-form-field-options>{{ $field['options'] ?? '' }}</textarea><small class="field-options-help">Untuk dropdown/radio: satu baris per opsi dengan format nilai=Label.</small>@error("form_fields.$index.options") <p class="help-block">{{ $message }}</p> @enderror</div></td>
+                                        <td><div class="form-group {{ $errors->has("form_fields.$index.min") ? 'has-error' : '' }}"><label class="sr-only" for="form-field-min-{{ $index }}">Minimum</label><input id="form-field-min-{{ $index }}" type="number" min="0" max="100000" class="form-control" name="form_fields[{{ $index }}][min]" value="{{ $field['min'] ?? '' }}" data-form-field="min">@error("form_fields.$index.min") <p class="help-block">{{ $message }}</p> @enderror</div></td>
+                                        <td><div class="form-group {{ $errors->has("form_fields.$index.max") ? 'has-error' : '' }}"><label class="sr-only" for="form-field-max-{{ $index }}">Maksimum</label><input id="form-field-max-{{ $index }}" type="number" min="1" max="100000" class="form-control" name="form_fields[{{ $index }}][max]" value="{{ $field['max'] ?? '' }}" data-form-field="max">@error("form_fields.$index.max") <p class="help-block">{{ $message }}</p> @enderror</div></td>
+                                        <td><div class="checkbox"><input type="hidden" name="form_fields[{{ $index }}][required]" value="0"><label><input type="checkbox" name="form_fields[{{ $index }}][required]" value="1" @checked($field['required'] ?? true)> Wajib</label></div></td>
+                                        <td class="text-center"><button type="button" class="btn btn-default btn-remove-form-field" title="Hapus field" aria-label="Hapus field"><i class="fa fa-trash text-danger" aria-hidden="true"></i></button></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="requirements-actions">
+                        <p id="form-fields-help" class="requirements-count" aria-live="polite">{{ count($formFields) }} field tambahan ditambahkan.</p>
+                        <button type="button" class="btn btn-success" id="add-form-field"><i class="fa fa-plus" aria-hidden="true"></i> Tambah Field</button>
                     </div>
                 </div>
             </section>
@@ -203,8 +285,23 @@
         <td><div class="form-group"><label class="sr-only">Kode dokumen</label><input class="form-control" data-field="code" required maxlength="50" pattern="[A-Za-z0-9-]+" placeholder="contoh: surat-pengantar"></div></td>
         <td><div class="form-group"><label class="sr-only">Nama persyaratan</label><input class="form-control" data-field="label" required maxlength="150" placeholder="Contoh: Surat Pengantar RT/RW"></div></td>
         <td><div class="form-group"><label class="sr-only">Keterangan dokumen</label><input class="form-control" data-field="description" maxlength="500" placeholder="Keterangan singkat untuk warga"></div></td>
+        <td><div class="form-group"><label class="sr-only">Field kondisi</label><input class="form-control condition-input" data-field="condition_field" maxlength="100" pattern="[a-z][a-z0-9_]*" placeholder="contoh: jenis_pengajuan"></div></td>
+        <td><div class="form-group"><label class="sr-only">Nilai kondisi</label><input class="form-control condition-input" data-field="condition_values" maxlength="1000" placeholder="baru, perubahan"><small class="field-options-help">Pisahkan dengan koma.</small></div></td>
         <td><div class="checkbox"><input type="hidden" data-field="required-hidden" value="0"><label><input type="checkbox" data-field="required" value="1" checked> Wajib</label></div></td>
         <td class="text-center"><button type="button" class="btn btn-default btn-remove-requirement" title="Hapus persyaratan" aria-label="Hapus persyaratan"><i class="fa fa-trash text-danger" aria-hidden="true"></i></button></td>
+    </tr>
+</template>
+
+<template id="form-field-row-template">
+    <tr class="form-field-row">
+        <td><div class="form-group"><label class="sr-only">Kunci field</label><input class="form-control" data-form-field="key" required maxlength="100" pattern="[a-z][a-z0-9_]*" placeholder="contoh: jenis_pengajuan"></div></td>
+        <td><div class="form-group"><label class="sr-only">Label field</label><input class="form-control" data-form-field="label" required maxlength="150" placeholder="Contoh: Jenis pengajuan"></div></td>
+        <td><div class="form-group"><label class="sr-only">Jenis field</label><select class="form-control" data-form-field="type" data-form-field-type required>@foreach($fieldTypeOptions as $type => $label)<option value="{{ $type }}">{{ $label }}</option>@endforeach</select></div></td>
+        <td><div class="form-group"><label class="sr-only">Opsi pilihan</label><textarea class="form-control" data-form-field="options" data-form-field-options rows="3" maxlength="5000" placeholder="baru=Baru&#10;hilang=Hilang"></textarea><small class="field-options-help">Untuk dropdown/radio: format nilai=Label.</small></div></td>
+        <td><div class="form-group"><label class="sr-only">Minimum</label><input type="number" min="0" max="100000" class="form-control" data-form-field="min"></div></td>
+        <td><div class="form-group"><label class="sr-only">Maksimum</label><input type="number" min="1" max="100000" class="form-control" data-form-field="max"></div></td>
+        <td><div class="checkbox"><input type="hidden" data-form-field="required-hidden" value="0"><label><input type="checkbox" data-form-field="required" value="1" checked> Wajib</label></div></td>
+        <td class="text-center"><button type="button" class="btn btn-default btn-remove-form-field" title="Hapus field" aria-label="Hapus field"><i class="fa fa-trash text-danger" aria-hidden="true"></i></button></td>
     </tr>
 </template>
 @endsection
@@ -231,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function () {
     addButton.addEventListener('click', function () {
         const fragment = template.content.cloneNode(true);
         const row = fragment.querySelector('.requirement-row');
-        const fieldNames = { code: 'code', label: 'label', description: 'description', 'required-hidden': 'required', required: 'required' };
+        const fieldNames = { code: 'code', label: 'label', description: 'description', condition_field: 'condition_field', condition_values: 'condition_values', 'required-hidden': 'required', required: 'required' };
         row.querySelectorAll('[data-field]').forEach(function (field) {
             const fieldName = fieldNames[field.dataset.field];
             field.name = `requirements[${nextIndex}][${fieldName}]`;
@@ -255,6 +352,64 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     updateRows();
+
+    const formFieldsList = document.getElementById('form-fields-list');
+    const formFieldTemplate = document.getElementById('form-field-row-template');
+    const addFormFieldButton = document.getElementById('add-form-field');
+    const formFieldsCountLabel = document.getElementById('form-fields-help');
+    let nextFormFieldIndex = {{ count($formFields) }};
+
+    function syncFieldOptions(row) {
+        const type = row.querySelector('[data-form-field-type]')?.value;
+        const options = row.querySelector('[data-form-field-options]');
+        if (!options) return;
+        const usesOptions = type === 'select' || type === 'radio';
+        options.disabled = !usesOptions;
+        options.required = usesOptions;
+        options.closest('.form-group').classList.toggle('text-muted', !usesOptions);
+        const usesLimits = type === 'text' || type === 'textarea' || type === 'number';
+        row.querySelectorAll('[data-form-field="min"], [data-form-field="max"]').forEach(function (field) {
+            field.disabled = !usesLimits;
+        });
+    }
+
+    function updateFormFieldRows() {
+        const rows = formFieldsList.querySelectorAll('.form-field-row');
+        formFieldsCountLabel.textContent = `${rows.length} field tambahan ditambahkan.`;
+        rows.forEach(syncFieldOptions);
+    }
+
+    addFormFieldButton.addEventListener('click', function () {
+        const fragment = formFieldTemplate.content.cloneNode(true);
+        const row = fragment.querySelector('.form-field-row');
+        const fieldNames = { key: 'key', label: 'label', type: 'type', options: 'options', min: 'min', max: 'max', 'required-hidden': 'required', required: 'required' };
+        row.querySelectorAll('[data-form-field]').forEach(function (field) {
+            field.name = `form_fields[${nextFormFieldIndex}][${fieldNames[field.dataset.formField]}]`;
+            field.id = `form-field-${field.dataset.formField}-${nextFormFieldIndex}`;
+        });
+        row.querySelectorAll('label.sr-only').forEach(function (label) {
+            const input = label.parentElement.querySelector('[data-form-field]');
+            if (input) label.htmlFor = input.id;
+        });
+        nextFormFieldIndex++;
+        formFieldsList.appendChild(fragment);
+        updateFormFieldRows();
+        formFieldsList.querySelector('.form-field-row:last-child [data-form-field="key"]').focus();
+    });
+
+    formFieldsList.addEventListener('click', function (event) {
+        const button = event.target.closest('.btn-remove-form-field');
+        if (!button) return;
+        button.closest('.form-field-row').remove();
+        updateFormFieldRows();
+    });
+
+    formFieldsList.addEventListener('change', function (event) {
+        if (!event.target.matches('[data-form-field-type]')) return;
+        syncFieldOptions(event.target.closest('.form-field-row'));
+    });
+
+    updateFormFieldRows();
 });
 </script>
 @endpush @endif

@@ -8,7 +8,6 @@
         <div class="container government-page__container">
             <section class="government-organization" aria-labelledby="government-organization-title">
                 <header class="government-organization__intro">
-                    <span class="section-kicker">Pemerintah Desa</span>
                     <h1 id="government-organization-title">Struktur Pemerintahan</h1>
                     <p>Struktur organisasi Pemerintah Desa Sukomulyo beserta perangkat desa dan kepala dusun.</p>
                 </header>

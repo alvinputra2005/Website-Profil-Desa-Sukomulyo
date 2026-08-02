@@ -54,7 +54,7 @@ class GovernmentOfficialSeeder extends Seeder
             foreach ([
                 ['name' => 'Bambang S', 'position' => 'Kasun Bakir', 'display_order' => 9],
                 ['name' => 'Sispanaji', 'position' => 'Kasun Biyan', 'display_order' => 10],
-                ['name' => 'Nikita F Z', 'position' => 'Kasun Cumul', 'display_order' => 11],
+                ['name' => 'Nikita F Z', 'position' => 'Kasun Gumul', 'display_order' => 11],
                 ['name' => 'Fendi Priyo S', 'position' => 'Kasun Kedungrejo', 'display_order' => 12],
                 ['name' => 'Cahyo Utomo', 'position' => 'Kasun Talasan', 'display_order' => 13],
             ] as $official) {

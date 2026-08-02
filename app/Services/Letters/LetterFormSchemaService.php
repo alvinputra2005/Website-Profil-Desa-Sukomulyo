@@ -20,14 +20,15 @@ class LetterFormSchemaService
     {
         $rules = [];
         foreach ($this->fields($service) as $field) {
-            // Semua field pada formulir publik wajib diisi agar data permohonan
-            // lengkap sebelum masuk ke tahap berikutnya.
-            $fieldRules = ['required'];
+            $fieldRules = [($field['required'] ?? true) ? 'required' : 'nullable'];
             $fieldRules[] = match ($field['type']) {
                 'date' => 'date',
                 'number' => 'numeric',
                 default => 'string',
             };
+            if (isset($field['min'])) {
+                $fieldRules[] = 'min:'.(int) $field['min'];
+            }
             if (isset($field['max'])) {
                 $fieldRules[] = 'max:'.(int) $field['max'];
             }

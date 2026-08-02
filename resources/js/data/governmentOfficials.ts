@@ -27,7 +27,7 @@ export const governmentOfficials: GovernmentOfficial[] = [
         position: 'Sekretaris Desa',
         group: 'secretariat',
         parentId: 'kepala-desa',
-        positionDesktop: { x: 1110, y: 145 },
+        positionDesktop: { x: 1080, y: 125 },
     }),
     official({
         id: 'kasi-pemerintahan',
@@ -63,7 +63,7 @@ export const governmentOfficials: GovernmentOfficial[] = [
         image: '/assets/suwarno.jpeg',
         group: 'administration',
         parentId: 'sekretaris-desa',
-        positionDesktop: { x: 1190, y: 300 },
+        positionDesktop: { x: 1190, y: 240 },
     }),
     official({
         id: 'kaur-perencanaan',
@@ -72,7 +72,7 @@ export const governmentOfficials: GovernmentOfficial[] = [
         image: '/assets/reza-tri.jpeg',
         group: 'administration',
         parentId: 'sekretaris-desa',
-        positionDesktop: { x: 1190, y: 415 },
+        positionDesktop: { x: 1190, y: 355 },
     }),
     official({
         id: 'kaur-tu-umum',
@@ -81,7 +81,7 @@ export const governmentOfficials: GovernmentOfficial[] = [
         image: '/assets/catur-yulianto.jpeg',
         group: 'administration',
         parentId: 'sekretaris-desa',
-        positionDesktop: { x: 1190, y: 530 },
+        positionDesktop: { x: 1190, y: 470 },
     }),
     official({
         id: 'kasun-bakir',
@@ -102,9 +102,9 @@ export const governmentOfficials: GovernmentOfficial[] = [
         positionDesktop: { x: 365, y: 665 },
     }),
     official({
-        id: 'kasun-gumuk',
+        id: 'kasun-gumul',
         name: 'Nikita F Z',
-        position: 'Kasun Gumuk',
+        position: 'Kasun Gumul',
         image: '/assets/nikita.jpeg',
         group: 'hamlet',
         parentId: 'kepala-desa',
@@ -140,4 +140,3 @@ export const officialGroupLabels: Record<OfficialGroup, string> = {
 export const resolveOfficialPhoto = (officialData: GovernmentOfficial): string => (
     officialData.image || officialData.fallbackImage
 );
-

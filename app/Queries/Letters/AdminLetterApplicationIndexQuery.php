@@ -17,6 +17,9 @@ class AdminLetterApplicationIndexQuery
             ->when($request->boolean('unassigned'), fn ($q) => $q->whereNull('assigned_to'))
             ->when($request->filled('from'), fn ($q) => $q->whereDate('submitted_at', '>=', $request->from))
             ->when($request->filled('until'), fn ($q) => $q->whereDate('submitted_at', '<=', $request->until))
-            ->orderByRaw("CASE WHEN status = 'submitted' THEN 0 ELSE 1 END")->latest('submitted_at')->paginate(20)->withQueryString();
+            ->orderByRaw("CASE WHEN status = 'submitted' THEN 0 WHEN status = 'draft' THEN 1 ELSE 2 END")
+            ->orderByRaw('COALESCE(submitted_at, created_at) DESC')
+            ->paginate(20)
+            ->withQueryString();
     }
 }

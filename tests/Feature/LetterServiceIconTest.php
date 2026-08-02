@@ -26,6 +26,22 @@ class LetterServiceIconTest extends TestCase
             ->assertDontSee('fa-baby', false);
     }
 
+    public function test_sktm_service_uses_the_surat_keterangan_label(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $service = LetterService::where('code', 'SKTM')->firstOrFail();
+
+        $this->assertSame('Surat Keterangan', $service->name);
+        $this->assertSame('SKTM', LetterService::orderBy('display_order')->value('code'));
+        $this->get(route('letter-services.index'))
+            ->assertOk()
+            ->assertSee('Surat Keterangan')
+            ->assertSee('Untuk SKTM dan kebutuhan administrasi lainnya.')
+            ->assertSee('letter-choice--featured', false)
+            ->assertDontSee('Surat Keterangan Tidak Mampu');
+    }
+
     public function test_data_admin_can_select_an_icon_for_a_letter_service(): void
     {
         $role = Role::factory()->create(['code' => 'admin_data']);

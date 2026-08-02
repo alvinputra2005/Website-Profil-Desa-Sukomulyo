@@ -8,4 +8,11 @@
             </li>
         @endforeach
     </ol>
+    @if (! empty($notes))
+        <div class="service-requirement-notes">
+            @foreach ($notes as $note)
+                <p><i class="fas fa-info-circle" aria-hidden="true"></i><span>{{ $note }}</span></p>
+            @endforeach
+        </div>
+    @endif
 </div>

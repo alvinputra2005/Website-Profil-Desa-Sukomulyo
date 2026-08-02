@@ -10,7 +10,7 @@ class AdministrativeServiceCatalogTest extends TestCase
     {
         $services = collect(config('administrative_services.services'));
 
-        $this->assertCount(8, $services);
+        $this->assertCount(11, $services);
         $this->assertSame($services->count(), $services->pluck('id')->unique()->count());
 
         $services->each(function (array $service): void {

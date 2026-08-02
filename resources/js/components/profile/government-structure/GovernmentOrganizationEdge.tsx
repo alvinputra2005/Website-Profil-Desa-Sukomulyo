@@ -35,7 +35,7 @@ const GovernmentOrganizationEdge = ({
             path = `M ${edgeData.trunkX} ${edgeData.trunkY} V ${targetY} H ${targetX}`;
             break;
         case 'bottom-main':
-            path = `M ${sourceX} ${sourceY} V ${edgeData.trunkY} H ${edgeData.trunkEndX} M ${edgeData.trunkX} ${edgeData.trunkY} H ${edgeData.trunkStartX}`;
+            path = `M ${sourceX} ${sourceY} V ${edgeData.trunkY} H ${edgeData.trunkEndX} M ${edgeData.trunkX} ${edgeData.trunkY} H ${edgeData.trunkStartX} M ${edgeData.trunkX} ${edgeData.trunkY} V ${targetY}`;
             break;
         case 'bottom-branch':
             path = `M ${targetX} ${edgeData.trunkY} V ${targetY}`;

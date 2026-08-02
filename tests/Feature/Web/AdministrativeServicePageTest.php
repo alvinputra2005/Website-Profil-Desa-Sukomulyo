@@ -22,9 +22,21 @@ class AdministrativeServicePageTest extends TestCase
             ->assertSee('Administrasi Nikah')
             ->assertSee('fas fa-venus-mars', false)
             ->assertSee('SKCK')
+            ->assertSee('Surat Keterangan')
+            ->assertDontSee('Pengajuan SKTM dapat dilakukan melalui layanan')
+            ->assertSee('Pengajuan KTP-el')
+            ->assertSee('KTP-el Baru / Pemula')
+            ->assertSee('KTP-el Hilang')
+            ->assertSee('KTP-el Rusak')
+            ->assertSee('Perubahan Data KTP-el')
+            ->assertSee('KTP-el karena Pindah Datang')
+            ->assertDontSee('Pemohon yang belum pernah merekam wajib hadir')
+            ->assertSee('Surat Izin Survei/Penelitian')
             ->assertSee('Pengajuan Akta Kelahiran')
             ->assertSee('fas fa-birthday-cake', false)
             ->assertSee('Pindah Tempat (Masuk/Keluar)')
+            ->assertSee('Permohonan Pindah Pergi')
+            ->assertSee('Permohonan Pindah Masuk')
             ->assertSee('Kartu Identitas Anak (KIA)')
             ->assertSee('BPJS')
             ->assertSee('Penerbitan KK Baru')
@@ -33,8 +45,8 @@ class AdministrativeServicePageTest extends TestCase
 
         $html = $response->getContent();
 
-        $this->assertSame(8, substr_count($html, 'data-service-item'));
-        $this->assertSame(3, substr_count($html, 'data-service-child-item'));
+        $this->assertSame(11, substr_count($html, 'data-service-item'));
+        $this->assertSame(10, substr_count($html, 'data-service-child-item'));
         $this->assertSame(1, substr_count($html, 'data-administrative-services'));
     }
 
