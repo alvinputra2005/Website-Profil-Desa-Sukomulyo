@@ -69,25 +69,27 @@
                             @endif
 
                             @if($token)
-                                <form method="post" action="{{ route('letter-services.whatsapp.confirm', $token) }}" target="_blank">
-                                    @csrf
-                                    <button class="letter-button whatsapp" type="submit">
-                                        <i class="fab fa-whatsapp"></i> Konfirmasi ke WhatsApp Desa <i class="fas fa-external-link-alt"></i>
-                                    </button>
-                                </form>
+                                <div class="letter-status-actions">
+                                    <form method="post" action="{{ route('letter-services.whatsapp.confirm', $token) }}" target="_blank">
+                                        @csrf
+                                        <button class="letter-button whatsapp" type="submit">
+                                            <i class="fab fa-whatsapp"></i> Konfirmasi ke WhatsApp Desa <i class="fas fa-external-link-alt"></i>
+                                        </button>
+                                    </form>
+
+                                    @if($application->status->canTransitionTo(\App\Enums\LetterApplicationStatus::Cancelled))
+                                        <form method="post" action="{{ route('letter-services.application.cancel', $token) }}" onsubmit="return confirm('Batalkan permohonan ini?')">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button class="letter-button danger" type="submit">Batalkan Permohonan</button>
+                                        </form>
+                                    @endif
+                                </div>
                                 <small>WhatsApp dibuka di tab baru. Jika tidak terbuka, izinkan pop-up untuk situs ini. Anda tetap harus menekan tombol Kirim di WhatsApp.</small>
                             @endif
 
                             @if($token && $application->canBeEditedByApplicant())
                                 <a class="letter-button secondary" href="{{ route('letter-services.application.edit', $token) }}">Perbaiki Permohonan</a>
-                            @endif
-
-                            @if($token && $application->status->canTransitionTo(\App\Enums\LetterApplicationStatus::Cancelled))
-                                <form method="post" action="{{ route('letter-services.application.cancel', $token) }}" onsubmit="return confirm('Batalkan permohonan ini?')">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button class="letter-button secondary" type="submit">Batalkan Permohonan</button>
-                                </form>
                             @endif
 
                             <p class="letter-no-download">Surat tidak tersedia dalam bentuk file dan tidak dapat diunduh.</p>

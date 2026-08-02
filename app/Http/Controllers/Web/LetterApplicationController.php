@@ -109,8 +109,12 @@ class LetterApplicationController extends Controller
     {
         $application = $this->fromToken($token);
         $requirements = $documentRequirements->forApplication($application);
+        $uploadedRequirementKeys = $application->documents()
+            ->where('upload_status', 'uploaded')
+            ->pluck('requirement_key');
         foreach ($requirements as $index => $requirement) {
-            if (($requirement['required'] ?? true) && !$request->hasFile("documents.{$index}")) {
+            $key = $requirement['key'] ?? 'requirement_'.($index + 1);
+            if (($requirement['required'] ?? true) && !$request->hasFile("documents.{$index}") && !$uploadedRequirementKeys->contains($key)) {
                 throw ValidationException::withMessages(["documents.{$index}" => 'Dokumen '.($requirement['label'] ?? 'persyaratan').' wajib diunggah.']);
             }
         }
@@ -160,7 +164,6 @@ class LetterApplicationController extends Controller
     public function completeDocument(
         Request $request,
         string $token,
-        LetterDocumentRequirementService $documentRequirements,
     ): \Illuminate\Http\JsonResponse
     {
         $application = $this->fromToken($token);
@@ -170,13 +173,6 @@ class LetterApplicationController extends Controller
         $actualSize = $disk->size($document->path);
         abort_unless($actualSize <= 5242880 && $actualSize > 0, 422, 'Ukuran file tidak valid.');
         $document->update(['upload_status' => 'uploaded', 'uploaded_at' => now(), 'file_size' => $actualSize, 'size_bytes' => $actualSize]);
-        $requiredKeys = $documentRequirements->forApplication($application)
-            ->filter(fn (array $requirement) => $requirement['required'] ?? true)
-            ->pluck('key')
-            ->filter();
-        if ($requiredKeys->isEmpty() || $application->documents()->whereIn('requirement_key', $requiredKeys)->where('upload_status', 'uploaded')->distinct('requirement_key')->count('requirement_key') >= $requiredKeys->count()) {
-            $application->forceFill(['status' => LetterApplicationStatus::Submitted, 'submitted_at' => now()])->save();
-        }
         return response()->json(['document' => ['id' => $document->public_id, 'name' => $document->original_name, 'size' => $actualSize, 'preview_url' => route('letter-services.application.documents.preview', [$token, $document->public_id])]]);
     }
 

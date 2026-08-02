@@ -154,6 +154,45 @@ class LetterApplicationTest extends TestCase
             ->assertJsonPath('url', route('admin.letter-applications.document.preview-content', [$application, $document->id]));
     }
 
+    public function test_presigned_document_upload_stays_draft_until_applicant_continues(): void
+    {
+        Storage::fake('local');
+        $token = str_repeat('b', 64);
+        $service = LetterService::factory()->create();
+        $application = LetterApplication::factory()->for($service, 'service')->create([
+            'tracking_token_hash' => hash('sha256', $token),
+            'status' => LetterApplicationStatus::Draft,
+            'submitted_at' => null,
+        ]);
+        $path = 'layanan-surat/test/ktp.pdf';
+        Storage::disk('local')->put($path, 'PDF document');
+        $document = LetterApplicationDocument::create([
+            'public_id' => (string) Str::ulid(),
+            'letter_application_id' => $application->id,
+            'requirement_key' => 'ktp',
+            'label' => 'KTP asli',
+            'disk' => 'local',
+            'path' => $path,
+            'original_name' => 'ktp.pdf',
+            'stored_extension' => 'pdf',
+            'mime_type' => 'application/pdf',
+            'file_size' => 12,
+            'size_bytes' => 12,
+            'upload_status' => 'pending_upload',
+            'review_status' => 'pending_review',
+        ]);
+
+        $this->postJson(route('letter-services.application.documents.complete', $token), ['document_id' => $document->public_id])
+            ->assertOk();
+
+        $this->assertSame(LetterApplicationStatus::Draft, $application->refresh()->status);
+
+        $this->post(route('letter-services.application.documents.upload', $token))
+            ->assertRedirect(route('letter-services.track.token', $token));
+
+        $this->assertSame(LetterApplicationStatus::Submitted, $application->refresh()->status);
+    }
+
     private function user(string $roleCode): User
     {
         $role = Role::factory()->create(['code' => $roleCode]);

@@ -8,6 +8,6 @@ class UploadLetterDocumentsRequest extends FormRequest
     public function authorize(): bool { return true; }
     public function rules(): array
     {
-        return ['documents' => ['required', 'array'], 'documents.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120']];
+        return ['documents' => ['nullable', 'array'], 'documents.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120']];
     }
 }

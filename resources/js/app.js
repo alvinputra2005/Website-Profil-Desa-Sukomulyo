@@ -99,11 +99,10 @@ const initPublicPage = () => {
                     await window.axios.post(documentForm.dataset.completeUrl, { document_id: presign.data.document_id });
                     complete.add(key);
                     row.classList.add('is-uploaded');
-                    if (requiredRows.every((requiredRow) => complete.has(requiredRow.dataset.requirementKey))) window.location.assign(documentForm.dataset.finalUrl);
                 } catch (error) {
                     documentForm.dataset.fallback = 'true';
                     requiredInputs.forEach((requiredInput) => { requiredInput.required = true; });
-                    window.alert('Upload langsung ke R2 dibatasi browser. File akan dikirim melalui server saat Anda menekan “Unggah & Lanjutkan”.');
+                    window.alert('Upload langsung ke R2 dibatasi browser. File akan dikirim melalui server saat Anda menekan tombol Lanjutkan.');
                 }
             });
         });
@@ -112,7 +111,9 @@ const initPublicPage = () => {
             if (!requiredRows.every((requiredRow) => complete.has(requiredRow.dataset.requirementKey))) {
                 event.preventDefault();
                 window.alert('Unggah semua dokumen wajib terlebih dahulu.');
+                return;
             }
+            rows.forEach((row) => { row.querySelector('input[type="file"]').disabled = true; });
         });
     }
 
