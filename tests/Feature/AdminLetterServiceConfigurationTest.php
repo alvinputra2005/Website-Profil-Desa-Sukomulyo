@@ -173,6 +173,69 @@ class AdminLetterServiceConfigurationTest extends TestCase
             ->assertSee('Draf');
     }
 
+    public function test_admin_can_filter_letter_services_by_status(): void
+    {
+        $admin = $this->dataAdmin();
+        $active = LetterService::factory()->create(['name' => 'Layanan Aktif', 'is_active' => true]);
+        $inactive = LetterService::factory()->create(['name' => 'Layanan Nonaktif', 'is_active' => false]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.letter-services.index', ['status' => 'active']))
+            ->assertOk()
+            ->assertSee('name="status"', false)
+            ->assertSee('Layanan Aktif')
+            ->assertDontSee('Layanan Nonaktif');
+
+        $this->actingAs($admin)
+            ->get(route('admin.letter-services.index', ['status' => 'inactive']))
+            ->assertOk()
+            ->assertSee('Layanan Nonaktif')
+            ->assertDontSee('Layanan Aktif');
+    }
+
+    public function test_admin_can_filter_letter_applications_by_assignee(): void
+    {
+        $admin = $this->dataAdmin();
+        $assigned = LetterApplication::factory()->create(['assigned_to' => $admin->id]);
+        $unassigned = LetterApplication::factory()->create(['assigned_to' => null]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.letter-applications.index', ['assigned_to' => $admin->id]))
+            ->assertOk()
+            ->assertSee('name="assigned_to"', false)
+            ->assertSee($assigned->application_number)
+            ->assertDontSee($unassigned->application_number);
+
+        $this->actingAs($admin)
+            ->get(route('admin.letter-applications.index', ['assigned_to' => 'unassigned']))
+            ->assertOk()
+            ->assertSee($unassigned->application_number)
+            ->assertDontSee($assigned->application_number);
+    }
+
+    public function test_admin_can_select_and_bulk_delete_letter_applications(): void
+    {
+        $admin = $this->dataAdmin();
+        $first = LetterApplication::factory()->create(['assigned_to' => null]);
+        $second = LetterApplication::factory()->create(['assigned_to' => null]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.letter-applications.index'))
+            ->assertOk()
+            ->assertSee('data-bulk-select-all', false)
+            ->assertSee('data-bulk-item', false)
+            ->assertSee('Hapus Terpilih');
+
+        $this->actingAs($admin)
+            ->delete(route('admin.letter-applications.bulk-destroy'), [
+                'ids' => [$first->id, $second->id],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseMissing('letter_applications', ['id' => $first->id]);
+        $this->assertDatabaseMissing('letter_applications', ['id' => $second->id]);
+    }
+
     private function basePayload(LetterService $service): array
     {
         return [

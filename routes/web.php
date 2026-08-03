@@ -186,6 +186,7 @@ Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(fu
     });
     Route::middleware('can:manage-letter-applications')->prefix('permohonan-surat')->name('letter-applications.')->group(function () {
         Route::get('/', [AdminLetterApplicationController::class, 'index'])->name('index');
+        Route::delete('/bulk', [AdminLetterApplicationController::class, 'bulkDestroy'])->name('bulk-destroy');
         Route::get('/{application:public_id}', [AdminLetterApplicationController::class, 'show'])->name('show');
         Route::get('/{application:public_id}/dokumen/{document}', [AdminLetterApplicationController::class, 'document'])->name('document');
         Route::get('/{application:public_id}/dokumen/{document}/preview-url', [AdminLetterApplicationController::class, 'previewUrl'])->name('document.preview-url');

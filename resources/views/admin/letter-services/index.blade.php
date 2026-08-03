@@ -10,6 +10,24 @@
             <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
         </form>
     </div>
+    <div class="box-body">
+        <form method="get" class="row" aria-label="Filter layanan surat">
+            <div class="col-sm-4 col-md-3 form-group">
+                <label class="control-label" for="letter-service-status">Status layanan</label>
+                <select id="letter-service-status" name="status" class="form-control">
+                    <option value="">Semua status</option>
+                    <option value="active" @selected(request('status') === 'active')>Aktif</option>
+                    <option value="inactive" @selected(request('status') === 'inactive')>Nonaktif</option>
+                </select>
+            </div>
+            <div class="col-sm-3 col-md-2 form-group" style="padding-top: 25px;">
+                <button class="btn btn-primary" type="submit"><i class="fa fa-filter" aria-hidden="true"></i> Terapkan</button>
+                @if(request()->filled('status'))
+                    <a class="btn btn-default" href="{{ route('admin.letter-services.index') }}" title="Reset filter" aria-label="Reset filter"><i class="fa fa-times" aria-hidden="true"></i></a>
+                @endif
+            </div>
+        </form>
+    </div>
     <div class="box-body table-responsive">
         <table class="table table-striped">
             <thead>

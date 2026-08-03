@@ -1,6 +1,6 @@
 export const init = (root = document) => {
     const scope = root.querySelector('[data-letter-application-detail]') || root;
-    const modalElement = scope.querySelector('#document-viewer');
+    const modalElement = root.querySelector('#document-viewer') || document.getElementById('document-viewer');
 
     if (!modalElement || !window.jQuery || modalElement.dataset.initialized === 'true') return;
 
@@ -79,7 +79,7 @@ export const init = (root = document) => {
         });
     });
 
-    scope.querySelectorAll('[data-viewer-action]').forEach((button) => {
+    modalElement.querySelectorAll('[data-viewer-action]').forEach((button) => {
         button.addEventListener('click', () => {
             const action = button.dataset.viewerAction;
             if (action === 'zoom-in' && isImage) { zoom = Math.min(zoom + .2, 3); updateImageTransform(); }

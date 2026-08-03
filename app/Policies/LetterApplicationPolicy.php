@@ -27,6 +27,11 @@ class LetterApplicationPolicy
         return $this->manage($user);
     }
 
+    public function delete(User $user, LetterApplication $application): bool
+    {
+        return $this->manage($user);
+    }
+
     public function changeStatus(User $user, LetterApplication $application): bool
     {
         return $this->manage($user);

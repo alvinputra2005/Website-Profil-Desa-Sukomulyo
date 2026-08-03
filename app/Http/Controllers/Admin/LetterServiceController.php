@@ -14,11 +14,19 @@ use Illuminate\View\View;
 
 class LetterServiceController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $this->authorize('viewAny', LetterService::class);
 
-        return view('admin.letter-services.index', ['services' => LetterService::withCount('applications')->orderBy('display_order')->get()]);
+        $status = $request->query('status');
+
+        return view('admin.letter-services.index', [
+            'services' => LetterService::withCount('applications')
+                ->when($status === 'active', fn ($query) => $query->where('is_active', true))
+                ->when($status === 'inactive', fn ($query) => $query->where('is_active', false))
+                ->orderBy('display_order')
+                ->get(),
+        ]);
     }
 
     public function create(): View

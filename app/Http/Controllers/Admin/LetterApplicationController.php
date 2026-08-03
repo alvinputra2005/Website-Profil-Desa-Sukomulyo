@@ -39,6 +39,26 @@ class LetterApplicationController extends Controller
         ]);
     }
 
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $this->authorize('viewAny', LetterApplication::class);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', 'exists:letter_applications,id'],
+        ]);
+
+        $applications = LetterApplication::with('documents')->whereKey($data['ids'])->get();
+
+        $applications->each(function (LetterApplication $application): void {
+            $this->authorize('delete', $application);
+            $application->documents->each(fn ($document) => Storage::disk($document->disk)->delete($document->path));
+            $application->delete();
+        });
+
+        return back()->with('success', $applications->count().' permohonan dihapus.');
+    }
+
     public function document(LetterApplication $application, int $document)
     {
         $this->authorize('view', $application);
