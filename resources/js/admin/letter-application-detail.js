@@ -59,7 +59,9 @@ export const init = (root = document) => {
     };
 
     scope.querySelectorAll('[data-document-preview]').forEach((button) => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (event) => {
+            // The link remains usable when this enhancement is unavailable.
+            event.preventDefault();
             resetViewer();
             title.textContent = button.dataset.documentName;
             meta.textContent = button.dataset.documentSize;
