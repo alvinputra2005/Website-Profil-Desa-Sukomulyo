@@ -5,17 +5,17 @@
 <div class="box box-primary">
     <div class="box-header with-border">
         <h3 class="box-title">Inbox</h3>
-        <form id="bulk-delete-messages" method="post" action="{{ route('admin.messages.bulk-destroy') }}" class="inline-form" data-confirm="Hapus pesan yang dipilih?" data-confirm-tone="danger" data-confirm-title="Hapus Pesan Terpilih" data-confirm-button="Ya, hapus">
-            @csrf
-            @method('delete')
-            <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
-        </form>
-        <div class="box-tools">
+        <div class="box-tools admin-list-actions">
             <form>
                 <div class="input-group input-group-sm" style="width:250px">
                     <input class="form-control" name="q" value="{{ request('q') }}" placeholder="Cari pesan...">
                     <span class="input-group-btn"><button class="btn btn-default"><i class="fa fa-search"></i></button></span>
                 </div>
+            </form>
+            <form id="bulk-delete-messages" method="post" action="{{ route('admin.messages.bulk-destroy') }}" class="inline-form" data-confirm="Hapus pesan yang dipilih?" data-confirm-tone="danger" data-confirm-title="Hapus Pesan Terpilih" data-confirm-button="Ya, hapus">
+                @csrf
+                @method('delete')
+                <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
             </form>
         </div>
     </div>

@@ -7,13 +7,8 @@
     <div class="box-header with-border">
         <h3 class="box-title">Daftar Komentar</h3>
         <span class="label label-warning" style="margin-left:8px">{{ $pendingCount }} pending</span>
-        <div class="box-tools" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <form id="bulk-delete-comments" method="post" action="{{ route('admin.comments.bulk-destroy') }}" class="inline-form" data-confirm="Hapus komentar yang dipilih?" data-confirm-tone="danger" data-confirm-title="Hapus Komentar Terpilih" data-confirm-button="Ya, hapus">
-                @csrf
-                @method('delete')
-                <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
-            </form>
-            <form class="form-inline" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="box-tools admin-list-actions">
+            <form class="form-inline" style="display:flex;align-items:center;gap:8px;flex-wrap:nowrap">
                 <div class="input-group input-group-sm" style="width:320px">
                     <input class="form-control" name="q" value="{{ request('q') }}" placeholder="Cari nama, alamat, atau isi komentar...">
                     <span class="input-group-btn"><button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button></span>
@@ -24,6 +19,11 @@
                         <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
+            </form>
+            <form id="bulk-delete-comments" method="post" action="{{ route('admin.comments.bulk-destroy') }}" class="inline-form" data-confirm="Hapus komentar yang dipilih?" data-confirm-tone="danger" data-confirm-title="Hapus Komentar Terpilih" data-confirm-button="Ya, hapus">
+                @csrf
+                @method('delete')
+                <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
             </form>
         </div>
     </div>

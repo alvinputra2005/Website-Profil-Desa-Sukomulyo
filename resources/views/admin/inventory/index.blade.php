@@ -6,12 +6,14 @@
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title"><i class="fa {{ $categoryData['icon'] }}"></i> Daftar {{ $categoryData['label'] }}</h3>
-        <form id="bulk-delete-inventory" method="post" action="{{ route('admin.inventory.bulk-destroy', $category) }}" class="inline-form" data-confirm="Hapus inventaris yang dipilih beserta seluruh riwayat mutasinya?" data-confirm-tone="danger" data-confirm-title="Hapus Inventaris Terpilih" data-confirm-button="Ya, hapus">
-            @csrf
-            @method('delete')
-            <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
-        </form>
-        <div class="box-tools"><a href="{{ route('admin.inventory.create',$category) }}" class="btn btn-social btn-info btn-sm"><i class="fa fa-plus"></i> Tambah Data</a></div>
+        <div class="box-tools admin-list-actions">
+            <a href="{{ route('admin.inventory.create',$category) }}" class="btn btn-social btn-info btn-sm"><i class="fa fa-plus"></i> Tambah Data</a>
+            <form id="bulk-delete-inventory" method="post" action="{{ route('admin.inventory.bulk-destroy', $category) }}" class="inline-form" data-confirm="Hapus inventaris yang dipilih beserta seluruh riwayat mutasinya?" data-confirm-tone="danger" data-confirm-title="Hapus Inventaris Terpilih" data-confirm-button="Ya, hapus">
+                @csrf
+                @method('delete')
+                <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
+            </form>
+        </div>
     </div>
     <div class="box-body">
         <form class="row" method="get">

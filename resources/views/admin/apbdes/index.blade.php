@@ -5,15 +5,15 @@
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title"><i class="fa fa-money"></i> Data APBDes Desa Sukomulyo</h3>
-        <form id="bulk-delete-apbdes" method="post" action="{{ route('admin.apbdes.bulk-destroy') }}" class="inline-form" data-confirm="Hapus APBDes yang dipilih?" data-confirm-tone="danger" data-confirm-title="Hapus APBDes Terpilih" data-confirm-button="Ya, hapus">
-            @csrf
-            @method('delete')
-            <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
-        </form>
-        <div class="box-tools">
+        <div class="box-tools admin-list-actions">
             <a href="{{ route('admin.apbdes.create') }}" class="btn btn-social btn-info btn-sm">
                 <i class="fa fa-plus"></i> Tambah APBDes
             </a>
+            <form id="bulk-delete-apbdes" method="post" action="{{ route('admin.apbdes.bulk-destroy') }}" class="inline-form" data-confirm="Hapus APBDes yang dipilih?" data-confirm-tone="danger" data-confirm-title="Hapus APBDes Terpilih" data-confirm-button="Ya, hapus">
+                @csrf
+                @method('delete')
+                <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
+            </form>
         </div>
     </div>
     <div class="box-body">

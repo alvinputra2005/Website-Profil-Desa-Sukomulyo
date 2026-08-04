@@ -3,12 +3,14 @@
 @section('content')
 <div class="box box-primary">
     <div class="box-header">
-        <a class="btn btn-primary" href="{{ route('admin.letter-services.create') }}"><i class="fa fa-plus"></i> Tambah Layanan</a>
-        <form id="bulk-delete-letter-services" method="post" action="{{ route('admin.letter-services.bulk-destroy') }}" class="inline-form" data-confirm="Hapus layanan surat yang dipilih? Layanan yang sudah memiliki permohonan tidak dapat dihapus." data-confirm-tone="danger" data-confirm-title="Hapus Layanan Terpilih" data-confirm-button="Ya, hapus">
-            @csrf
-            @method('delete')
-            <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
-        </form>
+        <div class="admin-list-actions">
+            <a class="btn btn-primary" href="{{ route('admin.letter-services.create') }}"><i class="fa fa-plus"></i> Tambah Layanan</a>
+            <form id="bulk-delete-letter-services" method="post" action="{{ route('admin.letter-services.bulk-destroy') }}" class="inline-form" data-confirm="Hapus layanan surat yang dipilih? Layanan yang sudah memiliki permohonan tidak dapat dihapus." data-confirm-tone="danger" data-confirm-title="Hapus Layanan Terpilih" data-confirm-button="Ya, hapus">
+                @csrf
+                @method('delete')
+                <button class="btn btn-danger btn-sm" type="submit" data-bulk-button disabled><i class="fa fa-trash"></i> Hapus Terpilih</button>
+            </form>
+        </div>
     </div>
     <div class="box-body">
         <form method="get" class="row" aria-label="Filter layanan surat">
